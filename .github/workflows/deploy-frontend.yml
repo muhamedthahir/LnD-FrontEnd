@@ -33,7 +33,7 @@ jobs:
 
       - name: Sync Build to S3
         run: |
-          aws s3 sync build/ s3://${{ secrets.S3_BUCKET }} --delete
+          aws s3 sync dist/ s3://${{ secrets.S3_BUCKET }} --delete
 
       - name: Invalidate CloudFront
         run: |
