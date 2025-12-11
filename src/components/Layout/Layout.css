@@ -27,7 +27,7 @@
 
 .layout-main {
   flex: 1;
-  margin-left: 13rem;
+  margin-left: 11rem;
   min-height: 100vh;
   background: var(--bg-primary);
 }

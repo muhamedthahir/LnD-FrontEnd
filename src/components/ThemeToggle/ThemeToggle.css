@@ -1,8 +1,5 @@
 .theme-toggle {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 1000;
+  position: relative;
   width: 48px;
   height: 48px;
   border-radius: 50%;

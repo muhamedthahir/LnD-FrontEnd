@@ -71,13 +71,13 @@ function UserAdmin() {
 
   const fetchColleges = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/admin/colleges', {
+      const response = await fetch('http://localhost:3000/api/institutions/all', {
         credentials: 'include'
       })
       
       if (response.ok) {
         const data = await response.json()
-        setColleges(data.colleges || [])
+        setColleges(data.institutions || [])
       }
     } catch (error) {
       console.error('Error fetching colleges:', error)
@@ -646,71 +646,87 @@ function UserAdmin() {
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <h2>Edit User Details</h2>
             <form onSubmit={handleEditSubmit}>
-              <div className="form-group">
-                <label>Name *</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={editData.name}
-                  onChange={handleEditChange}
-                  required
-                />
-              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Name *</label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={editData.name}
+                    onChange={handleEditChange}
+                    required
+                  />
+                </div>
 
-              <div className="form-group">
-                <label>Email *</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={editData.email}
-                  onChange={handleEditChange}
-                  required
-                />
+                <div className="form-group">
+                  <label>Email *</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={editData.email}
+                    onChange={handleEditChange}
+                    required
+                  />
+                </div>
               </div>
 
               {selectedUser.role === 'student' && (
                 <>
-                  <div className="form-group">
-                    <label>Roll Number</label>
-                    <input
-                      type="text"
-                      name="roll_number"
-                      value={editData.roll_number}
-                      onChange={handleEditChange}
-                    />
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Roll Number</label>
+                      <input
+                        type="text"
+                        name="roll_number"
+                        value={editData.roll_number}
+                        onChange={handleEditChange}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label>Degree</label>
+                      <input
+                        type="text"
+                        name="degree"
+                        value={editData.degree}
+                        onChange={handleEditChange}
+                      />
+                    </div>
                   </div>
 
-                  <div className="form-group">
-                    <label>Department</label>
-                    <input
-                      type="text"
-                      name="department"
-                      value={editData.department}
-                      onChange={handleEditChange}
-                    />
-                  </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Department</label>
+                      <input
+                        type="text"
+                        name="department"
+                        value={editData.department}
+                        onChange={handleEditChange}
+                      />
+                    </div>
 
-                  <div className="form-group">
-                    <label>Section</label>
-                    <input
-                      type="text"
-                      name="section"
-                      value={editData.section}
-                      onChange={handleEditChange}
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Degree</label>
-                    <input
-                      type="text"
-                      name="degree"
-                      value={editData.degree}
-                      onChange={handleEditChange}
-                    />
+                    <div className="form-group">
+                      <label>Section</label>
+                      <input
+                        type="text"
+                        name="section"
+                        value={editData.section}
+                        onChange={handleEditChange}
+                      />
+                    </div>
                   </div>
                 </>
               )}
+
+              <div className="form-group">
+                <label>College Name</label>
+                <input
+                  type="text"
+                  value={selectedUser.college_name || ''}
+                  disabled
+                  className="readonly-input"
+                />
+              </div>
 
               <div className="form-actions">
                 <button type="submit" className="btn-primary">Update</button>

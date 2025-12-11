@@ -1,29 +1,8 @@
-import { useOutletContext, useNavigate } from 'react-router-dom'
+import { useOutletContext } from 'react-router-dom'
 import './Dashboard.css'
 
 function Dashboard() {
-  const { user, logout } = useOutletContext()
-  const navigate = useNavigate()
-
-  const handleLogout = async () => {
-    // Use logout from context if available, otherwise do it manually
-    if (logout) {
-      await logout()
-    } else {
-      try {
-        await fetch('http://localhost:3000/api/auth/logout', {
-          method: 'POST',
-          credentials: 'include'
-        })
-        localStorage.removeItem('user')
-        navigate('/login')
-      } catch (error) {
-        console.error('Logout failed:', error)
-        localStorage.removeItem('user')
-        navigate('/login')
-      }
-    }
-  }
+  const { user } = useOutletContext()
 
   const getRoleDisplay = (role) => {
     const roleMap = {
@@ -48,9 +27,6 @@ function Dashboard() {
       <header className="dashboard-header">
         <div className="header-content">
           <h1>Welcome, {user.name}!</h1>
-          <button onClick={handleLogout} className="logout-btn">
-            Logout
-          </button>
         </div>
       </header>
 

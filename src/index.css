@@ -154,7 +154,8 @@
   box-sizing: border-box;
 }
 
-html, body {
+html {
+  font-size: 14px; /* Reduced from default 16px (87.5% of 16px) */
   height: 100%;
 }
 
@@ -162,7 +163,8 @@ body {
   font-family: var(--font-display);
   background: var(--bg-primary);
   color: var(--text-primary);
-  line-height: 1.6;
+  font-size: 0.875rem; /* 14px base */
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background-color var(--transition-normal), color var(--transition-normal);

@@ -31,6 +31,10 @@ function Groups() {
   })
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
+  const [leftPage, setLeftPage] = useState(1)
+  const [rightPage, setRightPage] = useState(1)
+  const [leftPageSize, setLeftPageSize] = useState(10)
+  const [rightPageSize, setRightPageSize] = useState(10)
 
   useEffect(() => {
     fetchGroups()
@@ -62,13 +66,13 @@ function Groups() {
 
   const fetchColleges = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/admin/colleges', {
+      const response = await fetch('http://localhost:3000/api/institutions/all', {
         credentials: 'include'
       })
       
       if (response.ok) {
         const data = await response.json()
-        setColleges(data.colleges || [])
+        setColleges(data.institutions || [])
       }
     } catch (error) {
       console.error('Error fetching colleges:', error)
@@ -186,16 +190,36 @@ function Groups() {
 
   const handleMoveToRight = () => {
     const selected = availableStudents.filter(s => selectedStudentIds.includes(s.id))
+    const remainingCount = availableStudents.length - selected.length
     setGroupStudents(prev => [...prev, ...selected])
     setAvailableStudents(prev => prev.filter(s => !selectedStudentIds.includes(s.id)))
     setSelectedStudentIds([])
+    // Reset pagination if current page becomes empty
+    if (remainingCount > 0) {
+      const maxPage = Math.ceil(remainingCount / leftPageSize)
+      if (leftPage > maxPage) {
+        setLeftPage(Math.max(1, maxPage))
+      }
+    } else {
+      setLeftPage(1)
+    }
   }
 
   const handleMoveToLeft = () => {
     const selected = groupStudents.filter(s => selectedStudentIds.includes(s.id))
+    const remainingCount = groupStudents.length - selected.length
     setAvailableStudents(prev => [...prev, ...selected])
     setGroupStudents(prev => prev.filter(s => !selectedStudentIds.includes(s.id)))
     setSelectedStudentIds([])
+    // Reset pagination if current page becomes empty
+    if (remainingCount > 0) {
+      const maxPage = Math.ceil(remainingCount / rightPageSize)
+      if (rightPage > maxPage) {
+        setRightPage(Math.max(1, maxPage))
+      }
+    } else {
+      setRightPage(1)
+    }
   }
 
   const toggleStudentSelection = (studentId) => {
@@ -219,6 +243,72 @@ function Groups() {
            s.email.toLowerCase().includes(search) ||
            (s.roll_number && s.roll_number.toLowerCase().includes(search))
   })
+
+  // Paginated left students
+  const paginatedLeftStudents = filteredLeftStudents.slice(
+    (leftPage - 1) * leftPageSize,
+    leftPage * leftPageSize
+  )
+
+  // Paginated right students
+  const paginatedRightStudents = filteredRightStudents.slice(
+    (rightPage - 1) * rightPageSize,
+    rightPage * rightPageSize
+  )
+
+  // Select all filtered students on left
+  const handleSelectAllLeft = () => {
+    const allFilteredIds = filteredLeftStudents.map(s => s.id)
+    const allSelected = allFilteredIds.every(id => selectedStudentIds.includes(id))
+    
+    if (allSelected) {
+      // Deselect all filtered students
+      setSelectedStudentIds(prev => prev.filter(id => !allFilteredIds.includes(id)))
+    } else {
+      // Select all filtered students
+      setSelectedStudentIds(prev => {
+        const newIds = allFilteredIds.filter(id => !prev.includes(id))
+        return [...prev, ...newIds]
+      })
+    }
+  }
+
+  // Select all filtered students on right
+  const handleSelectAllRight = () => {
+    const allFilteredIds = filteredRightStudents.map(s => s.id)
+    const allSelected = allFilteredIds.every(id => selectedStudentIds.includes(id))
+    
+    if (allSelected) {
+      // Deselect all filtered students
+      setSelectedStudentIds(prev => prev.filter(id => !allFilteredIds.includes(id)))
+    } else {
+      // Select all filtered students
+      setSelectedStudentIds(prev => {
+        const newIds = allFilteredIds.filter(id => !prev.includes(id))
+        return [...prev, ...newIds]
+      })
+    }
+  }
+
+  // Check if all filtered students are selected
+  const allLeftSelected = filteredLeftStudents.length > 0 && 
+    filteredLeftStudents.every(s => selectedStudentIds.includes(s.id))
+  
+  const allRightSelected = filteredRightStudents.length > 0 && 
+    filteredRightStudents.every(s => selectedStudentIds.includes(s.id))
+
+  // Check if some (but not all) filtered students are selected
+  const someLeftSelected = filteredLeftStudents.some(s => selectedStudentIds.includes(s.id)) && !allLeftSelected
+  const someRightSelected = filteredRightStudents.some(s => selectedStudentIds.includes(s.id)) && !allRightSelected
+
+  // Reset pagination when search changes
+  useEffect(() => {
+    setLeftPage(1)
+  }, [searchLeft])
+
+  useEffect(() => {
+    setRightPage(1)
+  }, [searchRight])
 
   const handleUpdateGroup = async () => {
     if (!validateForm()) return
@@ -529,7 +619,24 @@ function Groups() {
           
           <div className="student-selection-container">
             <div className="student-list-panel">
-              <h3>Available Students ({filteredLeftStudents.length})</h3>
+              <div className="student-list-header">
+                <h3>Available Students ({filteredLeftStudents.length})</h3>
+                {filteredLeftStudents.length > 0 && (
+                  <label className="select-all-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={allLeftSelected}
+                      ref={(input) => {
+                        if (input) {
+                          input.indeterminate = someLeftSelected
+                        }
+                      }}
+                      onChange={handleSelectAllLeft}
+                    />
+                    <span>Select All</span>
+                  </label>
+                )}
+              </div>
               <div className="search-box">
                 <input
                   type="text"
@@ -539,7 +646,7 @@ function Groups() {
                 />
               </div>
               <div className="student-list">
-                {filteredLeftStudents.map(student => (
+                {paginatedLeftStudents.map(student => (
                   <div 
                     key={student.id}
                     className={`student-item ${selectedStudentIds.includes(student.id) ? 'selected' : ''}`}
@@ -552,10 +659,7 @@ function Groups() {
                     />
                     <div className="student-info">
                       <div className="student-name">{student.name}</div>
-                      <div className="student-details">
-                        {student.roll_number && <span>Roll: {student.roll_number}</span>}
-                        <span>{student.email}</span>
-                      </div>
+                      <div className="student-email">{student.email}</div>
                     </div>
                   </div>
                 ))}
@@ -563,6 +667,19 @@ function Groups() {
                   <div className="empty-state">No students available</div>
                 )}
               </div>
+              {filteredLeftStudents.length > 0 && (
+                <div className="student-list-pagination">
+                  <Pagination
+                    currentPage={leftPage}
+                    pageSize={leftPageSize}
+                    totalCount={filteredLeftStudents.length}
+                    itemName="students"
+                    onPageChange={setLeftPage}
+                    onPageSizeChange={setLeftPageSize}
+                    pageSizeOptions={[5, 10, 20, 50]}
+                  />
+                </div>
+              )}
             </div>
 
             <div className="student-selection-actions">
@@ -585,7 +702,24 @@ function Groups() {
             </div>
 
             <div className="student-list-panel">
-              <h3>Group Students ({filteredRightStudents.length})</h3>
+              <div className="student-list-header">
+                <h3>Group Students ({filteredRightStudents.length})</h3>
+                {filteredRightStudents.length > 0 && (
+                  <label className="select-all-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={allRightSelected}
+                      ref={(input) => {
+                        if (input) {
+                          input.indeterminate = someRightSelected
+                        }
+                      }}
+                      onChange={handleSelectAllRight}
+                    />
+                    <span>Select All</span>
+                  </label>
+                )}
+              </div>
               <div className="search-box">
                 <input
                   type="text"
@@ -595,7 +729,7 @@ function Groups() {
                 />
               </div>
               <div className="student-list">
-                {filteredRightStudents.map(student => (
+                {paginatedRightStudents.map(student => (
                   <div 
                     key={student.id}
                     className={`student-item ${selectedStudentIds.includes(student.id) ? 'selected' : ''}`}
@@ -608,10 +742,7 @@ function Groups() {
                     />
                     <div className="student-info">
                       <div className="student-name">{student.name}</div>
-                      <div className="student-details">
-                        {student.roll_number && <span>Roll: {student.roll_number}</span>}
-                        <span>{student.email}</span>
-                      </div>
+                      <div className="student-email">{student.email}</div>
                     </div>
                   </div>
                 ))}
@@ -619,6 +750,19 @@ function Groups() {
                   <div className="empty-state">No students in group yet</div>
                 )}
               </div>
+              {filteredRightStudents.length > 0 && (
+                <div className="student-list-pagination">
+                  <Pagination
+                    currentPage={rightPage}
+                    pageSize={rightPageSize}
+                    totalCount={filteredRightStudents.length}
+                    itemName="students"
+                    onPageChange={setRightPage}
+                    onPageSizeChange={setRightPageSize}
+                    pageSizeOptions={[5, 10, 20, 50]}
+                  />
+                </div>
+              )}
             </div>
           </div>
 

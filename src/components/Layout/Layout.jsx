@@ -74,7 +74,7 @@ function Layout() {
 
   return (
     <div className="layout">
-      <Sidebar user={user} />
+      <Sidebar user={user} logout={logout} />
       <main className="layout-main">
         <Outlet context={{ user, logout }} />
       </main>
