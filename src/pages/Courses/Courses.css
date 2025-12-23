@@ -25,12 +25,44 @@
 /* Button styles moved to Button component */
 
 .empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-4xl) var(--spacing-lg);
   text-align: center;
-  padding: var(--spacing-4xl);
-  color: var(--text-secondary);
   background: var(--bg-card);
   border-radius: var(--radius-md);
   border: var(--border-sm) solid var(--border-color);
+  min-height: 300px;
+}
+
+.empty-state-icon {
+  width: 80px;
+  height: 80px;
+  margin-bottom: var(--spacing-lg);
+  color: var(--text-secondary);
+  opacity: 0.5;
+}
+
+.empty-state-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.empty-state h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.empty-state p {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0;
+  max-width: 400px;
 }
 
 .courses-table-card {
@@ -41,6 +73,12 @@
   margin-bottom: var(--spacing-lg);
   box-shadow: var(--shadow-sm);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 12rem);
+  min-height: 500px;
+  max-height: calc(100vh - 12rem);
+  margin-bottom: var(--spacing-lg);
 }
 
 .table-header {
@@ -50,6 +88,7 @@
   margin-bottom: var(--spacing-md);
   flex-wrap: wrap;
   gap: var(--spacing-md);
+  flex-shrink: 0;
 }
 
 .filters-left {
@@ -124,7 +163,12 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+  flex: 0 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+  max-height: calc(100% - 80px);
 }
 
 .course-card {
@@ -220,6 +264,19 @@
   text-align: center;
   padding: var(--spacing-4xl);
   color: var(--text-secondary);
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Pagination wrapper - keep at bottom */
+.pagination-wrapper {
+  flex-shrink: 0;
+  margin-top: auto;
+  padding: var(--spacing-md) 0;
+  border-top: var(--border-sm) solid var(--border-color);
+  background: var(--bg-card);
 }
 
 /* Modal Styles */
@@ -332,6 +389,11 @@
 @media (max-width: 768px) {
   .course-admin-page {
     padding: var(--spacing-md);
+  }
+
+  .courses-table-card {
+    height: calc(100vh - 8rem);
+    min-height: 400px;
   }
 
   .course-admin-header {

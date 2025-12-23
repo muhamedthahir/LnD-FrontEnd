@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import Pagination from '../../../components/Pagination/Pagination'
+import ConfirmModal from '../../../components/ConfirmModal/ConfirmModal'
+import { API_BASE_URL, API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES, VALIDATION_MESSAGES } from '../../../constants/constants'
 import './Groups.css'
 
 function Groups() {
@@ -9,6 +11,7 @@ function Groups() {
   const [groups, setGroups] = useState([])
   const [allGroups, setAllGroups] = useState([]) // Store all groups for filtering
   const [colleges, setColleges] = useState([])
+  const [institutions, setInstitutions] = useState([]) // For dropdown
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [formPage, setFormPage] = useState(1) // 1 = details, 2 = student selection
@@ -36,10 +39,13 @@ function Groups() {
   const [rightPage, setRightPage] = useState(1)
   const [leftPageSize, setLeftPageSize] = useState(10)
   const [rightPageSize, setRightPageSize] = useState(10)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [groupToDelete, setGroupToDelete] = useState(null)
 
   useEffect(() => {
     fetchGroups()
     fetchColleges()
+    fetchInstitutions()
   }, [])
 
   useEffect(() => {
@@ -49,7 +55,7 @@ function Groups() {
   const fetchGroups = async () => {
     try {
       setLoading(true)
-      const response = await fetch('http://localhost:3000/api/groups', {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.GROUPS.LIST}`, {
         credentials: 'include'
       })
       
@@ -57,9 +63,12 @@ function Groups() {
         const data = await response.json()
         setAllGroups(data.groups || [])
         // applyFilters will be called by useEffect
+      } else {
+        toast.error(ERROR_MESSAGES.GROUP_FETCH_FAILED)
       }
     } catch (error) {
       console.error('Error fetching groups:', error)
+      toast.error(ERROR_MESSAGES.GROUP_FETCH_FAILED)
     } finally {
       setLoading(false)
     }
@@ -67,16 +76,45 @@ function Groups() {
 
   const fetchColleges = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/institutions/all', {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.INSTITUTIONS.ALL}`, {
         credentials: 'include'
       })
       
       if (response.ok) {
         const data = await response.json()
-        setColleges(data.institutions || [])
+        // Extract just the names for the filter dropdown
+        setColleges((data.institutions || []).map(inst => typeof inst === 'string' ? inst : inst.name))
       }
     } catch (error) {
       console.error('Error fetching colleges:', error)
+    }
+  }
+
+  const fetchInstitutions = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.INSTITUTIONS.ALL}`, {
+        credentials: 'include'
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        const institutionsList = data.institutions || []
+        // Ensure we have objects with id and name
+        const formattedInstitutions = institutionsList.map(inst => {
+          if (typeof inst === 'string') {
+            // Legacy format - just a name string
+            return { id: null, name: inst }
+          }
+          return { id: inst.id, name: inst.name }
+        })
+        setInstitutions(formattedInstitutions)
+      } else {
+        console.error('Failed to fetch institutions:', response.status)
+        toast.error(ERROR_MESSAGES.INSTITUTION_LIST_FAILED)
+      }
+    } catch (error) {
+      console.error('Error fetching institutions:', error)
+      toast.error(ERROR_MESSAGES.INSTITUTION_LIST_FAILED)
     }
   }
 
@@ -129,8 +167,14 @@ function Groups() {
 
   const validateForm = () => {
     const newErrors = {}
-    if (!formData.name) newErrors.name = 'Group name is required'
-    if (!formData.college_name) newErrors.college_name = 'College name is required'
+    if (!formData.name || !formData.name.trim()) {
+      newErrors.name = VALIDATION_MESSAGES.GROUP_NAME_REQUIRED
+      toast.error(VALIDATION_MESSAGES.GROUP_NAME_REQUIRED)
+    }
+    if (!formData.college_name || !formData.college_name.trim()) {
+      newErrors.college_name = VALIDATION_MESSAGES.GROUP_COLLEGE_REQUIRED
+      toast.error(VALIDATION_MESSAGES.GROUP_COLLEGE_REQUIRED)
+    }
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -139,7 +183,7 @@ function Groups() {
     if (!collegeName) return
     
     try {
-      const response = await fetch(`http://localhost:3000/api/admin/users?college=${encodeURIComponent(collegeName)}&limit=1000`, {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.USERS.LIST}?college=${encodeURIComponent(collegeName)}&limit=1000`, {
         credentials: 'include'
       })
       
@@ -315,7 +359,7 @@ function Groups() {
     if (!validateForm()) return
 
     try {
-      const response = await fetch(`http://localhost:3000/api/groups/${editingGroup.id}`, {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.GROUPS.UPDATE(editingGroup.id)}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -324,7 +368,7 @@ function Groups() {
       
       if (!response.ok) {
         const data = await response.json()
-        toast.error(data.error || 'Failed to update group')
+        toast.error(data.error || ERROR_MESSAGES.GROUP_UPDATE_FAILED)
         return
       }
 
@@ -332,7 +376,7 @@ function Groups() {
       handleNextPage()
     } catch (error) {
       console.error('Error updating group:', error)
-      toast.error('Failed to update group')
+      toast.error(ERROR_MESSAGES.GROUP_UPDATE_FAILED)
     }
   }
 
@@ -353,7 +397,7 @@ function Groups() {
 
       if (!editingGroup) {
         // Create new group
-        const response = await fetch('http://localhost:3000/api/groups', {
+        const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.GROUPS.CREATE}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
@@ -362,7 +406,7 @@ function Groups() {
         
         if (!response.ok) {
           const data = await response.json()
-          toast.error(data.error || 'Failed to create group')
+          toast.error(data.error || ERROR_MESSAGES.GROUP_CREATE_FAILED)
           return
         }
 
@@ -374,7 +418,7 @@ function Groups() {
       // Fetch current members from API to compare
       let previousMemberIds = []
       if (editingGroup) {
-        const memberResponse = await fetch(`http://localhost:3000/api/groups/${groupId}`, {
+        const memberResponse = await fetch(`${API_BASE_URL}${API_ENDPOINTS.GROUPS.GET(groupId)}`, {
           credentials: 'include'
         })
         if (memberResponse.ok) {
@@ -388,7 +432,7 @@ function Groups() {
       const removeUserIds = previousMemberIds.filter(id => !currentMemberIds.includes(id))
 
       if (addUserIds.length > 0 || removeUserIds.length > 0) {
-        const memberResponse = await fetch(`http://localhost:3000/api/groups/${groupId}/members`, {
+        const memberResponse = await fetch(`${API_BASE_URL}${API_ENDPOINTS.GROUPS.ADD_MEMBERS(groupId)}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
@@ -411,40 +455,54 @@ function Groups() {
       setGroupStudents([])
       setAvailableStudents([])
       setSelectedStudentIds([])
-      toast.success(editingGroup ? 'Group updated successfully' : 'Group created successfully')
+      toast.success(editingGroup ? SUCCESS_MESSAGES.GROUP_UPDATED : SUCCESS_MESSAGES.GROUP_CREATED)
       fetchGroups()
     } catch (error) {
       console.error('Error saving group:', error)
-      toast.error('Failed to save group')
+      toast.error(ERROR_MESSAGES.GROUP_CREATE_FAILED)
     }
   }
 
 
-  const handleDelete = async (id) => {
-    // Note: Using confirm for deletion - this is acceptable for destructive actions
-    if (!window.confirm('Are you sure you want to delete this group?')) return
+  const handleDeleteClick = (id) => {
+    const group = groups.find(g => g.id === id)
+    setGroupToDelete({ id, name: group?.name || 'this group' })
+    setShowDeleteModal(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!groupToDelete || !groupToDelete.id) return
 
     try {
-      const response = await fetch(`http://localhost:3000/api/groups/${id}`, {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.GROUPS.DELETE(groupToDelete.id)}`, {
         method: 'DELETE',
         credentials: 'include'
       })
       
       if (response.ok) {
-        toast.success('Group deleted successfully')
+        toast.success(SUCCESS_MESSAGES.GROUP_DELETED)
         fetchGroups()
       } else {
-        toast.error('Failed to delete group')
+        toast.error(ERROR_MESSAGES.GROUP_DELETE_FAILED)
       }
     } catch (error) {
       console.error('Error deleting group:', error)
-      toast.error('Failed to delete group')
+      toast.error(ERROR_MESSAGES.GROUP_DELETE_FAILED)
     }
+    
+    setShowDeleteModal(false)
+    setGroupToDelete(null)
+  }
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false)
+    setGroupToDelete(null)
   }
 
   const handleDownloadTemplate = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/groups/template', {
+      // Note: This endpoint might not be in constants, but we'll use a generic pattern
+      const response = await fetch(`${API_BASE_URL}/api/groups/template`, {
         credentials: 'include'
       })
       
@@ -458,10 +516,13 @@ function Groups() {
         a.click()
         window.URL.revokeObjectURL(url)
         document.body.removeChild(a)
+        toast.success(SUCCESS_MESSAGES.TEMPLATE_DOWNLOADED)
+      } else {
+        toast.error(ERROR_MESSAGES.USER_TEMPLATE_DOWNLOAD_FAILED)
       }
     } catch (error) {
       console.error('Error downloading template:', error)
-      alert('Failed to download template')
+      toast.error(ERROR_MESSAGES.USER_TEMPLATE_DOWNLOAD_FAILED)
     }
   }
 
@@ -532,14 +593,19 @@ function Groups() {
                   disabled={!!editingGroup}
                 >
                   <option value="">Select College</option>
-                  {colleges.map((college) => (
-                    <option key={college} value={college}>
-                      {college}
+                  {institutions.map((institution) => (
+                    <option key={institution.id} value={institution.name}>
+                      {institution.name}
                     </option>
                   ))}
                 </select>
                 {errors.college_name && <span className="error-text">{errors.college_name}</span>}
                 {editingGroup && <span className="info-text">College cannot be changed in edit mode</span>}
+                {institutions.length === 0 && (
+                  <small style={{ color: 'var(--text-secondary)', marginTop: '4px', display: 'block' }}>
+                    No institutions available. Please create an institution first.
+                  </small>
+                )}
               </div>
             </div>
 
@@ -853,11 +919,19 @@ function Groups() {
           <div className="loading">Loading groups...</div>
         ) : groups.length === 0 ? (
           <div className="empty-state">
-            <p>No groups found. {filters.college || filters.groupName ? 'Try adjusting your filters.' : 'Create your first group to get started.'}</p>
+            <div className="empty-state-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+            </div>
+            <h3>No Groups Found</h3>
+            <p>{filters.college || filters.groupName ? 'Try adjusting your filters or create a new group.' : 'Get started by creating your first student group.'}</p>
           </div>
         ) : (
-          <div className="table-responsive">
-            <table className="groups-table">
+          <table className="groups-table">
             <thead>
               <tr>
                 <th>Name</th>
@@ -891,7 +965,7 @@ function Groups() {
                       </button>
                       <button 
                         className="btn-delete"
-                        onClick={() => handleDelete(group.id)}
+                        onClick={() => handleDeleteClick(group.id)}
                         title="Delete"
                       >
                         Delete
@@ -902,21 +976,32 @@ function Groups() {
               ))}
             </tbody>
           </table>
-          </div>
         )}
 
         {/* Pagination Controls */}
         {!loading && groups.length > 0 && (
-          <Pagination
-            currentPage={currentPage}
-            pageSize={pageSize}
-            totalCount={groups.length}
-            itemName="groups"
-            onPageChange={setCurrentPage}
-            onPageSizeChange={setPageSize}
-          />
+          <div className="pagination-wrapper">
+            <Pagination
+              currentPage={currentPage}
+              pageSize={pageSize}
+              totalCount={groups.length}
+              itemName="groups"
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+            />
+          </div>
         )}
       </div>
+
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Group"
+        message={groupToDelete ? `Are you sure you want to delete "${groupToDelete.name}"? This action cannot be undone.` : 'Are you sure you want to delete this group? This action cannot be undone.'}
+        confirmText="Delete"
+        cancelText="Cancel"
+      />
     </div>
   )
 }

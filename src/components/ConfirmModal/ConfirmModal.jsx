@@ -1,6 +1,6 @@
 import './ConfirmModal.css'
 
-function ConfirmModal({ isOpen, onClose, onConfirm, title, message, confirmText = 'Confirm', cancelText = 'Cancel' }) {
+function ConfirmModal({ isOpen, onClose, onConfirm, title, message, confirmText = 'Confirm', cancelText = 'Cancel', errorMessage = null, disabled = false }) {
   if (!isOpen) return null
 
   return (
@@ -11,12 +11,21 @@ function ConfirmModal({ isOpen, onClose, onConfirm, title, message, confirmText 
         </div>
         <div className="confirm-modal-body">
           <p>{message}</p>
+          {errorMessage && (
+            <div className="confirm-modal-error">
+              <p>{errorMessage}</p>
+            </div>
+          )}
         </div>
         <div className="confirm-modal-footer">
           <button className="btn-cancel" onClick={onClose}>
             {cancelText}
           </button>
-          <button className="btn-confirm" onClick={onConfirm}>
+          <button 
+            className={`btn-confirm ${disabled ? 'disabled' : ''}`} 
+            onClick={onConfirm}
+            disabled={disabled}
+          >
             {confirmText}
           </button>
         </div>

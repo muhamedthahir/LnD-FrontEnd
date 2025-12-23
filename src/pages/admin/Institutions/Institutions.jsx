@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
+import { toast } from 'react-toastify'
 import Pagination from '../../../components/Pagination/Pagination'
+import { API_BASE_URL, API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES, VALIDATION_MESSAGES } from '../../../constants/constants'
 import '../UserAdmin/UserAdmin.css'
 import './Institutions.css'
 
@@ -28,7 +30,7 @@ function Institutions() {
   const fetchInstitutions = async () => {
     try {
       setLoading(true)
-      const url = new URL('http://localhost:3000/api/institutions')
+      const url = new URL(`${API_BASE_URL}${API_ENDPOINTS.INSTITUTIONS.LIST}`)
       if (search) url.searchParams.append('search', search)
       url.searchParams.append('limit', pageSize.toString())
       url.searchParams.append('offset', ((currentPage - 1) * pageSize).toString())
@@ -41,9 +43,12 @@ function Institutions() {
         const data = await response.json()
         setInstitutions(data.institutions || [])
         setTotalCount(data.total || 0)
+      } else {
+        toast.error(ERROR_MESSAGES.INSTITUTION_LIST_FAILED)
       }
     } catch (error) {
       console.error('Error fetching institutions:', error)
+      toast.error(ERROR_MESSAGES.INSTITUTION_LIST_FAILED)
     } finally {
       setLoading(false)
     }
@@ -76,11 +81,20 @@ function Institutions() {
   const validateForm = () => {
     const newErrors = {}
     
-    if (!formData.name) newErrors.name = 'Institution name is required'
-    if (!formData.admin_name) newErrors.admin_name = 'Admin name is required'
-    if (!formData.admin_email) newErrors.admin_email = 'Admin email is required'
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.admin_email)) {
-      newErrors.admin_email = 'Invalid email format'
+    if (!formData.name || !formData.name.trim()) {
+      newErrors.name = VALIDATION_MESSAGES.INSTITUTION_NAME_REQUIRED
+      toast.error(VALIDATION_MESSAGES.INSTITUTION_NAME_REQUIRED)
+    }
+    if (!formData.admin_name || !formData.admin_name.trim()) {
+      newErrors.admin_name = VALIDATION_MESSAGES.INSTITUTION_ADMIN_NAME_REQUIRED
+      toast.error(VALIDATION_MESSAGES.INSTITUTION_ADMIN_NAME_REQUIRED)
+    }
+    if (!formData.admin_email || !formData.admin_email.trim()) {
+      newErrors.admin_email = VALIDATION_MESSAGES.INSTITUTION_ADMIN_EMAIL_REQUIRED
+      toast.error(VALIDATION_MESSAGES.INSTITUTION_ADMIN_EMAIL_REQUIRED)
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.admin_email)) {
+      newErrors.admin_email = VALIDATION_MESSAGES.INSTITUTION_ADMIN_EMAIL_INVALID
+      toast.error(VALIDATION_MESSAGES.INSTITUTION_ADMIN_EMAIL_INVALID)
     }
     
     setErrors(newErrors)
@@ -94,8 +108,8 @@ function Institutions() {
     
     try {
       const url = selectedInstitution 
-        ? `http://localhost:3000/api/institutions/${selectedInstitution.id}`
-        : 'http://localhost:3000/api/institutions'
+        ? `${API_BASE_URL}${API_ENDPOINTS.INSTITUTIONS.UPDATE(selectedInstitution.id)}`
+        : `${API_BASE_URL}${API_ENDPOINTS.INSTITUTIONS.CREATE}`
       
       const method = selectedInstitution ? 'PUT' : 'POST'
       
@@ -111,21 +125,22 @@ function Institutions() {
         setShowEditModal(false)
         setFormData({ name: '', admin_name: '', admin_email: '' })
         setSelectedInstitution(null)
-        alert(selectedInstitution ? 'Institution updated successfully!' : 'Institution created successfully! OTP has been sent to admin email.')
+        setErrors({})
+        toast.success(selectedInstitution ? SUCCESS_MESSAGES.INSTITUTION_UPDATED : SUCCESS_MESSAGES.INSTITUTION_CREATED)
         fetchInstitutions()
       } else {
         const data = await response.json()
-        alert(data.error || 'Failed to save institution')
+        toast.error(data.error || ERROR_MESSAGES.INSTITUTION_CREATE_FAILED)
       }
     } catch (error) {
       console.error('Error saving institution:', error)
-      alert('Failed to save institution')
+      toast.error(ERROR_MESSAGES.INSTITUTION_CREATE_FAILED)
     }
   }
 
   const handleView = async (institution) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/institutions/${institution.id}`, {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.INSTITUTIONS.GET(institution.id)}`, {
         credentials: 'include'
       })
       
@@ -136,16 +151,18 @@ function Institutions() {
           admins: data.admins || []
         })
         setShowViewModal(true)
+      } else {
+        toast.error(ERROR_MESSAGES.INSTITUTION_FETCH_FAILED)
       }
     } catch (error) {
       console.error('Error fetching institution details:', error)
-      alert('Failed to fetch institution details')
+      toast.error(ERROR_MESSAGES.INSTITUTION_FETCH_FAILED)
     }
   }
 
   const handleEdit = async (institution) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/institutions/${institution.id}`, {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.INSTITUTIONS.GET(institution.id)}`, {
         credentials: 'include'
       })
       
@@ -159,16 +176,18 @@ function Institutions() {
         
         setSelectedInstitution(institutionData)
         setFormData({
-          name: institutionData.name,
+          name: institutionData.name || '',
           admin_name: primaryAdmin.name || '',
           admin_email: primaryAdmin.email || ''
         })
         setShowEditModal(true)
         setShowViewModal(false)
+      } else {
+        toast.error(ERROR_MESSAGES.INSTITUTION_FETCH_FAILED)
       }
     } catch (error) {
       console.error('Error fetching institution details:', error)
-      alert('Failed to fetch institution details')
+      toast.error(ERROR_MESSAGES.INSTITUTION_FETCH_FAILED)
     }
   }
 
@@ -291,47 +310,62 @@ function Institutions() {
 
         {loading ? (
           <div className="loading">Loading institutions...</div>
-        ) : (
-          <div className="table-responsive">
-            <table className="users-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Created</th>
-                  <th className="actions-header">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {institutions.map((institution) => (
-                  <tr key={institution.id}>
-                    <td>{institution.name}</td>
-                    <td>{new Date(institution.created_at).toLocaleDateString()}</td>
-                    <td className="actions-cell">
-                      <div className="action-buttons">
-                        <button 
-                          className="btn-edit"
-                          onClick={() => handleView(institution)}
-                          title="View Institution"
-                        >
-                          View
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        ) : institutions.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-state-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                <polyline points="7 3 7 8 15 8"></polyline>
+              </svg>
+            </div>
+            <h3>No Institutions Found</h3>
+            <p>Get started by creating your first institution or college.</p>
           </div>
+        ) : (
+          <table className="users-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Created</th>
+                <th className="actions-header">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {institutions.map((institution) => (
+                <tr key={institution.id}>
+                  <td>{institution.name}</td>
+                  <td>{new Date(institution.created_at).toLocaleDateString()}</td>
+                  <td className="actions-cell">
+                    <div className="action-buttons">
+                      <button 
+                        className="btn-edit"
+                        onClick={() => handleView(institution)}
+                        title="View Institution"
+                      >
+                        View
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
         
-        <Pagination
-          currentPage={currentPage}
-          pageSize={pageSize}
-          totalCount={totalCount}
-          itemName="institutions"
-          onPageChange={setCurrentPage}
-          onPageSizeChange={setPageSize}
-        />
+        {/* Pagination Controls - Only show when there are institutions */}
+        {!loading && institutions.length > 0 && (
+          <div className="pagination-wrapper">
+            <Pagination
+              currentPage={currentPage}
+              pageSize={pageSize}
+              totalCount={totalCount}
+              itemName="institutions"
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+            />
+          </div>
+        )}
       </div>
 
       {showViewModal && selectedInstitution && (

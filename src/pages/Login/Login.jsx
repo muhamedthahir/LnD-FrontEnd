@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import { toast } from 'react-toastify'
 import PasswordSetup from '../../components/PasswordSetup/PasswordSetup'
+import { API_BASE_URL, API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES } from '../../constants/constants'
 import './Login.css'
 
 function Login() {
@@ -60,7 +62,7 @@ function Login() {
     
     // API call to backend
     try {
-      const response = await fetch('http://localhost:3000/api/auth/login', {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.AUTH.LOGIN}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -107,7 +109,7 @@ function Login() {
     setRequiresPasswordSetup(false)
     setPasswordSetupData(null)
     setFormData({ email: '', password: '' })
-    alert('Password set successfully! Please login with your new password.')
+    toast.success(SUCCESS_MESSAGES.PASSWORD_SET)
   }
 
   if (requiresPasswordSetup && passwordSetupData) {

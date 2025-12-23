@@ -61,6 +61,7 @@
   font-size: 0.875rem;
   margin: 0;
   line-height: 1.6;
+  white-space: pre-line;
 }
 
 .confirm-modal-footer {
@@ -97,7 +98,37 @@
   color: white;
 }
 
-.btn-confirm:hover {
+.btn-confirm:hover:not(:disabled) {
   background: #dc2626;
+}
+
+.btn-confirm.disabled,
+.btn-confirm:disabled {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  opacity: 0.5;
+  cursor: not-allowed;
+  border: var(--border-sm) solid var(--border-color);
+}
+
+.btn-confirm.disabled:hover,
+.btn-confirm:disabled:hover {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+}
+
+.confirm-modal-error {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: rgba(239, 68, 68, 0.1);
+  border: var(--border-sm) solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-md);
+}
+
+.confirm-modal-error p {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin: 0;
+  font-weight: 500;
 }
 

@@ -2,12 +2,15 @@ import { useState, useEffect } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import Pagination from '../../../components/Pagination/Pagination'
+import ConfirmModal from '../../../components/ConfirmModal/ConfirmModal'
+import { API_BASE_URL, API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES, VALIDATION_MESSAGES } from '../../../constants/constants'
 import './UserAdmin.css'
 
 function UserAdmin() {
   const { user } = useOutletContext()
   const [users, setUsers] = useState([])
   const [colleges, setColleges] = useState([])
+  const [institutions, setInstitutions] = useState([]) // For dropdown
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [selectedCollege, setSelectedCollege] = useState('')
@@ -18,7 +21,10 @@ function UserAdmin() {
   const [showBulkUploadModal, setShowBulkUploadModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showResetModal, setShowResetModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [selectedUser, setSelectedUser] = useState(null)
+  const [userToDelete, setUserToDelete] = useState(null)
+  const [deleteError, setDeleteError] = useState(null)
   const [menuOpen, setMenuOpen] = useState(null)
   const [formData, setFormData] = useState({
     name: '',
@@ -43,12 +49,13 @@ function UserAdmin() {
   useEffect(() => {
     fetchUsers()
     fetchColleges()
+    fetchInstitutions()
   }, [selectedCollege, currentPage, pageSize])
 
   const fetchUsers = async () => {
     try {
       setLoading(true)
-      const url = new URL('http://localhost:3000/api/admin/users')
+      const url = new URL(`${API_BASE_URL}${API_ENDPOINTS.USERS.LIST}`)
       if (selectedCollege) url.searchParams.append('college', selectedCollege)
       if (search) url.searchParams.append('search', search)
       url.searchParams.append('limit', pageSize.toString())
@@ -62,9 +69,12 @@ function UserAdmin() {
         const data = await response.json()
         setUsers(data.users || [])
         setTotalCount(data.total || 0)
+      } else {
+        toast.error(ERROR_MESSAGES.USER_FETCH_FAILED)
       }
     } catch (error) {
       console.error('Error fetching users:', error)
+      toast.error(ERROR_MESSAGES.USER_FETCH_FAILED)
     } finally {
       setLoading(false)
     }
@@ -72,16 +82,46 @@ function UserAdmin() {
 
   const fetchColleges = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/institutions/all', {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.INSTITUTIONS.ALL}`, {
         credentials: 'include'
       })
       
       if (response.ok) {
         const data = await response.json()
-        setColleges(data.institutions || [])
+        // Extract just the names for the filter dropdown
+        setColleges((data.institutions || []).map(inst => typeof inst === 'string' ? inst : inst.name))
       }
     } catch (error) {
       console.error('Error fetching colleges:', error)
+    }
+  }
+
+  const fetchInstitutions = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.INSTITUTIONS.ALL}`, {
+        credentials: 'include'
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        const institutionsList = data.institutions || []
+        // Ensure we have objects with id and name
+        const formattedInstitutions = institutionsList.map(inst => {
+          if (typeof inst === 'string') {
+            // Legacy format - just a name string
+            return { id: null, name: inst }
+          }
+          return { id: inst.id, name: inst.name }
+        })
+        setInstitutions(formattedInstitutions)
+        console.log('Institutions loaded:', formattedInstitutions.length)
+      } else {
+        console.error('Failed to fetch institutions:', response.status)
+        toast.error(ERROR_MESSAGES.INSTITUTION_LIST_FAILED)
+      }
+    } catch (error) {
+      console.error('Error fetching institutions:', error)
+      toast.error(ERROR_MESSAGES.INSTITUTION_LIST_FAILED)
     }
   }
 
@@ -121,20 +161,33 @@ function UserAdmin() {
   const validateForm = () => {
     const newErrors = {}
     
-    if (!formData.name) newErrors.name = 'Name is required'
-    if (!formData.email) newErrors.email = 'Email is required'
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Invalid email format'
+    if (!formData.name || !formData.name.trim()) {
+      newErrors.name = VALIDATION_MESSAGES.USER_NAME_REQUIRED
+      toast.error(VALIDATION_MESSAGES.USER_NAME_REQUIRED)
+    }
+    if (!formData.email || !formData.email.trim()) {
+      newErrors.email = VALIDATION_MESSAGES.USER_EMAIL_REQUIRED
+      toast.error(VALIDATION_MESSAGES.USER_EMAIL_REQUIRED)
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = VALIDATION_MESSAGES.USER_EMAIL_INVALID
+      toast.error(VALIDATION_MESSAGES.USER_EMAIL_INVALID)
     }
     
     // College name is required for all users
-    if (!formData.college_name) {
-      newErrors.college_name = 'College name is required'
+    if (!formData.college_name || !formData.college_name.trim()) {
+      newErrors.college_name = VALIDATION_MESSAGES.USER_COLLEGE_REQUIRED
+      toast.error(VALIDATION_MESSAGES.USER_COLLEGE_REQUIRED)
     }
     
     if (formData.role === 'student') {
-      if (!formData.roll_number) newErrors.roll_number = 'Roll number is required'
-      if (!formData.department) newErrors.department = 'Department is required'
+      if (!formData.roll_number || !formData.roll_number.trim()) {
+        newErrors.roll_number = VALIDATION_MESSAGES.USER_ROLL_NUMBER_REQUIRED
+        toast.error(VALIDATION_MESSAGES.USER_ROLL_NUMBER_REQUIRED)
+      }
+      if (!formData.department || !formData.department.trim()) {
+        newErrors.department = VALIDATION_MESSAGES.USER_DEPARTMENT_REQUIRED
+        toast.error(VALIDATION_MESSAGES.USER_DEPARTMENT_REQUIRED)
+      }
     }
     
     setErrors(newErrors)
@@ -147,7 +200,7 @@ function UserAdmin() {
     if (!validateForm()) return
     
     try {
-      const response = await fetch('http://localhost:3000/api/admin/users', {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.USERS.CREATE}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -166,15 +219,16 @@ function UserAdmin() {
           section: '1',
           degree: ''
         })
-        toast.success('User created successfully! OTP has been sent to their email.')
+        setErrors({})
+        toast.success(SUCCESS_MESSAGES.USER_CREATED)
         fetchUsers()
       } else {
         const data = await response.json()
-        toast.error(data.error || 'Failed to create user')
+        toast.error(data.error || ERROR_MESSAGES.USER_CREATE_FAILED)
       }
     } catch (error) {
       console.error('Error creating user:', error)
-      toast.error('Failed to create user')
+      toast.error(ERROR_MESSAGES.USER_CREATE_FAILED)
     }
   }
 
@@ -195,8 +249,22 @@ function UserAdmin() {
   const handleEditSubmit = async (e) => {
     e.preventDefault()
     
+    // Validate required fields
+    if (!editData.name || !editData.name.trim()) {
+      toast.error(VALIDATION_MESSAGES.USER_NAME_REQUIRED)
+      return
+    }
+    if (!editData.email || !editData.email.trim()) {
+      toast.error(VALIDATION_MESSAGES.USER_EMAIL_REQUIRED)
+      return
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editData.email)) {
+      toast.error(VALIDATION_MESSAGES.USER_EMAIL_INVALID)
+      return
+    }
+    
     try {
-      const response = await fetch(`http://localhost:3000/api/admin/users/${selectedUser.id}`, {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.USERS.UPDATE(selectedUser.id)}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -206,15 +274,15 @@ function UserAdmin() {
       if (response.ok) {
         setShowEditModal(false)
         setSelectedUser(null)
-        toast.success('User updated successfully')
+        toast.success(SUCCESS_MESSAGES.USER_UPDATED)
         fetchUsers()
       } else {
         const data = await response.json()
-        toast.error(data.error || 'Failed to update user')
+        toast.error(data.error || ERROR_MESSAGES.USER_UPDATE_FAILED)
       }
     } catch (error) {
       console.error('Error updating user:', error)
-      toast.error('Failed to update user')
+      toast.error(ERROR_MESSAGES.USER_UPDATE_FAILED)
     }
   }
 
@@ -222,13 +290,13 @@ function UserAdmin() {
     e.preventDefault()
     
     if (!resetPassword || resetPassword.length < 6) {
-      toast.error('Password must be at least 6 characters')
+      toast.error(ERROR_MESSAGES.PASSWORD_TOO_SHORT)
       return
     }
     
     try {
       const response = await fetch(
-        `http://localhost:3000/api/admin/users/${selectedUser.id}/reset-password`,
+        `${API_BASE_URL}${API_ENDPOINTS.USERS.RESET_PASSWORD(selectedUser.id)}`,
         {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -241,43 +309,73 @@ function UserAdmin() {
         setShowResetModal(false)
         setResetPassword('')
         setSelectedUser(null)
-        toast.success('Password reset successfully')
+        toast.success(SUCCESS_MESSAGES.USER_PASSWORD_RESET)
       } else {
         const data = await response.json()
-        toast.error(data.error || 'Failed to reset password')
+        toast.error(data.error || ERROR_MESSAGES.USER_PASSWORD_RESET_FAILED)
       }
     } catch (error) {
       console.error('Error resetting password:', error)
-      toast.error('Failed to reset password')
+      toast.error(ERROR_MESSAGES.USER_PASSWORD_RESET_FAILED)
     }
   }
 
-  const handleDelete = async (userId) => {
-    // Note: Using confirm for deletion - this is acceptable for destructive actions
-    if (!window.confirm('Are you sure you want to delete this user?')) return
+  const handleDeleteClick = (userId) => {
+    const user = users.find(u => u.id === userId)
+    setUserToDelete(userId)
+    setSelectedUser(user)
+    setDeleteError(null) // Reset error when opening modal
+    setShowDeleteModal(true)
+    setMenuOpen(null)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!userToDelete) return
+    
+    // Check if it's the only college admin before attempting deletion
+    if (selectedUser && isOnlyCollegeAdmin(selectedUser)) {
+      setDeleteError('At least one college admin is required for this institution. Cannot delete the last college admin.')
+      return
+    }
     
     try {
-      const response = await fetch(`http://localhost:3000/api/admin/users/${userId}`, {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.USERS.DELETE(userToDelete)}`, {
         method: 'DELETE',
         credentials: 'include'
       })
       
       if (response.ok) {
-        toast.success('User deleted successfully')
+        toast.success(SUCCESS_MESSAGES.USER_DELETED)
         fetchUsers()
+        setShowDeleteModal(false)
+        setUserToDelete(null)
+        setSelectedUser(null)
+        setDeleteError(null)
       } else {
-        toast.error('Failed to delete user')
+        const data = await response.json()
+        const errorMessage = data.error || ERROR_MESSAGES.USER_DELETE_FAILED
+        setDeleteError(errorMessage)
+        toast.error(errorMessage)
+        // Don't close modal if there's an error, so user can see the message
       }
     } catch (error) {
       console.error('Error deleting user:', error)
-      toast.error('Failed to delete user')
+      const errorMessage = ERROR_MESSAGES.USER_DELETE_FAILED
+      setDeleteError(errorMessage)
+      toast.error(errorMessage)
     }
-    setMenuOpen(null)
+  }
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false)
+    setUserToDelete(null)
+    setSelectedUser(null)
+    setDeleteError(null)
   }
 
   const handleDownloadTemplate = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/admin/users/bulk/template', {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.USERS.BULK_TEMPLATE}`, {
         credentials: 'include'
       })
       
@@ -291,25 +389,26 @@ function UserAdmin() {
         a.click()
         window.URL.revokeObjectURL(url)
         document.body.removeChild(a)
+        toast.success(SUCCESS_MESSAGES.TEMPLATE_DOWNLOADED)
       } else {
-        alert('Failed to download template')
+        toast.error(ERROR_MESSAGES.USER_TEMPLATE_DOWNLOAD_FAILED)
       }
     } catch (error) {
       console.error('Error downloading template:', error)
-      alert('Failed to download template')
+      toast.error(ERROR_MESSAGES.USER_TEMPLATE_DOWNLOAD_FAILED)
     }
   }
 
   const handleBulkUpload = async (e) => {
     e.preventDefault()
     
-    if (!bulkUploadData.college_name) {
-      toast.error('Please select a college')
+    if (!bulkUploadData.college_name || !bulkUploadData.college_name.trim()) {
+      toast.error(VALIDATION_MESSAGES.COLLEGE_REQUIRED)
       return
     }
     
     if (!bulkUploadData.file) {
-      toast.error('Please select a file to upload')
+      toast.error(VALIDATION_MESSAGES.FILE_REQUIRED)
       return
     }
     
@@ -321,7 +420,7 @@ function UserAdmin() {
       formData.append('file', bulkUploadData.file)
       formData.append('college_name', bulkUploadData.college_name)
       
-      const response = await fetch('http://localhost:3000/api/admin/users/bulk/upload', {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.USERS.BULK_UPLOAD}`, {
         method: 'POST',
         credentials: 'include',
         body: formData
@@ -336,6 +435,7 @@ function UserAdmin() {
           total: data.total,
           errors: data.errors
         })
+        toast.success(SUCCESS_MESSAGES.USER_BULK_UPLOAD_SUCCESS(data.created, data.total))
         fetchUsers()
         // Reset form after 3 seconds
         setTimeout(() => {
@@ -345,18 +445,32 @@ function UserAdmin() {
       } else {
         setBulkUploadResult({
           success: false,
-          error: data.error || 'Failed to upload users'
+          error: data.error || ERROR_MESSAGES.USER_BULK_UPLOAD_FAILED
         })
+        toast.error(data.error || ERROR_MESSAGES.USER_BULK_UPLOAD_FAILED)
       }
     } catch (error) {
       console.error('Error uploading users:', error)
       setBulkUploadResult({
         success: false,
-        error: 'Failed to upload users'
+        error: ERROR_MESSAGES.USER_BULK_UPLOAD_FAILED
       })
+      toast.error(ERROR_MESSAGES.USER_BULK_UPLOAD_FAILED)
     } finally {
       setBulkUploadLoading(false)
     }
+  }
+
+  // Helper function to check if a user is the only college admin for their institution
+  const isOnlyCollegeAdmin = (user) => {
+    if (user.role !== 'college_admin' || !user.college_name) {
+      return false
+    }
+    // Count college admins for the same institution
+    const collegeAdminsCount = users.filter(
+      u => u.role === 'college_admin' && u.college_name === user.college_name
+    ).length
+    return collegeAdminsCount <= 1
   }
 
   const openMenu = (userId, e) => {
@@ -447,15 +561,25 @@ function UserAdmin() {
             <div className="form-row">
               <div className="form-group">
                 <label>College Name *</label>
-                <input
-                  type="text"
+                <select
                   name="college_name"
                   value={formData.college_name}
                   onChange={handleChange}
-                  placeholder="Enter college name"
                   className={errors.college_name ? 'error' : ''}
-                />
+                >
+                  <option value="">Select College</option>
+                  {institutions.map((institution) => (
+                    <option key={institution.id} value={institution.name}>
+                      {institution.name}
+                    </option>
+                  ))}
+                </select>
                 {errors.college_name && <span className="error-text">{errors.college_name}</span>}
+                {institutions.length === 0 && (
+                  <small style={{ color: 'var(--text-secondary)', marginTop: '4px', display: 'block' }}>
+                    No institutions available. Please create an institution first.
+                  </small>
+                )}
               </div>
             </div>
 
@@ -567,9 +691,21 @@ function UserAdmin() {
 
         {loading ? (
           <div className="loading">Loading users...</div>
+        ) : users.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-state-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <line x1="19" y1="8" x2="19" y2="14"></line>
+                <line x1="22" y1="11" x2="16" y2="11"></line>
+              </svg>
+            </div>
+            <h3>No Users Found</h3>
+            <p>Get started by creating your first user or uploading users in bulk.</p>
+          </div>
         ) : (
-          <div className="table-responsive">
-            <table className="users-table">
+          <table className="users-table">
             <thead>
               <tr>
                 <th>Name</th>
@@ -619,7 +755,7 @@ function UserAdmin() {
                           }}>Reset Password</button>
                           {/* Don't show delete option for primary admins or current user */}
                           {u.role !== 'primary_admin' && u.id !== user?.id && (
-                            <button onClick={() => handleDelete(u.id)} className="delete-option">
+                            <button onClick={() => handleDeleteClick(u.id)} className="delete-option">
                               Delete User
                             </button>
                           )}
@@ -631,18 +767,21 @@ function UserAdmin() {
               ))}
             </tbody>
           </table>
-          </div>
         )}
         
-        {/* Pagination Controls */}
-        <Pagination
-          currentPage={currentPage}
-          pageSize={pageSize}
-          totalCount={totalCount}
-          itemName="users"
-          onPageChange={setCurrentPage}
-          onPageSizeChange={setPageSize}
-        />
+        {/* Pagination Controls - Only show when there are users */}
+        {!loading && users.length > 0 && (
+          <div className="pagination-wrapper">
+            <Pagination
+              currentPage={currentPage}
+              pageSize={pageSize}
+              totalCount={totalCount}
+              itemName="users"
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+            />
+          </div>
+        )}
       </div>
 
       {showEditModal && selectedUser && (
@@ -816,10 +955,15 @@ function UserAdmin() {
                   required
                 >
                   <option value="">Select College</option>
-                  {colleges.map(college => (
-                    <option key={college} value={college}>{college}</option>
+                  {institutions.map(institution => (
+                    <option key={institution.id} value={institution.name}>{institution.name}</option>
                   ))}
                 </select>
+                {institutions.length === 0 && (
+                  <small style={{ color: 'var(--text-secondary)', marginTop: '4px', display: 'block' }}>
+                    No institutions available. Please create an institution first.
+                  </small>
+                )}
               </div>
 
               <div className="form-group">
@@ -884,6 +1028,24 @@ function UserAdmin() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Delete User"
+        message={
+          selectedUser && isOnlyCollegeAdmin(selectedUser)
+            ? `At least one college admin is required for "${selectedUser.college_name}".\n\nCannot delete ${selectedUser.name} as this institution must have at least one college admin.`
+            : selectedUser 
+              ? `Are you sure you want to delete ${selectedUser.name}?\n This action cannot be undone.`
+              : 'Are you sure you want to delete this user?\n This action cannot be undone.'
+        }
+        confirmText="Delete"
+        cancelText="Cancel"
+        errorMessage={deleteError}
+        disabled={selectedUser && isOnlyCollegeAdmin(selectedUser)}
+      />
     </div>
   )
 }

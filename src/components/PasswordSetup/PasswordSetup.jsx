@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { toast } from 'react-toastify'
+import { API_BASE_URL, API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES } from '../../constants/constants'
 import './PasswordSetup.css'
 
 function PasswordSetup({ userId, otp, onComplete }) {
@@ -49,7 +51,7 @@ function PasswordSetup({ userId, otp, onComplete }) {
     
     setLoading(true)
     try {
-      const response = await fetch('http://localhost:3000/api/auth/set-password', {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.AUTH.SET_PASSWORD}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -61,15 +63,15 @@ function PasswordSetup({ userId, otp, onComplete }) {
       })
       
       if (response.ok) {
-        alert('Password set successfully! Please login again with your new password.')
+        toast.success(SUCCESS_MESSAGES.PASSWORD_SET)
         onComplete()
       } else {
         const data = await response.json()
-        alert(data.error || 'Failed to set password')
+        toast.error(data.error || ERROR_MESSAGES.PASSWORD_SET_FAILED)
       }
     } catch (error) {
       console.error('Error setting password:', error)
-      alert('Failed to set password')
+      toast.error(ERROR_MESSAGES.PASSWORD_SET_FAILED)
     } finally {
       setLoading(false)
     }

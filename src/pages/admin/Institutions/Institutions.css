@@ -134,3 +134,98 @@
   color: white;
 }
 
+/* Institutions table specific styles */
+.users-table th:first-child,
+.users-table td:first-child {
+  width: auto;
+  min-width: 0;
+}
+
+.users-table th:nth-child(2),
+.users-table td:nth-child(2) {
+  width: 1%;
+  white-space: nowrap;
+  padding-left: var(--spacing-lg);
+  padding-right: var(--spacing-lg);
+}
+
+.users-table th:last-child,
+.users-table td:last-child {
+  width: 1%;
+  white-space: nowrap;
+  padding-left: var(--spacing-lg);
+  padding-right: var(--spacing-md);
+}
+
+/* Add subtle vertical lines between header columns */
+.users-table th {
+  position: relative;
+}
+
+.users-table th:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 20%;
+  bottom: 20%;
+  width: 1px;
+  background: var(--border-color);
+  opacity: 0.5;
+}
+
+/* Add subtle vertical lines between body columns */
+.users-table td:not(:last-child) {
+  position: relative;
+}
+
+.users-table td:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 10%;
+  bottom: 10%;
+  width: 1px;
+  background: var(--border-color);
+  opacity: 0.3;
+}
+
+/* Empty state styles */
+.empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-4xl) var(--spacing-lg);
+  text-align: center;
+  min-height: 300px;
+  overflow: hidden;
+}
+
+.empty-state-icon {
+  width: 80px;
+  height: 80px;
+  margin-bottom: var(--spacing-lg);
+  color: var(--text-secondary);
+  opacity: 0.5;
+}
+
+.empty-state-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.empty-state h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.empty-state p {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0;
+  max-width: 400px;
+}
+

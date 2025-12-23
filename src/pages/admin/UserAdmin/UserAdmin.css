@@ -66,6 +66,16 @@
   overflow: hidden;
 }
 
+.users-table-card {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 12rem);
+  min-height: 500px;
+  max-height: calc(100vh - 12rem);
+  overflow: hidden;
+  margin-bottom: var(--spacing-lg);
+}
+
 .table-header {
   display: flex;
   justify-content: space-between;
@@ -73,6 +83,7 @@
   margin-bottom: var(--spacing-md);
   flex-wrap: wrap;
   gap: var(--spacing-md);
+  flex-shrink: 0;
 }
 
 
@@ -135,9 +146,13 @@
 
 
 
-.filter-select option {
+.filter-select option,
+.form-group select option {
   color: var(--text-primary);
   background: var(--bg-input);
+  padding: var(--spacing-sm);
+  max-height: 200px;
+  overflow-y: auto;
 }
 
 .filter-select:hover {
@@ -172,12 +187,6 @@
   height: var(--icon-sm);
 }
 
-.table-responsive {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  width: 100%;
-}
-
 .user-form-card h2 {
   font-size: 1.25rem;
   font-weight: 600;
@@ -190,6 +199,11 @@
   grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
   gap: var(--spacing-lg);
   margin-bottom: var(--spacing-lg);
+}
+
+/* Single column form group (like college name) */
+.form-row .form-group:only-child {
+  max-width: 25rem;
 }
 
 .form-group {
@@ -213,6 +227,24 @@
   color: var(--text-primary);
   font-size: 0.875rem;
   transition: all var(--transition-fast);
+  height: 2.5rem;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.form-group select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--spacing-md) center;
+  background-size: var(--icon-sm);
+  padding-right: var(--spacing-3xl);
+  appearance: none;
+  cursor: pointer;
+  max-width: 100%;
+}
+
+.form-group select:hover {
+  border-color: var(--accent-primary);
 }
 
 .form-group input:focus,
@@ -249,6 +281,13 @@
   width: 100%;
   min-width: 35rem;
   border-collapse: collapse;
+  overflow-x: auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  flex: 0 1 auto;
+  min-height: 0;
+  max-height: calc(100% - 80px);
+  margin-bottom: var(--spacing-md);
 }
 
 .users-table thead {
@@ -323,10 +362,54 @@
   text-align: center;
   padding: var(--spacing-4xl);
   color: var(--text-secondary);
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-4xl) var(--spacing-lg);
+  text-align: center;
+  min-height: 300px;
+  overflow: hidden;
+}
+
+.empty-state-icon {
+  width: 80px;
+  height: 80px;
+  margin-bottom: var(--spacing-lg);
+  color: var(--text-secondary);
+  opacity: 0.5;
+}
+
+.empty-state-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.empty-state h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.empty-state p {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0;
+  max-width: 400px;
 }
 
 .menu-container {
   position: relative;
+  z-index: 1;
 }
 
 .menu-button {
@@ -361,7 +444,7 @@
   border: var(--border-sm) solid var(--border-color);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
-  z-index: 1000;
+  z-index: 10000;
   min-width: 10rem;
   overflow: hidden;
 }
@@ -389,6 +472,42 @@
 
 .menu-dropdown button.delete-option:hover {
   background: rgba(239, 68, 68, 0.1);
+}
+
+.menu-dropdown button.delete-option.disabled {
+  color: var(--text-secondary);
+  opacity: 0.5;
+  cursor: not-allowed;
+  position: relative;
+}
+
+.menu-dropdown button.delete-option.disabled:hover {
+  background: transparent;
+}
+
+.menu-dropdown button.delete-option.disabled .disabled-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--bg-card);
+  border: var(--border-sm) solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  color: var(--text-primary);
+  white-space: nowrap;
+  box-shadow: var(--shadow-md);
+  z-index: 10001;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-fast);
+}
+
+.menu-dropdown button.delete-option.disabled:hover .disabled-tooltip {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .modal-overlay {
@@ -442,6 +561,22 @@
   width: 90%;
 }
 
+.bulk-upload-modal .form-group select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--spacing-md) center;
+  background-size: var(--icon-sm);
+  padding-right: var(--spacing-3xl);
+  appearance: none;
+  cursor: pointer;
+  height: 2.5rem;
+  max-width: 100%;
+}
+
+.bulk-upload-modal .form-group select:hover {
+  border-color: var(--accent-primary);
+}
+
 .bulk-upload-info {
   background: var(--bg-secondary);
   padding: var(--spacing-md);
@@ -489,9 +624,23 @@
   margin-bottom: var(--spacing-xs);
 }
 
+/* Pagination wrapper - keep at bottom */
+.pagination-wrapper {
+  flex-shrink: 0;
+  margin-top: auto;
+  padding: var(--spacing-md) 0;
+  border-top: var(--border-sm) solid var(--border-color);
+  background: var(--bg-card);
+}
+
 @media (max-width: 768px) {
   .user-admin-page {
     padding: var(--spacing-md);
+  }
+  
+  .users-table-card {
+    height: calc(100vh - 8rem);
+    min-height: 400px;
   }
   
   .form-row {

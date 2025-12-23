@@ -4,9 +4,8 @@ import { toast } from 'react-toastify'
 import Button from '../../../components/Button/Button'
 import LessonModal from '../../../components/LessonModal/LessonModal'
 import ConfirmModal from '../../../components/ConfirmModal/ConfirmModal'
+import { API_BASE_URL, API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES, VALIDATION_MESSAGES } from '../../../constants/constants'
 import './CourseEdit.css'
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
 
 function CourseEdit() {
   const { id } = useParams()
@@ -82,7 +81,7 @@ function CourseEdit() {
         })
         setTags([])
       } else {
-        const response = await fetch(`${API_BASE_URL}/api/courses/${id}`, {
+        const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.COURSES.GET(id)}`, {
           credentials: 'include'
         })
         if (!response.ok) throw new Error('Failed to fetch course')
@@ -100,7 +99,7 @@ function CourseEdit() {
       }
     } catch (error) {
       console.error('Error fetching course:', error)
-      toast.error('Failed to load course')
+      toast.error(ERROR_MESSAGES.COURSE_FETCH_FAILED)
     } finally {
       setLoading(false)
     }
@@ -108,7 +107,7 @@ function CourseEdit() {
 
   const fetchSections = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/topics/course/${id}`, {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.TOPICS.GET_BY_COURSE(id)}`, {
         credentials: 'include'
       })
       if (!response.ok) throw new Error('Failed to fetch sections')
@@ -119,7 +118,7 @@ function CourseEdit() {
       const lessonsMap = {}
       for (const section of data) {
         try {
-          const lessonsResponse = await fetch(`${API_BASE_URL}/api/segments/topic/${section.id}`, {
+          const lessonsResponse = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SEGMENTS.GET_BY_TOPIC(section.id)}`, {
             credentials: 'include'
           })
           if (lessonsResponse.ok) {
@@ -134,13 +133,13 @@ function CourseEdit() {
       setSectionLessons(lessonsMap)
     } catch (error) {
       console.error('Error fetching sections:', error)
-      toast.error('Failed to load sections')
+      toast.error(ERROR_MESSAGES.SECTION_FETCH_FAILED)
     }
   }
 
   const fetchSectionLessons = async (sectionId) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/segments/topic/${sectionId}`, {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SEGMENTS.GET_BY_TOPIC(sectionId)}`, {
         credentials: 'include'
       })
       if (!response.ok) throw new Error('Failed to fetch lessons')
@@ -151,7 +150,7 @@ function CourseEdit() {
       }))
     } catch (error) {
       console.error('Error fetching lessons:', error)
-      toast.error('Failed to load lessons')
+      toast.error(ERROR_MESSAGES.LESSON_FETCH_FAILED)
     }
   }
 
@@ -166,19 +165,19 @@ function CourseEdit() {
   const saveCourse = async (status) => {
     // Validate required fields
     if (!courseForm.name || !courseForm.name.trim()) {
-      toast.error('Course name is required')
+      toast.error(VALIDATION_MESSAGES.COURSE_NAME_REQUIRED)
       return
     }
     if (!courseForm.category || !courseForm.category.trim()) {
-      toast.error('Category is required')
+      toast.error(VALIDATION_MESSAGES.COURSE_CATEGORY_REQUIRED)
       return
     }
     if (!courseForm.competency_level || !courseForm.competency_level.trim()) {
-      toast.error('Competency level is required')
+      toast.error(VALIDATION_MESSAGES.COURSE_COMPETENCY_LEVEL_REQUIRED)
       return
     }
     if (!courseForm.short_description || !courseForm.short_description.trim()) {
-      toast.error('Short description is required')
+      toast.error(VALIDATION_MESSAGES.COURSE_SHORT_DESCRIPTION_REQUIRED)
       return
     }
     
@@ -200,7 +199,7 @@ function CourseEdit() {
           body: JSON.stringify(courseData)
         })
       } else {
-        response = await fetch(`${API_BASE_URL}/api/courses/${id}`, {
+        response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.COURSES.UPDATE(id)}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
@@ -210,7 +209,7 @@ function CourseEdit() {
 
       if (!response.ok) throw new Error('Failed to save course')
       const data = await response.json()
-      toast.success(status === 'published' ? 'Course published successfully' : 'Course saved as draft')
+      toast.success(status === 'published' ? SUCCESS_MESSAGES.COURSE_PUBLISHED : SUCCESS_MESSAGES.COURSE_SAVED_DRAFT)
       
       if (id === 'new') {
         navigate(`/courses/${data.course.id}/edit`)
@@ -219,7 +218,7 @@ function CourseEdit() {
       }
     } catch (error) {
       console.error('Error saving course:', error)
-      toast.error('Failed to save course')
+      toast.error(ERROR_MESSAGES.COURSE_SAVE_FAILED)
     } finally {
       setSaving(false)
     }
@@ -234,11 +233,11 @@ function CourseEdit() {
     try {
       const courseId = id === 'new' ? null : id
       if (!courseId) {
-        toast.error('Please save the course first before adding sections')
+        toast.error(VALIDATION_MESSAGES.SAVE_COURSE_FIRST)
         return
       }
 
-      const response = await fetch(`${API_BASE_URL}/api/topics`, {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.TOPICS.CREATE}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -255,10 +254,10 @@ function CourseEdit() {
       setSections([...sections, data.topic])
       setSectionForm({ title: '', description: '' })
       setShowSectionForm(false)
-      toast.success('Section added successfully')
+      toast.success(SUCCESS_MESSAGES.SECTION_CREATED)
     } catch (error) {
       console.error('Error adding section:', error)
-      toast.error('Failed to add section')
+      toast.error(ERROR_MESSAGES.SECTION_CREATE_FAILED)
     }
   }
 
@@ -269,7 +268,7 @@ function CourseEdit() {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/topics/${editingSection.id}`, {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.TOPICS.UPDATE(editingSection.id)}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -286,10 +285,10 @@ function CourseEdit() {
       setSectionForm({ title: '', description: '' })
       setEditingSection(null)
       setShowSectionForm(false)
-      toast.success('Section updated successfully')
+      toast.success(SUCCESS_MESSAGES.SECTION_UPDATED)
     } catch (error) {
       console.error('Error updating section:', error)
-      toast.error('Failed to update section')
+      toast.error(ERROR_MESSAGES.SECTION_UPDATE_FAILED)
     }
   }
 
@@ -305,7 +304,7 @@ function CourseEdit() {
     if (!sectionToDelete) return
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/topics/${sectionToDelete}`, {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.TOPICS.DELETE(sectionToDelete)}`, {
         method: 'DELETE',
         credentials: 'include'
       })
@@ -317,12 +316,12 @@ function CourseEdit() {
         delete updated[sectionToDelete]
         return updated
       })
-      toast.success('Section deleted successfully')
+      toast.success(SUCCESS_MESSAGES.SECTION_DELETED)
       setShowDeleteSectionConfirm(false)
       setSectionToDelete(null)
     } catch (error) {
       console.error('Error deleting section:', error)
-      toast.error('Failed to delete section')
+      toast.error(ERROR_MESSAGES.SECTION_DELETE_FAILED)
     }
   }
 
@@ -434,7 +433,14 @@ function CourseEdit() {
           <div className="sections-tab">
             {sections.length === 0 && !showSectionForm ? (
               <div className="empty-sections">
-                <p>Add sections to create the course</p>
+                <div className="empty-state-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                </div>
+                <h3>No Sections Added</h3>
+                <p>Add sections to organize your course content into topics and lessons.</p>
                 {!isPublished && (
                   <Button variant="primary" onClick={() => setShowSectionForm(true)}>
                     Add Section
@@ -568,7 +574,7 @@ function CourseEdit() {
                                           onClick={async () => {
                                             // Fetch lesson details for editing
                                             try {
-                                              const response = await fetch(`${API_BASE_URL}/api/segments/${lesson.id}`, {
+                                              const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SEGMENTS.GET(lesson.id)}`, {
                                                 credentials: 'include'
                                               })
                                               if (!response.ok) throw new Error('Failed to fetch lesson')
@@ -578,7 +584,7 @@ function CourseEdit() {
                                               setShowLessonModal(true)
                                             } catch (error) {
                                               console.error('Error fetching lesson:', error)
-                                              toast.error('Failed to load lesson')
+                                              toast.error(ERROR_MESSAGES.LESSON_FETCH_FAILED)
                                             }
                                           }}
                                           title="Edit Lesson"
@@ -607,7 +613,16 @@ function CourseEdit() {
                                 ))}
                               </div>
                             ) : (
-                              <p className="empty-message">No items added yet</p>
+                              <div className="empty-message">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                  <polyline points="14 2 14 8 20 8"></polyline>
+                                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                                  <polyline points="10 9 9 9 8 9"></polyline>
+                                </svg>
+                                <p>No lessons added yet</p>
+                              </div>
                             )}
                           </div>
                         </div>
@@ -792,23 +807,23 @@ function CourseEdit() {
         }}
         onConfirm={async () => {
           try {
-            const response = await fetch(`${API_BASE_URL}/api/segments/${lessonToDelete.id}`, {
+            const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SEGMENTS.DELETE(lessonToDelete.id)}`, {
               method: 'DELETE',
               credentials: 'include'
             })
             if (!response.ok) throw new Error('Failed to delete lesson')
-            toast.success('Lesson deleted successfully')
+            toast.success(SUCCESS_MESSAGES.LESSON_DELETED)
             await fetchSectionLessons(sectionIdForDelete)
             setShowDeleteConfirm(false)
             setLessonToDelete(null)
             setSectionIdForDelete(null)
           } catch (error) {
             console.error('Error deleting lesson:', error)
-            toast.error('Failed to delete lesson')
+            toast.error(ERROR_MESSAGES.LESSON_DELETE_FAILED)
           }
         }}
         title="Delete Lesson"
-        message={`Are you sure you want to delete "${lessonToDelete?.name}"? This action cannot be undone.`}
+        message={`Are you sure you want to delete "${lessonToDelete?.name}"?\n This action cannot be undone.`}
         confirmText="Delete"
         cancelText="Cancel"
       />
@@ -837,7 +852,7 @@ function CourseEdit() {
 
             if (lessonData.lessonId) {
               // Update existing lesson
-              const response = await fetch(`${API_BASE_URL}/api/segments/${lessonData.lessonId}`, {
+              const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SEGMENTS.UPDATE(lessonData.lessonId)}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -851,10 +866,10 @@ function CourseEdit() {
               })
 
               if (!response.ok) throw new Error('Failed to update lesson')
-              toast.success('Lesson updated successfully')
+              toast.success(SUCCESS_MESSAGES.LESSON_UPDATED)
             } else {
               // Create new lesson
-              const response = await fetch(`${API_BASE_URL}/api/segments`, {
+              const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SEGMENTS.CREATE}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -869,14 +884,14 @@ function CourseEdit() {
               })
 
               if (!response.ok) throw new Error('Failed to create lesson')
-              toast.success('Lesson added successfully')
+              toast.success(SUCCESS_MESSAGES.LESSON_CREATED)
             }
             
             // Refresh lessons for the section
             await fetchSectionLessons(selectedSectionId)
           } catch (error) {
             console.error('Error saving lesson:', error)
-            toast.error(lessonData.lessonId ? 'Failed to update lesson' : 'Failed to add lesson')
+            toast.error(lessonData.lessonId ? ERROR_MESSAGES.LESSON_UPDATE_FAILED : ERROR_MESSAGES.LESSON_CREATE_FAILED)
           }
         }}
         sectionId={selectedSectionId}

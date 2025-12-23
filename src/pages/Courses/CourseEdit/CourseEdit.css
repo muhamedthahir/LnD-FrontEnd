@@ -105,14 +105,41 @@
 }
 
 .empty-sections {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-4xl) var(--spacing-lg);
   text-align: center;
-  padding: var(--spacing-4xl);
+  min-height: 300px;
   color: var(--text-secondary);
+}
+
+.empty-sections .empty-state-icon {
+  width: 80px;
+  height: 80px;
+  margin-bottom: var(--spacing-lg);
+  color: var(--text-secondary);
+  opacity: 0.5;
+}
+
+.empty-sections .empty-state-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.empty-sections h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-sm) 0;
 }
 
 .empty-sections p {
   margin-bottom: var(--spacing-lg);
-  font-size: 1rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  max-width: 400px;
 }
 
 .add-section-btn {
@@ -239,10 +266,27 @@
 }
 
 .empty-message {
-  color: var(--text-secondary);
-  font-size: 0.875rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
   text-align: center;
+  color: var(--text-secondary);
+}
+
+.empty-message svg {
+  width: 48px;
+  height: 48px;
+  margin-bottom: var(--spacing-md);
+  opacity: 0.5;
+  color: var(--text-secondary);
+}
+
+.empty-message p {
+  font-size: 0.875rem;
   margin: 0;
+  color: var(--text-secondary);
 }
 
 .lessons-list {
