@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useOutletContext } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import Pagination from '../../../components/Pagination/Pagination'
 import './UserAdmin.css'
 
@@ -165,15 +166,15 @@ function UserAdmin() {
           section: '1',
           degree: ''
         })
-        alert('User created successfully! OTP has been sent to their email.')
+        toast.success('User created successfully! OTP has been sent to their email.')
         fetchUsers()
       } else {
         const data = await response.json()
-        alert(data.error || 'Failed to create user')
+        toast.error(data.error || 'Failed to create user')
       }
     } catch (error) {
       console.error('Error creating user:', error)
-      alert('Failed to create user')
+      toast.error('Failed to create user')
     }
   }
 
@@ -205,14 +206,15 @@ function UserAdmin() {
       if (response.ok) {
         setShowEditModal(false)
         setSelectedUser(null)
+        toast.success('User updated successfully')
         fetchUsers()
       } else {
         const data = await response.json()
-        alert(data.error || 'Failed to update user')
+        toast.error(data.error || 'Failed to update user')
       }
     } catch (error) {
       console.error('Error updating user:', error)
-      alert('Failed to update user')
+      toast.error('Failed to update user')
     }
   }
 
@@ -220,7 +222,7 @@ function UserAdmin() {
     e.preventDefault()
     
     if (!resetPassword || resetPassword.length < 6) {
-      alert('Password must be at least 6 characters')
+      toast.error('Password must be at least 6 characters')
       return
     }
     
@@ -239,19 +241,20 @@ function UserAdmin() {
         setShowResetModal(false)
         setResetPassword('')
         setSelectedUser(null)
-        alert('Password reset successfully')
+        toast.success('Password reset successfully')
       } else {
         const data = await response.json()
-        alert(data.error || 'Failed to reset password')
+        toast.error(data.error || 'Failed to reset password')
       }
     } catch (error) {
       console.error('Error resetting password:', error)
-      alert('Failed to reset password')
+      toast.error('Failed to reset password')
     }
   }
 
   const handleDelete = async (userId) => {
-    if (!confirm('Are you sure you want to delete this user?')) return
+    // Note: Using confirm for deletion - this is acceptable for destructive actions
+    if (!window.confirm('Are you sure you want to delete this user?')) return
     
     try {
       const response = await fetch(`http://localhost:3000/api/admin/users/${userId}`, {
@@ -260,13 +263,14 @@ function UserAdmin() {
       })
       
       if (response.ok) {
+        toast.success('User deleted successfully')
         fetchUsers()
       } else {
-        alert('Failed to delete user')
+        toast.error('Failed to delete user')
       }
     } catch (error) {
       console.error('Error deleting user:', error)
-      alert('Failed to delete user')
+      toast.error('Failed to delete user')
     }
     setMenuOpen(null)
   }
@@ -300,12 +304,12 @@ function UserAdmin() {
     e.preventDefault()
     
     if (!bulkUploadData.college_name) {
-      alert('Please select a college')
+      toast.error('Please select a college')
       return
     }
     
     if (!bulkUploadData.file) {
-      alert('Please select a file to upload')
+      toast.error('Please select a file to upload')
       return
     }
     

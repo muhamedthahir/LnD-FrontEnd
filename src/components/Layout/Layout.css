@@ -27,9 +27,15 @@
 
 .layout-main {
   flex: 1;
-  margin-left: 11rem;
-  min-height: 100vh;
+  margin-left: 12rem;
+  margin-top: 3.5rem;
+  min-height: calc(100vh - 3.5rem);
   background: var(--bg-primary);
+  transition: margin-left var(--transition-normal);
+}
+
+html[data-sidebar-collapsed="true"] .layout-main {
+  margin-left: 4rem;
 }
 
 @media (max-width: 768px) {

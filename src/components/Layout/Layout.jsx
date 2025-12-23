@@ -2,12 +2,26 @@ import { Outlet } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Sidebar from '../Sidebar/Sidebar'
+import Header from '../Header/Header'
 import './Layout.css'
 
 function Layout() {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    const saved = localStorage.getItem('sidebarCollapsed')
+    return saved ? JSON.parse(saved) : false
+  })
   const navigate = useNavigate()
+
+  useEffect(() => {
+    localStorage.setItem('sidebarCollapsed', JSON.stringify(isSidebarCollapsed))
+    document.documentElement.setAttribute('data-sidebar-collapsed', isSidebarCollapsed)
+  }, [isSidebarCollapsed])
+
+  const toggleSidebar = () => {
+    setIsSidebarCollapsed(!isSidebarCollapsed)
+  }
 
   useEffect(() => {
     checkAuth()
@@ -74,7 +88,13 @@ function Layout() {
 
   return (
     <div className="layout">
-      <Sidebar user={user} logout={logout} />
+      <Sidebar user={user} isCollapsed={isSidebarCollapsed} />
+      <Header 
+        user={user} 
+        logout={logout} 
+        onToggleSidebar={toggleSidebar}
+        isSidebarCollapsed={isSidebarCollapsed}
+      />
       <main className="layout-main">
         <Outlet context={{ user, logout }} />
       </main>

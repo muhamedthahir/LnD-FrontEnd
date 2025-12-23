@@ -22,7 +22,22 @@
   color: var(--text-secondary);
 }
 
-/* Button styles moved to Button component */
+.btn-primary {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background: var(--accent-primary);
+  color: var(--bg-primary);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-primary:hover {
+  background: var(--accent-secondary);
+  transform: translateY(-0.0625rem);
+}
 
 .empty-state {
   text-align: center;
@@ -46,20 +61,13 @@
 .table-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
+  align-items: center;
   margin-bottom: var(--spacing-md);
   flex-wrap: wrap;
   gap: var(--spacing-md);
 }
 
-.filters-left {
-  display: flex;
-  gap: var(--spacing-md);
-  align-items: flex-end;
-  flex-wrap: wrap;
-}
-
-.filters-right {
+.filters {
   display: flex;
   gap: var(--spacing-md);
   align-items: flex-end;
@@ -118,7 +126,33 @@
   box-shadow: 0 0 0 var(--spacing-xs) var(--accent-subtle);
 }
 
-/* Button styles moved to Button component */
+.btn-clear-filters {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--accent-primary);
+  color: var(--bg-primary);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+  height: 2.25rem;
+}
+
+.btn-clear-filters:hover {
+  background: var(--accent-secondary);
+  transform: translateY(-0.0625rem);
+}
+
+.btn-clear-filters svg {
+  width: 1rem;
+  height: 1rem;
+}
 
 .courses-grid {
   display: grid;
@@ -327,7 +361,37 @@
   justify-content: flex-end;
 }
 
-/* Button styles moved to Button component */
+.btn-secondary {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: var(--border-sm) solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-secondary:hover {
+  background: var(--bg-tertiary);
+}
+
+.btn-draft {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+  border: var(--border-sm) solid #f59e0b;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-draft:hover {
+  background: rgba(245, 158, 11, 0.2);
+}
 
 @media (max-width: 768px) {
   .course-admin-page {
@@ -339,8 +403,7 @@
     gap: var(--spacing-md);
   }
 
-  .filters-left,
-  .filters-right {
+  .filters {
     flex-direction: column;
     width: 100%;
   }
@@ -363,3 +426,5 @@
     width: 100%;
   }
 }
+
+

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useOutletContext } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import Pagination from '../../../components/Pagination/Pagination'
 import './Groups.css'
 
@@ -323,7 +324,7 @@ function Groups() {
       
       if (!response.ok) {
         const data = await response.json()
-        alert(data.error || 'Failed to update group')
+        toast.error(data.error || 'Failed to update group')
         return
       }
 
@@ -331,7 +332,7 @@ function Groups() {
       handleNextPage()
     } catch (error) {
       console.error('Error updating group:', error)
-      alert('Failed to update group')
+      toast.error('Failed to update group')
     }
   }
 
@@ -361,7 +362,7 @@ function Groups() {
         
         if (!response.ok) {
           const data = await response.json()
-          alert(data.error || 'Failed to create group')
+          toast.error(data.error || 'Failed to create group')
           return
         }
 
@@ -410,16 +411,18 @@ function Groups() {
       setGroupStudents([])
       setAvailableStudents([])
       setSelectedStudentIds([])
+      toast.success(editingGroup ? 'Group updated successfully' : 'Group created successfully')
       fetchGroups()
     } catch (error) {
       console.error('Error saving group:', error)
-      alert('Failed to save group')
+      toast.error('Failed to save group')
     }
   }
 
 
   const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to delete this group?')) return
+    // Note: Using confirm for deletion - this is acceptable for destructive actions
+    if (!window.confirm('Are you sure you want to delete this group?')) return
 
     try {
       const response = await fetch(`http://localhost:3000/api/groups/${id}`, {
@@ -428,13 +431,14 @@ function Groups() {
       })
       
       if (response.ok) {
+        toast.success('Group deleted successfully')
         fetchGroups()
       } else {
-        alert('Failed to delete group')
+        toast.error('Failed to delete group')
       }
     } catch (error) {
       console.error('Error deleting group:', error)
-      alert('Failed to delete group')
+      toast.error('Failed to delete group')
     }
   }
 

@@ -4,6 +4,7 @@ import Layout from './components/Layout/Layout'
 import Login from './pages/Login/Login'
 import Dashboard from './pages/Dashboard/Dashboard'
 import Courses from './pages/Courses/Courses'
+import CourseEdit from './pages/Courses/CourseEdit/CourseEdit'
 import Assessments from './pages/Assessments/Assessments'
 import CourseAdmin from './pages/admin/CourseAdmin/CourseAdmin'
 import AssessmentAdmin from './pages/admin/AssessmentAdmin/AssessmentAdmin'
@@ -21,6 +22,8 @@ function App() {
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/courses" element={<Courses />} />
+          <Route path="/courses/:id/edit" element={<CourseEdit />} />
+          <Route path="/courses/new/edit" element={<CourseEdit />} />
           <Route path="/assessments" element={<Assessments />} />
           <Route path="/admin/institutions" element={<Institutions />} />
           <Route path="/admin/users" element={<UserAdmin />} />

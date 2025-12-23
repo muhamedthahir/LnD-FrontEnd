@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react'
+import { useOutletContext } from 'react-router-dom'
 import '../UserAdmin/UserAdmin.css'
 
 function CourseAdmin() {
+  const { user } = useOutletContext()
+
   return (
     <div className="user-admin-page">
       <div className="user-admin-header">
         <div>
           <h1>Course Administration</h1>
-          <p>Manage courses and enrollments</p>
+          <p>Administrative functions for course management</p>
         </div>
       </div>
       <div className="users-table-card">
@@ -18,4 +21,3 @@ function CourseAdmin() {
 }
 
 export default CourseAdmin
-
