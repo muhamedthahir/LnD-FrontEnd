@@ -1,6 +1,6 @@
 import { getConfig } from '../config';
 // API Base URL
-const config = await getConfig();
+const config =  getConfig();
 export const API_BASE_URL = config.BACKEND_URL;//import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
 
 // API Endpoints
