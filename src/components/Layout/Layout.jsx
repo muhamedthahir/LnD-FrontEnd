@@ -49,7 +49,7 @@ function Layout() {
 
   const checkAuth = async () => {
     try {
-      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.AUTH.CHECK}`, {
+      const response = await fetch(`https://d1qio8dibp2agp.cloudfront.net${API_ENDPOINTS.AUTH.CHECK}`, {
         credentials: 'include',
         method: 'GET',
         headers: {

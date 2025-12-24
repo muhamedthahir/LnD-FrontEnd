@@ -8,7 +8,7 @@ export async function getConfig() {
   const hostname = window.location.hostname;
 
   if (hostname.includes('localhost')) {
-    configFile = '/config.local.json';
+    configFile = '/config.dev.json';
   } else {
     configFile = '/config.dev.json';
   }
