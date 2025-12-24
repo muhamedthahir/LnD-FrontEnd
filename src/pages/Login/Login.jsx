@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { toast } from 'react-toastify'
 import PasswordSetup from '../../components/PasswordSetup/PasswordSetup'
-import { API_BASE_URL, API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES } from '../../constants/constants'
+import { useApi } from '../../contexts/ApiContext'
+import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES } from '../../constants/constants'
 import './Login.css'
 
 function Login() {
+  const { apiBaseUrl } = useApi()
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -62,7 +64,7 @@ function Login() {
     
     // API call to backend
     try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.AUTH.LOGIN}`, {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.AUTH.LOGIN}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

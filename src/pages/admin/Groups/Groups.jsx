@@ -3,10 +3,12 @@ import { useOutletContext } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import Pagination from '../../../components/Pagination/Pagination'
 import ConfirmModal from '../../../components/ConfirmModal/ConfirmModal'
-import { API_BASE_URL, API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES, VALIDATION_MESSAGES } from '../../../constants/constants'
+import { useApi } from '../../../contexts/ApiContext'
+import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES, VALIDATION_MESSAGES } from '../../../constants/constants'
 import './Groups.css'
 
 function Groups() {
+  const { apiBaseUrl } = useApi()
   const { user } = useOutletContext()
   const [groups, setGroups] = useState([])
   const [allGroups, setAllGroups] = useState([]) // Store all groups for filtering
@@ -55,7 +57,7 @@ function Groups() {
   const fetchGroups = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.GROUPS.LIST}`, {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.GROUPS.LIST}`, {
         credentials: 'include'
       })
       
@@ -76,7 +78,7 @@ function Groups() {
 
   const fetchColleges = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.INSTITUTIONS.ALL}`, {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.INSTITUTIONS.ALL}`, {
         credentials: 'include'
       })
       
@@ -92,7 +94,7 @@ function Groups() {
 
   const fetchInstitutions = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.INSTITUTIONS.ALL}`, {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.INSTITUTIONS.ALL}`, {
         credentials: 'include'
       })
       
@@ -183,7 +185,7 @@ function Groups() {
     if (!collegeName) return
     
     try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.USERS.LIST}?college=${encodeURIComponent(collegeName)}&limit=1000`, {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.USERS.LIST}?college=${encodeURIComponent(collegeName)}&limit=1000`, {
         credentials: 'include'
       })
       
@@ -201,7 +203,7 @@ function Groups() {
 
   const fetchGroupEditData = async (groupId, collegeName) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/groups/${groupId}/edit-data`, {
+      const response = await fetch(`${apiBaseUrl}/api/groups/${groupId}/edit-data`, {
         credentials: 'include'
       })
       
@@ -359,7 +361,7 @@ function Groups() {
     if (!validateForm()) return
 
     try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.GROUPS.UPDATE(editingGroup.id)}`, {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.GROUPS.UPDATE(editingGroup.id)}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -397,7 +399,7 @@ function Groups() {
 
       if (!editingGroup) {
         // Create new group
-        const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.GROUPS.CREATE}`, {
+        const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.GROUPS.CREATE}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
@@ -418,7 +420,7 @@ function Groups() {
       // Fetch current members from API to compare
       let previousMemberIds = []
       if (editingGroup) {
-        const memberResponse = await fetch(`${API_BASE_URL}${API_ENDPOINTS.GROUPS.GET(groupId)}`, {
+        const memberResponse = await fetch(`${apiBaseUrl}${API_ENDPOINTS.GROUPS.GET(groupId)}`, {
           credentials: 'include'
         })
         if (memberResponse.ok) {
@@ -432,7 +434,7 @@ function Groups() {
       const removeUserIds = previousMemberIds.filter(id => !currentMemberIds.includes(id))
 
       if (addUserIds.length > 0 || removeUserIds.length > 0) {
-        const memberResponse = await fetch(`${API_BASE_URL}${API_ENDPOINTS.GROUPS.ADD_MEMBERS(groupId)}`, {
+        const memberResponse = await fetch(`${apiBaseUrl}${API_ENDPOINTS.GROUPS.ADD_MEMBERS(groupId)}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
@@ -474,7 +476,7 @@ function Groups() {
     if (!groupToDelete || !groupToDelete.id) return
 
     try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.GROUPS.DELETE(groupToDelete.id)}`, {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.GROUPS.DELETE(groupToDelete.id)}`, {
         method: 'DELETE',
         credentials: 'include'
       })
@@ -502,7 +504,7 @@ function Groups() {
   const handleDownloadTemplate = async () => {
     try {
       // Note: This endpoint might not be in constants, but we'll use a generic pattern
-      const response = await fetch(`${API_BASE_URL}/api/groups/template`, {
+      const response = await fetch(`${apiBaseUrl}/api/groups/template`, {
         credentials: 'include'
       })
       
