@@ -3,9 +3,12 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Sidebar from '../Sidebar/Sidebar'
 import Header from '../Header/Header'
+import { useApi } from '../../contexts/ApiContext'
+import { API_ENDPOINTS } from '../../constants/constants'
 import './Layout.css'
 
 function Layout() {
+  const { apiBaseUrl } = useApi()
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
@@ -29,7 +32,7 @@ function Layout() {
 
   const logout = async () => {
     try {
-      await fetch('http://localhost:3000/api/auth/logout', {
+      await fetch(`${apiBaseUrl}${API_ENDPOINTS.AUTH.LOGOUT}`, {
         method: 'POST',
         credentials: 'include'
       })
@@ -46,7 +49,7 @@ function Layout() {
 
   const checkAuth = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/auth/check', {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.AUTH.CHECK}`, {
         credentials: 'include',
         method: 'GET',
         headers: {
