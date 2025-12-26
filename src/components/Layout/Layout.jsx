@@ -71,8 +71,7 @@ function Layout() {
         credentials: 'include',
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache'
+          'Content-Type': 'application/json'
         }
       })
       
