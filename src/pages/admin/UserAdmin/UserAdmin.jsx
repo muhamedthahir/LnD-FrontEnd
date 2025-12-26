@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import Pagination from '../../../components/Pagination/Pagination'
@@ -45,6 +45,7 @@ function UserAdmin() {
   })
   const [bulkUploadLoading, setBulkUploadLoading] = useState(false)
   const [bulkUploadResult, setBulkUploadResult] = useState(null)
+  const fileInputRef = useRef(null)
 
   useEffect(() => {
     fetchUsers()
@@ -437,11 +438,11 @@ function UserAdmin() {
         })
         toast.success(SUCCESS_MESSAGES.USER_BULK_UPLOAD_SUCCESS(data.created, data.total))
         fetchUsers()
-        // Reset form after 3 seconds
-        setTimeout(() => {
-          setBulkUploadData({ college_name: '', file: null })
-          setBulkUploadResult(null)
-        }, 3000)
+        // Reset form data and file input
+        setBulkUploadData({ college_name: '', file: null })
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ''
+        }
       } else {
         setBulkUploadResult({
           success: false,
@@ -473,18 +474,49 @@ function UserAdmin() {
     return collegeAdminsCount <= 1
   }
 
-  const openMenu = (userId, e) => {
+  const handleMenuEnter = (userId, e) => {
     e.stopPropagation()
-    setMenuOpen(menuOpen === userId ? null : userId)
+    const button = e.currentTarget
+    setMenuOpen(userId)
+    
+    // Calculate and set position for fixed positioning with viewport detection
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        const dropdown = document.querySelector(`.menu-dropdown[data-user-id="${userId}"]`)
+        if (dropdown && button) {
+          const rect = button.getBoundingClientRect()
+          const dropdownHeight = dropdown.offsetHeight || 150
+          const viewportHeight = window.innerHeight
+          const spaceBelow = viewportHeight - rect.bottom
+          const spaceAbove = rect.top
+          const dropdownWidth = dropdown.offsetWidth || 160
+          
+          // Determine if dropdown should appear above or below
+          const shouldShowAbove = spaceBelow < dropdownHeight && spaceAbove > spaceBelow
+          
+          if (shouldShowAbove) {
+            // Position above the button
+            dropdown.style.top = 'auto'
+            dropdown.style.bottom = `${viewportHeight - rect.top + 4}px`
+            dropdown.style.left = `${rect.right - dropdownWidth}px`
+            dropdown.classList.add('menu-dropdown-above')
+          } else {
+            // Position below the button (default)
+            dropdown.style.top = `${rect.bottom + 4}px`
+            dropdown.style.bottom = 'auto'
+            dropdown.style.left = `${rect.right - dropdownWidth}px`
+            dropdown.classList.remove('menu-dropdown-above')
+          }
+        }
+      }, 10)
+    })
   }
 
-  useEffect(() => {
-    const handleClickOutside = () => setMenuOpen(null)
-    if (menuOpen) {
-      document.addEventListener('click', handleClickOutside)
-      return () => document.removeEventListener('click', handleClickOutside)
-    }
-  }, [menuOpen])
+  const handleMenuLeave = () => {
+    setMenuOpen(null)
+  }
+
+  // Removed click outside handler since we're using hover now
 
   return (
     <div className="user-admin-page">
@@ -646,131 +678,146 @@ function UserAdmin() {
       )}
 
       <div className="users-table-card">
-        <div className="table-header">
-          <div className="filters">
-            <div className="filter-group">
-              <label>Search</label>
-              <input
-                type="text"
-                placeholder="Search users..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="search-input"
-              />
+        {/* Scrollable Container - Contains filters and table */}
+        <div className="table-container">
+          {/* Filters Section - Scrollable, will hide when scrolling up */}
+          <div className="filters-section">
+            <div className="filters">
+              <div className="filter-group">
+                <label>Search</label>
+                <input
+                  type="text"
+                  placeholder="Search users..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="search-input"
+                />
+              </div>
+              <div className="filter-group">
+                <label>College</label>
+                <select
+                  value={selectedCollege}
+                  onChange={(e) => setSelectedCollege(e.target.value)}
+                  className="filter-select"
+                >
+                  <option value="">All Colleges</option>
+                  {colleges.map((college) => (
+                    <option key={college} value={college}>
+                      {college}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {selectedCollege && (
+                <button 
+                  onClick={() => setSelectedCollege('')}
+                  className="btn-clear-filters"
+                  title="Clear college filter"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                  Clear
+                </button>
+              )}
             </div>
-            <div className="filter-group">
-              <label>College</label>
-              <select
-                value={selectedCollege}
-                onChange={(e) => setSelectedCollege(e.target.value)}
-                className="filter-select"
-              >
-                <option value="">All Colleges</option>
-                {colleges.map((college) => (
-                  <option key={college} value={college}>
-                    {college}
-                  </option>
-                ))}
-              </select>
-            </div>
-            {selectedCollege && (
-              <button 
-                onClick={() => setSelectedCollege('')}
-                className="btn-clear-filters"
-                title="Clear college filter"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-                Clear
-              </button>
+          </div>
+
+          {/* Nested Box for Table Content */}
+          <div className="table-inner-box">
+            {loading ? (
+              <div className="loading">Loading users...</div>
+            ) : users.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-state-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <line x1="19" y1="8" x2="19" y2="14"></line>
+                    <line x1="22" y1="11" x2="16" y2="11"></line>
+                  </svg>
+                </div>
+                <h3>No Users Found</h3>
+                <p>Get started by creating your first user or uploading users in bulk.</p>
+              </div>
+            ) : (
+              <table className="users-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map((u) => (
+                    <tr key={u.id}>
+                      <td>{u.name}</td>
+                      <td>{u.email}</td>
+                      <td>
+                        <span className={`role-badge role-${u.role}`}>
+                          {u.role === 'college_admin' ? 'College Admin' : 
+                           u.role === 'primary_admin' ? 'Primary Admin' : 'Student'}
+                        </span>
+                      </td>
+                      <td>
+                        <span className={`status-badge status-${u.status || 'activated'}`}>
+                          {u.status === 'pending' ? 'Pending' : 'Activated'}
+                        </span>
+                      </td>
+                      <td>{new Date(u.created_at).toLocaleDateString()}</td>
+                      <td>
+                        <div 
+                          className="menu-container"
+                          onMouseEnter={(e) => handleMenuEnter(u.id, e)}
+                          onMouseLeave={handleMenuLeave}
+                        >
+                          <button
+                            className="menu-button"
+                            type="button"
+                          >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <circle cx="12" cy="5" r="1"/>
+                              <circle cx="12" cy="12" r="1"/>
+                              <circle cx="12" cy="19" r="1"/>
+                            </svg>
+                          </button>
+                          {menuOpen === u.id && (
+                            <div 
+                              className="menu-dropdown" 
+                              data-user-id={u.id}
+                              onMouseEnter={(e) => e.stopPropagation()}
+                            >
+                              <button onClick={() => handleEdit(u)}>Edit Details</button>
+                              <button onClick={() => {
+                                setSelectedUser(u)
+                                setShowResetModal(true)
+                                setMenuOpen(null)
+                              }}>Reset Password</button>
+                              {/* Don't show delete option for primary admins or current user */}
+                              {u.role !== 'primary_admin' && u.id !== user?.id && (
+                                <button onClick={() => handleDeleteClick(u.id)} className="delete-option">
+                                  Delete User
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             )}
           </div>
         </div>
-
-        {loading ? (
-          <div className="loading">Loading users...</div>
-        ) : users.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-state-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                <circle cx="9" cy="7" r="4"></circle>
-                <line x1="19" y1="8" x2="19" y2="14"></line>
-                <line x1="22" y1="11" x2="16" y2="11"></line>
-              </svg>
-            </div>
-            <h3>No Users Found</h3>
-            <p>Get started by creating your first user or uploading users in bulk.</p>
-          </div>
-        ) : (
-          <table className="users-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Created</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((u) => (
-                <tr key={u.id}>
-                  <td>{u.name}</td>
-                  <td>{u.email}</td>
-                  <td>
-                    <span className={`role-badge role-${u.role}`}>
-                      {u.role === 'college_admin' ? 'College Admin' : 
-                       u.role === 'primary_admin' ? 'Primary Admin' : 'Student'}
-                    </span>
-                  </td>
-                  <td>
-                    <span className={`status-badge status-${u.status || 'activated'}`}>
-                      {u.status === 'pending' ? 'Pending' : 'Activated'}
-                    </span>
-                  </td>
-                  <td>{new Date(u.created_at).toLocaleDateString()}</td>
-                  <td>
-                    <div className="menu-container">
-                      <button
-                        className="menu-button"
-                        onClick={(e) => openMenu(u.id, e)}
-                      >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <circle cx="12" cy="5" r="1"/>
-                          <circle cx="12" cy="12" r="1"/>
-                          <circle cx="12" cy="19" r="1"/>
-                        </svg>
-                      </button>
-                      {menuOpen === u.id && (
-                        <div className="menu-dropdown">
-                          <button onClick={() => handleEdit(u)}>Edit Details</button>
-                          <button onClick={() => {
-                            setSelectedUser(u)
-                            setShowResetModal(true)
-                            setMenuOpen(null)
-                          }}>Reset Password</button>
-                          {/* Don't show delete option for primary admins or current user */}
-                          {u.role !== 'primary_admin' && u.id !== user?.id && (
-                            <button onClick={() => handleDeleteClick(u.id)} className="delete-option">
-                              Delete User
-                            </button>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
         
-        {/* Pagination Controls - Only show when there are users */}
-        {!loading && users.length > 0 && (
+        {/* Pagination Controls - Fixed at bottom, always visible */}
+        {!loading && totalCount > 0 && (
           <div className="pagination-wrapper">
             <Pagination
               currentPage={currentPage}
@@ -926,6 +973,9 @@ function UserAdmin() {
           setShowBulkUploadModal(false)
           setBulkUploadData({ college_name: '', file: null })
           setBulkUploadResult(null)
+          if (fileInputRef.current) {
+            fileInputRef.current.value = ''
+          }
         }}>
           <div className="modal-content bulk-upload-modal" onClick={(e) => e.stopPropagation()}>
             <h2>Add Users in Bulk</h2>
@@ -969,6 +1019,7 @@ function UserAdmin() {
               <div className="form-group">
                 <label>Upload Excel File *</label>
                 <input
+                  ref={fileInputRef}
                   type="file"
                   accept=".xlsx,.xls"
                   onChange={(e) => setBulkUploadData(prev => ({ ...prev, file: e.target.files[0] }))}
@@ -981,6 +1032,16 @@ function UserAdmin() {
 
               {bulkUploadResult && (
                 <div className={`bulk-upload-result ${bulkUploadResult.success ? 'success' : 'error'}`}>
+                  <button
+                    className="bulk-upload-close"
+                    onClick={() => setBulkUploadResult(null)}
+                    title="Close"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </button>
                   {bulkUploadResult.success ? (
                     <>
                       <p>✓ Successfully created {bulkUploadResult.created} out of {bulkUploadResult.total} users</p>
@@ -1012,6 +1073,9 @@ function UserAdmin() {
                     setShowBulkUploadModal(false)
                     setBulkUploadData({ college_name: '', file: null })
                     setBulkUploadResult(null)
+                    if (fileInputRef.current) {
+                      fileInputRef.current.value = ''
+                    }
                   }}
                 >
                   Cancel

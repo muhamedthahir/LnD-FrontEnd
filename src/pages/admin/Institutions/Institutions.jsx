@@ -280,81 +280,88 @@ function Institutions() {
       )}
 
       <div className="users-table-card">
-        <div className="table-header">
-          <div className="filters">
-            <div className="filter-group">
-              <label>Search</label>
-              <input
-                type="text"
-                placeholder="Search institutions..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="search-input"
-              />
+        {/* Scrollable Container - Contains filters and table */}
+        <div className="table-container">
+          {/* Filters Section - Scrollable, will hide when scrolling up */}
+          <div className="filters-section">
+            <div className="filters">
+              <div className="filter-group">
+                <label>Search</label>
+                <input
+                  type="text"
+                  placeholder="Search institutions..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="search-input"
+                />
+              </div>
+              {search && (
+                <button 
+                  onClick={() => setSearch('')}
+                  className="btn-clear-filters"
+                  title="Clear search"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                  Clear
+                </button>
+              )}
             </div>
-            {search && (
-              <button 
-                onClick={() => setSearch('')}
-                className="btn-clear-filters"
-                title="Clear search"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-                Clear
-              </button>
+          </div>
+
+          {/* Nested Box for Table Content */}
+          <div className="table-inner-box">
+            {loading ? (
+              <div className="loading">Loading institutions...</div>
+            ) : institutions.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-state-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                    <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                    <polyline points="7 3 7 8 15 8"></polyline>
+                  </svg>
+                </div>
+                <h3>No Institutions Found</h3>
+                <p>Get started by creating your first institution or college.</p>
+              </div>
+            ) : (
+              <table className="users-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Created</th>
+                    <th className="actions-header">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {institutions.map((institution) => (
+                    <tr key={institution.id}>
+                      <td>{institution.name}</td>
+                      <td>{new Date(institution.created_at).toLocaleDateString()}</td>
+                      <td className="actions-cell">
+                        <div className="action-buttons">
+                          <button 
+                            className="btn-edit"
+                            onClick={() => handleView(institution)}
+                            title="View Institution"
+                          >
+                            View
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             )}
           </div>
         </div>
-
-        {loading ? (
-          <div className="loading">Loading institutions...</div>
-        ) : institutions.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-state-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                <polyline points="7 3 7 8 15 8"></polyline>
-              </svg>
-            </div>
-            <h3>No Institutions Found</h3>
-            <p>Get started by creating your first institution or college.</p>
-          </div>
-        ) : (
-          <table className="users-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Created</th>
-                <th className="actions-header">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {institutions.map((institution) => (
-                <tr key={institution.id}>
-                  <td>{institution.name}</td>
-                  <td>{new Date(institution.created_at).toLocaleDateString()}</td>
-                  <td className="actions-cell">
-                    <div className="action-buttons">
-                      <button 
-                        className="btn-edit"
-                        onClick={() => handleView(institution)}
-                        title="View Institution"
-                      >
-                        View
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
         
-        {/* Pagination Controls - Only show when there are institutions */}
-        {!loading && institutions.length > 0 && (
+        {/* Pagination Controls - Fixed at bottom, always visible */}
+        {!loading && totalCount > 0 && (
           <div className="pagination-wrapper">
             <Pagination
               currentPage={currentPage}

@@ -19,7 +19,7 @@ function Courses() {
   const [pageSize, setPageSize] = useState(10)
   const [totalCount, setTotalCount] = useState(0)
   const [showCreateModal, setShowCreateModal] = useState(false)
-  const [categories, setCategories] = useState(['Java', 'Python', 'C', 'C++'])
+  const [categories] = useState(['Python', 'Java', 'C', 'C++'])
   const [newCategory, setNewCategory] = useState('')
   const [showNewCategoryInput, setShowNewCategoryInput] = useState(false)
   const [formData, setFormData] = useState({
@@ -76,30 +76,36 @@ function Courses() {
   }
 
   const handleCreateCourse = () => {
-    navigate('/courses/new/edit')
+    setShowCreateModal(true)
+    setFormData({
+      name: '',
+      category: '',
+      competency_level: '',
+      short_description: '',
+      course_outcomes: '',
+      status: 'draft'
+    })
+    setErrors({})
+    setShowNewCategoryInput(false)
+    setNewCategory('')
   }
 
   const handleCategoryChange = (e) => {
     const value = e.target.value
-    if (value === 'new') {
+    if (value === 'other') {
       setShowNewCategoryInput(true)
       setFormData({ ...formData, category: '' })
     } else {
       setShowNewCategoryInput(false)
       setFormData({ ...formData, category: value })
+      setNewCategory('')
     }
   }
 
-  const handleAddNewCategory = () => {
-    if (newCategory.trim()) {
-      const categoryName = newCategory.trim()
-      if (!categories.includes(categoryName)) {
-        setCategories([...categories, categoryName])
-      }
-      setFormData({ ...formData, category: categoryName })
-      setNewCategory('')
-      setShowNewCategoryInput(false)
-    }
+  const handleNewCategoryChange = (e) => {
+    const value = e.target.value
+    setNewCategory(value)
+    setFormData({ ...formData, category: value })
   }
 
   const validateForm = () => {
@@ -107,7 +113,7 @@ function Courses() {
     if (!formData.name.trim()) {
       newErrors.name = 'Course name is required'
     }
-    if (!formData.category) {
+    if (!formData.category || !formData.category.trim()) {
       newErrors.category = 'Category is required'
     }
     if (!formData.competency_level) {
@@ -145,8 +151,20 @@ function Courses() {
         throw new Error('Failed to save course as draft')
       }
 
+      const data = await response.json()
       toast.success('Course saved as draft successfully!')
       setShowCreateModal(false)
+      setFormData({
+        name: '',
+        category: '',
+        competency_level: '',
+        short_description: '',
+        course_outcomes: '',
+        status: 'draft'
+      })
+      setErrors({})
+      setShowNewCategoryInput(false)
+      setNewCategory('')
       fetchCourses()
     } catch (error) {
       console.error('Error saving course:', error)
@@ -154,7 +172,7 @@ function Courses() {
     }
   }
 
-  const handleCreate = async () => {
+  const handleContinue = async () => {
     if (!validateForm()) {
       return
     }
@@ -168,7 +186,7 @@ function Courses() {
         credentials: 'include',
         body: JSON.stringify({
           ...formData,
-          status: 'published'
+          status: 'draft'
         })
       })
 
@@ -176,11 +194,22 @@ function Courses() {
         throw new Error('Failed to create course')
       }
 
+      const data = await response.json()
       toast.success('Course created successfully!')
       setShowCreateModal(false)
-      // Continue to next steps in course creation
-      // For now, just refresh the list
-      fetchCourses()
+      setFormData({
+        name: '',
+        category: '',
+        competency_level: '',
+        short_description: '',
+        course_outcomes: '',
+        status: 'draft'
+      })
+      setErrors({})
+      setShowNewCategoryInput(false)
+      setNewCategory('')
+      // Navigate to course edit page for next steps
+      navigate(`/courses/${data.course.id}/edit`)
     } catch (error) {
       console.error('Error creating course:', error)
       toast.error('Failed to create course')
@@ -359,7 +388,7 @@ function Courses() {
             <div className="form-group">
               <label>Category <span className="required">*</span></label>
               <select
-                value={formData.category}
+                value={showNewCategoryInput ? 'other' : formData.category}
                 onChange={handleCategoryChange}
                 className={errors.category ? 'error' : ''}
               >
@@ -367,17 +396,16 @@ function Courses() {
                 {categories.map(cat => (
                   <option key={cat} value={cat}>{cat}</option>
                 ))}
-                <option value="new">New Category</option>
+                <option value="other">Other</option>
               </select>
               {showNewCategoryInput && (
-                <div className="new-category-input">
+                <div className="new-category-input" style={{ marginTop: 'var(--spacing-sm)' }}>
                   <input
                     type="text"
                     value={newCategory}
-                    onChange={(e) => setNewCategory(e.target.value)}
-                    placeholder="Enter new category name"
-                    onBlur={handleAddNewCategory}
-                    onKeyPress={(e) => e.key === 'Enter' && handleAddNewCategory()}
+                    onChange={handleNewCategoryChange}
+                    placeholder="Enter category name"
+                    className={errors.category ? 'error' : ''}
                   />
                 </div>
               )}
@@ -432,8 +460,8 @@ function Courses() {
               <Button variant="draft" onClick={handleSaveAsDraft}>
                 Save as Draft
               </Button>
-              <Button variant="primary" onClick={handleCreate}>
-                Create
+              <Button variant="primary" onClick={handleContinue}>
+                Continue
               </Button>
             </div>
           </div>

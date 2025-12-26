@@ -870,12 +870,13 @@ function Groups() {
       )}
 
       <div className="groups-table-card">
-        <div className="table-header">
-          <h2>All Groups</h2>
-          <div className="filters">
-            <div className="filter-group">
-              <label>College</label>
-              <div className="select-wrapper">
+        {/* Scrollable Container - Contains filters and table */}
+        <div className="table-container">
+          {/* Filters Section - Scrollable, will hide when scrolling up */}
+          <div className="filters-section">
+            <div className="filters">
+              <div className="filter-group">
+                <label>College</label>
                 <select
                   value={filters.college}
                   onChange={(e) => handleFilterChange('college', e.target.value)}
@@ -889,96 +890,100 @@ function Groups() {
                   ))}
                 </select>
               </div>
+              <div className="filter-group">
+                <label>Group Name</label>
+                <input
+                  type="text"
+                  placeholder="Search by group name..."
+                  value={filters.groupName}
+                  onChange={(e) => handleFilterChange('groupName', e.target.value)}
+                  className="filter-input"
+                />
+              </div>
+              {(filters.college || filters.groupName) && (
+                <button 
+                  onClick={clearFilters}
+                  className="btn-clear-filters"
+                  title="Clear all filters"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                  Clear Filters
+                </button>
+              )}
             </div>
-            <div className="filter-group">
-              <label>Group Name</label>
-              <input
-                type="text"
-                placeholder="Search by group name..."
-                value={filters.groupName}
-                onChange={(e) => handleFilterChange('groupName', e.target.value)}
-                className="filter-input"
-              />
-            </div>
-            {(filters.college || filters.groupName) && (
-              <button 
-                onClick={clearFilters}
-                className="btn-clear-filters"
-                title="Clear all filters"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-                Clear Filters
-              </button>
+          </div>
+
+          {/* Nested Box for Table Content */}
+          <div className="table-inner-box">
+            {loading ? (
+              <div className="loading">Loading groups...</div>
+            ) : groups.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-state-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                  </svg>
+                </div>
+                <h3>No Groups Found</h3>
+                <p>{filters.college || filters.groupName ? 'Try adjusting your filters or create a new group.' : 'Get started by creating your first student group.'}</p>
+              </div>
+            ) : (
+              <table className="groups-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>College</th>
+                    <th>Degree</th>
+                    <th>Department</th>
+                    <th>Passout Year</th>
+                    <th>Members</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {groups.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((group) => (
+                    <tr key={group.id}>
+                      <td>{group.name}</td>
+                      <td>{group.college_name}</td>
+                      <td>{group.degree || '-'}</td>
+                      <td>{group.department || '-'}</td>
+                      <td>{group.passout_year || '-'}</td>
+                      <td>{group.member_count || 0}</td>
+                      <td>{new Date(group.created_at).toLocaleDateString()}</td>
+                      <td>
+                        <div className="action-buttons">
+                          <button 
+                            className="btn-edit"
+                            onClick={() => setEditingGroup(group)}
+                            title="Edit Group"
+                          >
+                            Edit
+                          </button>
+                          <button 
+                            className="btn-delete"
+                            onClick={() => handleDeleteClick(group.id)}
+                            title="Delete"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             )}
           </div>
         </div>
-        {loading ? (
-          <div className="loading">Loading groups...</div>
-        ) : groups.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-state-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                <circle cx="9" cy="7" r="4"></circle>
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-              </svg>
-            </div>
-            <h3>No Groups Found</h3>
-            <p>{filters.college || filters.groupName ? 'Try adjusting your filters or create a new group.' : 'Get started by creating your first student group.'}</p>
-          </div>
-        ) : (
-          <table className="groups-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>College</th>
-                <th>Degree</th>
-                <th>Department</th>
-                <th>Passout Year</th>
-                <th>Members</th>
-                <th>Created</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {groups.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((group) => (
-                <tr key={group.id}>
-                  <td>{group.name}</td>
-                  <td>{group.college_name}</td>
-                  <td>{group.degree || '-'}</td>
-                  <td>{group.department || '-'}</td>
-                  <td>{group.passout_year || '-'}</td>
-                  <td>{group.member_count || 0}</td>
-                  <td>{new Date(group.created_at).toLocaleDateString()}</td>
-                  <td>
-                    <div className="action-buttons">
-                      <button 
-                        className="btn-edit"
-                        onClick={() => setEditingGroup(group)}
-                        title="Edit Group"
-                      >
-                        Edit
-                      </button>
-                      <button 
-                        className="btn-delete"
-                        onClick={() => handleDeleteClick(group.id)}
-                        title="Delete"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
 
-        {/* Pagination Controls */}
+        {/* Pagination Controls - Fixed at bottom, always visible */}
         {!loading && groups.length > 0 && (
           <div className="pagination-wrapper">
             <Pagination

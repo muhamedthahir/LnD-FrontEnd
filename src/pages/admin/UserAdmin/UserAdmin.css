@@ -1,7 +1,9 @@
 .user-admin-page {
   padding: var(--spacing-lg);
-  max-width: 90rem;
-  margin: 0 auto;
+  height: calc(100vh - 3.5rem);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .user-admin-header {
@@ -55,8 +57,7 @@
   background: var(--bg-tertiary);
 }
 
-.user-form-card,
-.users-table-card {
+.user-form-card {
   background: var(--bg-card);
   border: var(--border-sm) solid var(--border-color);
   border-radius: var(--radius-md);
@@ -67,23 +68,35 @@
 }
 
 .users-table-card {
+  background: var(--bg-card);
+  border: var(--border-sm) solid var(--border-color);
+  border-radius: 0;
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 12rem);
-  min-height: 500px;
-  max-height: calc(100vh - 12rem);
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
-  margin-bottom: var(--spacing-lg);
+  padding: 0;
+  margin-top: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
 }
 
-.table-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--spacing-md);
-  flex-wrap: wrap;
-  gap: var(--spacing-md);
-  flex-shrink: 0;
+/* Scrollable Container - Contains filters and table */
+.table-container {
+  flex: 1;
+  overflow: auto;
+  min-height: 0;
+  position: relative;
+  padding: 0;
+}
+
+/* Filters Section - Scrollable, will hide when scrolling up */
+.filters-section {
+  padding: var(--spacing-lg);
+  border-bottom: var(--border-sm) solid var(--border-color);
+  background: var(--bg-card);
+  margin-bottom: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
 }
 
 
@@ -277,20 +290,42 @@
   margin-top: var(--spacing-xl);
 }
 
+/* Nested Box for Table Content */
+.table-inner-box {
+  background: var(--bg-card);
+  border: none;
+  border-radius: 0;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  margin: 0 var(--spacing-lg) var(--spacing-lg) var(--spacing-lg);
+}
+
 .users-table {
   width: 100%;
   min-width: 35rem;
   border-collapse: collapse;
-  overflow-x: auto;
-  overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  flex: 0 1 auto;
-  min-height: 0;
-  max-height: calc(100% - 80px);
-  margin-bottom: var(--spacing-md);
+  margin: 0;
+  display: table;
 }
 
 .users-table thead {
+  background: var(--bg-secondary);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  margin-top: 0;
+  display: table-header-group;
+}
+
+.users-table thead th {
+  background: var(--bg-secondary);
+  position: relative;
+  z-index: 101;
+}
+
+.users-table thead tr {
   background: var(--bg-secondary);
 }
 
@@ -362,14 +397,14 @@
   text-align: center;
   padding: var(--spacing-4xl);
   color: var(--text-secondary);
-  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 300px;
+  flex: 1;
 }
 
 .empty-state {
-  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -377,7 +412,7 @@
   padding: var(--spacing-4xl) var(--spacing-lg);
   text-align: center;
   min-height: 300px;
-  overflow: hidden;
+  flex: 1;
 }
 
 .empty-state-icon {
@@ -436,17 +471,18 @@
 }
 
 .menu-dropdown {
-  position: absolute;
-  right: 0;
-  top: 100%;
-  margin-top: var(--spacing-xs);
+  position: fixed;
   background: var(--bg-card);
   border: var(--border-sm) solid var(--border-color);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
-  z-index: 10000;
+  z-index: 999999;
   min-width: 10rem;
   overflow: hidden;
+}
+
+.menu-dropdown.menu-dropdown-above {
+  transform-origin: bottom right;
 }
 
 .menu-dropdown button {
@@ -594,6 +630,7 @@
   padding: var(--spacing-md);
   border-radius: var(--border-radius);
   margin-bottom: var(--spacing-md);
+  position: relative;
 }
 
 .bulk-upload-result.success {
@@ -624,13 +661,55 @@
   margin-bottom: var(--spacing-xs);
 }
 
-/* Pagination wrapper - keep at bottom */
+.bulk-upload-close {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+  opacity: 0.7;
+  transition: opacity var(--transition-fast);
+  border-radius: var(--radius-sm);
+}
+
+.bulk-upload-close:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.bulk-upload-close svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.bulk-upload-result.success .bulk-upload-close {
+  color: #4caf50;
+}
+
+.bulk-upload-result.error .bulk-upload-close {
+  color: #f44336;
+}
+
+/* Pagination wrapper - Fixed at bottom, always visible */
 .pagination-wrapper {
   flex-shrink: 0;
-  margin-top: auto;
-  padding: var(--spacing-md) 0;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  margin: 0 var(--spacing-lg);
   border-top: var(--border-sm) solid var(--border-color);
   background: var(--bg-card);
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+}
+
+.pagination-wrapper > * {
+  margin: 0;
 }
 
 @media (max-width: 768px) {
