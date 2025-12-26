@@ -4,10 +4,12 @@ import { toast } from 'react-toastify'
 import Button from '../../../components/Button/Button'
 import LessonModal from '../../../components/LessonModal/LessonModal'
 import ConfirmModal from '../../../components/ConfirmModal/ConfirmModal'
-import { API_BASE_URL, API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES, VALIDATION_MESSAGES } from '../../../constants/constants'
+import { useApi } from '../../../contexts/ApiContext'
+import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES, VALIDATION_MESSAGES } from '../../../constants/constants'
 import './CourseEdit.css'
 
 function CourseEdit() {
+  const { apiBaseUrl } = useApi()
   const { id } = useParams()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('sections')
@@ -81,7 +83,7 @@ function CourseEdit() {
         })
         setTags([])
       } else {
-        const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.COURSES.GET(id)}`, {
+        const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.COURSES.GET(id)}`, {
           credentials: 'include'
         })
         if (!response.ok) throw new Error('Failed to fetch course')
@@ -107,7 +109,7 @@ function CourseEdit() {
 
   const fetchSections = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.TOPICS.GET_BY_COURSE(id)}`, {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.TOPICS.GET_BY_COURSE(id)}`, {
         credentials: 'include'
       })
       if (!response.ok) throw new Error('Failed to fetch sections')
@@ -118,7 +120,7 @@ function CourseEdit() {
       const lessonsMap = {}
       for (const section of data) {
         try {
-          const lessonsResponse = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SEGMENTS.GET_BY_TOPIC(section.id)}`, {
+          const lessonsResponse = await fetch(`${apiBaseUrl}${API_ENDPOINTS.SEGMENTS.GET_BY_TOPIC(section.id)}`, {
             credentials: 'include'
           })
           if (lessonsResponse.ok) {
@@ -139,7 +141,7 @@ function CourseEdit() {
 
   const fetchSectionLessons = async (sectionId) => {
     try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SEGMENTS.GET_BY_TOPIC(sectionId)}`, {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.SEGMENTS.GET_BY_TOPIC(sectionId)}`, {
         credentials: 'include'
       })
       if (!response.ok) throw new Error('Failed to fetch lessons')
@@ -192,14 +194,14 @@ function CourseEdit() {
 
       let response
       if (id === 'new') {
-        response = await fetch(`${API_BASE_URL}/api/courses`, {
+        response = await fetch(`${apiBaseUrl}/api/courses`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
           body: JSON.stringify(courseData)
         })
       } else {
-        response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.COURSES.UPDATE(id)}`, {
+        response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.COURSES.UPDATE(id)}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
@@ -237,7 +239,7 @@ function CourseEdit() {
         return
       }
 
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.TOPICS.CREATE}`, {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.TOPICS.CREATE}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -268,7 +270,7 @@ function CourseEdit() {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.TOPICS.UPDATE(editingSection.id)}`, {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.TOPICS.UPDATE(editingSection.id)}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -304,7 +306,7 @@ function CourseEdit() {
     if (!sectionToDelete) return
 
     try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.TOPICS.DELETE(sectionToDelete)}`, {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.TOPICS.DELETE(sectionToDelete)}`, {
         method: 'DELETE',
         credentials: 'include'
       })
@@ -574,7 +576,7 @@ function CourseEdit() {
                                           onClick={async () => {
                                             // Fetch lesson details for editing
                                             try {
-                                              const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SEGMENTS.GET(lesson.id)}`, {
+                                              const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.SEGMENTS.GET(lesson.id)}`, {
                                                 credentials: 'include'
                                               })
                                               if (!response.ok) throw new Error('Failed to fetch lesson')
@@ -807,7 +809,7 @@ function CourseEdit() {
         }}
         onConfirm={async () => {
           try {
-            const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SEGMENTS.DELETE(lessonToDelete.id)}`, {
+            const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.SEGMENTS.DELETE(lessonToDelete.id)}`, {
               method: 'DELETE',
               credentials: 'include'
             })
@@ -852,7 +854,7 @@ function CourseEdit() {
 
             if (lessonData.lessonId) {
               // Update existing lesson
-              const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SEGMENTS.UPDATE(lessonData.lessonId)}`, {
+              const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.SEGMENTS.UPDATE(lessonData.lessonId)}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -869,7 +871,7 @@ function CourseEdit() {
               toast.success(SUCCESS_MESSAGES.LESSON_UPDATED)
             } else {
               // Create new lesson
-              const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SEGMENTS.CREATE}`, {
+              const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.SEGMENTS.CREATE}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',

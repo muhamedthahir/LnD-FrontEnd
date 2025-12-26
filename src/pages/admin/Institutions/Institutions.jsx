@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { toast } from 'react-toastify'
 import Pagination from '../../../components/Pagination/Pagination'
-import { API_BASE_URL, API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES, VALIDATION_MESSAGES } from '../../../constants/constants'
+import { useApi } from '../../../contexts/ApiContext'
+import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES, VALIDATION_MESSAGES } from '../../../constants/constants'
 import '../UserAdmin/UserAdmin.css'
 import './Institutions.css'
 
 function Institutions() {
+  const { apiBaseUrl } = useApi()
   const [institutions, setInstitutions] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -30,7 +32,7 @@ function Institutions() {
   const fetchInstitutions = async () => {
     try {
       setLoading(true)
-      const url = new URL(`${API_BASE_URL}${API_ENDPOINTS.INSTITUTIONS.LIST}`)
+      const url = new URL(`${apiBaseUrl}${API_ENDPOINTS.INSTITUTIONS.LIST}`)
       if (search) url.searchParams.append('search', search)
       url.searchParams.append('limit', pageSize.toString())
       url.searchParams.append('offset', ((currentPage - 1) * pageSize).toString())
@@ -108,8 +110,8 @@ function Institutions() {
     
     try {
       const url = selectedInstitution 
-        ? `${API_BASE_URL}${API_ENDPOINTS.INSTITUTIONS.UPDATE(selectedInstitution.id)}`
-        : `${API_BASE_URL}${API_ENDPOINTS.INSTITUTIONS.CREATE}`
+        ? `${apiBaseUrl}${API_ENDPOINTS.INSTITUTIONS.UPDATE(selectedInstitution.id)}`
+        : `${apiBaseUrl}${API_ENDPOINTS.INSTITUTIONS.CREATE}`
       
       const method = selectedInstitution ? 'PUT' : 'POST'
       
@@ -140,7 +142,7 @@ function Institutions() {
 
   const handleView = async (institution) => {
     try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.INSTITUTIONS.GET(institution.id)}`, {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.INSTITUTIONS.GET(institution.id)}`, {
         credentials: 'include'
       })
       
@@ -162,7 +164,7 @@ function Institutions() {
 
   const handleEdit = async (institution) => {
     try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.INSTITUTIONS.GET(institution.id)}`, {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.INSTITUTIONS.GET(institution.id)}`, {
         credentials: 'include'
       })
       

@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { ThemeProvider } from './contexts/ThemeContext'
+import { ApiProvider } from './contexts/ApiContext'
 import Layout from './components/Layout/Layout'
 import Login from './pages/Login/Login'
 import Dashboard from './pages/Dashboard/Dashboard'
@@ -15,7 +16,8 @@ import './App.css'
 
 function App() {
   return (
-    <ThemeProvider> 
+    <ApiProvider>
+      <ThemeProvider> 
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
@@ -33,6 +35,7 @@ function App() {
         </Route>
       </Routes>
     </ThemeProvider>
+    </ApiProvider>
   )
 }
 

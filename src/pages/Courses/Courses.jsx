@@ -3,11 +3,11 @@ import { useOutletContext, useNavigate } from 'react-router-dom'
 import Pagination from '../../components/Pagination/Pagination'
 import Button from '../../components/Button/Button'
 import { toast } from 'react-toastify'
+import { useApi } from '../../contexts/ApiContext'
 import './Courses.css'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
-
 function Courses() {
+  const { apiBaseUrl } = useApi()
   const { user } = useOutletContext()
   const navigate = useNavigate()
   const [courses, setCourses] = useState([])
@@ -47,7 +47,7 @@ function Courses() {
         ...(selectedStatus !== 'all' && { status: selectedStatus })
       })
 
-      const response = await fetch(`${API_BASE_URL}/api/courses?${params}`, {
+      const response = await fetch(`${apiBaseUrl}/api/courses?${params}`, {
         credentials: 'include'
       })
 
@@ -135,7 +135,7 @@ function Courses() {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/courses`, {
+      const response = await fetch(`${apiBaseUrl}/api/courses`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -178,7 +178,7 @@ function Courses() {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/courses`, {
+      const response = await fetch(`${apiBaseUrl}/api/courses`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

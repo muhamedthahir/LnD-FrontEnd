@@ -1,6 +1,3 @@
-// API Base URL
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
-
 // API Endpoints
 export const API_ENDPOINTS = {
   // Auth
@@ -8,7 +5,8 @@ export const API_ENDPOINTS = {
     LOGIN: '/api/auth/login',
     LOGOUT: '/api/auth/logout',
     REGISTER: '/api/auth/register',
-    SET_PASSWORD: '/api/auth/set-password'
+    SET_PASSWORD: '/api/auth/set-password',
+    CHECK: '/api/auth/check'
   },
   
   // Users

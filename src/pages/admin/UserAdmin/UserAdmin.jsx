@@ -3,10 +3,12 @@ import { useOutletContext } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import Pagination from '../../../components/Pagination/Pagination'
 import ConfirmModal from '../../../components/ConfirmModal/ConfirmModal'
-import { API_BASE_URL, API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES, VALIDATION_MESSAGES } from '../../../constants/constants'
+import { useApi } from '../../../contexts/ApiContext'
+import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES, VALIDATION_MESSAGES } from '../../../constants/constants'
 import './UserAdmin.css'
 
 function UserAdmin() {
+  const { apiBaseUrl } = useApi()
   const { user } = useOutletContext()
   const [users, setUsers] = useState([])
   const [colleges, setColleges] = useState([])
@@ -56,7 +58,7 @@ function UserAdmin() {
   const fetchUsers = async () => {
     try {
       setLoading(true)
-      const url = new URL(`${API_BASE_URL}${API_ENDPOINTS.USERS.LIST}`)
+      const url = new URL(`${apiBaseUrl}${API_ENDPOINTS.USERS.LIST}`)
       if (selectedCollege) url.searchParams.append('college', selectedCollege)
       if (search) url.searchParams.append('search', search)
       url.searchParams.append('limit', pageSize.toString())
@@ -83,7 +85,7 @@ function UserAdmin() {
 
   const fetchColleges = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.INSTITUTIONS.ALL}`, {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.INSTITUTIONS.ALL}`, {
         credentials: 'include'
       })
       
@@ -99,7 +101,7 @@ function UserAdmin() {
 
   const fetchInstitutions = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.INSTITUTIONS.ALL}`, {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.INSTITUTIONS.ALL}`, {
         credentials: 'include'
       })
       
@@ -201,7 +203,7 @@ function UserAdmin() {
     if (!validateForm()) return
     
     try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.USERS.CREATE}`, {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.USERS.CREATE}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -265,7 +267,7 @@ function UserAdmin() {
     }
     
     try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.USERS.UPDATE(selectedUser.id)}`, {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.USERS.UPDATE(selectedUser.id)}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -297,7 +299,7 @@ function UserAdmin() {
     
     try {
       const response = await fetch(
-        `${API_BASE_URL}${API_ENDPOINTS.USERS.RESET_PASSWORD(selectedUser.id)}`,
+        `${apiBaseUrl}${API_ENDPOINTS.USERS.RESET_PASSWORD(selectedUser.id)}`,
         {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -340,7 +342,7 @@ function UserAdmin() {
     }
     
     try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.USERS.DELETE(userToDelete)}`, {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.USERS.DELETE(userToDelete)}`, {
         method: 'DELETE',
         credentials: 'include'
       })
@@ -376,7 +378,7 @@ function UserAdmin() {
 
   const handleDownloadTemplate = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.USERS.BULK_TEMPLATE}`, {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.USERS.BULK_TEMPLATE}`, {
         credentials: 'include'
       })
       
@@ -421,7 +423,7 @@ function UserAdmin() {
       formData.append('file', bulkUploadData.file)
       formData.append('college_name', bulkUploadData.college_name)
       
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.USERS.BULK_UPLOAD}`, {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.USERS.BULK_UPLOAD}`, {
         method: 'POST',
         credentials: 'include',
         body: formData

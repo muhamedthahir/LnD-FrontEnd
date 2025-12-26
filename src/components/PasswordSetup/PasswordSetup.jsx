@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { toast } from 'react-toastify'
-import { API_BASE_URL, API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES } from '../../constants/constants'
+import { useApi } from '../../contexts/ApiContext'
+import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES } from '../../constants/constants'
 import './PasswordSetup.css'
 
 function PasswordSetup({ userId, otp, onComplete }) {
+  const { apiBaseUrl } = useApi()
   const [formData, setFormData] = useState({
     newPassword: '',
     confirmPassword: ''
@@ -51,7 +53,7 @@ function PasswordSetup({ userId, otp, onComplete }) {
     
     setLoading(true)
     try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.AUTH.SET_PASSWORD}`, {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.AUTH.SET_PASSWORD}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
