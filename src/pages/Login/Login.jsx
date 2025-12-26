@@ -7,11 +7,12 @@ import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES } from '../../constants
 import './Login.css'
 
 function Login() {
-  const { apiBaseUrl } = useApi()
+  const { apiBaseUrl, setTokens } = useApi()
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
     email: '',
-    password: ''
+    password: '',
+    rememberMe: false
   })
   const [errors, setErrors] = useState({})
   const [isLoading, setIsLoading] = useState(false)
@@ -71,10 +72,10 @@ function Login() {
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include', // Important for cookies/sessions
         body: JSON.stringify({
           email: formData.email,
-          password: formData.password
+          password: formData.password,
+          rememberMe: formData.rememberMe
         })
       })
 
@@ -96,28 +97,34 @@ function Login() {
         return
       }
 
-      // Verify we have user data
+      // Verify we have user data and tokens
       if (!data.user) {
         throw new Error('Login response missing user data')
       }
 
-      // Store user data in localStorage for easy access
+      if (!data.accessToken) {
+        throw new Error('Login response missing access token')
+      }
+
+      if (!data.refreshToken) {
+        throw new Error('Login response missing refresh token')
+      }
+
+      // Store tokens and user data
+      localStorage.setItem('accessToken', data.accessToken)
+      localStorage.setItem('refreshToken', data.refreshToken)
       localStorage.setItem('user', JSON.stringify(data.user))
       
-      // Check if Set-Cookie header is present (session cookie should be set)
-      const setCookieHeader = response.headers.get('Set-Cookie')
-      console.log('Login response - Set-Cookie header:', setCookieHeader ? 'Present' : 'Missing')
+      // Update tokens in ApiContext if available
+      if (setTokens) {
+        setTokens(data.accessToken, data.refreshToken)
+      }
       
       // Show success message
       toast.success('Login successful!')
       
-      // Longer delay to ensure session cookie is fully set and propagated
-      // This is especially important for cross-origin requests on deployed frontend
-      setTimeout(() => {
-        // Use React Router navigate instead of window.location to avoid full page reload
-        // This allows the session cookie to be properly sent on subsequent requests
-        navigate('/dashboard', { replace: true })
-      }, 300)
+      // Navigate immediately - no delay needed with JWT
+      navigate('/dashboard', { replace: true })
     } catch (error) {
       console.error('Login failed:', error)
       setErrors({ 
@@ -330,7 +337,12 @@ function Login() {
 
               <div className="form-options">
                 <label className="remember-me">
-                  <input type="checkbox" />
+                  <input 
+                    type="checkbox" 
+                    name="rememberMe"
+                    checked={formData.rememberMe}
+                    onChange={(e) => setFormData(prev => ({ ...prev, rememberMe: e.target.checked }))}
+                  />
                   <span className="checkmark"></span>
                   Remember me
                 </label>

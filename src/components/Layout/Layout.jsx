@@ -8,7 +8,7 @@ import { API_ENDPOINTS } from '../../constants/constants'
 import './Layout.css'
 
 function Layout() {
-  const { apiBaseUrl } = useApi()
+  const { apiBaseUrl, accessToken, refreshToken, clearTokens } = useApi()
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
@@ -28,30 +28,30 @@ function Layout() {
 
   useEffect(() => {
     if (apiBaseUrl) {
-      // Add a small delay to ensure session cookie is set after login
-      // This prevents the refresh loop when navigating immediately after login
-      const timer = setTimeout(() => {
-        checkAuth()
-      }, 100)
-      
-      return () => clearTimeout(timer)
+      checkAuth()
     }
-  }, [apiBaseUrl])
+  }, [apiBaseUrl, accessToken]) // Also check when access token changes
 
   const logout = async () => {
     try {
-      await fetch(`${apiBaseUrl}${API_ENDPOINTS.AUTH.LOGOUT}`, {
-        method: 'POST',
-        credentials: 'include'
-      })
-      localStorage.removeItem('user')
-      setUser(null)
-      navigate('/login')
+      // Call logout endpoint if refresh token exists
+      if (refreshToken) {
+        await fetch(`${apiBaseUrl}${API_ENDPOINTS.AUTH.LOGOUT}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ refreshToken })
+        })
+      }
     } catch (error) {
       console.error('Logout failed:', error)
+    } finally {
+      // Clear tokens and user data regardless of API call result
+      clearTokens()
       localStorage.removeItem('user')
       setUser(null)
-      navigate('/login')
+      navigate('/login', { replace: true })
     }
   }
 
@@ -73,12 +73,18 @@ function Layout() {
     try {
       // Add cache-busting to prevent 304 responses
       const timestamp = new Date().getTime()
+      const headers = {
+        'Content-Type': 'application/json'
+      }
+      
+      // Add Authorization header if access token exists
+      if (accessToken) {
+        headers['Authorization'] = `Bearer ${accessToken}`
+      }
+      
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.AUTH.CHECK}?t=${timestamp}`, {
-        credentials: 'include',
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        headers
       })
       
       if (!response.ok) {
@@ -92,33 +98,35 @@ function Layout() {
         localStorage.setItem('user', JSON.stringify(data.user))
         setLoading(false)
       } else {
-        // If we have a cached user and haven't retried yet, retry once
-        // The user might have just logged in and cookie hasn't propagated yet
-        if (cachedUser && retryCount === 0) {
-          console.warn('Session check failed but cached user exists. Retrying in 1000ms...')
-          setTimeout(() => {
-            checkAuth(1) // Retry once
-          }, 1000)
-        } else {
-          // Clear stale localStorage if session is invalid
-          localStorage.removeItem('user')
-          setUser(null)
-          setLoading(false)
-          // Only navigate to login if we're not already there
-          if (window.location.pathname !== '/login') {
-            navigate('/login', { replace: true })
+        // Access token is invalid or expired
+        // Try to refresh if we have a refresh token
+        if (refreshToken) {
+          try {
+            const refreshResponse = await fetch(`${apiBaseUrl}${API_ENDPOINTS.AUTH.REFRESH}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ refreshToken })
+            })
+
+            if (refreshResponse.ok) {
+              const refreshData = await refreshResponse.json()
+              if (refreshData.accessToken && refreshData.user) {
+                localStorage.setItem('accessToken', refreshData.accessToken)
+                localStorage.setItem('user', JSON.stringify(refreshData.user))
+                setUser(refreshData.user)
+                setLoading(false)
+                return
+              }
+            }
+          } catch (refreshError) {
+            console.error('Token refresh failed:', refreshError)
           }
         }
-      }
-    } catch (error) {
-      console.error('Auth check failed:', error)
-      // If we have cached user and haven't retried, retry once
-      if (cachedUser && retryCount === 0) {
-        console.warn('Auth check error but cached user exists. Retrying in 1000ms...')
-        setTimeout(() => {
-          checkAuth(1) // Retry once
-        }, 1000)
-      } else {
+
+        // If refresh failed or no refresh token, clear everything
+        clearTokens()
         localStorage.removeItem('user')
         setUser(null)
         setLoading(false)
@@ -126,6 +134,17 @@ function Layout() {
         if (window.location.pathname !== '/login') {
           navigate('/login', { replace: true })
         }
+      }
+    } catch (error) {
+      console.error('Auth check failed:', error)
+      // Clear tokens on error
+      clearTokens()
+      localStorage.removeItem('user')
+      setUser(null)
+      setLoading(false)
+      // Only navigate to login if we're not already there
+      if (window.location.pathname !== '/login') {
+        navigate('/login', { replace: true })
       }
     }
   }
