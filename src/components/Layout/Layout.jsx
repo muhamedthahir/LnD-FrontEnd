@@ -27,8 +27,10 @@ function Layout() {
   }
 
   useEffect(() => {
-    checkAuth()
-  }, [])
+    if (apiBaseUrl) {
+      checkAuth()
+    }
+  }, [apiBaseUrl])
 
   const logout = async () => {
     try {
@@ -48,8 +50,10 @@ function Layout() {
   }
 
   const checkAuth = async () => {
+    if (!apiBaseUrl) return // Wait for API config to load
+    
     try {
-      const response = await fetch(`https://d1qio8dibp2agp.cloudfront.net${API_ENDPOINTS.AUTH.CHECK}`, {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.AUTH.CHECK}`, {
         credentials: 'include',
         method: 'GET',
         headers: {

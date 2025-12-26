@@ -1,14 +1,22 @@
 let configCache = null;
 
 export async function getConfig() {
+  // Always reload config in development to pick up changes
+  const hostname = window.location.hostname;
+  const isLocalhost = hostname.includes('localhost') || hostname === '127.0.0.1';
+  
+  // Clear cache for localhost to allow config changes
+  if (isLocalhost) {
+    configCache = null;
+  }
+  
   if (configCache) return configCache;
-  let configFile = '';
+  
+  let configFile = '';  
 
   // Choose config file based on hostname
-  const hostname = window.location.hostname;
-
-  if (hostname.includes('localhost')) {
-    configFile = '/config.dev.json';
+  if (isLocalhost) {
+    configFile = '/config.local.json';
   } else {
     configFile = '/config.dev.json';
   }
