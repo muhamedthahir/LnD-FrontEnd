@@ -28,7 +28,13 @@ function Layout() {
 
   useEffect(() => {
     if (apiBaseUrl) {
-      checkAuth()
+      // Add a small delay to ensure session cookie is set after login
+      // This prevents the refresh loop when navigating immediately after login
+      const timer = setTimeout(() => {
+        checkAuth()
+      }, 100)
+      
+      return () => clearTimeout(timer)
     }
   }, [apiBaseUrl])
 
@@ -85,16 +91,30 @@ function Layout() {
         setUser(data.user)
         localStorage.setItem('user', JSON.stringify(data.user))
       } else {
-        // Clear stale localStorage if session is invalid
-        localStorage.removeItem('user')
-        setUser(null)
-        navigate('/login')
+        // If we have a cached user, don't immediately redirect
+        // The user might have just logged in and cookie hasn't propagated yet
+        if (cachedUser) {
+          console.warn('Session check failed but cached user exists. Retrying in 500ms...')
+          // Retry once after a short delay
+          setTimeout(() => {
+            checkAuth()
+          }, 500)
+        } else {
+          // Clear stale localStorage if session is invalid and no cached user
+          localStorage.removeItem('user')
+          setUser(null)
+          navigate('/login')
+        }
       }
     } catch (error) {
       console.error('Auth check failed:', error)
-      // If we have cached user, keep it but log the error
-      // Only redirect if we don't have a cached user
-      if (!cachedUser) {
+      // If we have cached user, retry once before redirecting
+      if (cachedUser) {
+        console.warn('Auth check error but cached user exists. Retrying in 500ms...')
+        setTimeout(() => {
+          checkAuth()
+        }, 500)
+      } else {
         localStorage.removeItem('user')
         setUser(null)
         navigate('/login')

@@ -102,9 +102,13 @@ function Login() {
       // Show success message
       toast.success('Login successful!')
       
-      // Use React Router navigate instead of window.location to avoid full page reload
-      // This allows the session cookie to be properly sent on subsequent requests
-      navigate('/dashboard', { replace: true })
+      // Small delay to ensure session cookie is set before navigation
+      // This helps prevent the refresh loop issue
+      setTimeout(() => {
+        // Use React Router navigate instead of window.location to avoid full page reload
+        // This allows the session cookie to be properly sent on subsequent requests
+        navigate('/dashboard', { replace: true })
+      }, 100)
     } catch (error) {
       console.error('Login failed:', error)
       setErrors({ 
