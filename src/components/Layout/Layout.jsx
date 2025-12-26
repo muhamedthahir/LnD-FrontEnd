@@ -55,12 +55,12 @@ function Layout() {
     }
   }
 
-  const checkAuth = async () => {
+  const checkAuth = async (retryCount = 0) => {
     if (!apiBaseUrl) return // Wait for API config to load
     
     // First check localStorage - if user exists, set it immediately for better UX
     const cachedUser = localStorage.getItem('user')
-    if (cachedUser) {
+    if (cachedUser && retryCount === 0) {
       try {
         const user = JSON.parse(cachedUser)
         setUser(user)
@@ -90,37 +90,43 @@ function Layout() {
       if (data.authenticated && data.user) {
         setUser(data.user)
         localStorage.setItem('user', JSON.stringify(data.user))
+        setLoading(false)
       } else {
-        // If we have a cached user, don't immediately redirect
+        // If we have a cached user and haven't retried yet, retry once
         // The user might have just logged in and cookie hasn't propagated yet
-        if (cachedUser) {
-          console.warn('Session check failed but cached user exists. Retrying in 500ms...')
-          // Retry once after a short delay
+        if (cachedUser && retryCount === 0) {
+          console.warn('Session check failed but cached user exists. Retrying in 1000ms...')
           setTimeout(() => {
-            checkAuth()
-          }, 500)
+            checkAuth(1) // Retry once
+          }, 1000)
         } else {
-          // Clear stale localStorage if session is invalid and no cached user
+          // Clear stale localStorage if session is invalid
           localStorage.removeItem('user')
           setUser(null)
-          navigate('/login')
+          setLoading(false)
+          // Only navigate to login if we're not already there
+          if (window.location.pathname !== '/login') {
+            navigate('/login', { replace: true })
+          }
         }
       }
     } catch (error) {
       console.error('Auth check failed:', error)
-      // If we have cached user, retry once before redirecting
-      if (cachedUser) {
-        console.warn('Auth check error but cached user exists. Retrying in 500ms...')
+      // If we have cached user and haven't retried, retry once
+      if (cachedUser && retryCount === 0) {
+        console.warn('Auth check error but cached user exists. Retrying in 1000ms...')
         setTimeout(() => {
-          checkAuth()
-        }, 500)
+          checkAuth(1) // Retry once
+        }, 1000)
       } else {
         localStorage.removeItem('user')
         setUser(null)
-        navigate('/login')
+        setLoading(false)
+        // Only navigate to login if we're not already there
+        if (window.location.pathname !== '/login') {
+          navigate('/login', { replace: true })
+        }
       }
-    } finally {
-      setLoading(false)
     }
   }
 

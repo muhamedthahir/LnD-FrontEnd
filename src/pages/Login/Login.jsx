@@ -96,19 +96,28 @@ function Login() {
         return
       }
 
+      // Verify we have user data
+      if (!data.user) {
+        throw new Error('Login response missing user data')
+      }
+
       // Store user data in localStorage for easy access
       localStorage.setItem('user', JSON.stringify(data.user))
+      
+      // Check if Set-Cookie header is present (session cookie should be set)
+      const setCookieHeader = response.headers.get('Set-Cookie')
+      console.log('Login response - Set-Cookie header:', setCookieHeader ? 'Present' : 'Missing')
       
       // Show success message
       toast.success('Login successful!')
       
-      // Small delay to ensure session cookie is set before navigation
-      // This helps prevent the refresh loop issue
+      // Longer delay to ensure session cookie is fully set and propagated
+      // This is especially important for cross-origin requests on deployed frontend
       setTimeout(() => {
         // Use React Router navigate instead of window.location to avoid full page reload
         // This allows the session cookie to be properly sent on subsequent requests
         navigate('/dashboard', { replace: true })
-      }, 100)
+      }, 300)
     } catch (error) {
       console.error('Login failed:', error)
       setErrors({ 
