@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import PasswordSetup from '../../components/PasswordSetup/PasswordSetup'
 import { useApi } from '../../contexts/ApiContext'
@@ -7,6 +8,7 @@ import './Login.css'
 
 function Login() {
   const { apiBaseUrl } = useApi()
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -76,11 +78,13 @@ function Login() {
         })
       })
 
-      const data = await response.json()
-
+      // Check response status first
       if (!response.ok) {
-        throw new Error(data.error || 'Login failed')
+        const errorData = await response.json().catch(() => ({ error: 'Login failed' }))
+        throw new Error(errorData.error || `Login failed: ${response.status}`)
       }
+
+      const data = await response.json()
 
       // Check if password setup is required
       if (data.requiresPasswordSetup) {
@@ -95,8 +99,12 @@ function Login() {
       // Store user data in localStorage for easy access
       localStorage.setItem('user', JSON.stringify(data.user))
       
-      // Redirect to dashboard
-      window.location.href = '/dashboard'
+      // Show success message
+      toast.success('Login successful!')
+      
+      // Use React Router navigate instead of window.location to avoid full page reload
+      // This allows the session cookie to be properly sent on subsequent requests
+      navigate('/dashboard', { replace: true })
     } catch (error) {
       console.error('Login failed:', error)
       setErrors({ 

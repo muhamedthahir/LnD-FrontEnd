@@ -52,12 +52,27 @@ function Layout() {
   const checkAuth = async () => {
     if (!apiBaseUrl) return // Wait for API config to load
     
+    // First check localStorage - if user exists, set it immediately for better UX
+    const cachedUser = localStorage.getItem('user')
+    if (cachedUser) {
+      try {
+        const user = JSON.parse(cachedUser)
+        setUser(user)
+        setLoading(false) // Show UI immediately
+      } catch (e) {
+        // Invalid cached user, continue with API check
+      }
+    }
+    
     try {
-      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.AUTH.CHECK}`, {
+      // Add cache-busting to prevent 304 responses
+      const timestamp = new Date().getTime()
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.AUTH.CHECK}?t=${timestamp}`, {
         credentials: 'include',
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache'
         }
       })
       
@@ -73,13 +88,18 @@ function Layout() {
       } else {
         // Clear stale localStorage if session is invalid
         localStorage.removeItem('user')
+        setUser(null)
         navigate('/login')
       }
     } catch (error) {
       console.error('Auth check failed:', error)
-      // Don't rely on localStorage if API call fails - force login
-      localStorage.removeItem('user')
-      navigate('/login')
+      // If we have cached user, keep it but log the error
+      // Only redirect if we don't have a cached user
+      if (!cachedUser) {
+        localStorage.removeItem('user')
+        setUser(null)
+        navigate('/login')
+      }
     } finally {
       setLoading(false)
     }
