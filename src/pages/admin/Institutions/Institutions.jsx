@@ -7,7 +7,7 @@ import '../UserAdmin/UserAdmin.css'
 import './Institutions.css'
 
 function Institutions() {
-  const { apiBaseUrl } = useApi()
+  const { apiBaseUrl, accessToken } = useApi()
   const [institutions, setInstitutions] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -38,7 +38,10 @@ function Institutions() {
       url.searchParams.append('offset', ((currentPage - 1) * pageSize).toString())
       
       const response = await fetch(url, {
-        credentials: 'include'
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        }
       })
       
       if (response.ok) {
@@ -117,8 +120,10 @@ function Institutions() {
       
       const response = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        },
         body: JSON.stringify(formData)
       })
       
@@ -143,7 +148,10 @@ function Institutions() {
   const handleView = async (institution) => {
     try {
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.INSTITUTIONS.GET(institution.id)}`, {
-        credentials: 'include'
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        }
       })
       
       if (response.ok) {
@@ -165,7 +173,10 @@ function Institutions() {
   const handleEdit = async (institution) => {
     try {
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.INSTITUTIONS.GET(institution.id)}`, {
-        credentials: 'include'
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        }
       })
       
       if (response.ok) {

@@ -9,8 +9,9 @@
  */
 export async function authenticatedFetch(url, options = {}, apiBaseUrl = '', token = null) {
   // Get token from localStorage if not provided
+  // Try both 'accessToken' and 'token' for backward compatibility
   if (!token) {
-    token = localStorage.getItem('token')
+    token = localStorage.getItem('accessToken') || localStorage.getItem('token')
   }
 
   // Build full URL if apiBaseUrl is provided
@@ -60,4 +61,5 @@ export async function unauthenticatedFetch(url, options = {}, apiBaseUrl = '') {
 
   return fetch(fullUrl, fetchOptions)
 }
+
 

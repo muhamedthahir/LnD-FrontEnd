@@ -7,7 +7,7 @@ import { useApi } from '../../contexts/ApiContext'
 import './Courses.css'
 
 function Courses() {
-  const { apiBaseUrl } = useApi()
+  const { apiBaseUrl, accessToken } = useApi()
   const { user } = useOutletContext()
   const navigate = useNavigate()
   const [courses, setCourses] = useState([])
@@ -48,7 +48,10 @@ function Courses() {
       })
 
       const response = await fetch(`${apiBaseUrl}/api/courses?${params}`, {
-        credentials: 'include'
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        }
       })
 
       if (!response.ok) {
@@ -140,7 +143,10 @@ function Courses() {
         headers: {
           'Content-Type': 'application/json'
         },
-        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        },
         body: JSON.stringify({
           ...formData,
           status: 'draft'
@@ -183,7 +189,10 @@ function Courses() {
         headers: {
           'Content-Type': 'application/json'
         },
-        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        },
         body: JSON.stringify({
           ...formData,
           status: 'draft'

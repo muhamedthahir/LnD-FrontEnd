@@ -27,18 +27,11 @@ function Header({ user, logout, onToggleSidebar, isSidebarCollapsed }) {
     if (logout) {
       await logout()
     } else {
-      try {
-        await fetch('http://localhost:3000/api/auth/logout', {
-          method: 'POST',
-          credentials: 'include'
-        })
-        localStorage.removeItem('user')
-        navigate('/login')
-      } catch (error) {
-        console.error('Logout failed:', error)
-        localStorage.removeItem('user')
-        navigate('/login')
-      }
+      // Fallback: just clear local storage and navigate
+      localStorage.removeItem('user')
+      localStorage.removeItem('accessToken')
+      localStorage.removeItem('refreshToken')
+      navigate('/login')
     }
     setShowUserMenu(false)
   }

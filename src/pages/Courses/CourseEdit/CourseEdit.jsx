@@ -9,7 +9,7 @@ import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES, VALIDATION_MESSAGES } 
 import './CourseEdit.css'
 
 function CourseEdit() {
-  const { apiBaseUrl } = useApi()
+  const { apiBaseUrl, accessToken } = useApi()
   const { id } = useParams()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('sections')
@@ -84,7 +84,10 @@ function CourseEdit() {
         setTags([])
       } else {
         const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.COURSES.GET(id)}`, {
-          credentials: 'include'
+          headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        }
         })
         if (!response.ok) throw new Error('Failed to fetch course')
         const data = await response.json()
@@ -110,7 +113,10 @@ function CourseEdit() {
   const fetchSections = async () => {
     try {
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.TOPICS.GET_BY_COURSE(id)}`, {
-        credentials: 'include'
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        }
       })
       if (!response.ok) throw new Error('Failed to fetch sections')
       const data = await response.json()
@@ -121,7 +127,10 @@ function CourseEdit() {
       for (const section of data) {
         try {
           const lessonsResponse = await fetch(`${apiBaseUrl}${API_ENDPOINTS.SEGMENTS.GET_BY_TOPIC(section.id)}`, {
-            credentials: 'include'
+            headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        }
           })
           if (lessonsResponse.ok) {
             const lessons = await lessonsResponse.json()
@@ -142,7 +151,10 @@ function CourseEdit() {
   const fetchSectionLessons = async (sectionId) => {
     try {
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.SEGMENTS.GET_BY_TOPIC(sectionId)}`, {
-        credentials: 'include'
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        }
       })
       if (!response.ok) throw new Error('Failed to fetch lessons')
       const lessons = await response.json()
@@ -197,14 +209,20 @@ function CourseEdit() {
         response = await fetch(`${apiBaseUrl}/api/courses`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
+          headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        },
           body: JSON.stringify(courseData)
         })
       } else {
         response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.COURSES.UPDATE(id)}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
+          headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        },
           body: JSON.stringify(courseData)
         })
       }
@@ -242,7 +260,10 @@ function CourseEdit() {
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.TOPICS.CREATE}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        },
         body: JSON.stringify({
           course_id: courseId,
           name: sectionForm.title,
@@ -273,7 +294,10 @@ function CourseEdit() {
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.TOPICS.UPDATE(editingSection.id)}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        },
         body: JSON.stringify({
           name: sectionForm.title,
           description: sectionForm.description,
@@ -308,7 +332,10 @@ function CourseEdit() {
     try {
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.TOPICS.DELETE(sectionToDelete)}`, {
         method: 'DELETE',
-        credentials: 'include'
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        }
       })
 
       if (!response.ok) throw new Error('Failed to delete section')
@@ -577,7 +604,10 @@ function CourseEdit() {
                                             // Fetch lesson details for editing
                                             try {
                                               const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.SEGMENTS.GET(lesson.id)}`, {
-                                                credentials: 'include'
+                                                headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        }
                                               })
                                               if (!response.ok) throw new Error('Failed to fetch lesson')
                                               const lessonData = await response.json()
@@ -811,7 +841,10 @@ function CourseEdit() {
           try {
             const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.SEGMENTS.DELETE(lessonToDelete.id)}`, {
               method: 'DELETE',
-              credentials: 'include'
+              headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        }
             })
             if (!response.ok) throw new Error('Failed to delete lesson')
             toast.success(SUCCESS_MESSAGES.LESSON_DELETED)
@@ -857,7 +890,10 @@ function CourseEdit() {
               const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.SEGMENTS.UPDATE(lessonData.lessonId)}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
+                headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        },
                 body: JSON.stringify({
                   name: lessonData.name,
                   description: '',
@@ -874,7 +910,10 @@ function CourseEdit() {
               const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.SEGMENTS.CREATE}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
+                headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        },
                 body: JSON.stringify({
                   topic_id: selectedSectionId,
                   name: lessonData.name,

@@ -8,7 +8,7 @@ import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES, VALIDATION_MESSAGES } 
 import './Groups.css'
 
 function Groups() {
-  const { apiBaseUrl } = useApi()
+  const { apiBaseUrl, accessToken } = useApi()
   const { user } = useOutletContext()
   const [groups, setGroups] = useState([])
   const [allGroups, setAllGroups] = useState([]) // Store all groups for filtering
@@ -58,7 +58,10 @@ function Groups() {
     try {
       setLoading(true)
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.GROUPS.LIST}`, {
-        credentials: 'include'
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        }
       })
       
       if (response.ok) {
@@ -79,7 +82,10 @@ function Groups() {
   const fetchColleges = async () => {
     try {
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.INSTITUTIONS.ALL}`, {
-        credentials: 'include'
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        }
       })
       
       if (response.ok) {
@@ -95,7 +101,10 @@ function Groups() {
   const fetchInstitutions = async () => {
     try {
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.INSTITUTIONS.ALL}`, {
-        credentials: 'include'
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        }
       })
       
       if (response.ok) {
@@ -186,7 +195,10 @@ function Groups() {
     
     try {
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.USERS.LIST}?college=${encodeURIComponent(collegeName)}&limit=1000`, {
-        credentials: 'include'
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        }
       })
       
       if (response.ok) {
@@ -204,7 +216,10 @@ function Groups() {
   const fetchGroupEditData = async (groupId, collegeName) => {
     try {
       const response = await fetch(`${apiBaseUrl}/api/groups/${groupId}/edit-data`, {
-        credentials: 'include'
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        }
       })
       
       if (response.ok) {
@@ -364,7 +379,10 @@ function Groups() {
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.GROUPS.UPDATE(editingGroup.id)}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        },
         body: JSON.stringify(formData)
       })
       
@@ -402,7 +420,10 @@ function Groups() {
         const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.GROUPS.CREATE}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
+          headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        },
           body: JSON.stringify(formData)
         })
         
@@ -421,7 +442,10 @@ function Groups() {
       let previousMemberIds = []
       if (editingGroup) {
         const memberResponse = await fetch(`${apiBaseUrl}${API_ENDPOINTS.GROUPS.GET(groupId)}`, {
-          credentials: 'include'
+          headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        }
         })
         if (memberResponse.ok) {
           const memberData = await memberResponse.json()
@@ -437,7 +461,10 @@ function Groups() {
         const memberResponse = await fetch(`${apiBaseUrl}${API_ENDPOINTS.GROUPS.ADD_MEMBERS(groupId)}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
+          headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        },
           body: JSON.stringify({
             addUserIds,
             removeUserIds
@@ -478,7 +505,10 @@ function Groups() {
     try {
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.GROUPS.DELETE(groupToDelete.id)}`, {
         method: 'DELETE',
-        credentials: 'include'
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        }
       })
       
       if (response.ok) {
@@ -505,7 +535,10 @@ function Groups() {
     try {
       // Note: This endpoint might not be in constants, but we'll use a generic pattern
       const response = await fetch(`${apiBaseUrl}/api/groups/template`, {
-        credentials: 'include'
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        }
       })
       
       if (response.ok) {

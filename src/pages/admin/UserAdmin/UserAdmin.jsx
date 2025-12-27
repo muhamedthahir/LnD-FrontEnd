@@ -8,7 +8,7 @@ import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES, VALIDATION_MESSAGES } 
 import './UserAdmin.css'
 
 function UserAdmin() {
-  const { apiBaseUrl } = useApi()
+  const { apiBaseUrl, accessToken } = useApi()
   const { user } = useOutletContext()
   const [users, setUsers] = useState([])
   const [colleges, setColleges] = useState([])
@@ -64,9 +64,14 @@ function UserAdmin() {
       url.searchParams.append('limit', pageSize.toString())
       url.searchParams.append('offset', ((currentPage - 1) * pageSize).toString())
       
-      const response = await fetch(url, {
-        credentials: 'include'
-      })
+      // Get token from context or localStorage as fallback
+      const token = accessToken || localStorage.getItem('accessToken')
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` })
+      }
+      
+      const response = await fetch(url, { headers })
       
       if (response.ok) {
         const data = await response.json()
@@ -85,8 +90,12 @@ function UserAdmin() {
 
   const fetchColleges = async () => {
     try {
+      const token = accessToken || localStorage.getItem('accessToken')
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.INSTITUTIONS.ALL}`, {
-        credentials: 'include'
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
+        }
       })
       
       if (response.ok) {
@@ -101,8 +110,12 @@ function UserAdmin() {
 
   const fetchInstitutions = async () => {
     try {
+      const token = accessToken || localStorage.getItem('accessToken')
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.INSTITUTIONS.ALL}`, {
-        credentials: 'include'
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
+        }
       })
       
       if (response.ok) {
@@ -203,10 +216,13 @@ function UserAdmin() {
     if (!validateForm()) return
     
     try {
+      const token = accessToken || localStorage.getItem('accessToken')
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.USERS.CREATE}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
+        },
         body: JSON.stringify(formData)
       })
       
@@ -267,10 +283,13 @@ function UserAdmin() {
     }
     
     try {
+      const token = accessToken || localStorage.getItem('accessToken')
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.USERS.UPDATE(selectedUser.id)}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
+        },
         body: JSON.stringify(editData)
       })
       
@@ -302,8 +321,10 @@ function UserAdmin() {
         `${apiBaseUrl}${API_ENDPOINTS.USERS.RESET_PASSWORD(selectedUser.id)}`,
         {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
+          headers: {
+            'Authorization': accessToken ? `Bearer ${accessToken}` : undefined,
+            'Content-Type': 'application/json'
+          },
           body: JSON.stringify({ password: resetPassword })
         }
       )
@@ -344,7 +365,10 @@ function UserAdmin() {
     try {
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.USERS.DELETE(userToDelete)}`, {
         method: 'DELETE',
-        credentials: 'include'
+        headers: {
+          'Authorization': accessToken ? `Bearer ${accessToken}` : undefined,
+          'Content-Type': 'application/json'
+        }
       })
       
       if (response.ok) {
@@ -379,7 +403,10 @@ function UserAdmin() {
   const handleDownloadTemplate = async () => {
     try {
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.USERS.BULK_TEMPLATE}`, {
-        credentials: 'include'
+        headers: {
+          'Authorization': accessToken ? `Bearer ${accessToken}` : undefined,
+          'Content-Type': 'application/json'
+        }
       })
       
       if (response.ok) {
@@ -425,7 +452,9 @@ function UserAdmin() {
       
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.USERS.BULK_UPLOAD}`, {
         method: 'POST',
-        credentials: 'include',
+        headers: {
+          'Authorization': accessToken ? `Bearer ${accessToken}` : undefined
+        },
         body: formData
       })
       
