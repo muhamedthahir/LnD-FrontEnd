@@ -141,9 +141,6 @@ function Courses() {
       const response = await fetch(`${apiBaseUrl}/api/courses`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
-        },
-        headers: {
           'Content-Type': 'application/json',
           ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
         },
@@ -186,9 +183,6 @@ function Courses() {
     try {
       const response = await fetch(`${apiBaseUrl}/api/courses`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
         headers: {
           'Content-Type': 'application/json',
           ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })

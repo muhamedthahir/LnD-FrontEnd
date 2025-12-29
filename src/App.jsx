@@ -12,6 +12,7 @@ import AssessmentAdmin from './pages/admin/AssessmentAdmin/AssessmentAdmin'
 import UserAdmin from './pages/admin/UserAdmin/UserAdmin'
 import Groups from './pages/admin/Groups/Groups'
 import Institutions from './pages/admin/Institutions/Institutions'
+import CodeEditorLayout from './pages/CodeEditor/CodeEditorLayout'
 import './App.css'
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/codeeditor" element={<CodeEditorLayout />} />
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/courses" element={<Courses />} />

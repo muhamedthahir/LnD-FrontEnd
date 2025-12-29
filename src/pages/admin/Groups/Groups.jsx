@@ -378,7 +378,6 @@ function Groups() {
     try {
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.GROUPS.UPDATE(editingGroup.id)}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         headers: {
           'Content-Type': 'application/json',
           ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
@@ -419,11 +418,10 @@ function Groups() {
         // Create new group
         const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.GROUPS.CREATE}`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           headers: {
-          'Content-Type': 'application/json',
-          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
-        },
+            'Content-Type': 'application/json',
+            ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+          },
           body: JSON.stringify(formData)
         })
         
@@ -460,11 +458,10 @@ function Groups() {
       if (addUserIds.length > 0 || removeUserIds.length > 0) {
         const memberResponse = await fetch(`${apiBaseUrl}${API_ENDPOINTS.GROUPS.ADD_MEMBERS(groupId)}`, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
           headers: {
-          'Content-Type': 'application/json',
-          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
-        },
+            'Content-Type': 'application/json',
+            ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+          },
           body: JSON.stringify({
             addUserIds,
             removeUserIds

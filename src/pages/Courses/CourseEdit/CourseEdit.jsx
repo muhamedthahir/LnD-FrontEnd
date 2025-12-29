@@ -208,21 +208,19 @@ function CourseEdit() {
       if (id === 'new') {
         response = await fetch(`${apiBaseUrl}/api/courses`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           headers: {
-          'Content-Type': 'application/json',
-          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
-        },
+            'Content-Type': 'application/json',
+            ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+          },
           body: JSON.stringify(courseData)
         })
       } else {
         response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.COURSES.UPDATE(id)}`, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
           headers: {
-          'Content-Type': 'application/json',
-          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
-        },
+            'Content-Type': 'application/json',
+            ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+          },
           body: JSON.stringify(courseData)
         })
       }
@@ -259,7 +257,6 @@ function CourseEdit() {
 
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.TOPICS.CREATE}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         headers: {
           'Content-Type': 'application/json',
           ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
@@ -293,7 +290,6 @@ function CourseEdit() {
     try {
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.TOPICS.UPDATE(editingSection.id)}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         headers: {
           'Content-Type': 'application/json',
           ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
@@ -889,11 +885,10 @@ function CourseEdit() {
               // Update existing lesson
               const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.SEGMENTS.UPDATE(lessonData.lessonId)}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
                 headers: {
-          'Content-Type': 'application/json',
-          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
-        },
+                  'Content-Type': 'application/json',
+                  ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+                },
                 body: JSON.stringify({
                   name: lessonData.name,
                   description: '',
@@ -909,11 +904,10 @@ function CourseEdit() {
               // Create new lesson
               const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.SEGMENTS.CREATE}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 headers: {
-          'Content-Type': 'application/json',
-          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
-        },
+                  'Content-Type': 'application/json',
+                  ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+                },
                 body: JSON.stringify({
                   topic_id: selectedSectionId,
                   name: lessonData.name,
