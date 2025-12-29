@@ -184,6 +184,44 @@ export const ERROR_MESSAGES = {
   INVALID_FORMAT: 'Invalid format'
 }
 
+// Code Editor Placeholder Snippets
+export const CODE_SNIPPETS = {
+  javascript: `// Replace "Asslamu alaikum" and start writing your code
+console.log("Asslamu alaikum");
+`,
+
+  python: `# Replace "Asslamu alaikum" and start writing your code
+print("Asslamu alaikum")
+`,
+
+  java: `// Replace "Asslamu alaikum" and start writing your code
+public class Solution {
+    public static void main(String[] args) {
+        System.out.println("Asslamu alaikum");
+    }
+}
+`,
+
+  cpp: `// Replace "Asslamu alaikum" and start writing your code
+#include <iostream>
+using namespace std;
+
+int main() {
+    cout << "Asslamu alaikum" << endl;
+    return 0;
+}
+`,
+
+  c: `// Replace "Asslamu alaikum" and start writing your code
+#include <stdio.h>
+
+int main() {
+    printf("Asslamu alaikum\\n");
+    return 0;
+}
+`
+}
+
 // Validation Messages
 export const VALIDATION_MESSAGES = {
   // User

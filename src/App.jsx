@@ -15,6 +15,7 @@ import AssessmentManagement from './pages/admin/assessments/AssessmentManagement
 import AssessmentAdministration from './pages/admin/assessments/AssessmentAdministration/AssessmentAdministration'
 import Groups from './pages/admin/Groups/Groups'
 import Institutions from './pages/admin/Institutions/Institutions'
+import CodeEditorLayout from './pages/CodeEditor/CodeEditorLayout'
 import './App.css'
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/codeeditor" element={<CodeEditorLayout />} />
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/courses" element={<Courses />} />

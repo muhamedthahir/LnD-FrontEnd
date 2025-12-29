@@ -189,14 +189,26 @@ function CourseEdit() {
         tags: tags.join(',')
       }
 
-      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.COURSES.UPDATE(id)}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
-        },
-        body: JSON.stringify(courseData)
-      })
+      let response
+      if (id === 'new') {
+        response = await fetch(`${apiBaseUrl}/api/courses`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+          },
+          body: JSON.stringify(courseData)
+        })
+      } else {
+        response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.COURSES.UPDATE(id)}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+          },
+          body: JSON.stringify(courseData)
+        })
+      }
 
       if (!response.ok) throw new Error('Failed to save course')
       const data = await response.json()
