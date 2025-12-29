@@ -174,6 +174,44 @@ export const ERROR_MESSAGES = {
   INVALID_FORMAT: 'Invalid format'
 }
 
+// Code Editor Placeholder Snippets
+export const CODE_SNIPPETS = {
+  javascript: `// Replace "Hello World" and start writing your code
+console.log("Hello World");
+`,
+
+  python: `# Replace "Hello World" and start writing your code
+print("Hello World")
+`,
+
+  java: `// Replace "Hello World" and start writing your code
+public class Solution {
+    public static void main(String[] args) {
+        System.out.println("Hello World");
+    }
+}
+`,
+
+  cpp: `// Replace "Hello World" and start writing your code
+#include <iostream>
+using namespace std;
+
+int main() {
+    cout << "Hello World" << endl;
+    return 0;
+}
+`,
+
+  c: `// Replace "Hello World" and start writing your code
+#include <stdio.h>
+
+int main() {
+    printf("Hello World\\n");
+    return 0;
+}
+`
+}
+
 // Validation Messages
 export const VALIDATION_MESSAGES = {
   // User

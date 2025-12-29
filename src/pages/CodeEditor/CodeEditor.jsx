@@ -1,16 +1,13 @@
 import { useState, useRef, useCallback } from 'react'
 import Editor from '@monaco-editor/react'
 import { useApi } from '../../contexts/ApiContext'
+import { CODE_SNIPPETS } from '../../constants/constants'
 import './CodeEditor.css'
 
 function CodeEditor() {
   const { apiBaseUrl } = useApi()
   const [editorHeight, setEditorHeight] = useState(85) // percentage
-  const [code, setCode] = useState(`// Write your code here
-function twoSum(nums, target) {
-  // Your solution
-  
-}`)
+  const [code, setCode] = useState(CODE_SNIPPETS.javascript)
   const [output, setOutput] = useState('')
   const [language, setLanguage] = useState('javascript')
   const [isRunning, setIsRunning] = useState(false)
@@ -25,6 +22,12 @@ function twoSum(nums, target) {
     { value: 'cpp', label: 'C++' },
     { value: 'c', label: 'C' }
   ]
+
+  // Handle language change - update code with corresponding snippet
+  const handleLanguageChange = (newLanguage) => {
+    setLanguage(newLanguage)
+    setCode(CODE_SNIPPETS[newLanguage] || '')
+  }
 
   // Monaco Editor mount handler
   const handleEditorDidMount = (editor, monaco) => {
@@ -137,7 +140,7 @@ function twoSum(nums, target) {
           <div className="language-selector">
             <select 
               value={language} 
-              onChange={(e) => setLanguage(e.target.value)}
+              onChange={(e) => handleLanguageChange(e.target.value)}
             >
               {languages.map(lang => (
                 <option key={lang.value} value={lang.value}>
