@@ -176,37 +176,37 @@ export const ERROR_MESSAGES = {
 
 // Code Editor Placeholder Snippets
 export const CODE_SNIPPETS = {
-  javascript: `// Replace "Hello World" and start writing your code
-console.log("Hello World");
+  javascript: `// Replace "Asslamu alaikum" and start writing your code
+console.log("Asslamu alaikum");
 `,
 
-  python: `# Replace "Hello World" and start writing your code
-print("Hello World")
+  python: `# Replace "Asslamu alaikum" and start writing your code
+print("Asslamu alaikum")
 `,
 
-  java: `// Replace "Hello World" and start writing your code
+  java: `// Replace "Asslamu alaikum" and start writing your code
 public class Solution {
     public static void main(String[] args) {
-        System.out.println("Hello World");
+        System.out.println("Asslamu alaikum");
     }
 }
 `,
 
-  cpp: `// Replace "Hello World" and start writing your code
+  cpp: `// Replace "Asslamu alaikum" and start writing your code
 #include <iostream>
 using namespace std;
 
 int main() {
-    cout << "Hello World" << endl;
+    cout << "Asslamu alaikum" << endl;
     return 0;
 }
 `,
 
-  c: `// Replace "Hello World" and start writing your code
+  c: `// Replace "Asslamu alaikum" and start writing your code
 #include <stdio.h>
 
 int main() {
-    printf("Hello World\\n");
+    printf("Asslamu alaikum\\n");
     return 0;
 }
 `
