@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useOutletContext, useNavigate } from 'react-router-dom'
-import Pagination from '../../components/Pagination/Pagination'
-import Button from '../../components/Button/Button'
+import Pagination from '../../../../components/Pagination/Pagination'
+import Button from '../../../../components/Button/Button'
+import CourseCard from '../../../../components/CourseCard/CourseCard'
 import { toast } from 'react-toastify'
-import { useApi } from '../../contexts/ApiContext'
-import './Courses.css'
+import { useApi } from '../../../../contexts/ApiContext'
+import './CoursesManagement.css'
 
-function Courses() {
+function CoursesManagement() {
   const { apiBaseUrl, accessToken } = useApi()
   const { user } = useOutletContext()
   const navigate = useNavigate()
@@ -141,9 +142,6 @@ function Courses() {
       const response = await fetch(`${apiBaseUrl}/api/courses`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
-        },
-        headers: {
           'Content-Type': 'application/json',
           ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
         },
@@ -187,9 +185,6 @@ function Courses() {
       const response = await fetch(`${apiBaseUrl}/api/courses`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
-        },
-        headers: {
           'Content-Type': 'application/json',
           ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
         },
@@ -217,8 +212,8 @@ function Courses() {
       setErrors({})
       setShowNewCategoryInput(false)
       setNewCategory('')
-      // Navigate to course edit page for next steps
-      navigate(`/courses/${data.course.id}/edit`)
+      // Navigate to admin course edit page for next steps
+      navigate(`/admin/courses/management/${data.course.id}/edit`)
     } catch (error) {
       console.error('Error creating course:', error)
       toast.error('Failed to create course')
@@ -251,7 +246,7 @@ function Courses() {
 
   return (
     <div className="course-admin-page">
-      <div className="course-admin-header">
+      <div className="course-admin-header cm">
         <div>
           <h1>Course Management</h1>
           <p>Create and manage courses</p>
@@ -260,6 +255,10 @@ function Courses() {
           Create Course
         </Button>
       </div>
+
+
+
+      
 
       {loading ? (
         <div className="loading">Loading courses...</div>
@@ -279,8 +278,8 @@ function Courses() {
         </div>
       ) : (
         <>
-          <div className="courses-table-card">
-            <div className="table-header">
+          <div className="courses-grid">
+            <div className="filters-section">
               <div className="filters-left">
                 <div className="filter-group">
                   <label>Search</label>
@@ -319,45 +318,16 @@ function Courses() {
                     <option value="draft">Drafted</option>
                   </select>
                 </div>
-                <Button variant="clear-filters" onClick={handleClearFilters}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <line x1="18" y1="6" x2="6" y2="18"/>
-                    <line x1="6" y1="6" x2="18" y2="18"/>
+                <Button variant="clear-filters" onClick={handleClearFilters} title="Clear Filters">
+                  <svg viewBox="64 64 896 896" focusable="false" width="1em" height="1em" fill="currentColor" aria-hidden="true">
+                    <path d="M899.1 869.6l-53-305.6H864c14.4 0 26-11.6 26-26V346c0-14.4-11.6-26-26-26H618V138c0-14.4-11.6-26-26-26H432c-14.4 0-26 11.6-26 26v182H160c-14.4 0-26 11.6-26 26v192c0 14.4 11.6 26 26 26h17.9l-53 305.6a25.95 25.95 0 0025.6 30.4h723c1.5 0 3-.1 4.4-.4a25.88 25.88 0 0021.2-30zM204 390h272V182h72v208h272v104H204V390zm468 440V674c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v156H416V674c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v156H202.8l45.1-260H776l45.1 260H672z"></path>
                   </svg>
-                  Clear Filters
                 </Button>
               </div>
             </div>
 
-            <div className="courses-grid">
               {filteredCourses.map(course => (
-                <div 
-                  key={course.id} 
-                  className="course-card"
-                  onClick={() => navigate(`/courses/${course.id}/edit`)}
-                >
-                  <div className="course-thumbnail">
-                    {course.thumbnail ? (
-                      <img src={course.thumbnail} alt={course.name} />
-                    ) : (
-                      <div className="course-thumbnail-placeholder">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-                          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-                        </svg>
-                      </div>
-                    )}
-                  </div>
-                  <div className="course-info">
-                    <h3>{course.name}</h3>
-                    <div className="course-meta">
-                      <span className="course-category">{course.category}</span>
-                      <span className={`course-status ${course.status}`}>
-                        {course.status === 'published' ? 'Published' : 'Draft'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+              <CourseCard key={course.id} course={course} />
               ))}
             </div>
 
@@ -372,7 +342,6 @@ function Courses() {
                 />
               </div>
             )}
-          </div>
         </>
       )}
 
@@ -480,4 +449,5 @@ function Courses() {
   )
 }
 
-export default Courses
+export default CoursesManagement
+

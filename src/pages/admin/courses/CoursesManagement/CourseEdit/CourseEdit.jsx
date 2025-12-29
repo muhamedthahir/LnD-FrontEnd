@@ -1,21 +1,22 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useOutletContext } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import Button from '../../../components/Button/Button'
-import LessonModal from '../../../components/LessonModal/LessonModal'
-import ConfirmModal from '../../../components/ConfirmModal/ConfirmModal'
-import { useApi } from '../../../contexts/ApiContext'
-import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES, VALIDATION_MESSAGES } from '../../../constants/constants'
+import Button from '../../../../../components/Button/Button'
+import LessonModal from '../../../../../components/LessonModal/LessonModal'
+import ConfirmModal from '../../../../../components/ConfirmModal/ConfirmModal'
+import { useApi } from '../../../../../contexts/ApiContext'
+import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES, VALIDATION_MESSAGES } from '../../../../../constants/constants'
 import './CourseEdit.css'
 
 function CourseEdit() {
   const { apiBaseUrl, accessToken } = useApi()
   const { id } = useParams()
   const navigate = useNavigate()
+  const { user } = useOutletContext()
   const [activeTab, setActiveTab] = useState('sections')
   const [course, setCourse] = useState(null)
   const [sections, setSections] = useState([])
-  const [sectionLessons, setSectionLessons] = useState({}) // Store lessons for each section
+  const [sectionLessons, setSectionLessons] = useState({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   
@@ -52,59 +53,44 @@ function CourseEdit() {
   const [lessonToDelete, setLessonToDelete] = useState(null)
   const [sectionIdForDelete, setSectionIdForDelete] = useState(null)
 
+  const [showDeleteSectionConfirm, setShowDeleteSectionConfirm] = useState(false)
+  const [sectionToDelete, setSectionToDelete] = useState(null)
+
   useEffect(() => {
-    fetchCourse()
-    if (id && id !== 'new') {
-      fetchSections()
+    if (!id || id === 'new') {
+      toast.error('Invalid course')
+      navigate('/admin/courses/management')
+      return
     }
+    fetchCourse()
+    fetchSections()
   }, [id])
 
   const fetchCourse = async () => {
     try {
       setLoading(true)
-      if (id === 'new') {
-        // New course - initialize with empty data
-        setCourse({
-          id: null,
-          name: '',
-          category: '',
-          competency_level: '',
-          short_description: '',
-          course_outcomes: '',
-          status: 'draft',
-          thumbnail: null
-        })
-        setCourseForm({
-          name: '',
-          category: '',
-          competency_level: '',
-          short_description: '',
-          course_outcomes: ''
-        })
-        setTags([])
-      } else {
-        const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.COURSES.GET(id)}`, {
-          headers: {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.COURSES.GET(id)}`, {
+        headers: {
           'Content-Type': 'application/json',
           ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
         }
-        })
-        if (!response.ok) throw new Error('Failed to fetch course')
-        const data = await response.json()
-        setCourse(data)
-        setCourseForm({
-          name: data.name || '',
-          category: data.category || '',
-          competency_level: data.competency_level || '',
-          short_description: data.short_description || '',
-          course_outcomes: data.course_outcomes || ''
-        })
-        setTags(data.category ? [data.category] : [])
-        setThumbnail(data.thumbnail)
-      }
+      })
+      if (!response.ok) throw new Error('Failed to fetch course')
+      const data = await response.json()
+      setCourse(data)
+      setCourseForm({
+        name: data.name || '',
+        category: data.category || '',
+        competency_level: data.competency_level || '',
+        short_description: data.short_description || '',
+        course_outcomes: data.course_outcomes || ''
+      })
+      setTags(data.category ? [data.category] : [])
+      setThumbnail(data.thumbnail)
     } catch (error) {
       console.error('Error fetching course:', error)
       toast.error(ERROR_MESSAGES.COURSE_FETCH_FAILED)
+      navigate('/admin/courses/management')
     } finally {
       setLoading(false)
     }
@@ -128,9 +114,9 @@ function CourseEdit() {
         try {
           const lessonsResponse = await fetch(`${apiBaseUrl}${API_ENDPOINTS.SEGMENTS.GET_BY_TOPIC(section.id)}`, {
             headers: {
-          'Content-Type': 'application/json',
-          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
-        }
+              'Content-Type': 'application/json',
+              ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+            }
           })
           if (lessonsResponse.ok) {
             const lessons = await lessonsResponse.json()
@@ -177,7 +163,6 @@ function CourseEdit() {
   }
 
   const saveCourse = async (status) => {
-    // Validate required fields
     if (!courseForm.name || !courseForm.name.trim()) {
       toast.error(VALIDATION_MESSAGES.COURSE_NAME_REQUIRED)
       return
@@ -204,38 +189,20 @@ function CourseEdit() {
         tags: tags.join(',')
       }
 
-      let response
-      if (id === 'new') {
-        response = await fetch(`${apiBaseUrl}/api/courses`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          headers: {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.COURSES.UPDATE(id)}`, {
+        method: 'PUT',
+        headers: {
           'Content-Type': 'application/json',
           ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
         },
-          body: JSON.stringify(courseData)
-        })
-      } else {
-        response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.COURSES.UPDATE(id)}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          headers: {
-          'Content-Type': 'application/json',
-          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
-        },
-          body: JSON.stringify(courseData)
-        })
-      }
+        body: JSON.stringify(courseData)
+      })
 
       if (!response.ok) throw new Error('Failed to save course')
       const data = await response.json()
       toast.success(status === 'published' ? SUCCESS_MESSAGES.COURSE_PUBLISHED : SUCCESS_MESSAGES.COURSE_SAVED_DRAFT)
-      
-      if (id === 'new') {
-        navigate(`/courses/${data.course.id}/edit`)
-      } else {
-        setCourse(data.course)
-      }
+      setCourse(data.course)
+      setEditMode(false)
     } catch (error) {
       console.error('Error saving course:', error)
       toast.error(ERROR_MESSAGES.COURSE_SAVE_FAILED)
@@ -251,21 +218,14 @@ function CourseEdit() {
     }
 
     try {
-      const courseId = id === 'new' ? null : id
-      if (!courseId) {
-        toast.error(VALIDATION_MESSAGES.SAVE_COURSE_FIRST)
-        return
-      }
-
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.TOPICS.CREATE}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         headers: {
           'Content-Type': 'application/json',
           ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
         },
         body: JSON.stringify({
-          course_id: courseId,
+          course_id: id,
           name: sectionForm.title,
           description: sectionForm.description,
           order_index: sections.length
@@ -293,7 +253,6 @@ function CourseEdit() {
     try {
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.TOPICS.UPDATE(editingSection.id)}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         headers: {
           'Content-Type': 'application/json',
           ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
@@ -317,9 +276,6 @@ function CourseEdit() {
       toast.error(ERROR_MESSAGES.SECTION_UPDATE_FAILED)
     }
   }
-
-  const [showDeleteSectionConfirm, setShowDeleteSectionConfirm] = useState(false)
-  const [sectionToDelete, setSectionToDelete] = useState(null)
 
   const handleDeleteSection = (sectionId) => {
     setSectionToDelete(sectionId)
@@ -361,7 +317,6 @@ function CourseEdit() {
       [sectionId]: !prev[sectionId]
     }))
     
-    // Fetch lessons when section is expanded for the first time
     if (isExpanding && !sectionLessons[sectionId]) {
       await fetchSectionLessons(sectionId)
     }
@@ -395,25 +350,43 @@ function CourseEdit() {
   }
 
   const isPublished = course?.status === 'published'
+  const isEditable = !isPublished || editMode
 
   return (
     <div className="course-edit-page">
       <div className="course-edit-header">
-        <button className="back-button" onClick={() => navigate('/courses')}>
+        <button className="back-button" onClick={() => navigate('/admin/courses/management')}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M19 12H5M12 19l-7-7 7-7"/>
           </svg>
         </button>
         <div className="header-content">
-          <h1>{course?.name || 'New Course'}</h1>
+          <h1>{course?.name || 'Course'}</h1>
           <div className="header-actions">
-            {isPublished ? (
+            {isPublished && !editMode ? (
               <Button 
-                variant="secondary" 
-                disabled={true}
+                variant="primary" 
+                onClick={() => setEditMode(true)}
               >
-                Published
+                Edit Course
               </Button>
+            ) : isPublished ? (
+              <>
+                <Button 
+                  variant="secondary" 
+                  onClick={() => setEditMode(false)}
+                  disabled={saving}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  variant="primary" 
+                  onClick={handleSaveAndPublish}
+                  disabled={saving}
+                >
+                  Save Changes
+                </Button>
+              </>
             ) : (
               <>
                 <Button 
@@ -470,7 +443,7 @@ function CourseEdit() {
                 </div>
                 <h3>No Sections Added</h3>
                 <p>Add sections to organize your course content into topics and lessons.</p>
-                {!isPublished && (
+                {isEditable && (
                   <Button variant="primary" onClick={() => setShowSectionForm(true)}>
                     Add Section
                   </Button>
@@ -478,7 +451,7 @@ function CourseEdit() {
               </div>
             ) : (
               <>
-                {showSectionForm && !isPublished && (
+                {showSectionForm && isEditable && (
                   <div className="section-form">
                     <h3>{editingSection ? 'Edit Section' : 'Add Section'}</h3>
                     <div className="form-group">
@@ -513,7 +486,7 @@ function CourseEdit() {
                   </div>
                 )}
 
-                {!showSectionForm && !isPublished && (
+                {!showSectionForm && isEditable && (
                   <Button 
                     variant="primary" 
                     onClick={() => setShowSectionForm(true)}
@@ -532,7 +505,7 @@ function CourseEdit() {
                           {section.description && <p>{section.description}</p>}
                         </div>
                         <div className="section-actions">
-                          {!isPublished && (
+                          {isEditable && (
                             <>
                               <button 
                                 className="icon-btn"
@@ -572,7 +545,7 @@ function CourseEdit() {
                       </div>
                       {expandedSections[section.id] && (
                         <div className="section-content">
-                          {!isPublished && (
+                          {isEditable && (
                             <div className="section-options">
                               <Button 
                                 variant="secondary"
@@ -596,18 +569,17 @@ function CourseEdit() {
                                       <h5>{lesson.name}</h5>
                                       <span className="lesson-type">{lesson.segment_type.replace('lesson_', '')}</span>
                                     </div>
-                                    {!isPublished && (
+                                    {isEditable && (
                                       <div className="lesson-actions">
                                         <button 
                                           className="icon-btn"
                                           onClick={async () => {
-                                            // Fetch lesson details for editing
                                             try {
                                               const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.SEGMENTS.GET(lesson.id)}`, {
                                                 headers: {
-          'Content-Type': 'application/json',
-          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
-        }
+                                                  'Content-Type': 'application/json',
+                                                  ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+                                                }
                                               })
                                               if (!response.ok) throw new Error('Failed to fetch lesson')
                                               const lessonData = await response.json()
@@ -671,7 +643,7 @@ function CourseEdit() {
           <div className="details-tab">
             {!editMode ? (
               <div className="course-details-view">
-                {!isPublished && (
+                {isPublished && (
                   <Button variant="primary" onClick={() => setEditMode(true)}>
                     Edit Course
                   </Button>
@@ -779,52 +751,68 @@ function CourseEdit() {
                 {thumbnail ? (
                   <div className="thumbnail-preview">
                     <img src={thumbnail} alt="Course thumbnail" />
-                    <button onClick={() => setThumbnail(null)}>Remove</button>
+                    {isEditable && (
+                      <button onClick={() => setThumbnail(null)}>Remove</button>
+                    )}
                   </div>
                 ) : (
-                  <div className="thumbnail-placeholder">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-                      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-                    </svg>
-                    <p>Upload thumbnail image</p>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files[0]
-                        if (file) {
-                          const reader = new FileReader()
-                          reader.onload = (e) => setThumbnail(e.target.result)
-                          reader.readAsDataURL(file)
-                        }
-                      }}
-                    />
-                  </div>
+                  isEditable && (
+                    <div className="thumbnail-placeholder">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                      </svg>
+                      <p>Upload thumbnail image</p>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files[0]
+                          if (file) {
+                            const reader = new FileReader()
+                            reader.onload = (e) => setThumbnail(e.target.result)
+                            reader.readAsDataURL(file)
+                          }
+                        }}
+                      />
+                    </div>
+                  )
                 )}
               </div>
             </div>
 
             <div className="settings-section">
               <h3>Tags</h3>
-              <div className="tags-input">
-                <input
-                  type="text"
-                  value={newTag}
-                  onChange={(e) => setNewTag(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleAddTag()}
-                  placeholder="Add a tag"
-                />
-                <Button variant="primary" onClick={handleAddTag}>Add Tag</Button>
-              </div>
-              <div className="tags-list">
-                {tags.map(tag => (
-                  <span key={tag} className="tag">
-                    {tag}
-                    <button onClick={() => handleRemoveTag(tag)}>×</button>
-                  </span>
-                ))}
-              </div>
+              {isEditable ? (
+                <>
+                  <div className="tags-input">
+                    <input
+                      type="text"
+                      value={newTag}
+                      onChange={(e) => setNewTag(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleAddTag()}
+                      placeholder="Add a tag"
+                    />
+                    <Button variant="primary" onClick={handleAddTag}>Add Tag</Button>
+                  </div>
+                  <div className="tags-list">
+                    {tags.map(tag => (
+                      <span key={tag} className="tag">
+                        {tag}
+                        <button onClick={() => handleRemoveTag(tag)}>×</button>
+                      </span>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <div className="tags-list">
+                  {tags.map(tag => (
+                    <span key={tag} className="tag">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -842,9 +830,9 @@ function CourseEdit() {
             const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.SEGMENTS.DELETE(lessonToDelete.id)}`, {
               method: 'DELETE',
               headers: {
-          'Content-Type': 'application/json',
-          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
-        }
+                'Content-Type': 'application/json',
+                ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+              }
             })
             if (!response.ok) throw new Error('Failed to delete lesson')
             toast.success(SUCCESS_MESSAGES.LESSON_DELETED)
@@ -873,7 +861,6 @@ function CourseEdit() {
         }}
         onAdd={async (lessonData) => {
           try {
-            // Map content type to segment type
             let segmentType = 'articles'
             if (lessonData.contentType === 'article') {
               segmentType = 'lesson_text'
@@ -886,14 +873,12 @@ function CourseEdit() {
             }
 
             if (lessonData.lessonId) {
-              // Update existing lesson
               const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.SEGMENTS.UPDATE(lessonData.lessonId)}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
                 headers: {
-          'Content-Type': 'application/json',
-          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
-        },
+                  'Content-Type': 'application/json',
+                  ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+                },
                 body: JSON.stringify({
                   name: lessonData.name,
                   description: '',
@@ -906,14 +891,12 @@ function CourseEdit() {
               if (!response.ok) throw new Error('Failed to update lesson')
               toast.success(SUCCESS_MESSAGES.LESSON_UPDATED)
             } else {
-              // Create new lesson
               const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.SEGMENTS.CREATE}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 headers: {
-          'Content-Type': 'application/json',
-          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
-        },
+                  'Content-Type': 'application/json',
+                  ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+                },
                 body: JSON.stringify({
                   topic_id: selectedSectionId,
                   name: lessonData.name,
@@ -928,7 +911,6 @@ function CourseEdit() {
               toast.success(SUCCESS_MESSAGES.LESSON_CREATED)
             }
             
-            // Refresh lessons for the section
             await fetchSectionLessons(selectedSectionId)
           } catch (error) {
             console.error('Error saving lesson:', error)

@@ -247,5 +247,10 @@ html[data-sidebar-collapsed="true"] .app-header {
     left: var(--spacing-md);
     min-width: auto;
   }
+
+  /* Hide sidebar toggle button on mobile screens */
+  .sidebar-toggle-btn-header {
+    display: none;
+  }
 }
 

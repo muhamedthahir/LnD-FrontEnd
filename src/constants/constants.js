@@ -51,6 +51,16 @@ export const API_ENDPOINTS = {
     DELETE: (id) => `/api/courses/${id}`
   },
   
+  // Administrations
+  ADMINISTRATIONS: {
+    LIST: '/api/administrations',
+    CREATE: '/api/administrations',
+    GET: (id) => `/api/administrations/${id}`,
+    UPDATE: (id) => `/api/administrations/${id}`,
+    DELETE: (id) => `/api/administrations/${id}`,
+    DRAFT: '/api/administrations/draft'
+  },
+  
   // Topics (Sections)
   TOPICS: {
     CREATE: '/api/topics',

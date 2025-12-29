@@ -263,5 +263,10 @@
     justify-content: center;
     padding: var(--spacing-md);
   }
+
+  /* Hide sidebar toggle button on mobile screens */
+  .sidebar-toggle-btn {
+    display: none;
+  }
 }
 
