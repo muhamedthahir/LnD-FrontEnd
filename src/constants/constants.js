@@ -76,6 +76,15 @@ export const API_ENDPOINTS = {
     UPDATE: (id) => `/api/segments/${id}`,
     DELETE: (id) => `/api/segments/${id}`,
     GET_BY_TOPIC: (topicId) => `/api/segments/topic/${topicId}`
+  },
+  
+  // File Upload
+  UPLOAD: {
+    SINGLE: '/api/upload',
+    MULTIPLE: '/api/upload/multiple',
+    DELETE: '/api/upload/delete',
+    CREATE_BUCKET: '/api/upload/create-bucket',
+    ALLOWED_TYPES: '/api/upload/allowed-types'
   }
 }
 
@@ -121,7 +130,12 @@ export const SUCCESS_MESSAGES = {
   PASSWORD_SET: 'Password set successfully! Please login with your new password.',
   
   // File
-  TEMPLATE_DOWNLOADED: 'Template downloaded successfully'
+  TEMPLATE_DOWNLOADED: 'Template downloaded successfully',
+  
+  // Upload
+  UPLOAD_SUCCESS: 'Document uploaded successfully',
+  UPLOAD_MULTIPLE_SUCCESS: (count) => `Successfully uploaded ${count} document(s)`,
+  UPLOAD_DELETE_SUCCESS: 'Document deleted successfully'
 }
 
 // Error Messages
@@ -181,7 +195,15 @@ export const ERROR_MESSAGES = {
   // Validation
   REQUIRED_FIELD: (fieldName) => `${fieldName} is required`,
   INVALID_EMAIL: 'Invalid email format',
-  INVALID_FORMAT: 'Invalid format'
+  INVALID_FORMAT: 'Invalid format',
+  
+  // Upload
+  UPLOAD_FAILED: 'Failed to upload document',
+  UPLOAD_MULTIPLE_FAILED: 'Failed to upload documents',
+  UPLOAD_DELETE_FAILED: 'Failed to delete document',
+  UPLOAD_NO_FILE: 'Please select a file to upload',
+  UPLOAD_FILE_TOO_LARGE: 'File size exceeds the maximum allowed limit',
+  UPLOAD_INVALID_TYPE: 'File type is not allowed'
 }
 
 // Code Editor Placeholder Snippets

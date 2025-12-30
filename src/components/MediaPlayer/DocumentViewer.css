@@ -1,0 +1,192 @@
+.document-viewer-container {
+  width: 100%;
+  background: var(--bg-tertiary, #1a1a2e);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.document-viewer-container.compact {
+  max-width: 320px;
+}
+
+.document-viewer-container.pdf-preview {
+  position: relative;
+  min-height: 300px;
+}
+
+.pdf-iframe {
+  width: 100%;
+  height: 300px;
+  border: none;
+  background: #fff;
+}
+
+.document-viewer-container.compact .pdf-iframe {
+  height: 200px;
+}
+
+.documents-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+}
+
+.document-item,
+.document-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--bg-secondary, #16162a);
+  border-radius: 6px;
+  text-decoration: none;
+  color: var(--text-primary, #fff);
+  transition: all 0.2s ease;
+  border: 1px solid var(--border-color, #333);
+}
+
+.document-item:hover,
+.document-card:hover {
+  background: var(--bg-primary, #1e1e3f);
+  border-color: var(--primary, #6366f1);
+}
+
+.document-viewer-container.compact .document-item,
+.document-viewer-container.compact .document-card {
+  padding: 10px;
+  gap: 10px;
+}
+
+.file-icon {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  padding: 8px;
+  background: var(--bg-tertiary, #1a1a2e);
+  border-radius: 6px;
+  color: var(--text-secondary, #888);
+}
+
+.document-viewer-container.compact .file-icon {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  padding: 6px;
+}
+
+.file-icon.pdf { color: #ef4444; }
+.file-icon.doc { color: #3b82f6; }
+.file-icon.ppt { color: #f97316; }
+.file-icon.xls { color: #22c55e; }
+
+.document-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.document-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary, #fff);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.document-viewer-container.compact .document-name {
+  font-size: 12px;
+}
+
+.document-type {
+  font-size: 11px;
+  color: var(--text-secondary, #888);
+}
+
+.download-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--text-secondary, #888);
+  transition: color 0.2s ease;
+}
+
+.document-item:hover .download-icon,
+.document-card:hover .download-icon {
+  color: var(--primary, #6366f1);
+}
+
+.document-placeholder,
+.document-error,
+.document-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 32px;
+  color: var(--text-secondary, #888);
+}
+
+.document-placeholder svg,
+.document-error svg {
+  width: 40px;
+  height: 40px;
+  opacity: 0.5;
+}
+
+.document-error {
+  color: var(--danger, #ef4444);
+}
+
+.document-loading .spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border-color, #333);
+  border-top-color: var(--primary, #6366f1);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.download-link,
+.open-link {
+  font-size: 12px;
+  color: var(--primary, #6366f1);
+  text-decoration: none;
+  margin-top: 8px;
+}
+
+.download-link:hover,
+.open-link:hover {
+  text-decoration: underline;
+}
+
+.document-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--bg-secondary, #16162a);
+  border-top: 1px solid var(--border-color, #333);
+}
+
+.document-footer .file-name {
+  font-size: 12px;
+  color: var(--text-primary, #fff);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 60%;
+}
+
+.file-name {
+  font-size: 12px;
+  color: var(--text-secondary, #888);
+}
+

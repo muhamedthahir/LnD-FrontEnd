@@ -4,9 +4,10 @@ import Button from '../Button/Button'
 import ConfirmModal from '../ConfirmModal/ConfirmModal'
 import InputModal from '../InputModal/InputModal'
 import DoubleInputModal from '../DoubleInputModal/DoubleInputModal'
+import { VideoPlayer, AudioPlayer, DocumentViewer } from '../MediaPlayer'
 import './LessonModal.css'
 
-function LessonModal({ isOpen, onClose, onAdd, sectionId, editingLesson = null }) {
+function LessonModal({ isOpen, onClose, onAdd, sectionId, editingLesson = null, isSaving = false }) {
   const [lessonName, setLessonName] = useState('')
   const [contentType, setContentType] = useState('article') // article, video, document
   const [articleContent, setArticleContent] = useState('')
@@ -20,6 +21,11 @@ function LessonModal({ isOpen, onClose, onAdd, sectionId, editingLesson = null }
   const [isDragging, setIsDragging] = useState(false)
   const [showTextColorPicker, setShowTextColorPicker] = useState(false)
   const [showBgColorPicker, setShowBgColorPicker] = useState(false)
+  
+  // Existing media from S3 (when editing)
+  const [existingMediaUrl, setExistingMediaUrl] = useState(null)
+  const [existingMediaFileName, setExistingMediaFileName] = useState('')
+  const [existingDocuments, setExistingDocuments] = useState([])
   
   // Modal states
   const [showLinkModal, setShowLinkModal] = useState(false)
@@ -47,6 +53,9 @@ function LessonModal({ isOpen, onClose, onAdd, sectionId, editingLesson = null }
     setDocumentUrl('')
     setShowTextColorPicker(false)
     setShowBgColorPicker(false)
+    setExistingMediaUrl(null)
+    setExistingMediaFileName('')
+    setExistingDocuments([])
     editorContentLoadedRef.current = false
     // Clear editor content
     if (editorRef.current) {
@@ -85,14 +94,23 @@ function LessonModal({ isOpen, onClose, onAdd, sectionId, editingLesson = null }
           if (content.source === 'embedded') {
             setVideoEmbedded(true)
             setVideoUrl(content.url || '')
+          } else if (content.source === 'upload' && (content.presignedUrl || content.url)) {
+            // S3 uploaded video - show preview using presigned URL
+            setVideoEmbedded(false)
+            setExistingMediaUrl(content.presignedUrl || content.url)
+            setExistingMediaFileName(content.fileName || '')
           } else {
             setVideoEmbedded(false)
-            // Note: File objects can't be restored from JSON, so we'll leave videoFile as null
           }
         } else if (contentTypeValue === 'audio') {
           if (content.source === 'embedded') {
             setVideoEmbedded(true) // Using videoEmbedded state for audio embedded toggle (shared state)
             setVideoUrl(content.url || '')
+          } else if (content.source === 'upload' && (content.presignedUrl || content.url)) {
+            // S3 uploaded audio - show preview using presigned URL
+            setVideoEmbedded(false)
+            setExistingMediaUrl(content.presignedUrl || content.url)
+            setExistingMediaFileName(content.fileName || '')
           } else {
             setVideoEmbedded(false)
           }
@@ -100,9 +118,24 @@ function LessonModal({ isOpen, onClose, onAdd, sectionId, editingLesson = null }
           if (content.source === 'embedded') {
             setDocumentEmbedded(true)
             setDocumentUrl(content.url || '')
+          } else if (content.source === 'upload' && content.files) {
+            // S3 uploaded documents - show previews using presigned URLs
+            setDocumentEmbedded(false)
+            // Use presignedUrl if available, fallback to url
+            const filesWithUrls = content.files.map(file => ({
+              ...file,
+              url: file.presignedUrl || file.url
+            }))
+            setExistingDocuments(filesWithUrls)
+          } else if (content.source === 'upload' && (content.presignedUrl || content.url)) {
+            // Single document URL
+            setDocumentEmbedded(false)
+            setExistingDocuments([{ 
+              url: content.presignedUrl || content.url, 
+              fileName: content.fileName || '' 
+            }])
           } else {
             setDocumentEmbedded(false)
-            // Note: File objects can't be restored from JSON
           }
         }
       }
@@ -239,16 +272,16 @@ function LessonModal({ isOpen, onClose, onAdd, sectionId, editingLesson = null }
       }
     }
 
+    // Don't reset form or close modal here - let parent handle it after API response
     onAdd({
       name: lessonName,
       contentType,
       content,
       sectionId,
-      lessonId: editingLesson?.id || null
+      lessonId: editingLesson?.id || null,
+      existingMediaUrl, // Pass existing media URL so parent knows if it needs to upload
+      existingDocuments
     })
-
-    resetForm()
-    onClose()
   }
 
   const handleDocumentDrop = (e) => {
@@ -1165,85 +1198,193 @@ function LessonModal({ isOpen, onClose, onAdd, sectionId, editingLesson = null }
           {/* Video/Audio Content */}
           {(contentType === 'video' || contentType === 'audio') && (
             <div className="media-content">
-              <div className="content-source-toggle">
-                <label className="toggle-switch">
-                  <input
-                    type="checkbox"
-                    checked={videoEmbedded}
-                    onChange={(e) => setVideoEmbedded(e.target.checked)}
-                  />
-                  <span className="toggle-slider"></span>
-                  <span className="toggle-label">Use Embedded URL</span>
-                </label>
-              </div>
-
-              {videoEmbedded ? (
-                <div className="form-group">
-                  <label>Embedded URL (YouTube/Vimeo) <span className="required">*</span></label>
-                  <input
-                    type="url"
-                    value={videoUrl}
-                    onChange={(e) => setVideoUrl(e.target.value)}
-                    placeholder="https://www.youtube.com/embed/..."
-                  />
-                </div>
-              ) : (
-                <div className="media-upload">
-                  <div className="media-placeholder">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      {contentType === 'video' ? (
-                        <polygon points="5 3 19 12 5 21 5 3"/>
-                      ) : (
-                        <path d="M9 18V5l12-2v13"/>
-                      )}
-                    </svg>
-                    <p>Upload {contentType === 'video' ? 'Video' : 'Audio'} File</p>
-                    <p className="placeholder-note">(Amazon S3 hosting will be integrated later)</p>
-                    <input
-                      ref={contentType === 'video' ? videoInputRef : audioInputRef}
-                      type="file"
-                      accept={contentType === 'video' ? 'video/*' : 'audio/*'}
-                      onChange={(e) => {
-                        if (contentType === 'video') {
-                          setVideoFile(e.target.files[0])
-                        } else {
-                          setAudioFile(e.target.files[0])
-                        }
-                      }}
-                      style={{ display: 'none' }}
-                    />
-                    <Button
-                      variant="secondary"
-                      onClick={() => {
-                        if (contentType === 'video') {
-                          videoInputRef.current?.click()
-                        } else {
-                          audioInputRef.current?.click()
-                        }
-                      }}
-                    >
-                      Choose File
-                    </Button>
-                    {(contentType === 'video' ? videoFile : audioFile) && (
-                      <p className="file-name">
-                        {(contentType === 'video' ? videoFile : audioFile).name}
-                      </p>
+              {/* Show existing media preview when editing */}
+              {existingMediaUrl && !videoEmbedded && !(contentType === 'video' ? videoFile : audioFile) && (
+                <div className="existing-media-section">
+                  <div className="section-header">
+                    <span className="section-icon">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        {contentType === 'video' ? (
+                          <polygon points="5 3 19 12 5 21 5 3"/>
+                        ) : (
+                          <path d="M9 18V5l12-2v13"/>
+                        )}
+                      </svg>
+                    </span>
+                    <h4>Current {contentType === 'video' ? 'Video' : 'Audio'}</h4>
+                  </div>
+                  <div className="existing-media-player">
+                    {contentType === 'video' ? (
+                      <VideoPlayer 
+                        url={existingMediaUrl} 
+                        fileName={existingMediaFileName}
+                        compact={true}
+                      />
+                    ) : (
+                      <AudioPlayer 
+                        url={existingMediaUrl} 
+                        fileName={existingMediaFileName}
+                        compact={true}
+                      />
                     )}
                   </div>
                 </div>
               )}
+
+              {/* Separator when both existing and upload sections are visible */}
+              {existingMediaUrl && !videoEmbedded && !(contentType === 'video' ? videoFile : audioFile) && (
+                <div className="media-section-divider">
+                  <span>OR</span>
+                </div>
+              )}
+
+              {/* Upload New Media Section */}
+              <div className="upload-media-section">
+                <div className="section-header">
+                  <span className="section-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="17 8 12 3 7 8"/>
+                      <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                  </span>
+                  <h4>{existingMediaUrl ? 'Replace with New File' : 'Upload File'}</h4>
+                </div>
+
+                <div className="content-source-toggle">
+                  <label className="toggle-switch">
+                    <input
+                      type="checkbox"
+                      checked={videoEmbedded}
+                      onChange={(e) => {
+                        setVideoEmbedded(e.target.checked)
+                        // Clear existing media when switching to embedded
+                        if (e.target.checked) {
+                          setExistingMediaUrl(null)
+                          setExistingMediaFileName('')
+                        }
+                      }}
+                    />
+                    <span className="toggle-slider"></span>
+                    <span className="toggle-label">Use Embedded URL</span>
+                  </label>
+                </div>
+
+                {videoEmbedded ? (
+                  <div className="form-group">
+                    <label>Embedded URL (YouTube/Vimeo) <span className="required">*</span></label>
+                    <input
+                      type="url"
+                      value={videoUrl}
+                      onChange={(e) => setVideoUrl(e.target.value)}
+                      placeholder="https://www.youtube.com/embed/..."
+                    />
+                  </div>
+                ) : (
+                  <div className="media-upload">
+                    <div className="media-placeholder">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                      </svg>
+                      <p>Drop {contentType === 'video' ? 'video' : 'audio'} file here or click to browse</p>
+                      <input
+                        ref={contentType === 'video' ? videoInputRef : audioInputRef}
+                        type="file"
+                        accept={contentType === 'video' ? 'video/*' : 'audio/*'}
+                        onChange={(e) => {
+                          if (contentType === 'video') {
+                            setVideoFile(e.target.files[0])
+                          } else {
+                            setAudioFile(e.target.files[0])
+                          }
+                        }}
+                        style={{ display: 'none' }}
+                      />
+                      <Button
+                        variant="secondary"
+                        onClick={() => {
+                          if (contentType === 'video') {
+                            videoInputRef.current?.click()
+                          } else {
+                            audioInputRef.current?.click()
+                          }
+                        }}
+                      >
+                        Choose File
+                      </Button>
+                      {(contentType === 'video' ? videoFile : audioFile) && (
+                        <div className="selected-file-info">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <polyline points="20 6 9 17 4 12"/>
+                          </svg>
+                          <span>{(contentType === 'video' ? videoFile : audioFile).name}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
           {/* Document Content */}
           {contentType === 'document' && (
             <div className="document-content">
+              {/* Show existing documents preview when editing */}
+              {existingDocuments.length > 0 && !documentEmbedded && documentFiles.length === 0 && (
+                <div className="existing-media-section">
+                  <div className="section-header">
+                    <span className="section-icon">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                      </svg>
+                    </span>
+                    <h4>Current Documents</h4>
+                  </div>
+                  <div className="existing-media-player">
+                    <DocumentViewer 
+                      files={existingDocuments}
+                      compact={true}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Separator when both existing and upload sections are visible */}
+              {existingDocuments.length > 0 && !documentEmbedded && documentFiles.length === 0 && (
+                <div className="media-section-divider">
+                  <span>OR</span>
+                </div>
+              )}
+
+              {/* Upload New Documents Section */}
+              <div className="upload-media-section">
+                <div className="section-header">
+                  <span className="section-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="17 8 12 3 7 8"/>
+                      <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                  </span>
+                  <h4>{existingDocuments.length > 0 ? 'Replace with New Files' : 'Upload Files'}</h4>
+                </div>
+
               <div className="content-source-toggle">
                 <label className="toggle-switch">
                   <input
                     type="checkbox"
                     checked={documentEmbedded}
-                    onChange={(e) => setDocumentEmbedded(e.target.checked)}
+                    onChange={(e) => {
+                      setDocumentEmbedded(e.target.checked)
+                      // Clear existing documents when switching to embedded
+                      if (e.target.checked) {
+                        setExistingDocuments([])
+                      }
+                    }}
                   />
                   <span className="toggle-slider"></span>
                   <span className="toggle-label">Use Embedded URL</span>
@@ -1276,7 +1417,7 @@ function LessonModal({ isOpen, onClose, onAdd, sectionId, editingLesson = null }
                       <polyline points="17 8 12 3 7 8"/>
                       <line x1="12" y1="3" x2="12" y2="15"/>
                     </svg>
-                    <p>Drag and drop documents here</p>
+                    <p>{existingDocuments.length > 0 ? 'Replace documents' : 'Drag and drop documents here'}</p>
                     <p className="drop-note">or</p>
                     <input
                       ref={fileInputRef}
@@ -1297,7 +1438,7 @@ function LessonModal({ isOpen, onClose, onAdd, sectionId, editingLesson = null }
 
                   {documentFiles.length > 0 && (
                     <div className="document-list">
-                      <h4>Uploaded Documents:</h4>
+                      <h4>New Documents to Upload:</h4>
                       {documentFiles.map((file, index) => (
                         <div key={index} className="document-item">
                           <span>{file.name}</span>
@@ -1308,16 +1449,24 @@ function LessonModal({ isOpen, onClose, onAdd, sectionId, editingLesson = null }
                   )}
                 </div>
               )}
+              </div>
             </div>
           )}
         </div>
 
         <div className="lesson-modal-footer">
-          <Button variant="secondary" onClick={handleClose}>
+          <Button variant="secondary" onClick={handleClose} disabled={isSaving}>
             Cancel
           </Button>
-          <Button variant="primary" onClick={handleAdd}>
-            {editingLesson ? 'Update Lesson' : 'Add Lesson'}
+          <Button variant="primary" onClick={handleAdd} disabled={isSaving}>
+            {isSaving ? (
+              <>
+                <span className="btn-spinner"></span>
+                Saving...
+              </>
+            ) : (
+              editingLesson ? 'Update Lesson' : 'Add Lesson'
+            )}
           </Button>
         </div>
       </div>

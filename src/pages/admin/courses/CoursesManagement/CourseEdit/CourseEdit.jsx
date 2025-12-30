@@ -47,6 +47,7 @@ function CourseEdit() {
   const [showLessonModal, setShowLessonModal] = useState(false)
   const [selectedSectionId, setSelectedSectionId] = useState(null)
   const [editingLesson, setEditingLesson] = useState(null)
+  const [savingLesson, setSavingLesson] = useState(false)
   
   // Lesson deletion state
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -866,12 +867,16 @@ function CourseEdit() {
       <LessonModal
         isOpen={showLessonModal}
         editingLesson={editingLesson}
+        isSaving={savingLesson}
         onClose={() => {
-          setShowLessonModal(false)
-          setSelectedSectionId(null)
-          setEditingLesson(null)
+          if (!savingLesson) {
+            setShowLessonModal(false)
+            setSelectedSectionId(null)
+            setEditingLesson(null)
+          }
         }}
         onAdd={async (lessonData) => {
+          setSavingLesson(true)
           try {
             let segmentType = 'articles'
             if (lessonData.contentType === 'article') {
@@ -884,49 +889,110 @@ function CourseEdit() {
               segmentType = 'lesson_document'
             }
 
-            if (lessonData.lessonId) {
-              const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.SEGMENTS.UPDATE(lessonData.lessonId)}`, {
-                method: 'PUT',
+            // Check if content has files that need to be uploaded
+            const hasFiles = lessonData.content?.source === 'upload' && (
+              lessonData.content.file || 
+              lessonData.content.files?.length > 0
+            )
+
+            if (hasFiles) {
+              // Use FormData for file uploads
+              const formData = new FormData()
+              formData.append('name', lessonData.name)
+              formData.append('description', '')
+              formData.append('segment_type', segmentType)
+              
+              if (lessonData.lessonId) {
+                formData.append('order_index', editingLesson?.order_index || 0)
+              } else {
+                formData.append('topic_id', selectedSectionId)
+                formData.append('order_index', 0)
+              }
+
+              // Append files
+              if (lessonData.content.file) {
+                formData.append('files', lessonData.content.file)
+              } else if (lessonData.content.files) {
+                lessonData.content.files.forEach(file => {
+                  formData.append('files', file)
+                })
+              }
+
+              // Add content metadata (without the file objects)
+              const contentMeta = { ...lessonData.content }
+              delete contentMeta.file
+              delete contentMeta.files
+              formData.append('content', JSON.stringify(contentMeta))
+
+              const url = lessonData.lessonId 
+                ? `${apiBaseUrl}${API_ENDPOINTS.SEGMENTS.UPDATE(lessonData.lessonId)}`
+                : `${apiBaseUrl}${API_ENDPOINTS.SEGMENTS.CREATE}`
+              
+              const response = await fetch(url, {
+                method: lessonData.lessonId ? 'PUT' : 'POST',
                 headers: {
-                  'Content-Type': 'application/json',
                   ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
                 },
-                body: JSON.stringify({
-                  name: lessonData.name,
-                  description: '',
-                  segment_type: segmentType,
-                  order_index: editingLesson?.order_index || 0,
-                  content: lessonData.content
-                })
+                body: formData
               })
 
-              if (!response.ok) throw new Error('Failed to update lesson')
-              toast.success(SUCCESS_MESSAGES.LESSON_UPDATED)
+              if (!response.ok) throw new Error(lessonData.lessonId ? 'Failed to update lesson' : 'Failed to create lesson')
+              toast.success(lessonData.lessonId ? SUCCESS_MESSAGES.LESSON_UPDATED : SUCCESS_MESSAGES.LESSON_CREATED)
             } else {
-              const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.SEGMENTS.CREATE}`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
-                },
-                body: JSON.stringify({
-                  topic_id: selectedSectionId,
-                  name: lessonData.name,
-                  description: '',
-                  segment_type: segmentType,
-                  order_index: 0,
-                  content: lessonData.content
+              // Use JSON for non-file content (article, embedded URLs)
+              if (lessonData.lessonId) {
+                // Update existing lesson
+                const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.SEGMENTS.UPDATE(lessonData.lessonId)}`, {
+                  method: 'PUT',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+                  },
+                  body: JSON.stringify({
+                    name: lessonData.name,
+                    description: '',
+                    segment_type: segmentType,
+                    order_index: editingLesson?.order_index || 0,
+                    content: lessonData.content
+                  })
                 })
-              })
 
-              if (!response.ok) throw new Error('Failed to create lesson')
-              toast.success(SUCCESS_MESSAGES.LESSON_CREATED)
+                if (!response.ok) throw new Error('Failed to update lesson')
+                toast.success(SUCCESS_MESSAGES.LESSON_UPDATED)
+              } else {
+                // Create new lesson
+                const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.SEGMENTS.CREATE}`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+                  },
+                  body: JSON.stringify({
+                    topic_id: selectedSectionId,
+                    name: lessonData.name,
+                    description: '',
+                    segment_type: segmentType,
+                    order_index: 0,
+                    content: lessonData.content
+                  })
+                })
+
+                if (!response.ok) throw new Error('Failed to create lesson')
+                toast.success(SUCCESS_MESSAGES.LESSON_CREATED)
+              }
             }
             
             await fetchSectionLessons(selectedSectionId)
+            
+            // Close modal after successful save
+            setShowLessonModal(false)
+            setSelectedSectionId(null)
+            setEditingLesson(null)
           } catch (error) {
             console.error('Error saving lesson:', error)
             toast.error(lessonData.lessonId ? ERROR_MESSAGES.LESSON_UPDATE_FAILED : ERROR_MESSAGES.LESSON_CREATE_FAILED)
+          } finally {
+            setSavingLesson(false)
           }
         }}
         sectionId={selectedSectionId}

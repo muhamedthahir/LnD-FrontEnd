@@ -1,0 +1,93 @@
+.video-player-container {
+  position: relative;
+  width: 100%;
+  background: var(--bg-tertiary, #1a1a2e);
+  border-radius: 8px;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+}
+
+.video-player-container.compact {
+  max-width: 320px;
+  max-height: 180px;
+}
+
+.video-element,
+.video-iframe {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+}
+
+.video-placeholder,
+.video-error,
+.video-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--text-secondary, #888);
+  background: var(--bg-tertiary, #1a1a2e);
+}
+
+.video-placeholder svg,
+.video-error svg {
+  width: 48px;
+  height: 48px;
+  opacity: 0.5;
+}
+
+.video-player-container.compact .video-placeholder svg,
+.video-player-container.compact .video-error svg {
+  width: 32px;
+  height: 32px;
+}
+
+.video-error {
+  color: var(--danger, #ef4444);
+}
+
+.video-loading .spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border-color, #333);
+  border-top-color: var(--primary, #6366f1);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.video-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 8px 12px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+}
+
+.video-info .file-name {
+  font-size: 12px;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.file-name {
+  font-size: 12px;
+  color: var(--text-secondary, #888);
+  margin-top: 4px;
+}
+
