@@ -9,7 +9,7 @@ import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES, VALIDATION_MESSAGES } 
 import './CourseEdit.css'
 
 function CourseEdit() {
-  const { apiBaseUrl, accessToken } = useApi()
+  const { apiBaseUrl, directUploadUrl, accessToken } = useApi()
   const { id } = useParams()
   const navigate = useNavigate()
   const { user } = useOutletContext()
@@ -924,9 +924,11 @@ function CourseEdit() {
               delete contentMeta.files
               formData.append('content', JSON.stringify(contentMeta))
 
+              // Use directUploadUrl for file uploads to bypass CloudFront
+              const uploadBaseUrl = directUploadUrl || apiBaseUrl
               const url = lessonData.lessonId 
-                ? `${apiBaseUrl}${API_ENDPOINTS.SEGMENTS.UPDATE(lessonData.lessonId)}`
-                : `${apiBaseUrl}${API_ENDPOINTS.SEGMENTS.CREATE}`
+                ? `${uploadBaseUrl}${API_ENDPOINTS.SEGMENTS.UPDATE(lessonData.lessonId)}`
+                : `${uploadBaseUrl}${API_ENDPOINTS.SEGMENTS.CREATE}`
               
               const response = await fetch(url, {
                 method: lessonData.lessonId ? 'PUT' : 'POST',

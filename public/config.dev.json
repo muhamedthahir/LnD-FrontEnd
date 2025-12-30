@@ -1,3 +1,4 @@
 {
-    "BACKEND_URL": "https://d1qio8dibp2agp.cloudfront.net"
+    "BACKEND_URL": "https://d1qio8dibp2agp.cloudfront.net",
+    "DIRECT_UPLOAD_URL": ""
 }

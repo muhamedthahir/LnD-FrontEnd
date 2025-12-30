@@ -65,10 +65,13 @@ const validateFile = (file) => {
  * Custom hook for file upload operations
  */
 export const useFileUpload = () => {
-  const { apiBaseUrl, accessToken } = useApi()
+  const { apiBaseUrl, directUploadUrl, accessToken } = useApi()
   const [uploading, setUploading] = useState(false)
   const [progress, setProgress] = useState(0)
   const [error, setError] = useState(null)
+  
+  // Use direct URL for uploads to bypass CloudFront
+  const uploadBaseUrl = directUploadUrl || apiBaseUrl
 
   /**
    * Upload a single file
@@ -101,8 +104,8 @@ export const useFileUpload = () => {
       if (metadata.sectionName) formData.append('sectionName', metadata.sectionName)
       if (metadata.lessonName) formData.append('lessonName', metadata.lessonName)
 
-      // Make upload request
-      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.UPLOAD.SINGLE}`, {
+      // Make upload request (using direct URL to bypass CloudFront)
+      const response = await fetch(`${uploadBaseUrl}${API_ENDPOINTS.UPLOAD.SINGLE}`, {
         method: 'POST',
         headers: {
           ...(accessToken && { 'Authorization': `Bearer ${accessToken}` })
@@ -135,7 +138,7 @@ export const useFileUpload = () => {
     } finally {
       setUploading(false)
     }
-  }, [apiBaseUrl, accessToken])
+  }, [uploadBaseUrl, accessToken])
 
   /**
    * Upload multiple files
@@ -174,8 +177,8 @@ export const useFileUpload = () => {
       if (metadata.sectionName) formData.append('sectionName', metadata.sectionName)
       if (metadata.lessonName) formData.append('lessonName', metadata.lessonName)
 
-      // Make upload request
-      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.UPLOAD.MULTIPLE}`, {
+      // Make upload request (using direct URL to bypass CloudFront)
+      const response = await fetch(`${uploadBaseUrl}${API_ENDPOINTS.UPLOAD.MULTIPLE}`, {
         method: 'POST',
         headers: {
           ...(accessToken && { 'Authorization': `Bearer ${accessToken}` })
@@ -213,7 +216,7 @@ export const useFileUpload = () => {
     } finally {
       setUploading(false)
     }
-  }, [apiBaseUrl, accessToken])
+  }, [uploadBaseUrl, accessToken])
 
   /**
    * Delete a file from S3
