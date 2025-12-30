@@ -4,8 +4,9 @@ import { ApiProvider } from './contexts/ApiContext'
 import Layout from './components/Layout/Layout'
 import Login from './pages/Login/Login'
 import Dashboard from './pages/user/Dashboard/Dashboard'
-import Courses from './pages/user/Courses/Courses'
-import CourseView from './pages/user/Courses/CourseView/CourseView'
+import UserCourses from './pages/user/Courses/UserCourses/UserCourses'
+import CourseOverview from './pages/user/Courses/CourseOverview/CourseOverview'
+import CurrentCourse from './pages/user/Courses/CurrentCourse/CurrentCourse'
 import Assessments from './pages/user/Assessments/Assessments'
 import CoursesManagement from './pages/admin/courses/CoursesManagement/CoursesManagement'
 import CourseEdit from './pages/admin/courses/CoursesManagement/CourseEdit/CourseEdit'
@@ -28,8 +29,9 @@ function App() {
         <Route path="/codeeditor" element={<CodeEditorLayout />} />
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/courses" element={<Courses />} />
-          <Route path="/courses/:id" element={<CourseView />} />
+          <Route path="/courses/user-courses" element={<UserCourses />} />
+          <Route path="/courses/:id" element={<CourseOverview />} />
+          <Route path="/courses/:id/current" element={<CurrentCourse />} />
           <Route path="/assessments" element={<Assessments />} />
           <Route path="/admin/institutions" element={<Institutions />} />
           <Route path="/admin/users" element={<Users />} />

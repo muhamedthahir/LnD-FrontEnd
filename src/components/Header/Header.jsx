@@ -1,11 +1,21 @@
 import { useState, useRef, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation, useParams } from 'react-router-dom'
+import { useApi } from '../../contexts/ApiContext'
 import './Header.css'
 
 function Header({ user, logout, onToggleSidebar, isSidebarCollapsed }) {
   const navigate = useNavigate()
+  const location = useLocation()
+  const params = useParams()
+  const { apiBaseUrl, accessToken } = useApi()
   const [showUserMenu, setShowUserMenu] = useState(false)
+  const [courseProgress, setCourseProgress] = useState(null)
+  const [courseName, setCourseName] = useState(null)
   const menuRef = useRef(null)
+  
+  // Check if we're on the current course page
+  const isCurrentCoursePage = location.pathname.includes('/courses/') && location.pathname.includes('/current')
+  const courseId = isCurrentCoursePage ? params.id : null
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -22,6 +32,67 @@ function Header({ user, logout, onToggleSidebar, isSidebarCollapsed }) {
       document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [showUserMenu])
+
+  // Fetch course progress when on current course page
+  useEffect(() => {
+    if (isCurrentCoursePage && courseId) {
+      fetchCourseProgress.current(courseId)
+      fetchCourseName.current(courseId)
+    } else {
+      setCourseProgress(null)
+      setCourseName(null)
+    }
+  }, [isCurrentCoursePage, courseId, apiBaseUrl, accessToken])
+
+  // Listen for progress updates
+  useEffect(() => {
+    const handleProgressUpdate = (event) => {
+      if (event.detail?.courseId === courseId && isCurrentCoursePage) {
+        fetchCourseProgress.current(courseId)
+      }
+    }
+
+    window.addEventListener('courseProgressUpdated', handleProgressUpdate)
+    return () => {
+      window.removeEventListener('courseProgressUpdated', handleProgressUpdate)
+    }
+  }, [courseId, isCurrentCoursePage])
+
+  const fetchCourseProgress = useRef(async (id) => {
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/user-courses/progress/${id}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        }
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setCourseProgress(data)
+      }
+    } catch (error) {
+      console.error('Error fetching course progress:', error)
+    }
+  })
+
+  const fetchCourseName = useRef(async (id) => {
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/courses/${id}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        }
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setCourseName(data.name)
+      }
+    } catch (error) {
+      console.error('Error fetching course name:', error)
+    }
+  })
 
   const handleLogout = async () => {
     if (logout) {
@@ -67,6 +138,22 @@ function Header({ user, logout, onToggleSidebar, isSidebarCollapsed }) {
             )}
           </svg>
         </button>
+        
+        {/* Course Progress Bar - shown only on current course page */}
+        {isCurrentCoursePage && courseProgress && (
+          <div className="header-course-progress">
+            {courseName && (
+              <span className="header-course-name">{courseName}</span>
+            )}
+            <div className="header-progress-bar">
+              <div 
+                className="header-progress-fill" 
+                style={{ width: `${courseProgress.progress_percentage || 0}%` }}
+              ></div>
+            </div>
+            <span className="header-progress-text">{courseProgress.progress_percentage || 0}%</span>
+          </div>
+        )}
       </div>
 
       <div className="header-right">

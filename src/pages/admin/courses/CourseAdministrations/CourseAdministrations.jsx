@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import Button from '../../../../components/Button/Button'
 import Pagination from '../../../../components/Pagination/Pagination'
@@ -28,20 +28,19 @@ function CourseAdministrations() {
   const [formData, setFormData] = useState({
     // Page 1
     administrationName: '',
-    displayId: '',
+    displayId: '', // Auto-generated, not shown in UI
     category: '',
     competencyLevel: '',
     courseId: '',
     startTime: '',
     endTime: '',
+    college: '', // Moved from page 2, required
     // Page 2
     candidateType: 'group', // 'group' or 'individual'
-    groupCollege: '',
     groupDegree: '',
     groupDepartment: '',
     groupYear: '',
     selectedGroups: [],
-    individualCollege: '',
     individualUsers: []
   })
   const [errors, setErrors] = useState({})
@@ -69,16 +68,16 @@ function CourseAdministrations() {
   }, [filters, allAdministrations, currentPage, pageSize])
 
   useEffect(() => {
-    if (formData.groupCollege) {
+    if (formData.college && formData.candidateType === 'group') {
       fetchGroupsForCollege()
     }
-  }, [formData.groupCollege, formData.groupDegree, formData.groupDepartment, formData.groupYear])
+  }, [formData.college, formData.candidateType, formData.groupDegree, formData.groupDepartment, formData.groupYear])
 
   useEffect(() => {
-    if (formData.individualCollege) {
+    if (formData.college && formData.candidateType === 'individual') {
       fetchUsersForCollege()
     }
-  }, [formData.individualCollege])
+  }, [formData.college, formData.candidateType])
 
   const generateDisplayId = () => {
     const timestamp = Date.now()
@@ -125,7 +124,7 @@ function CourseAdministrations() {
   const fetchGroupsForCollege = async () => {
     try {
       const params = new URLSearchParams({
-        college: formData.groupCollege,
+        college: formData.college,
         ...(formData.groupDegree && { degree: formData.groupDegree }),
         ...(formData.groupDepartment && { department: formData.groupDepartment }),
         ...(formData.groupYear && { year: formData.groupYear })
@@ -149,7 +148,7 @@ function CourseAdministrations() {
 
   const fetchUsersForCollege = async () => {
     try {
-      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.USERS.LIST}?college=${encodeURIComponent(formData.individualCollege)}&limit=1000`, {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.USERS.LIST}?college=${encodeURIComponent(formData.college)}&limit=1000`, {
         headers: {
           'Content-Type': 'application/json',
           ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
@@ -293,13 +292,12 @@ function CourseAdministrations() {
       courseId: admin.courseId || '',
       startTime: admin.startDate ? new Date(admin.startDate).toISOString().slice(0, 16) : '',
       endTime: admin.endDate ? new Date(admin.endDate).toISOString().slice(0, 16) : '',
+      college: admin.college || '',
       candidateType: 'group',
-      groupCollege: admin.college || '',
       groupDegree: '',
       groupDepartment: '',
       groupYear: '',
       selectedGroups: [],
-      individualCollege: admin.college || '',
       individualUsers: []
     })
     setErrors({})
@@ -317,13 +315,12 @@ function CourseAdministrations() {
       courseId: '',
       startTime: '',
       endTime: '',
+      college: '',
       candidateType: 'group',
-      groupCollege: '',
       groupDegree: '',
       groupDepartment: '',
       groupYear: '',
       selectedGroups: [],
-      individualCollege: '',
       individualUsers: []
     })
     setErrors({})
@@ -333,6 +330,9 @@ function CourseAdministrations() {
     const newErrors = {}
     if (!formData.administrationName.trim()) {
       newErrors.administrationName = 'Administration name is required'
+    }
+    if (!formData.college || formData.college.trim() === '') {
+      newErrors.college = 'College name is required'
     }
     if (!editingAdministration) {
       // Only validate these for new administrations
@@ -359,8 +359,66 @@ function CourseAdministrations() {
     return Object.keys(newErrors).length === 0
   }
 
+  // Validation functions that check without setting errors (for disabled state)
+  const checkPage1Valid = () => {
+    if (!formData.administrationName.trim()) return false
+    if (!formData.college || formData.college.trim() === '') return false
+    if (!editingAdministration) {
+      if (!formData.category) return false
+      if (!formData.competencyLevel) return false
+      if (!formData.courseId) return false
+    }
+    if (!formData.startTime) return false
+    if (!formData.endTime) return false
+    if (formData.startTime && formData.endTime && new Date(formData.startTime) >= new Date(formData.endTime)) return false
+    return true
+  }
+
+  const checkPage2Valid = () => {
+    // Page 2 doesn't have required fields for draft, but groups/users are required for publish
+    return true
+  }
+
+  const validatePage2 = () => {
+    const newErrors = {}
+    // Page 2 doesn't have required fields for draft, but groups/users are required for publish
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const validateAll = () => {
+    const page1Valid = validatePage1()
+    const page2Valid = validatePage2()
+    return page1Valid && page2Valid
+  }
+
+  // Use useMemo to compute disabled state without triggering re-renders
+  const isPage2ValidForDraft = useMemo(() => {
+    return checkPage1Valid() && checkPage2Valid()
+  }, [formData.administrationName, formData.college, formData.category, formData.competencyLevel, formData.courseId, formData.startTime, formData.endTime, editingAdministration])
+
+  const canSaveOrPublish = useMemo(() => {
+    // Check if all required fields are filled
+    if (!checkPage1Valid()) return false
+    if (!checkPage2Valid()) return false
+    
+    // For publish, also require at least one group or user to be selected
+    if (formData.candidateType === 'group') {
+      if (!formData.selectedGroups || formData.selectedGroups.length === 0) {
+        return false
+      }
+    } else if (formData.candidateType === 'individual') {
+      if (!formData.individualUsers || formData.individualUsers.length === 0) {
+        return false
+      }
+    }
+    
+    return true
+  }, [formData.administrationName, formData.college, formData.category, formData.competencyLevel, formData.courseId, formData.startTime, formData.endTime, formData.candidateType, formData.selectedGroups, formData.individualUsers, editingAdministration])
+
   const handleSaveAsDraft = async () => {
-    if (!validatePage1()) return
+    // Validate both pages, but allow saving draft even without groups/users selected
+    if (!validateAll()) return
     
     try {
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.ADMINISTRATIONS.DRAFT}`, {
@@ -404,6 +462,13 @@ function CourseAdministrations() {
   }
 
   const handleFinalUpdate = async () => {
+    // Validate all fields and require groups/users to be selected for publish
+    if (!canSaveOrPublish()) {
+      // Show validation errors
+      validateAll()
+      return
+    }
+    
     try {
       // First update the administration name and dates
       const updateResponse = await fetch(`${apiBaseUrl}${API_ENDPOINTS.ADMINISTRATIONS.UPDATE(editingAdministration.id)}`, {
@@ -418,12 +483,12 @@ function CourseAdministrations() {
           endTime: formData.endTime,
           // Include enrollment data for page 2
           candidateType: formData.candidateType,
-          groupCollege: formData.groupCollege,
+          groupCollege: formData.college,
           groupDegree: formData.groupDegree,
           groupDepartment: formData.groupDepartment,
           groupYear: formData.groupYear,
           selectedGroups: formData.selectedGroups,
-          individualCollege: formData.individualCollege,
+          individualCollege: formData.college,
           individualUsers: formData.individualUsers,
           courseId: formData.courseId
         })
@@ -442,14 +507,27 @@ function CourseAdministrations() {
   }
 
   const handleSendInvite = async () => {
+    // Validate all fields and require groups/users to be selected for publish
+    if (!canSaveOrPublish()) {
+      // Show validation errors
+      validateAll()
+      return
+    }
+    
     try {
+      // Prepare data with college mapped to groupCollege/individualCollege for backend
+      const requestData = {
+        ...formData,
+        groupCollege: formData.college,
+        individualCollege: formData.college
+      }
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.ADMINISTRATIONS.CREATE}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(requestData)
       })
 
       if (response.ok) {
@@ -682,9 +760,32 @@ function CourseAdministrations() {
       {showCreateModal && (
         <div className="modal-overlay" onClick={handleCancel}>
           <div className="modal-content create-administration-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              {formPage === 2 && (
+                <button 
+                  className="modal-close-btn modal-close-left"
+                  onClick={() => setFormPage(1)}
+                  title="Back"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                  </svg>
+                </button>
+              )}
+              <h2>{editingAdministration ? 'Edit Administration - Page 1 of 2' : formPage === 1 ? 'Create Administration - Page 1 of 2' : 'Create Administration - Page 2 of 2'}</h2>
+              <button 
+                className="modal-close-btn modal-close-right"
+                onClick={handleCancel}
+                title="Close"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
             {formPage === 1 ? (
               <>
-                <h2>{editingAdministration ? 'Edit Administration - Page 1 of 2' : 'Create Administration - Page 1 of 2'}</h2>
                 <div className="form-section">
                   <h3>Administration Details</h3>
                   
@@ -701,14 +802,19 @@ function CourseAdministrations() {
                   </div>
 
                   <div className="form-group">
-                    <label>Display ID</label>
-                    <input
-                      type="text"
-                      value={formData.displayId}
-                      readOnly
-                      className="readonly-input"
-                      placeholder="Auto-generated"
-                    />
+                    <label>College Name <span className="required">*</span></label>
+                    <select
+                      value={formData.college}
+                      onChange={(e) => setFormData({ ...formData, college: e.target.value })}
+                      className={errors.college ? 'error' : ''}
+                      disabled={!!editingAdministration}
+                    >
+                      <option value="">Select College</option>
+                      {colleges.map(college => (
+                        <option key={college} value={college}>{college}</option>
+                      ))}
+                    </select>
+                    {errors.college && <div className="error-text">{errors.college}</div>}
                   </div>
 
                   <div className="form-group">
@@ -789,32 +895,18 @@ function CourseAdministrations() {
 
                 <div className="modal-actions">
                   {editingAdministration ? (
-                    <>
-                      <Button variant="secondary" onClick={handleCancel}>
-                        Cancel
-                      </Button>
-                      <Button variant="primary" onClick={handleUpdate}>
-                        Update
-                      </Button>
-                    </>
+                    <Button variant="primary" onClick={handleUpdate}>
+                      Update
+                    </Button>
                   ) : (
-                    <>
-                      <Button variant="secondary" onClick={handleCancel}>
-                        Cancel
-                      </Button>
-                      <Button variant="draft" onClick={handleSaveAsDraft}>
-                        Save as Draft
-                      </Button>
-                      <Button variant="primary" onClick={handleContinue}>
-                        Continue
-                      </Button>
-                    </>
+                    <Button variant="primary" onClick={handleContinue}>
+                      Continue
+                    </Button>
                   )}
                 </div>
               </>
             ) : (
               <>
-                <h2>Create Administration - Page 2 of 2</h2>
                 <div className="form-section">
                   <h3>Invite and Share</h3>
                   
@@ -850,19 +942,6 @@ function CourseAdministrations() {
 
                   {formData.candidateType === 'group' ? (
                     <>
-                      <div className="form-group">
-                        <label>College Name <span className="required">*</span></label>
-                        <select
-                          value={formData.groupCollege}
-                          onChange={(e) => setFormData({ ...formData, groupCollege: e.target.value, selectedGroups: [] })}
-                        >
-                          <option value="">Select College</option>
-                          {colleges.map(college => (
-                            <option key={college} value={college}>{college}</option>
-                          ))}
-                        </select>
-                      </div>
-
                       <div className="form-row">
                         <div className="form-group">
                           <label>Degree (Optional)</label>
@@ -945,19 +1024,6 @@ function CourseAdministrations() {
                   ) : (
                     <>
                       <div className="form-group">
-                        <label>College Name <span className="required">*</span></label>
-                        <select
-                          value={formData.individualCollege}
-                          onChange={(e) => setFormData({ ...formData, individualCollege: e.target.value, individualUsers: [] })}
-                        >
-                          <option value="">Select College</option>
-                          {colleges.map(college => (
-                            <option key={college} value={college}>{college}</option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div className="form-group">
                         <label>User Email ID or Username</label>
                         <input
                           type="text"
@@ -1005,18 +1071,29 @@ function CourseAdministrations() {
                 </div>
 
                 <div className="modal-actions">
-                  <Button variant="secondary" onClick={() => setFormPage(1)}>
-                    Back
-                  </Button>
-                  <Button variant="secondary" onClick={handleCancel}>
-                    Cancel
-                  </Button>
+                  {!editingAdministration && (
+                    <Button 
+                      variant="draft" 
+                      onClick={handleSaveAsDraft}
+                      disabled={!isPage2ValidForDraft}
+                    >
+                      Save as Draft
+                    </Button>
+                  )}
                   {editingAdministration ? (
-                    <Button variant="primary" onClick={handleFinalUpdate}>
+                    <Button 
+                      variant="primary" 
+                      onClick={handleFinalUpdate}
+                      disabled={!canSaveOrPublish}
+                    >
                       Publish
                     </Button>
                   ) : (
-                    <Button variant="primary" onClick={handleSendInvite}>
+                    <Button 
+                      variant="primary" 
+                      onClick={handleSendInvite}
+                      disabled={!canSaveOrPublish}
+                    >
                       Send Invite
                     </Button>
                   )}

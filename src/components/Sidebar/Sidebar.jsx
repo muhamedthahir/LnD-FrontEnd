@@ -9,7 +9,8 @@ function Sidebar({ user, isCollapsed }) {
   
   const isActive = (path) => {
     if (path === '/dashboard' && location.pathname === '/dashboard') return true
-    if (path === '/courses' && location.pathname.startsWith('/courses') && !location.pathname.startsWith('/admin/courses')) return true
+    if (path === '/courses/user-courses' && location.pathname === '/courses/user-courses') return true
+    if (path === '/courses' && location.pathname.startsWith('/courses') && !location.pathname.startsWith('/admin/courses') && location.pathname !== '/courses/user-courses') return true
     if (path === '/assessments' && location.pathname.startsWith('/assessments') && !location.pathname.startsWith('/admin/assessments')) return true
     if (path === '/admin' && location.pathname.startsWith('/admin')) return true
     return false
@@ -102,6 +103,18 @@ function Sidebar({ user, isCollapsed }) {
         <div className="nav-section">
           <div className="nav-section-label">Course</div>
           
+          {!isAdmin && (
+            <Link 
+              to="/courses/user-courses" 
+              className={`nav-item ${isActive('/courses/user-courses') ? 'active' : ''}`}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+              </svg>
+              <span>My Courses</span>
+            </Link>
+          )}
 
           {isAdmin && (
             <>

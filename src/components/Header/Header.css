@@ -27,6 +27,51 @@ html[data-sidebar-collapsed="true"] .app-header {
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
+  flex: 1;
+  min-width: 0;
+}
+
+.header-course-progress {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex: 0 0 auto;
+  min-width: 0;
+  max-width: 400px;
+}
+
+.header-course-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
+.header-progress-bar {
+  width: 120px;
+  height: 0.5rem;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.header-progress-fill {
+  height: 100%;
+  background: var(--accent-primary);
+  transition: width var(--transition-normal);
+}
+
+.header-progress-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  min-width: 3rem;
+  text-align: right;
 }
 
 .sidebar-toggle-btn-header {
@@ -251,6 +296,24 @@ html[data-sidebar-collapsed="true"] .app-header {
   /* Hide sidebar toggle button on mobile screens */
   .sidebar-toggle-btn-header {
     display: none;
+  }
+
+  .header-course-progress {
+    max-width: 250px;
+    gap: var(--spacing-xs);
+  }
+
+  .header-course-name {
+    display: none;
+  }
+
+  .header-progress-bar {
+    width: 100px;
+  }
+
+  .header-progress-text {
+    min-width: 2.5rem;
+    font-size: 0.6875rem;
   }
 }
 
