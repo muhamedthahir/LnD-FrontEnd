@@ -1,4 +1,4 @@
 {
     "BACKEND_URL": "https://d1qio8dibp2agp.cloudfront.net",
-    "DIRECT_UPLOAD_URL": ""
+    "DIRECT_UPLOAD_URL": "http://lnd-backend-env.eba-aweatpum.ap-south-1.elasticbeanstalk.com"
 }
