@@ -13,7 +13,6 @@ export const useApi = () => {
 
 export const ApiProvider = ({ children }) => {
   const [apiBaseUrl, setApiBaseUrl] = useState('')
-  const [directUploadUrl, setDirectUploadUrl] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [accessToken, setAccessToken] = useState(() => {
     // Load access token from localStorage on initialization
@@ -46,13 +45,9 @@ export const ApiProvider = ({ children }) => {
       try {
         const config = await getConfig()
         setApiBaseUrl(config.BACKEND_URL || '')
-        // Direct upload URL for bypassing CloudFront on file uploads
-        // Falls back to BACKEND_URL if not set
-        setDirectUploadUrl(config.DIRECT_UPLOAD_URL || config.BACKEND_URL || '')
       } catch (error) {
         console.error('Failed to load API config:', error)
         setApiBaseUrl('')
-        setDirectUploadUrl('')
       } finally {
         setIsLoading(false)
       }
@@ -152,7 +147,6 @@ export const ApiProvider = ({ children }) => {
   return (
     <ApiContext.Provider value={{ 
       apiBaseUrl,
-      directUploadUrl, // Direct URL for file uploads (bypasses CloudFront)
       isLoading, 
       accessToken, 
       refreshToken,

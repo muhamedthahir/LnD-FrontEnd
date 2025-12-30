@@ -9,7 +9,7 @@ import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES, VALIDATION_MESSAGES } 
 import './CourseEdit.css'
 
 function CourseEdit() {
-  const { apiBaseUrl, directUploadUrl, accessToken } = useApi()
+  const { apiBaseUrl, accessToken } = useApi()
   const { id } = useParams()
   const navigate = useNavigate()
   const { user } = useOutletContext()
@@ -896,49 +896,105 @@ function CourseEdit() {
             )
 
             if (hasFiles) {
-              // Use FormData for file uploads
-              const formData = new FormData()
-              formData.append('name', lessonData.name)
-              formData.append('description', '')
-              formData.append('segment_type', segmentType)
+              // Use presigned URL for direct S3 upload
+              const filesToUpload = lessonData.content.file 
+                ? [lessonData.content.file] 
+                : lessonData.content.files
+
+              // Get section info for folder path
+              const section = sections.find(s => s.id === selectedSectionId)
               
-              if (lessonData.lessonId) {
-                formData.append('order_index', editingLesson?.order_index || 0)
-              } else {
-                formData.append('topic_id', selectedSectionId)
-                formData.append('order_index', 0)
+              // Step 1: Get presigned URL(s) from backend
+              const presignedResponse = await fetch(`${apiBaseUrl}${API_ENDPOINTS.UPLOAD.PRESIGNED_URLS}`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+                },
+                body: JSON.stringify({
+                  files: filesToUpload.map(file => ({
+                    fileName: file.name,
+                    contentType: file.type
+                  })),
+                  courseId: course?.id,
+                  courseName: course?.name,
+                  sectionId: selectedSectionId,
+                  sectionName: section?.name,
+                  lessonName: lessonData.name
+                })
+              })
+
+              if (!presignedResponse.ok) {
+                throw new Error('Failed to get presigned URL for upload')
               }
 
-              // Append files
-              if (lessonData.content.file) {
-                formData.append('files', lessonData.content.file)
-              } else if (lessonData.content.files) {
-                lessonData.content.files.forEach(file => {
-                  formData.append('files', file)
+              const presignedData = await presignedResponse.json()
+
+              // Step 2: Upload files directly to S3 using presigned URLs
+              const uploadedFiles = []
+              for (let i = 0; i < filesToUpload.length; i++) {
+                const file = filesToUpload[i]
+                const presignedInfo = presignedData.data[i]
+
+                const uploadResponse = await fetch(presignedInfo.presignedUrl, {
+                  method: 'PUT',
+                  headers: {
+                    'Content-Type': file.type
+                  },
+                  body: file
+                })
+
+                if (!uploadResponse.ok) {
+                  throw new Error(`Failed to upload file ${file.name} to S3`)
+                }
+
+                uploadedFiles.push({
+                  url: presignedInfo.fileUrl,
+                  key: presignedInfo.key,
+                  fileName: presignedInfo.originalFileName,
+                  contentType: file.type
                 })
               }
 
-              // Add content metadata (without the file objects)
-              const contentMeta = { ...lessonData.content }
-              delete contentMeta.file
-              delete contentMeta.files
-              formData.append('content', JSON.stringify(contentMeta))
+              // Step 3: Create/update segment with S3 URLs (no file upload to backend)
+              let content
+              if (segmentType === 'lesson_video' || segmentType === 'lesson_audio') {
+                content = {
+                  type: segmentType.replace('lesson_', ''),
+                  source: 'upload',
+                  url: uploadedFiles[0].url,
+                  key: uploadedFiles[0].key,
+                  fileName: uploadedFiles[0].fileName
+                }
+              } else if (segmentType === 'lesson_document') {
+                content = {
+                  type: 'document',
+                  source: 'upload',
+                  files: uploadedFiles
+                }
+              }
 
-              // Use directUploadUrl for file uploads to bypass CloudFront
-              const uploadBaseUrl = directUploadUrl || apiBaseUrl
-              const url = lessonData.lessonId 
-                ? `${uploadBaseUrl}${API_ENDPOINTS.SEGMENTS.UPDATE(lessonData.lessonId)}`
-                : `${uploadBaseUrl}${API_ENDPOINTS.SEGMENTS.CREATE}`
+              const segmentUrl = lessonData.lessonId 
+                ? `${apiBaseUrl}${API_ENDPOINTS.SEGMENTS.UPDATE(lessonData.lessonId)}`
+                : `${apiBaseUrl}${API_ENDPOINTS.SEGMENTS.CREATE}`
               
-              const response = await fetch(url, {
+              const segmentResponse = await fetch(segmentUrl, {
                 method: lessonData.lessonId ? 'PUT' : 'POST',
                 headers: {
+                  'Content-Type': 'application/json',
                   ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
                 },
-                body: formData
+                body: JSON.stringify({
+                  ...(lessonData.lessonId ? {} : { topic_id: selectedSectionId }),
+                  name: lessonData.name,
+                  description: '',
+                  segment_type: segmentType,
+                  order_index: lessonData.lessonId ? (editingLesson?.order_index || 0) : 0,
+                  content
+                })
               })
 
-              if (!response.ok) throw new Error(lessonData.lessonId ? 'Failed to update lesson' : 'Failed to create lesson')
+              if (!segmentResponse.ok) throw new Error(lessonData.lessonId ? 'Failed to update lesson' : 'Failed to create lesson')
               toast.success(lessonData.lessonId ? SUCCESS_MESSAGES.LESSON_UPDATED : SUCCESS_MESSAGES.LESSON_CREATED)
             } else {
               // Use JSON for non-file content (article, embedded URLs)

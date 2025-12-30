@@ -65,16 +65,13 @@ const validateFile = (file) => {
  * Custom hook for file upload operations
  */
 export const useFileUpload = () => {
-  const { apiBaseUrl, directUploadUrl, accessToken } = useApi()
+  const { apiBaseUrl, accessToken } = useApi()
   const [uploading, setUploading] = useState(false)
   const [progress, setProgress] = useState(0)
   const [error, setError] = useState(null)
-  
-  // Use direct URL for uploads to bypass CloudFront
-  const uploadBaseUrl = directUploadUrl || apiBaseUrl
 
   /**
-   * Upload a single file
+   * Upload a single file using presigned URL (direct to S3)
    * @param {File} file - The file to upload
    * @param {Object} metadata - Metadata for organizing the file in S3
    * @returns {Promise<Object>} - Upload result
@@ -93,33 +90,44 @@ export const useFileUpload = () => {
         return { success: false, error: validation.error }
       }
 
-      // Create form data
-      const formData = new FormData()
-      formData.append('file', file)
-      
-      // Add metadata
-      if (metadata.courseId) formData.append('courseId', metadata.courseId)
-      if (metadata.courseName) formData.append('courseName', metadata.courseName)
-      if (metadata.sectionId) formData.append('sectionId', metadata.sectionId)
-      if (metadata.sectionName) formData.append('sectionName', metadata.sectionName)
-      if (metadata.lessonName) formData.append('lessonName', metadata.lessonName)
-
-      // Make upload request (using direct URL to bypass CloudFront)
-      const response = await fetch(`${uploadBaseUrl}${API_ENDPOINTS.UPLOAD.SINGLE}`, {
+      // Step 1: Get presigned URL from backend
+      setProgress(10)
+      const presignedResponse = await fetch(`${apiBaseUrl}${API_ENDPOINTS.UPLOAD.PRESIGNED_URL}`, {
         method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           ...(accessToken && { 'Authorization': `Bearer ${accessToken}` })
         },
-        body: formData
+        body: JSON.stringify({
+          fileName: file.name,
+          contentType: file.type,
+          courseId: metadata.courseId,
+          courseName: metadata.courseName,
+          sectionId: metadata.sectionId,
+          sectionName: metadata.sectionName,
+          lessonName: metadata.lessonName
+        })
       })
 
-      const result = await response.json()
+      if (!presignedResponse.ok) {
+        const errorData = await presignedResponse.json()
+        throw new Error(errorData.error || 'Failed to get presigned URL')
+      }
 
-      if (!response.ok) {
-        const errorMessage = result.error || ERROR_MESSAGES.UPLOAD_FAILED
-        toast.error(errorMessage)
-        setError(errorMessage)
-        return { success: false, error: errorMessage }
+      const presignedData = await presignedResponse.json()
+      setProgress(30)
+
+      // Step 2: Upload directly to S3 using presigned URL
+      const uploadResponse = await fetch(presignedData.data.presignedUrl, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': file.type
+        },
+        body: file
+      })
+
+      if (!uploadResponse.ok) {
+        throw new Error('Failed to upload file to S3')
       }
 
       setProgress(100)
@@ -127,7 +135,12 @@ export const useFileUpload = () => {
       
       return {
         success: true,
-        data: result.data
+        data: {
+          url: presignedData.data.fileUrl,
+          key: presignedData.data.key,
+          fileName: presignedData.data.originalFileName,
+          contentType: file.type
+        }
       }
 
     } catch (err) {
@@ -138,10 +151,10 @@ export const useFileUpload = () => {
     } finally {
       setUploading(false)
     }
-  }, [uploadBaseUrl, accessToken])
+  }, [apiBaseUrl, accessToken])
 
   /**
-   * Upload multiple files
+   * Upload multiple files using presigned URLs (direct to S3)
    * @param {FileList|Array} files - The files to upload
    * @param {Object} metadata - Metadata for organizing files in S3
    * @returns {Promise<Object>} - Upload results
@@ -164,48 +177,73 @@ export const useFileUpload = () => {
         }
       }
 
-      // Create form data
-      const formData = new FormData()
-      fileArray.forEach(file => {
-        formData.append('files', file)
-      })
-      
-      // Add metadata
-      if (metadata.courseId) formData.append('courseId', metadata.courseId)
-      if (metadata.courseName) formData.append('courseName', metadata.courseName)
-      if (metadata.sectionId) formData.append('sectionId', metadata.sectionId)
-      if (metadata.sectionName) formData.append('sectionName', metadata.sectionName)
-      if (metadata.lessonName) formData.append('lessonName', metadata.lessonName)
-
-      // Make upload request (using direct URL to bypass CloudFront)
-      const response = await fetch(`${uploadBaseUrl}${API_ENDPOINTS.UPLOAD.MULTIPLE}`, {
+      // Step 1: Get presigned URLs from backend
+      setProgress(10)
+      const presignedResponse = await fetch(`${apiBaseUrl}${API_ENDPOINTS.UPLOAD.PRESIGNED_URLS}`, {
         method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           ...(accessToken && { 'Authorization': `Bearer ${accessToken}` })
         },
-        body: formData
+        body: JSON.stringify({
+          files: fileArray.map(file => ({
+            fileName: file.name,
+            contentType: file.type
+          })),
+          courseId: metadata.courseId,
+          courseName: metadata.courseName,
+          sectionId: metadata.sectionId,
+          sectionName: metadata.sectionName,
+          lessonName: metadata.lessonName
+        })
       })
 
-      const result = await response.json()
-
-      if (!response.ok) {
-        const errorMessage = result.error || ERROR_MESSAGES.UPLOAD_MULTIPLE_FAILED
-        toast.error(errorMessage)
-        setError(errorMessage)
-        return { success: false, error: errorMessage }
+      if (!presignedResponse.ok) {
+        const errorData = await presignedResponse.json()
+        throw new Error(errorData.error || 'Failed to get presigned URLs')
       }
 
-      setProgress(100)
+      const presignedData = await presignedResponse.json()
+      setProgress(30)
+
+      // Step 2: Upload each file directly to S3
+      const uploadedFiles = []
+      const totalFiles = fileArray.length
       
-      if (result.success) {
-        toast.success(SUCCESS_MESSAGES.UPLOAD_MULTIPLE_SUCCESS(result.data.uploaded.length))
-      } else {
-        toast.warning(result.message)
+      for (let i = 0; i < fileArray.length; i++) {
+        const file = fileArray[i]
+        const presignedInfo = presignedData.data[i]
+
+        const uploadResponse = await fetch(presignedInfo.presignedUrl, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': file.type
+          },
+          body: file
+        })
+
+        if (!uploadResponse.ok) {
+          throw new Error(`Failed to upload file ${file.name} to S3`)
+        }
+
+        uploadedFiles.push({
+          url: presignedInfo.fileUrl,
+          key: presignedInfo.key,
+          fileName: presignedInfo.originalFileName,
+          contentType: file.type
+        })
+
+        // Update progress
+        setProgress(30 + Math.round(((i + 1) / totalFiles) * 70))
       }
+
+      toast.success(SUCCESS_MESSAGES.UPLOAD_MULTIPLE_SUCCESS(uploadedFiles.length))
       
       return {
-        success: result.success,
-        data: result.data
+        success: true,
+        data: {
+          uploaded: uploadedFiles
+        }
       }
 
     } catch (err) {
@@ -216,7 +254,7 @@ export const useFileUpload = () => {
     } finally {
       setUploading(false)
     }
-  }, [uploadBaseUrl, accessToken])
+  }, [apiBaseUrl, accessToken])
 
   /**
    * Delete a file from S3

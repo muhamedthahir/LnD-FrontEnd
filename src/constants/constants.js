@@ -84,7 +84,9 @@ export const API_ENDPOINTS = {
     MULTIPLE: '/api/upload/multiple',
     DELETE: '/api/upload/delete',
     CREATE_BUCKET: '/api/upload/create-bucket',
-    ALLOWED_TYPES: '/api/upload/allowed-types'
+    ALLOWED_TYPES: '/api/upload/allowed-types',
+    PRESIGNED_URL: '/api/upload/presigned-url',
+    PRESIGNED_URLS: '/api/upload/presigned-urls'
   }
 }
 
