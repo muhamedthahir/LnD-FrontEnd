@@ -118,6 +118,7 @@ function CodeEditor() {
     } finally {
       setIsRunning(false)
     }
+    
   }
 
   const handleSubmit = () => {
