@@ -1,0 +1,209 @@
+.rich-text-editor {
+  border: var(--border-sm) solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--bg-input);
+}
+
+.rich-text-editor.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--bg-secondary);
+  border-bottom: var(--border-sm) solid var(--border-color);
+}
+
+.toolbar-group {
+  display: flex;
+  gap: 2px;
+  padding-right: var(--spacing-xs);
+  border-right: 1px solid var(--border-color);
+}
+
+.toolbar-group:last-child {
+  border-right: none;
+  padding-right: 0;
+}
+
+.toolbar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.toolbar-btn:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.toolbar-btn:active {
+  background: var(--accent-subtle);
+  color: var(--accent-primary);
+}
+
+.toolbar-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.toolbar-btn .text-btn {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.editor-content {
+  padding: var(--spacing-md);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  outline: none;
+  overflow-y: auto;
+  max-height: 500px;
+}
+
+.editor-content:empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.editor-content:focus {
+  background: var(--bg-card);
+}
+
+/* Content Styles */
+.editor-content h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0.5em 0;
+}
+
+.editor-content h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0.5em 0;
+}
+
+.editor-content h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0.5em 0;
+}
+
+.editor-content p {
+  margin: 0.5em 0;
+}
+
+.editor-content ul,
+.editor-content ol {
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+}
+
+.editor-content li {
+  margin: 0.25em 0;
+}
+
+.editor-content blockquote {
+  margin: 0.5em 0;
+  padding: 0.5em 1em;
+  border-left: 3px solid var(--accent-primary);
+  background: var(--bg-secondary);
+  font-style: italic;
+}
+
+.editor-content pre {
+  margin: 0.5em 0;
+  padding: 1em;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  overflow-x: auto;
+}
+
+.editor-content code {
+  padding: 0.2em 0.4em;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-xs);
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+.editor-content a {
+  color: var(--accent-primary);
+  text-decoration: underline;
+}
+
+.editor-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-sm);
+  margin: 0.5em 0;
+}
+
+/* Simple mode - hide some toolbar groups */
+.rich-text-editor.simple .editor-toolbar {
+  padding: var(--spacing-xs);
+}
+
+.rich-text-editor.simple .toolbar-btn {
+  width: 26px;
+  height: 26px;
+}
+
+.rich-text-editor.simple .toolbar-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Scrollbar */
+.editor-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.editor-content::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+.editor-content::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+.editor-content::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .editor-toolbar {
+    gap: 2px;
+    padding: var(--spacing-xs);
+  }
+
+  .toolbar-group {
+    padding-right: var(--spacing-xs);
+  }
+
+  .toolbar-btn {
+    width: 26px;
+    height: 26px;
+  }
+}
+

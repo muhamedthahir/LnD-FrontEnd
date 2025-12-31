@@ -20,7 +20,13 @@ import CreateGroup from './pages/admin/Groups/CreateGroup/CreateGroup'
 import Institutions from './pages/admin/Institutions/Institutions'
 import CreateInstitution from './pages/admin/Institutions/CreateInstitution/CreateInstitution'
 import CreateAdministration from './pages/admin/courses/CourseAdministrations/CreateAdministration/CreateAdministration'
-import Questions from './pages/admin/Questions/Questions'
+// Question Bank Pages
+import QuestionBanks from './pages/admin/Questions/QuestionBanks'
+import QuestionBankForm from './pages/admin/Questions/QuestionBankForm'
+import QuestionBankDetail from './pages/admin/Questions/QuestionBankDetail'
+import QuestionList from './pages/admin/Questions/QuestionList'
+import QuestionForm from './pages/admin/Questions/QuestionForm'
+import QuestionDetail from './pages/admin/Questions/QuestionDetail'
 import CodeEditorLayout from './pages/CodeEditor/CodeEditorLayout'
 import './App.css'
 
@@ -50,7 +56,16 @@ function App() {
           <Route path="/admin/courses/management/:id/edit" element={<CourseEdit />} />
           <Route path="/admin/courses/administrations" element={<CourseAdministrations />} />
           <Route path="/admin/courses/administrations/create" element={<CreateAdministration />} />
-          <Route path="/admin/questions" element={<Questions />} />
+          {/* Question Bank Routes */}
+          <Route path="/admin/questions" element={<Navigate to="/admin/questions/banks" replace />} />
+          <Route path="/admin/questions/banks" element={<QuestionBanks />} />
+          <Route path="/admin/questions/banks/create" element={<QuestionBankForm />} />
+          <Route path="/admin/questions/banks/:id" element={<QuestionBankDetail />} />
+          <Route path="/admin/questions/banks/:id/edit" element={<QuestionBankForm />} />
+          <Route path="/admin/questions/list" element={<QuestionList />} />
+          <Route path="/admin/questions/list/create" element={<QuestionForm />} />
+          <Route path="/admin/questions/list/:id" element={<QuestionDetail />} />
+          <Route path="/admin/questions/list/:id/edit" element={<QuestionForm />} />
         </Route>
       </Routes>
     </ThemeProvider>
@@ -59,5 +74,3 @@ function App() {
 }
 
 export default App
-
-
