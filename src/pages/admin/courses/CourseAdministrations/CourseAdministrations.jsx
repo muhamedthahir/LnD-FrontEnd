@@ -434,7 +434,8 @@ function CourseAdministrations() {
           competencyLevel: formData.competencyLevel,
           courseId: formData.courseId,
           startTime: formData.startTime,
-          endTime: formData.endTime
+          endTime: formData.endTime,
+          college: formData.college
         })
       })
 

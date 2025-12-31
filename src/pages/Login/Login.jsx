@@ -154,8 +154,17 @@ function Login() {
 
   return (
     <div className="login-page">
+      {/* Loading Overlay */}
+      {isLoading && (
+        <div className="login-loading-overlay">
+          <div className="loading-spinner-container">
+            <div className="loading-spinner"></div>
+          </div>
+        </div>
+      )}
+      
       {/* Animated background */}
-      <div className="login-background">
+      <div className={`login-background ${isLoading ? 'blurred' : ''}`}>
         <div className="grid-pattern"></div>
         <div className="glow-orb glow-orb-1"></div>
         <div className="glow-orb glow-orb-2"></div>
@@ -351,23 +360,14 @@ function Login() {
 
               <button 
                 type="submit" 
-                className={`submit-btn ${isLoading ? 'loading' : ''}`}
+                className="submit-btn"
                 disabled={isLoading}
               >
-                {isLoading ? (
-                  <>
-                    <span className="spinner"></span>
-                    Signing in...
-                  </>
-                ) : (
-                  <>
                     Sign In
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <line x1="5" y1="12" x2="19" y2="12"/>
                       <polyline points="12 5 19 12 12 19"/>
                     </svg>
-                  </>
-                )}
               </button>
             </form>
 

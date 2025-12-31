@@ -1047,15 +1047,29 @@ function Users() {
 
               <div className="form-group">
                 <label>Upload Excel File *</label>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".xlsx,.xls"
-                  onChange={(e) => setBulkUploadData(prev => ({ ...prev, file: e.target.files[0] }))}
-                  required
-                />
+                <div className="file-input-wrapper">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".xlsx,.xls"
+                    onChange={(e) => setBulkUploadData(prev => ({ ...prev, file: e.target.files[0] }))}
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="file-input-button"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                      <polyline points="17 8 12 3 7 8"></polyline>
+                      <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    {bulkUploadData.file ? bulkUploadData.file.name : 'Choose File'}
+                  </button>
+                </div>
                 {bulkUploadData.file && (
-                  <small>Selected: {bulkUploadData.file.name}</small>
+                  <div className="file-input-label">Selected: {bulkUploadData.file.name}</div>
                 )}
               </div>
 
