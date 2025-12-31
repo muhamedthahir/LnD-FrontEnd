@@ -1241,13 +1241,6 @@ function LessonModal({ isOpen, onClose, onAdd, sectionId, editingLesson = null, 
               {/* Upload New Media Section */}
               <div className="upload-media-section">
                 <div className="section-header">
-                  <span className="section-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                      <polyline points="17 8 12 3 7 8"/>
-                      <line x1="12" y1="3" x2="12" y2="15"/>
-                    </svg>
-                  </span>
                   <h4>{existingMediaUrl ? 'Replace with New File' : 'Upload File'}</h4>
                 </div>
 
@@ -1347,7 +1340,7 @@ function LessonModal({ isOpen, onClose, onAdd, sectionId, editingLesson = null, 
                   <div className="existing-media-player">
                     <DocumentViewer 
                       files={existingDocuments}
-                      compact={true}
+                      showViewer={true}
                     />
                   </div>
                 </div>
@@ -1363,13 +1356,6 @@ function LessonModal({ isOpen, onClose, onAdd, sectionId, editingLesson = null, 
               {/* Upload New Documents Section */}
               <div className="upload-media-section">
                 <div className="section-header">
-                  <span className="section-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                      <polyline points="17 8 12 3 7 8"/>
-                      <line x1="12" y1="3" x2="12" y2="15"/>
-                    </svg>
-                  </span>
                   <h4>{existingDocuments.length > 0 ? 'Replace with New Files' : 'Upload Files'}</h4>
                 </div>
 

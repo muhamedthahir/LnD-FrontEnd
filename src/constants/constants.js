@@ -87,6 +87,50 @@ export const API_ENDPOINTS = {
     ALLOWED_TYPES: '/api/upload/allowed-types',
     PRESIGNED_URL: '/api/upload/presigned-url',
     PRESIGNED_URLS: '/api/upload/presigned-urls'
+  },
+
+  // Question Banks
+  QUESTION_BANKS: {
+    LIST: '/api/question-banks',
+    CREATE: '/api/question-banks',
+    GET: (id) => `/api/question-banks/${id}`,
+    UPDATE: (id) => `/api/question-banks/${id}`,
+    DELETE: (id) => `/api/question-banks/${id}`
+  },
+
+  // Questions
+  QUESTIONS: {
+    LIST: '/api/questions',
+    CREATE: '/api/questions',
+    GET: (id) => `/api/questions/${id}`,
+    UPDATE: (id) => `/api/questions/${id}`,
+    DELETE: (id) => `/api/questions/${id}`,
+    ADD_TO_BANK: (id) => `/api/questions/${id}/add-to-bank`,
+    REMOVE_FROM_BANK: (id) => `/api/questions/${id}/remove-from-bank`
+  },
+
+  // Test Cases
+  TEST_CASES: {
+    LIST: (programmingQuestionId) => `/api/test-cases/programming-question/${programmingQuestionId}`,
+    CREATE: '/api/test-cases',
+    GET: (id) => `/api/test-cases/${id}`,
+    UPDATE: (id) => `/api/test-cases/${id}`,
+    DELETE: (id) => `/api/test-cases/${id}`,
+    TOGGLE_ACTIVE: (id) => `/api/test-cases/${id}/toggle-active`,
+    TOGGLE_HIDDEN: (id) => `/api/test-cases/${id}/toggle-hidden`
+  },
+
+  // Master Data
+  MASTER_DATA: {
+    ALL: '/api/master-data/all',
+    LEVELS: '/api/master-data/levels',
+    STATUSES: '/api/master-data/statuses',
+    QUESTION_TYPES: '/api/master-data/question-types',
+    LANGUAGES: '/api/master-data/languages',
+    CATEGORIES: '/api/master-data/categories',
+    TAGS: '/api/master-data/tags',
+    CREATE_TAG: '/api/master-data/tags',
+    CREATE_CATEGORY: '/api/master-data/categories'
   }
 }
 

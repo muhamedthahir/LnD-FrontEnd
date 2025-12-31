@@ -20,6 +20,7 @@ import CreateGroup from './pages/admin/Groups/CreateGroup/CreateGroup'
 import Institutions from './pages/admin/Institutions/Institutions'
 import CreateInstitution from './pages/admin/Institutions/CreateInstitution/CreateInstitution'
 import CreateAdministration from './pages/admin/courses/CourseAdministrations/CreateAdministration/CreateAdministration'
+import Questions from './pages/admin/Questions/Questions'
 import CodeEditorLayout from './pages/CodeEditor/CodeEditorLayout'
 import './App.css'
 
@@ -49,6 +50,7 @@ function App() {
           <Route path="/admin/courses/management/:id/edit" element={<CourseEdit />} />
           <Route path="/admin/courses/administrations" element={<CourseAdministrations />} />
           <Route path="/admin/courses/administrations/create" element={<CreateAdministration />} />
+          <Route path="/admin/questions" element={<Questions />} />
         </Route>
       </Routes>
     </ThemeProvider>

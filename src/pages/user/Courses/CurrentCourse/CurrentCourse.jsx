@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate, useOutletContext } from 'react-router-dom'
 import { useApi } from '../../../../contexts/ApiContext'
 import { API_ENDPOINTS } from '../../../../constants/constants'
+import { VideoPlayer, AudioPlayer, DocumentViewer } from '../../../../components/MediaPlayer'
 import './CurrentCourse.css'
 
 function CurrentCourse() {
@@ -370,10 +371,92 @@ function CurrentCourse() {
                             }
                           }
                           
-                          // If it's an object, extract HTML content
+                          // If it's an object, check the content type
                           if (typeof contentObj === 'object' && contentObj !== null) {
+                            const segmentType = selectedSegment.segment_type?.toLowerCase() || '';
+                            
+                            // Handle video content
+                            if (segmentType.includes('video') || contentObj.type === 'video') {
+                              const videoUrl = contentObj.presignedUrl || contentObj.url || '';
+                              if (contentObj.source === 'embedded' && videoUrl) {
+                                return (
+                                  <div className="embedded-video">
+                                    <iframe
+                                      src={videoUrl}
+                                      title={selectedSegment.name || 'Video'}
+                                      frameBorder="0"
+                                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                      allowFullScreen
+                                    />
+                                  </div>
+                                );
+                              }
+                              if (videoUrl) {
+                                return (
+                                  <VideoPlayer 
+                                    url={videoUrl}
+                                    fileName={contentObj.fileName || ''}
+                                  />
+                                );
+                              }
+                            }
+                            
+                            // Handle audio content
+                            if (segmentType.includes('audio') || contentObj.type === 'audio') {
+                              const audioUrl = contentObj.presignedUrl || contentObj.url || '';
+                              if (audioUrl) {
+                                return (
+                                  <AudioPlayer 
+                                    url={audioUrl}
+                                    fileName={contentObj.fileName || ''}
+                                  />
+                                );
+                              }
+                            }
+                            
+                            // Handle document content
+                            if (segmentType.includes('document') || contentObj.type === 'document') {
+                              // Handle embedded URL
+                              if (contentObj.source === 'embedded' && contentObj.url) {
+                                return (
+                                  <DocumentViewer 
+                                    url={contentObj.url}
+                                    fileName={contentObj.fileName || 'Document'}
+                                    showViewer={true}
+                                  />
+                                );
+                              }
+                              // Handle multiple files
+                              if (contentObj.files && contentObj.files.length > 0) {
+                                const filesWithUrls = contentObj.files.map(file => ({
+                                  ...file,
+                                  url: file.presignedUrl || file.url
+                                }));
+                                return (
+                                  <DocumentViewer 
+                                    files={filesWithUrls}
+                                    showViewer={true}
+                                  />
+                                );
+                              }
+                              // Handle single document
+                              const docUrl = contentObj.presignedUrl || contentObj.url || '';
+                              if (docUrl) {
+                                return (
+                                  <DocumentViewer 
+                                    url={docUrl}
+                                    fileName={contentObj.fileName || 'Document'}
+                                    showViewer={true}
+                                  />
+                                );
+                              }
+                            }
+                            
+                            // Default: extract HTML content for article/text
                             const htmlContent = contentObj.html || contentObj.content || '';
-                            return <div dangerouslySetInnerHTML={{ __html: htmlContent }} />;
+                            if (htmlContent) {
+                              return <div dangerouslySetInnerHTML={{ __html: htmlContent }} />;
+                            }
                           }
                           
                           // Fallback: display as string

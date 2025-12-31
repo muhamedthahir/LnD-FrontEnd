@@ -220,6 +220,45 @@
   margin-bottom: var(--spacing-md);
 }
 
+/* Embedded video styles */
+.embedded-video {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  margin-bottom: var(--spacing-lg);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--bg-secondary);
+}
+
+.embedded-video iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Video player container */
+.lesson-content .video-player-container {
+  margin-bottom: var(--spacing-lg);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+/* Audio player container */
+.lesson-content .audio-player-container {
+  margin-bottom: var(--spacing-lg);
+}
+
+/* Document viewer container */
+.lesson-content .document-viewer-container {
+  margin-bottom: var(--spacing-lg);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
 .btn-mark-complete {
   margin-top: var(--spacing-lg);
   padding: var(--spacing-sm) var(--spacing-lg);
