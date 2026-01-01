@@ -365,10 +365,10 @@ function CoursesManagement() {
 
             <div className="form-group">
               <label>Category <span className="required">*</span></label>
-              <select
+              <select 
                 value={showNewCategoryInput ? 'other' : formData.category}
                 onChange={handleCategoryChange}
-                className={errors.category ? 'error' : ''}
+                className={errors.category ? 'error' : 'filter-select create-course'}
               >
                 <option value="">Select Category</option>
                 {categories.map(cat => (
@@ -395,7 +395,7 @@ function CoursesManagement() {
               <select
                 value={formData.competency_level}
                 onChange={(e) => setFormData({ ...formData, competency_level: e.target.value })}
-                className={errors.competency_level ? 'error' : ''}
+                className={errors.competency_level ? 'error' : 'filter-select create-course'}
               >
                 <option value="">Select Competency Level</option>
                 <option value="beginner">Beginner</option>

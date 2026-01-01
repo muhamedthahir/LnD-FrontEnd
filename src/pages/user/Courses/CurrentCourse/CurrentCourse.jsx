@@ -3,6 +3,7 @@ import { useParams, useNavigate, useOutletContext } from 'react-router-dom'
 import { useApi } from '../../../../contexts/ApiContext'
 import { API_ENDPOINTS } from '../../../../constants/constants'
 import { VideoPlayer, AudioPlayer, DocumentViewer } from '../../../../components/MediaPlayer'
+import { DocumentViewer } from '../../../../components/MediaPlayer'
 import './CurrentCourse.css'
 
 function CurrentCourse() {
@@ -371,7 +372,94 @@ function CurrentCourse() {
                             }
                           }
                           
-                          // If it's an object, check the content type
+                          // Check if this is a document segment
+                          const segmentType = (selectedSegment.segment_type || '').toLowerCase();
+                          if (segmentType === 'lesson_document' && typeof contentObj === 'object' && contentObj !== null) {
+                            // Handle document content - check for files array first
+                            if (contentObj.files && Array.isArray(contentObj.files) && contentObj.files.length > 0) {
+                              // Multiple files (uploaded documents)
+                              const files = contentObj.files.map(file => ({
+                                url: file.presignedUrl || file.url || file,
+                                fileName: file.fileName || file.name || `Document ${contentObj.files.indexOf(file) + 1}`,
+                                contentType: file.contentType || file.type || ''
+                              }));
+                              return (
+                                <>
+                                  <DocumentViewer files={files} compact={false} />
+                                  {!isSegmentCompleted(selectedSegment.id) && (
+                                    <button 
+                                      className="btn-mark-complete"
+                                      onClick={() => handleMarkComplete(selectedSegment.id)}
+                                    >
+                                      Mark as Complete
+                                    </button>
+                                  )}
+                                </>
+                              );
+                            } else if (contentObj.source === 'upload' && (contentObj.presignedUrl || contentObj.url)) {
+                              // Single uploaded file
+                              return (
+                                <>
+                                  <DocumentViewer 
+                                    url={contentObj.presignedUrl || contentObj.url}
+                                    fileName={contentObj.fileName || selectedSegment.name || 'Document'}
+                                    contentType={contentObj.contentType || contentObj.type || ''}
+                                    compact={false}
+                                  />
+                                  {!isSegmentCompleted(selectedSegment.id) && (
+                                    <button 
+                                      className="btn-mark-complete"
+                                      onClick={() => handleMarkComplete(selectedSegment.id)}
+                                    >
+                                      Mark as Complete
+                                    </button>
+                                  )}
+                                </>
+                              );
+                            } else if (contentObj.source === 'embedded' && contentObj.url) {
+                              // Embedded document URL
+                              return (
+                                <>
+                                  <DocumentViewer 
+                                    url={contentObj.url}
+                                    fileName={selectedSegment.name || contentObj.fileName || 'Document'}
+                                    contentType={contentObj.contentType || ''}
+                                    compact={false}
+                                  />
+                                  {!isSegmentCompleted(selectedSegment.id) && (
+                                    <button 
+                                      className="btn-mark-complete"
+                                      onClick={() => handleMarkComplete(selectedSegment.id)}
+                                    >
+                                      Mark as Complete
+                                    </button>
+                                  )}
+                                </>
+                              );
+                            } else if (contentObj.url || contentObj.presignedUrl) {
+                              // Fallback: if there's a URL but no source specified
+                              return (
+                                <>
+                                  <DocumentViewer 
+                                    url={contentObj.presignedUrl || contentObj.url}
+                                    fileName={contentObj.fileName || selectedSegment.name || 'Document'}
+                                    contentType={contentObj.contentType || contentObj.type || ''}
+                                    compact={false}
+                                  />
+                                  {!isSegmentCompleted(selectedSegment.id) && (
+                                    <button 
+                                      className="btn-mark-complete"
+                                      onClick={() => handleMarkComplete(selectedSegment.id)}
+                                    >
+                                      Mark as Complete
+                                    </button>
+                                  )}
+                                </>
+                              );
+                            }
+                          }
+                          
+                          // If it's an object, check the content (for text lessons) type
                           if (typeof contentObj === 'object' && contentObj !== null) {
                             const segmentType = selectedSegment.segment_type?.toLowerCase() || '';
                             
@@ -455,12 +543,36 @@ function CurrentCourse() {
                             // Default: extract HTML content for article/text
                             const htmlContent = contentObj.html || contentObj.content || '';
                             if (htmlContent) {
-                              return <div dangerouslySetInnerHTML={{ __html: htmlContent }} />;
+                              return (
+                              <>
+                                <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
+                                {!isSegmentCompleted(selectedSegment.id) && (
+                                  <button 
+                                    className="btn-mark-complete"
+                                    onClick={() => handleMarkComplete(selectedSegment.id)}
+                                  >
+                                    Mark as Complete
+                                  </button>
+                                )}
+                              </>
+                            );
                             }
                           }
                           
                           // Fallback: display as string
-                          return <div>{String(contentObj)}</div>;
+                          return (
+                            <>
+                              <div>{String(contentObj)}</div>
+                              {!isSegmentCompleted(selectedSegment.id) && (
+                                <button 
+                                  className="btn-mark-complete"
+                                  onClick={() => handleMarkComplete(selectedSegment.id)}
+                                >
+                                  Mark as Complete
+                                </button>
+                              )}
+                            </>
+                          );
                         } catch (error) {
                           console.error('Error rendering content:', error);
                           return <div>Error displaying content. Please try again.</div>;
@@ -468,14 +580,6 @@ function CurrentCourse() {
                       })()
                     ) : (
                       <p>Lesson content will be displayed here.</p>
-                    )}
-                    {!isSegmentCompleted(selectedSegment.id) && (
-                      <button 
-                        className="btn-mark-complete"
-                        onClick={() => handleMarkComplete(selectedSegment.id)}
-                      >
-                        Mark as Complete
-                      </button>
                     )}
                   </div>
                 )}
