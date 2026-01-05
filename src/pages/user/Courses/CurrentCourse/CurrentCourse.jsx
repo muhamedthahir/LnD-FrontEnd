@@ -3,7 +3,6 @@ import { useParams, useNavigate, useOutletContext } from 'react-router-dom'
 import { useApi } from '../../../../contexts/ApiContext'
 import { API_ENDPOINTS } from '../../../../constants/constants'
 import { VideoPlayer, AudioPlayer, DocumentViewer } from '../../../../components/MediaPlayer'
-import { DocumentViewer } from '../../../../components/MediaPlayer'
 import './CurrentCourse.css'
 
 function CurrentCourse() {

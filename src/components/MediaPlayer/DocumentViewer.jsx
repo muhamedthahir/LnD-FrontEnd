@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect } from 'react'
 import DocViewer, { DocViewerRenderers } from '@cyntler/react-doc-viewer'
 import '@cyntler/react-doc-viewer/dist/index.css'
-import DocViewer, { DocViewerRenderers } from 'react-doc-viewer'
 import './DocumentViewer.css'
 
 /**
