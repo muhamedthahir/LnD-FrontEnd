@@ -68,36 +68,9 @@
 .doc-viewer-wrapper {
   flex: 1;
   position: relative;
-  overflow: hidden;
+  overflow: auto;
   background: #f5f5f5;
   min-height: 400px;
-}
-
-/* Override react-doc-viewer styles */
-.react-doc-viewer {
-  background: #f5f5f5 !important;
-}
-
-.react-doc-viewer #header-bar {
-  display: none !important;
-}
-
-.react-doc-viewer #pdf-controls {
-  background: var(--bg-secondary, #16162a) !important;
-  box-shadow: none !important;
-  border-bottom: 1px solid var(--border-color, #333) !important;
-}
-
-.react-doc-viewer #pdf-controls button {
-  color: var(--text-primary, #fff) !important;
-}
-
-.react-doc-viewer #pdf-pagination {
-  color: var(--text-primary, #fff) !important;
-}
-
-.react-doc-viewer #proxy-renderer {
-  background: #f5f5f5 !important;
 }
 
 /* Documents list */
@@ -156,6 +129,7 @@
 .file-icon.ppt { color: #f97316; }
 .file-icon.xls { color: #22c55e; }
 .file-icon.txt { color: #8b5cf6; }
+.file-icon.img { color: #14b8a6; }
 
 .document-info {
   flex: 1;
@@ -229,6 +203,37 @@
   padding: 12px;
 }
 
+.unsupported-message {
+  font-size: 14px;
+  text-align: center;
+}
+
+.download-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--primary, #6366f1);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 8px;
+}
+
+.download-btn:hover {
+  background: var(--primary-dark, #4f46e5);
+}
+
+.download-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
 .document-loading .spinner {
   width: 32px;
   height: 32px;
@@ -285,75 +290,160 @@
   max-width: 60%;
 }
 
-.file-name {
-  font-size: 12px;
-  color: var(--text-secondary, #888);
-}
-
-.doc-viewer-wrapper {
-  width: 100%;
-  min-height: 500px;
-  background: var(--bg-primary, #1e1e3f);
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-.document-viewer-container.doc-preview {
-  min-height: 500px;
-}
-
-.documents-preview {
+/* PDF Viewer Styles */
+.pdf-viewer {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg, 16px);
-  padding: var(--spacing-md, 12px);
+  height: 100%;
+  background: #525659;
 }
 
-.document-preview-item {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm, 8px);
-}
-
-.document-preview-header {
+.pdf-controls {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: var(--spacing-sm, 8px) var(--spacing-md, 12px);
+  justify-content: center;
+  gap: 12px;
+  padding: 10px 16px;
   background: var(--bg-secondary, #16162a);
-  border-radius: 6px 6px 0 0;
   border-bottom: 1px solid var(--border-color, #333);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
-.document-preview-header .document-name {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-primary, #fff);
-}
-
-.document-preview-header .download-link {
-  font-size: 12px;
-  color: var(--primary, #6366f1);
-  text-decoration: none;
-  padding: 4px 8px;
-  border-radius: 4px;
-  transition: background 0.2s ease;
-}
-
-.document-preview-header .download-link:hover {
+.pdf-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
   background: var(--bg-tertiary, #1a1a2e);
-  text-decoration: none;
+  border: 1px solid var(--border-color, #333);
+  border-radius: 6px;
+  color: var(--text-primary, #fff);
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-/* PDF iframe - native browser PDF viewer */
-.pdf-iframe {
+.pdf-btn:hover:not(:disabled) {
+  background: var(--primary, #6366f1);
+  border-color: var(--primary, #6366f1);
+}
+
+.pdf-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pdf-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.page-info {
+  font-size: 13px;
+  color: var(--text-primary, #fff);
+  min-width: 100px;
+  text-align: center;
+}
+
+.zoom-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 16px;
+  padding-left: 16px;
+  border-left: 1px solid var(--border-color, #333);
+}
+
+.zoom-level {
+  font-size: 12px;
+  color: var(--text-secondary, #888);
+  min-width: 45px;
+  text-align: center;
+}
+
+.pdf-document-wrapper {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+.pdf-document-wrapper .react-pdf__Document {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pdf-document-wrapper .react-pdf__Page {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  margin-bottom: 20px;
+  background: #fff;
+}
+
+.pdf-document-wrapper .react-pdf__Page canvas {
+  max-width: 100%;
+  height: auto !important;
+}
+
+/* DOCX Viewer Styles */
+.docx-viewer {
   width: 100%;
   height: 100%;
-  min-height: 500px;
-  border: none;
+  overflow: auto;
   background: #fff;
-  position: absolute;
-  inset: 0;
+}
+
+.docx-container {
+  padding: 20px;
+  min-height: 100%;
+}
+
+.docx-container .docx-wrapper {
+  max-width: 800px;
+  margin: 0 auto;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 40px 60px;
+}
+
+/* Image Viewer */
+.image-viewer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 20px;
+  background: #1a1a2e;
+}
+
+.image-viewer img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Text Viewer */
+.text-viewer {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background: #1e1e2e;
+  padding: 20px;
+}
+
+.text-viewer pre {
+  margin: 0;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #e0e0e0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
 /* Responsive adjustments */
@@ -378,5 +468,23 @@
   
   .document-tab .tab-name {
     max-width: 80px;
+  }
+  
+  .pdf-controls {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .zoom-controls {
+    margin-left: 0;
+    padding-left: 0;
+    border-left: none;
+    margin-top: 8px;
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .docx-container .docx-wrapper {
+    padding: 20px;
   }
 }

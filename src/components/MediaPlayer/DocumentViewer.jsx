@@ -1,12 +1,15 @@
-import { useState, useCallback, useEffect } from 'react'
-import DocViewer, { DocViewerRenderers } from '@cyntler/react-doc-viewer'
-import '@cyntler/react-doc-viewer/dist/index.css'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { Document, Page, pdfjs } from 'react-pdf'
+import 'react-pdf/dist/Page/AnnotationLayer.css'
+import 'react-pdf/dist/Page/TextLayer.css'
 import './DocumentViewer.css'
+
+// Set up PDF.js worker
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
 
 /**
  * DocumentViewer component for displaying documents
- * Supports PDF, DOCX, PPTX, TXT and more using react-doc-viewer
- * Handles S3 presigned URLs properly
+ * Supports PDF (react-pdf), DOCX (docx-preview), and download links for other types
  */
 function DocumentViewer({ 
   url, 
@@ -15,45 +18,37 @@ function DocumentViewer({
   compact = false,
   files = null,
   onError = null,
-  showViewer = true // Set to false to only show download links
+  showViewer = true
 }) {
   const [error, setError] = useState(false)
   const [loading, setLoading] = useState(true)
   const [activeDocIndex, setActiveDocIndex] = useState(0)
-  const [blobUrl, setBlobUrl] = useState(null)
+  
+  // PDF specific state
+  const [numPages, setNumPages] = useState(null)
+  const [pageNumber, setPageNumber] = useState(1)
+  const [scale, setScale] = useState(1.0)
+  
+  // DOCX specific
+  const docxContainerRef = useRef(null)
 
   // Get file extension
   const getExtension = (name) => {
-    // Handle URLs with query params (like S3 presigned URLs)
     const cleanName = name?.split('?')[0] || name
     return cleanName?.split('.').pop()?.toLowerCase() || ''
   }
 
-  // Check if file is a PDF
-  const isPDF = (name, type) => {
-    return type === 'application/pdf' || getExtension(name) === 'pdf'
-  }
-
-  // Check if file type is supported by the viewer (excluding PDF which uses iframe)
-  const isDocViewerSupported = (name) => {
-    const ext = getExtension(name)
-    // PDF will use iframe, these use DocViewer
-    const supportedExtensions = ['doc', 'docx', 'ppt', 'pptx', 'txt', 'csv', 'xls', 'xlsx', 'png', 'jpg', 'jpeg', 'gif', 'bmp']
-    return supportedExtensions.includes(ext)
-  }
-
-  // Check if any viewer supports this file
-  const isViewerSupported = (name) => {
-    const ext = getExtension(name)
-    const supportedExtensions = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'txt', 'csv', 'xls', 'xlsx', 'png', 'jpg', 'jpeg', 'gif', 'bmp']
-    return supportedExtensions.includes(ext)
-  }
+  // Check file types
+  const isPDF = (name) => getExtension(name) === 'pdf'
+  const isDOCX = (name) => ['doc', 'docx'].includes(getExtension(name))
+  const isImage = (name) => ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'].includes(getExtension(name))
+  const isTXT = (name) => getExtension(name) === 'txt'
 
   // Get icon based on file type
-  const getFileIcon = (name, type) => {
+  const getFileIcon = (name) => {
     const ext = getExtension(name)
     
-    if (isPDF(name, type)) {
+    if (ext === 'pdf') {
       return (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="file-icon pdf">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -96,18 +91,16 @@ function DocumentViewer({
       )
     }
 
-    if (ext === 'txt') {
+    if (isImage(name)) {
       return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="file-icon txt">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-          <polyline points="14 2 14 8 20 8"/>
-          <line x1="8" y1="12" x2="16" y2="12"/>
-          <line x1="8" y1="16" x2="12" y2="16"/>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="file-icon img">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+          <polyline points="21 15 16 10 5 21"/>
         </svg>
       )
     }
     
-    // Default document icon
     return (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="file-icon">
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -123,11 +116,7 @@ function DocumentViewer({
     if (onError) onError(e)
   }, [onError])
 
-  const handleDocumentLoad = useCallback(() => {
-    setLoading(false)
-  }, [])
-
-  // Prepare documents for the viewer
+  // Prepare documents
   const prepareDocuments = () => {
     if (files && files.length > 0) {
       return files.map(file => ({
@@ -136,10 +125,7 @@ function DocumentViewer({
       }))
     }
     if (url) {
-      return [{
-        uri: url,
-        fileName: fileName || 'Document'
-      }]
+      return [{ uri: url, fileName: fileName || 'Document' }]
     }
     return []
   }
@@ -147,203 +133,93 @@ function DocumentViewer({
   const documents = prepareDocuments()
   const currentDoc = documents[activeDocIndex] || documents[0]
 
-  // Fetch document as blob for non-PDF files to handle S3 CORS
+  // Load DOCX using docx-preview
   useEffect(() => {
-    if (!showViewer || compact || !currentDoc?.uri) {
+    if (!currentDoc?.uri || !isDOCX(currentDoc.fileName) || !showViewer || compact) {
       return
     }
 
-    const ext = getExtension(currentDoc.fileName)
-    
-    // PDFs use iframe, no need to fetch as blob
-    if (ext === 'pdf') {
-      setLoading(false)
-      return
-    }
-
-    // For other document types, fetch as blob to avoid CORS issues
-    if (isDocViewerSupported(currentDoc.fileName)) {
+    const loadDocx = async () => {
       setLoading(true)
       setError(false)
-      setBlobUrl(null)
 
-      fetch(currentDoc.uri)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`)
-          }
-          return response.blob()
-        })
-        .then(blob => {
-          const url = URL.createObjectURL(blob)
-          setBlobUrl(url)
-          setLoading(false)
-        })
-        .catch(err => {
-          console.error('Failed to fetch document:', err)
-          setError(true)
-          setLoading(false)
-        })
-
-      // Cleanup blob URL on unmount or doc change
-      return () => {
-        if (blobUrl) {
-          URL.revokeObjectURL(blobUrl)
+      try {
+        // Dynamically import docx-preview
+        const docxPreview = await import('docx-preview')
+        
+        // Fetch the document
+        const response = await fetch(currentDoc.uri)
+        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+        
+        const blob = await response.blob()
+        
+        if (docxContainerRef.current) {
+          docxContainerRef.current.innerHTML = ''
+          await docxPreview.renderAsync(blob, docxContainerRef.current, null, {
+            className: 'docx-wrapper',
+            inWrapper: true,
+            ignoreWidth: false,
+            ignoreHeight: false,
+            ignoreFonts: false,
+            breakPages: true,
+            useBase64URL: true
+          })
         }
+        setLoading(false)
+      } catch (err) {
+        console.error('Failed to load DOCX:', err)
+        setError(true)
+        setLoading(false)
       }
-    } else {
-      setLoading(false)
     }
-  }, [currentDoc?.uri, activeDocIndex, showViewer, compact])
 
-  // Handle multiple files - list view
+    loadDocx()
+  }, [currentDoc?.uri, currentDoc?.fileName, showViewer, compact])
+
+  // PDF handlers
+  const onDocumentLoadSuccess = ({ numPages }) => {
+    setNumPages(numPages)
+    setPageNumber(1)
+    setLoading(false)
+  }
+
+  const goToPrevPage = () => setPageNumber(prev => Math.max(prev - 1, 1))
+  const goToNextPage = () => setPageNumber(prev => Math.min(prev + 1, numPages || 1))
+  const zoomIn = () => setScale(prev => Math.min(prev + 0.2, 3))
+  const zoomOut = () => setScale(prev => Math.max(prev - 0.2, 0.5))
+
+  // Handle multiple files - list view (compact or download only)
   if (files && files.length > 0 && (compact || !showViewer)) {
-    // Check if files are File objects (for upload preview) or URL objects
-    const isFileObjects = files.length > 0 && files[0] instanceof File
-    
-    // For File objects, create preview with react-doc-viewer
-    if (isFileObjects && !compact) {
-      const docs = files.map(file => ({
-        uri: URL.createObjectURL(file),
-        fileType: getExtension(file.name).toLowerCase(),
-        fileName: file.name
-      })).filter(doc => {
-        // Only include supported file types
-        const supportedTypes = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx']
-        return supportedTypes.includes(doc.fileType)
-      })
-      
-      if (docs.length > 0) {
-        return (
-          <div className={`document-viewer-container doc-preview`}>
-            <DocViewer
-              pluginRenderers={DocViewerRenderers}
-              documents={docs}
-              config={{
-                header: {
-                  disableHeader: false,
-                  disableFileName: false,
-                  retainURLParams: false
-                }
-              }}
-            />
-          </div>
-        )
-      }
-    }
-    
-    // For URL objects (viewing uploaded documents) or compact view
     return (
       <div className={`document-viewer-container ${compact ? 'compact' : ''}`}>
-        {!compact ? (
-          // Full preview for URLs
-          <div className="documents-preview">
-            {files.map((file, index) => {
-              const fileUrl = file.url || file.presignedUrl || file
-              const fileName = file.fileName || file.name || `Document ${index + 1}`
-              const fileType = file.contentType || getExtension(fileName)
-              
-              // Use react-doc-viewer for preview if it's a supported type
-              const supportedTypes = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx']
-              const ext = getExtension(fileName).toLowerCase()
-              
-              if (supportedTypes.includes(ext)) {
-                return (
-                  <div key={index} className="document-preview-item">
-                    <div className="document-preview-header">
-                      <span className="document-name" title={fileName}>{fileName}</span>
-                      <a 
-                        href={fileUrl} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="download-link"
-                      >
-                        Download
-                      </a>
-                    </div>
-                    <div className="doc-viewer-wrapper">
-                      <DocViewer
-                        pluginRenderers={DocViewerRenderers}
-                        documents={[{
-                          uri: fileUrl,
-                          fileType: ext,
-                          fileName: fileName
-                        }]}
-                        config={{
-                          header: {
-                            disableHeader: false,
-                            disableFileName: false,
-                            retainURLParams: false
-                          }
-                        }}
-                      />
-                    </div>
-                  </div>
-                )
-              }
-              
-              // Fallback to download card for unsupported types
-              return (
-                <a 
-                  key={index}
-                  href={fileUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="document-item"
-                >
-                  {getFileIcon(fileName, fileType)}
-                  <div className="document-info">
-                    <span className="document-name" title={fileName}>
-                      {fileName}
-                    </span>
-                    <span className="document-type">
-                      {ext.toUpperCase()}
-                    </span>
-                  </div>
-                  <svg className="download-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="7 10 12 15 17 10"/>
-                    <line x1="12" y1="15" x2="12" y2="3"/>
-                  </svg>
-                </a>
-              )
-            })}
-          </div>
-        ) : (
-          // Compact list view
-          <div className="documents-list">
-            {files.map((file, index) => {
-              const fileUrl = file.url || file.presignedUrl || (file instanceof File ? URL.createObjectURL(file) : file)
-              const fileName = file.fileName || file.name || `Document ${index + 1}`
-              const fileType = file.contentType || getExtension(fileName)
-              
-              return (
-                <a 
-                  key={index}
-                  href={fileUrl || file.presignedUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="document-item"
-                >
-                  {getFileIcon(fileName || file.name, fileType)}
-                  <div className="document-info">
-                    <span className="document-name" title={fileName || file.name}>
-                      {fileName || file.name}
-                    </span>
-                    <span className="document-type">
-                      {getExtension(fileName || file.name).toUpperCase()}
-                    </span>
-                  </div>
-                  <svg className="download-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="7 10 12 15 17 10"/>
-                    <line x1="12" y1="15" x2="12" y2="3"/>
-                  </svg>
-                </a>
-              )
-            })}
-          </div>
-        )}
+        <div className="documents-list">
+          {files.map((file, index) => {
+            const fileUrl = file.url || file.presignedUrl || file
+            const name = file.fileName || file.name || `Document ${index + 1}`
+            const ext = getExtension(name)
+            
+            return (
+              <a 
+                key={index}
+                href={fileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="document-item"
+              >
+                {getFileIcon(name)}
+                <div className="document-info">
+                  <span className="document-name" title={name}>{name}</span>
+                  <span className="document-type">{ext.toUpperCase()}</span>
+                </div>
+                <svg className="download-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+              </a>
+            )
+          })}
+        </div>
       </div>
     )
   }
@@ -363,13 +239,8 @@ function DocumentViewer({
     )
   }
 
-  // Show viewer for supported documents
+  // Show viewer
   if (showViewer && !compact && currentDoc) {
-    const isSupported = isViewerSupported(currentDoc.fileName)
-    const isPdfFile = isPDF(currentDoc.fileName)
-    const useDocViewer = isDocViewerSupported(currentDoc.fileName)
-
-    // Render content based on file type
     const renderDocumentContent = () => {
       if (error) {
         return (
@@ -387,63 +258,112 @@ function DocumentViewer({
         )
       }
 
-      // PDF - use iframe (works with S3 presigned URLs)
-      if (isPdfFile) {
+      // PDF Viewer
+      if (isPDF(currentDoc.fileName)) {
         return (
-          <iframe
-            src={`${currentDoc.uri}#toolbar=1&navpanes=0&scrollbar=1`}
-            className="pdf-iframe"
-            title={currentDoc.fileName || 'PDF Document'}
-            onLoad={handleDocumentLoad}
-            onError={handleError}
-          />
-        )
-      }
-
-      // Other supported docs - use DocViewer with blob URL
-      if (useDocViewer && blobUrl) {
-        return (
-          <DocViewer
-            documents={[{ 
-              uri: blobUrl, 
-              fileName: currentDoc.fileName,
-              fileType: getExtension(currentDoc.fileName)
-            }]}
-            pluginRenderers={DocViewerRenderers}
-            config={{
-              header: {
-                disableHeader: true,
-                disableFileName: true,
-                retainURLParams: false
-              },
-              pdfZoom: {
-                defaultZoom: 1,
-                zoomJump: 0.2
-              },
-              pdfVerticalScrollByDefault: true
-            }}
-            style={{ height: '100%', width: '100%' }}
-            onDocumentLoad={handleDocumentLoad}
-            onError={handleError}
-            className="react-doc-viewer"
-          />
-        )
-      }
-
-      // Unsupported file type
-      if (!isSupported) {
-        return (
-          <div className="unsupported-file">
-            {getFileIcon(currentDoc.fileName)}
-            <span>Preview not available for this file type</span>
-            <a href={currentDoc.uri} target="_blank" rel="noopener noreferrer" className="download-link">
-              Download file
-            </a>
+          <div className="pdf-viewer">
+            <div className="pdf-controls">
+              <button onClick={goToPrevPage} disabled={pageNumber <= 1} className="pdf-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="15 18 9 12 15 6"/>
+                </svg>
+              </button>
+              <span className="page-info">
+                Page {pageNumber} of {numPages || '...'}
+              </span>
+              <button onClick={goToNextPage} disabled={pageNumber >= (numPages || 1)} className="pdf-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+              </button>
+              <div className="zoom-controls">
+                <button onClick={zoomOut} className="pdf-btn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    <line x1="8" y1="11" x2="14" y2="11"/>
+                  </svg>
+                </button>
+                <span className="zoom-level">{Math.round(scale * 100)}%</span>
+                <button onClick={zoomIn} className="pdf-btn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    <line x1="11" y1="8" x2="11" y2="14"/>
+                    <line x1="8" y1="11" x2="14" y2="11"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div className="pdf-document-wrapper">
+              <Document
+                file={currentDoc.uri}
+                onLoadSuccess={onDocumentLoadSuccess}
+                onLoadError={handleError}
+                loading={
+                  <div className="document-loading">
+                    <div className="spinner"></div>
+                    <span>Loading PDF...</span>
+                  </div>
+                }
+              >
+                <Page 
+                  pageNumber={pageNumber} 
+                  scale={scale}
+                  renderTextLayer={true}
+                  renderAnnotationLayer={true}
+                />
+              </Document>
+            </div>
           </div>
         )
       }
 
-      return null
+      // DOCX Viewer
+      if (isDOCX(currentDoc.fileName)) {
+        return (
+          <div className="docx-viewer">
+            <div ref={docxContainerRef} className="docx-container" />
+          </div>
+        )
+      }
+
+      // Image Viewer
+      if (isImage(currentDoc.fileName)) {
+        return (
+          <div className="image-viewer">
+            <img 
+              src={currentDoc.uri} 
+              alt={currentDoc.fileName}
+              onLoad={() => setLoading(false)}
+              onError={handleError}
+            />
+          </div>
+        )
+      }
+
+      // TXT Viewer - fetch and display
+      if (isTXT(currentDoc.fileName)) {
+        return <TextFileViewer url={currentDoc.uri} onLoad={() => setLoading(false)} onError={handleError} />
+      }
+
+      // Unsupported - show download card
+      return (
+        <div className="unsupported-file">
+          {getFileIcon(currentDoc.fileName)}
+          <span className="unsupported-message">
+            Preview not available for {getExtension(currentDoc.fileName).toUpperCase()} files
+          </span>
+          <a href={currentDoc.uri} target="_blank" rel="noopener noreferrer" className="download-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Download File
+          </a>
+        </div>
+      )
     }
 
     return (
@@ -459,7 +379,7 @@ function DocumentViewer({
                   setActiveDocIndex(index)
                   setLoading(true)
                   setError(false)
-                  setBlobUrl(null)
+                  setPageNumber(1)
                 }}
               >
                 {getFileIcon(doc.fileName)}
@@ -471,7 +391,7 @@ function DocumentViewer({
 
         {/* Document viewer */}
         <div className="doc-viewer-wrapper">
-          {loading && (
+          {loading && !isPDF(currentDoc?.fileName) && (
             <div className="document-loading">
               <div className="spinner"></div>
               <span>Loading document...</span>
@@ -506,14 +426,10 @@ function DocumentViewer({
         rel="noopener noreferrer"
         className="document-card"
       >
-        {getFileIcon(fileName, contentType)}
+        {getFileIcon(fileName)}
         <div className="document-info">
-          <span className="document-name" title={fileName}>
-            {fileName || 'Document'}
-          </span>
-          <span className="document-type">
-            {getExtension(fileName).toUpperCase() || 'FILE'}
-          </span>
+          <span className="document-name" title={fileName}>{fileName || 'Document'}</span>
+          <span className="document-type">{getExtension(fileName).toUpperCase() || 'FILE'}</span>
         </div>
         <svg className="download-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -521,6 +437,44 @@ function DocumentViewer({
           <line x1="12" y1="15" x2="12" y2="3"/>
         </svg>
       </a>
+    </div>
+  )
+}
+
+// Text file viewer component
+function TextFileViewer({ url, onLoad, onError }) {
+  const [content, setContent] = useState('')
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch(url)
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        return res.text()
+      })
+      .then(text => {
+        setContent(text)
+        setLoading(false)
+        onLoad?.()
+      })
+      .catch(err => {
+        console.error('Failed to load text file:', err)
+        onError?.(err)
+      })
+  }, [url])
+
+  if (loading) {
+    return (
+      <div className="document-loading">
+        <div className="spinner"></div>
+        <span>Loading text file...</span>
+      </div>
+    )
+  }
+
+  return (
+    <div className="text-viewer">
+      <pre>{content}</pre>
     </div>
   )
 }
