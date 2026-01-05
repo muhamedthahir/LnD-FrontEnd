@@ -528,18 +528,22 @@
   gap: var(--spacing-sm);
 }
 
-.form-group label {
+.form-group.login-cred label {
   display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: var(--spacing-sm);
+  justify-content: flex-start;
+  gap: 0.5rem;
   font-size: 0.9375rem;
   font-weight: 500;
   color: var(--text-secondary);
 }
 
 .form-group label svg {
-  width: var(--icon-sm);
-  height: var(--icon-sm);
+  width: 1.125rem;
+  height: 1.125rem;
+  min-width: 1.125rem;
+  flex-shrink: 0;
   color: var(--text-muted);
 }
 

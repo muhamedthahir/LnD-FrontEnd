@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import DocViewer, { DocViewerRenderers } from '@cyntler/react-doc-viewer'
 import '@cyntler/react-doc-viewer/dist/index.css'
+import DocViewer, { DocViewerRenderers } from 'react-doc-viewer'
 import './DocumentViewer.css'
 
 /**
@@ -198,34 +199,152 @@ function DocumentViewer({
 
   // Handle multiple files - list view
   if (files && files.length > 0 && (compact || !showViewer)) {
+    // Check if files are File objects (for upload preview) or URL objects
+    const isFileObjects = files.length > 0 && files[0] instanceof File
+    
+    // For File objects, create preview with react-doc-viewer
+    if (isFileObjects && !compact) {
+      const docs = files.map(file => ({
+        uri: URL.createObjectURL(file),
+        fileType: getExtension(file.name).toLowerCase(),
+        fileName: file.name
+      })).filter(doc => {
+        // Only include supported file types
+        const supportedTypes = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx']
+        return supportedTypes.includes(doc.fileType)
+      })
+      
+      if (docs.length > 0) {
+        return (
+          <div className={`document-viewer-container doc-preview`}>
+            <DocViewer
+              pluginRenderers={DocViewerRenderers}
+              documents={docs}
+              config={{
+                header: {
+                  disableHeader: false,
+                  disableFileName: false,
+                  retainURLParams: false
+                }
+              }}
+            />
+          </div>
+        )
+      }
+    }
+    
+    // For URL objects (viewing uploaded documents) or compact view
     return (
       <div className={`document-viewer-container ${compact ? 'compact' : ''}`}>
-        <div className="documents-list">
-          {files.map((file, index) => (
-            <a 
-              key={index}
-              href={file.url || file.presignedUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="document-item"
-            >
-              {getFileIcon(file.fileName || file.name, file.contentType)}
-              <div className="document-info">
-                <span className="document-name" title={file.fileName || file.name}>
-                  {file.fileName || file.name}
-                </span>
-                <span className="document-type">
-                  {getExtension(file.fileName || file.name).toUpperCase()}
-                </span>
-              </div>
-              <svg className="download-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7 10 12 15 17 10"/>
-                <line x1="12" y1="15" x2="12" y2="3"/>
-              </svg>
-            </a>
-          ))}
-        </div>
+        {!compact ? (
+          // Full preview for URLs
+          <div className="documents-preview">
+            {files.map((file, index) => {
+              const fileUrl = file.url || file.presignedUrl || file
+              const fileName = file.fileName || file.name || `Document ${index + 1}`
+              const fileType = file.contentType || getExtension(fileName)
+              
+              // Use react-doc-viewer for preview if it's a supported type
+              const supportedTypes = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx']
+              const ext = getExtension(fileName).toLowerCase()
+              
+              if (supportedTypes.includes(ext)) {
+                return (
+                  <div key={index} className="document-preview-item">
+                    <div className="document-preview-header">
+                      <span className="document-name" title={fileName}>{fileName}</span>
+                      <a 
+                        href={fileUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="download-link"
+                      >
+                        Download
+                      </a>
+                    </div>
+                    <div className="doc-viewer-wrapper">
+                      <DocViewer
+                        pluginRenderers={DocViewerRenderers}
+                        documents={[{
+                          uri: fileUrl,
+                          fileType: ext,
+                          fileName: fileName
+                        }]}
+                        config={{
+                          header: {
+                            disableHeader: false,
+                            disableFileName: false,
+                            retainURLParams: false
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
+                )
+              }
+              
+              // Fallback to download card for unsupported types
+              return (
+                <a 
+                  key={index}
+                  href={fileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="document-item"
+                >
+                  {getFileIcon(fileName, fileType)}
+                  <div className="document-info">
+                    <span className="document-name" title={fileName}>
+                      {fileName}
+                    </span>
+                    <span className="document-type">
+                      {ext.toUpperCase()}
+                    </span>
+                  </div>
+                  <svg className="download-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                </a>
+              )
+            })}
+          </div>
+        ) : (
+          // Compact list view
+          <div className="documents-list">
+            {files.map((file, index) => {
+              const fileUrl = file.url || file.presignedUrl || (file instanceof File ? URL.createObjectURL(file) : file)
+              const fileName = file.fileName || file.name || `Document ${index + 1}`
+              const fileType = file.contentType || getExtension(fileName)
+              
+              return (
+                <a 
+                  key={index}
+                  href={fileUrl || file.presignedUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="document-item"
+                >
+                  {getFileIcon(fileName || file.name, fileType)}
+                  <div className="document-info">
+                    <span className="document-name" title={fileName || file.name}>
+                      {fileName || file.name}
+                    </span>
+                    <span className="document-type">
+                      {getExtension(fileName || file.name).toUpperCase()}
+                    </span>
+                  </div>
+                  <svg className="download-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                </a>
+              )
+            })}
+          </div>
+        )}
       </div>
     )
   }

@@ -1423,14 +1423,12 @@ function LessonModal({ isOpen, onClose, onAdd, sectionId, editingLesson = null, 
                   </div>
 
                   {documentFiles.length > 0 && (
-                    <div className="document-list">
+                    <div className="document-upload-preview">
                       <h4>New Documents to Upload:</h4>
-                      {documentFiles.map((file, index) => (
-                        <div key={index} className="document-item">
-                          <span>{file.name}</span>
-                          <button onClick={() => removeDocument(index)}>×</button>
-                        </div>
-                      ))}
+                      <DocumentViewer 
+                        files={documentFiles}
+                        compact={false}
+                      />
                     </div>
                   )}
                 </div>
