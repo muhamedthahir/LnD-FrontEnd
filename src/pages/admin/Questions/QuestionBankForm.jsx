@@ -18,6 +18,8 @@ function QuestionBankForm() {
   const [saving, setSaving] = useState(false)
   const [institutions, setInstitutions] = useState([])
   const [statuses, setStatuses] = useState([])
+  const [levels, setLevels] = useState([])
+  const [categories, setCategories] = useState([])
   const [tags, setTags] = useState([])
   
   const [formData, setFormData] = useState({
@@ -25,6 +27,8 @@ function QuestionBankForm() {
     description: '',
     institution_id: null,
     status_id: null,
+    level_id: null,
+    category_id: null,
     active: true,
     tags: []
   })
@@ -56,6 +60,8 @@ function QuestionBankForm() {
       if (masterRes.ok) {
         const data = await masterRes.json()
         setStatuses(data.statuses || [])
+        setLevels(data.levels || [])
+        setCategories(data.categories || [])
         setTags(data.tags || [])
         
         // Set default status to DRAFT for new banks
@@ -97,6 +103,8 @@ function QuestionBankForm() {
           description: bank.description || '',
           institution_id: bank.institution_id || null,
           status_id: bank.status_id || null,
+          level_id: bank.level_id || null,
+          category_id: bank.category_id || null,
           active: bank.active !== false,
           tags: bank.tags?.map(t => t.id) || []
         })
@@ -236,13 +244,36 @@ function QuestionBankForm() {
             </div>
           </div>
 
+          <div className="form-row">
+            <div className="form-group">
+              <Dropdown
+                label="Default Level"
+                options={levels}
+                value={formData.level_id}
+                onChange={(value) => handleChange('level_id', value)}
+                placeholder="Select default level (optional)"
+              />
+            </div>
+
+            <div className="form-group">
+              <Dropdown
+                label="Default Category"
+                options={categories}
+                value={formData.category_id}
+                onChange={(value) => handleChange('category_id', value)}
+                placeholder="Select default category (optional)"
+                searchable
+              />
+            </div>
+          </div>
+
           <div className="form-group">
             <Dropdown
-              label="Tags"
+              label="Default Tags"
               options={tags}
               value={formData.tags}
               onChange={(value) => handleChange('tags', value)}
-              placeholder="Select tags (optional)"
+              placeholder="Select default tags (optional)"
               multiple
               searchable
               renderOption={(tag) => (
@@ -284,4 +315,7 @@ function QuestionBankForm() {
 }
 
 export default QuestionBankForm
+
+
+
 

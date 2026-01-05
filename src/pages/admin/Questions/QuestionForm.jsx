@@ -192,6 +192,22 @@ function QuestionForm() {
 
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }))
+    
+    // Pre-populate level, category, and tags when selecting a question bank
+    if (field === 'question_bank_id' && value && !isEditing) {
+      const selectedBank = questionBanks.find(bank => bank.id === value)
+      if (selectedBank) {
+        setFormData(prev => ({
+          ...prev,
+          question_bank_id: value,
+          level_id: selectedBank.level_id || prev.level_id,
+          category_id: selectedBank.category_id || prev.category_id,
+          tags: selectedBank.tags?.length > 0 
+            ? selectedBank.tags.map(t => t.id) 
+            : prev.tags
+        }))
+      }
+    }
   }
 
   const handleProgrammingChange = (field, value) => {
@@ -395,7 +411,10 @@ function QuestionForm() {
               <button
                 type="button"
                 className={`form-tab ${step === 2 ? 'active' : ''}`}
-                onClick={() => setStep(2)}
+                onClick={(e) => {
+                  e.preventDefault()
+                  setStep(2)
+                }}
               >
                 Basic Details
               </button>
@@ -403,7 +422,10 @@ function QuestionForm() {
                 <button
                   type="button"
                   className={`form-tab ${step === 3 ? 'active' : ''}`}
-                  onClick={() => setStep(3)}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setStep(3)
+                  }}
                 >
                   Programming Details
                 </button>
@@ -412,7 +434,10 @@ function QuestionForm() {
                 <button
                   type="button"
                   className={`form-tab ${step === 3 ? 'active' : ''}`}
-                  onClick={() => setStep(3)}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setStep(3)
+                  }}
                 >
                   Options ({options.length})
                 </button>
@@ -796,7 +821,14 @@ function QuestionForm() {
           {/* Form Actions */}
           <div className="form-actions-bar">
             {step > 2 && (
-              <button type="button" className="btn-secondary" onClick={() => setStep(step - 1)}>
+              <button 
+                type="button" 
+                className="btn-secondary" 
+                onClick={(e) => {
+                  e.preventDefault()
+                  setStep(step - 1)
+                }}
+              >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <polyline points="15 18 9 12 15 6"/>
                 </svg>
@@ -813,7 +845,15 @@ function QuestionForm() {
               </button>
               
               {((isProgramming() || isMCQ()) && step === 2) ? (
-                <button type="button" className="btn-primary" onClick={() => setStep(3)}>
+                <button 
+                  type="button" 
+                  className="btn-primary" 
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    setStep(3)
+                  }}
+                >
                   Next: {isProgramming() ? 'Programming Details' : 'Options'}
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polyline points="9 18 15 12 9 6"/>
