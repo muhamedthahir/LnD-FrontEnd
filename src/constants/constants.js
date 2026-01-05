@@ -327,5 +327,6 @@ export const VALIDATION_MESSAGES = {
   FILE_REQUIRED: 'Please select a file to upload',
   COLLEGE_REQUIRED: 'Please select a college',
   SAVE_COURSE_FIRST: 'Please save the course first before adding sections'
+  
 }
 
