@@ -1,18 +1,29 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import Pagination from '../../../components/Pagination/Pagination'
 import ConfirmModal from '../../../components/ConfirmModal/ConfirmModal'
 import { useApi } from '../../../contexts/ApiContext'
+import { useAutoLoadMasterData } from '../../../hooks/useMasterData'
 import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES, VALIDATION_MESSAGES } from '../../../constants/constants'
 import './Users.css'
 
 function Users() {
   const { apiBaseUrl, accessToken } = useApi()
   const { user } = useOutletContext()
+  
+  // Use Redux for institutions (prevents duplicate API calls)
+  const { institutions: reduxInstitutions, loadInstitutions } = useAutoLoadMasterData()
+  
   const [users, setUsers] = useState([])
-  const [colleges, setColleges] = useState([])
-  const [institutions, setInstitutions] = useState([]) // For dropdown
+  // Derive colleges from Redux institutions
+  const colleges = reduxInstitutions.map(inst => typeof inst === 'string' ? inst : inst.name)
+  const institutions = reduxInstitutions.map(inst => {
+    if (typeof inst === 'string') {
+      return { id: null, name: inst }
+    }
+    return { id: inst.id, name: inst.name }
+  })
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [selectedCollege, setSelectedCollege] = useState('')
@@ -49,10 +60,14 @@ function Users() {
   const [bulkUploadResult, setBulkUploadResult] = useState(null)
   const fileInputRef = useRef(null)
 
+  // Load institutions from Redux if not loaded
+  useEffect(() => {
+    loadInstitutions()
+  }, [loadInstitutions])
+
+  // Fetch users when filters change
   useEffect(() => {
     fetchUsers()
-    fetchColleges()
-    fetchInstitutions()
   }, [selectedCollege, currentPage, pageSize])
 
   const fetchUsers = async () => {
@@ -88,59 +103,7 @@ function Users() {
     }
   }
 
-  const fetchColleges = async () => {
-    try {
-      const token = accessToken || localStorage.getItem('accessToken')
-      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.INSTITUTIONS.ALL}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` })
-        }
-      })
-      
-      if (response.ok) {
-        const data = await response.json()
-        // Extract just the names for the filter dropdown
-        setColleges((data.institutions || []).map(inst => typeof inst === 'string' ? inst : inst.name))
-      }
-    } catch (error) {
-      console.error('Error fetching colleges:', error)
-    }
-  }
-
-  const fetchInstitutions = async () => {
-    try {
-      const token = accessToken || localStorage.getItem('accessToken')
-      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.INSTITUTIONS.ALL}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` })
-        }
-      })
-      
-      if (response.ok) {
-        const data = await response.json()
-        const institutionsList = data.institutions || []
-        // Ensure we have objects with id and name
-        const formattedInstitutions = institutionsList.map(inst => {
-          if (typeof inst === 'string') {
-            // Legacy format - just a name string
-            return { id: null, name: inst }
-          }
-          return { id: inst.id, name: inst.name }
-        })
-        setInstitutions(formattedInstitutions)
-        console.log('Institutions loaded:', formattedInstitutions.length)
-      } else {
-        console.error('Failed to fetch institutions:', response.status)
-        toast.error(ERROR_MESSAGES.INSTITUTION_LIST_FAILED)
-      }
-    } catch (error) {
-      console.error('Error fetching institutions:', error)
-      toast.error(ERROR_MESSAGES.INSTITUTION_LIST_FAILED)
-    }
-  }
-
+  // Search effect with debounce
   useEffect(() => {
     // Debounce search and reset to page 1
     const timer = setTimeout(() => {

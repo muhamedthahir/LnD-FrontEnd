@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useOutletContext, useNavigate } from 'react-router-dom'
 import Pagination from '../../../../components/Pagination/Pagination'
 import Button from '../../../../components/Button/Button'
@@ -19,6 +19,9 @@ function CoursesManagement() {
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [totalCount, setTotalCount] = useState(0)
+  
+  // Prevent duplicate API calls
+  const abortControllerRef = useRef(null)
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [categories] = useState(['Python', 'Java', 'C', 'C++'])
   const [newCategory, setNewCategory] = useState('')
@@ -33,11 +36,15 @@ function CoursesManagement() {
   })
   const [errors, setErrors] = useState({})
 
-  useEffect(() => {
-    fetchCourses()
-  }, [search, selectedCategory, selectedStatus, currentPage, pageSize])
-
-  const fetchCourses = async () => {
+  const fetchCourses = useCallback(async () => {
+    if (!apiBaseUrl) return
+    
+    // Cancel previous request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+    }
+    abortControllerRef.current = new AbortController()
+    
     try {
       setLoading(true)
       const params = new URLSearchParams({
@@ -52,7 +59,8 @@ function CoursesManagement() {
         headers: {
           'Content-Type': 'application/json',
           ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
-        }
+        },
+        signal: abortControllerRef.current.signal
       })
 
       if (!response.ok) {
@@ -63,14 +71,30 @@ function CoursesManagement() {
       setCourses(data.courses || [])
       setTotalCount(data.totalCount || 0)
     } catch (error) {
-      console.error('Error fetching courses:', error)
-      toast.error('Failed to fetch courses')
-      setCourses([])
-      setTotalCount(0)
+      if (error.name !== 'AbortError') {
+        console.error('Error fetching courses:', error)
+        toast.error('Failed to fetch courses')
+        setCourses([])
+        setTotalCount(0)
+      }
     } finally {
       setLoading(false)
     }
-  }
+  }, [apiBaseUrl, accessToken, search, selectedCategory, selectedStatus, currentPage, pageSize])
+
+  // Fetch when dependencies change
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchCourses()
+    }, search ? 300 : 0) // Debounce only for search
+    
+    return () => {
+      clearTimeout(timer)
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
+    }
+  }, [fetchCourses])
 
   const handleClearFilters = () => {
     setSearch('')

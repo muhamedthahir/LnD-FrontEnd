@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { useApi } from '../../../contexts/ApiContext'
+import { useAutoLoadMasterData } from '../../../hooks/useMasterData'
 import { API_ENDPOINTS } from '../../../constants/constants'
 import Dropdown from '../../../components/Dropdown/Dropdown'
 import Toggle from '../../../components/Toggle/Toggle'
@@ -18,15 +19,14 @@ function QuestionForm() {
   const [step, setStep] = useState(1) // 1: type selection, 2: question details, 3: options/programming
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [masterData, setMasterData] = useState({
-    levels: [],
-    statuses: [],
-    questionTypes: [],
-    languages: [],
-    categories: [],
-    tags: []
-  })
-  const [questionBanks, setQuestionBanks] = useState([])
+  
+  // Use Redux for master data
+  const { 
+    levels, statuses, questionTypes, languages, categories, tags, 
+    questionBanks, loadQuestionBanks, isLoaded 
+  } = useAutoLoadMasterData()
+  
+  const masterData = { levels, statuses, questionTypes, languages, categories, tags }
   
   const [formData, setFormData] = useState({
     name: '',
@@ -63,61 +63,29 @@ function QuestionForm() {
   ])
 
   useEffect(() => {
-    fetchMasterData()
-    fetchQuestionBanks()
+    // Load question banks if not already loaded
+    loadQuestionBanks()
+    
     if (isEditing) {
       fetchQuestion()
     }
-  }, [id])
+    
+    // Set default status when master data is loaded
+    if (isLoaded && !isEditing) {
+      const draftStatus = statuses?.find(s => s.name === 'DRAFT')
+      if (draftStatus && !formData.status_id) {
+        setFormData(prev => ({ ...prev, status_id: draftStatus.id }))
+      }
+    }
+  }, [id, isLoaded, statuses])
 
   const getSelectedTypeName = () => {
-    const type = masterData.questionTypes.find(t => t.id === formData.question_type_id)
+    const type = questionTypes.find(t => t.id === formData.question_type_id)
     return type?.name || ''
   }
 
   const isProgramming = () => getSelectedTypeName() === 'Programming'
   const isMCQ = () => getSelectedTypeName() === 'MCQ' || getSelectedTypeName() === 'Multi Select'
-
-  const fetchMasterData = async () => {
-    try {
-      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.MASTER_DATA.ALL}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
-        }
-      })
-      if (response.ok) {
-        const data = await response.json()
-        setMasterData(data)
-        
-        if (!isEditing) {
-          const draftStatus = data.statuses?.find(s => s.name === 'DRAFT')
-          if (draftStatus) {
-            setFormData(prev => ({ ...prev, status_id: draftStatus.id }))
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Failed to fetch master data:', error)
-    }
-  }
-
-  const fetchQuestionBanks = async () => {
-    try {
-      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.QUESTION_BANKS.LIST}?limit=1000`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
-        }
-      })
-      if (response.ok) {
-        const data = await response.json()
-        setQuestionBanks(data.questionBanks || [])
-      }
-    } catch (error) {
-      console.error('Failed to fetch question banks:', error)
-    }
-  }
 
   const fetchQuestion = async () => {
     try {

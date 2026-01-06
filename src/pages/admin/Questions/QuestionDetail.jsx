@@ -304,7 +304,7 @@ function QuestionDetail() {
               <h2>Test Cases ({testCases.length})</h2>
               <button 
                 className="btn-primary btn-sm"
-                onClick={() => navigate(`/admin/questions/list/${id}/edit?tab=testcases`)}
+                onClick={() => navigate(`/admin/questions/list/${id}/testcases`)}
               >
                 Manage Test Cases
               </button>

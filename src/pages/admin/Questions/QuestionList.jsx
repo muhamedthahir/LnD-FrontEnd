@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { useApi } from '../../../contexts/ApiContext'
+import { useAutoLoadMasterData } from '../../../hooks/useMasterData'
 import { API_ENDPOINTS } from '../../../constants/constants'
 import Pagination from '../../../components/Pagination/Pagination'
 import Dropdown from '../../../components/Dropdown/Dropdown'
@@ -18,52 +19,26 @@ function QuestionList() {
   const [pageSize, setPageSize] = useState(10)
   const [totalCount, setTotalCount] = useState(0)
   
-  // Filters
-  const [questionTypes, setQuestionTypes] = useState([])
-  const [levels, setLevels] = useState([])
-  const [statuses, setStatuses] = useState([])
+  // Use Redux for master data (filters)
+  const { questionTypes, levels, statuses } = useAutoLoadMasterData()
+  
+  // Filter selections
   const [selectedType, setSelectedType] = useState(null)
   const [selectedLevel, setSelectedLevel] = useState(null)
   const [selectedStatus, setSelectedStatus] = useState(null)
+  
+  // Prevent duplicate API calls
+  const abortControllerRef = useRef(null)
 
-  useEffect(() => {
-    fetchMasterData()
-  }, [])
-
-  useEffect(() => {
-    fetchQuestions()
-  }, [currentPage, pageSize, selectedType, selectedLevel, selectedStatus])
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (search !== undefined) {
-        setCurrentPage(1)
-        fetchQuestions()
-      }
-    }, 300)
-    return () => clearTimeout(timer)
-  }, [search])
-
-  const fetchMasterData = async () => {
-    try {
-      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.MASTER_DATA.ALL}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
-        }
-      })
-      if (response.ok) {
-        const data = await response.json()
-        setQuestionTypes(data.questionTypes || [])
-        setLevels(data.levels || [])
-        setStatuses(data.statuses || [])
-      }
-    } catch (error) {
-      console.error('Failed to fetch master data:', error)
+  const fetchQuestions = useCallback(async () => {
+    if (!apiBaseUrl) return
+    
+    // Cancel previous request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
     }
-  }
-
-  const fetchQuestions = async () => {
+    abortControllerRef.current = new AbortController()
+    
     try {
       setLoading(true)
       const offset = (currentPage - 1) * pageSize
@@ -79,7 +54,8 @@ function QuestionList() {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
-        }
+        },
+        signal: abortControllerRef.current.signal
       })
 
       if (response.ok) {
@@ -90,12 +66,28 @@ function QuestionList() {
         toast.error('Failed to fetch questions')
       }
     } catch (error) {
-      console.error('Error fetching questions:', error)
-      toast.error('Failed to fetch questions')
+      if (error.name !== 'AbortError') {
+        console.error('Error fetching questions:', error)
+        toast.error('Failed to fetch questions')
+      }
     } finally {
       setLoading(false)
     }
-  }
+  }, [apiBaseUrl, accessToken, currentPage, pageSize, search, selectedType, selectedLevel, selectedStatus])
+
+  // Fetch when dependencies change
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchQuestions()
+    }, search ? 300 : 0) // Debounce only for search
+    
+    return () => {
+      clearTimeout(timer)
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
+    }
+  }, [fetchQuestions])
 
   const getStatusBadgeClass = (statusName) => {
     switch (statusName?.toUpperCase()) {

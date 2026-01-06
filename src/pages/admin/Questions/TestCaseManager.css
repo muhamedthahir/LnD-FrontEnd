@@ -1,0 +1,468 @@
+.testcase-manager-page {
+  padding: var(--spacing-lg);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.testcase-manager-page .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-lg);
+  gap: var(--spacing-md);
+}
+
+.testcase-manager-page .page-header h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: var(--spacing-sm) 0 0;
+}
+
+.testcase-manager-page .page-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.testcase-manager-page .question-code {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--accent-primary);
+  background: var(--accent-subtle);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.testcase-manager-page .question-name {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+/* Form Card */
+.testcase-manager-page .form-card {
+  background: var(--bg-card);
+  border: var(--border-sm) solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-lg);
+}
+
+.testcase-manager-page .form-header {
+  margin-bottom: var(--spacing-lg);
+}
+
+.testcase-manager-page .form-header h2 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.testcase-manager-page .form-section {
+  margin-bottom: var(--spacing-lg);
+}
+
+.testcase-manager-page .form-group {
+  margin-bottom: var(--spacing-md);
+}
+
+.testcase-manager-page .form-group label {
+  display: block;
+  margin-bottom: var(--spacing-xs);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.testcase-manager-page .form-group .required {
+  color: var(--error);
+}
+
+.testcase-manager-page .form-input {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--bg-input);
+  border: var(--border-sm) solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-family: inherit;
+  transition: border-color var(--transition-fast);
+}
+
+.testcase-manager-page .form-input:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+}
+
+.testcase-manager-page .code-input {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  resize: vertical;
+}
+
+.testcase-manager-page .form-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-md);
+}
+
+.testcase-manager-page .form-row-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.testcase-manager-page .toggle-group {
+  display: flex;
+  align-items: center;
+  padding-top: var(--spacing-md);
+}
+
+.testcase-manager-page .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+  padding-top: var(--spacing-md);
+  border-top: var(--border-sm) solid var(--border-color);
+}
+
+/* Test Cases Section */
+.testcases-section {
+  background: var(--bg-card);
+  border: var(--border-sm) solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+}
+
+.testcases-section .section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.testcases-section .section-header h2 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* Test Cases Grid */
+.testcases-grid {
+  display: grid;
+  gap: var(--spacing-md);
+}
+
+/* Test Case Card */
+.testcase-card {
+  background: var(--bg-secondary);
+  border: var(--border-sm) solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  transition: all var(--transition-fast);
+}
+
+.testcase-card:hover {
+  border-color: var(--accent-primary);
+}
+
+.testcase-card.inactive {
+  opacity: 0.6;
+}
+
+.testcase-card.hidden {
+  border-left: 3px solid #8b5cf6;
+}
+
+.testcase-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+}
+
+.testcase-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.testcase-number {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: var(--bg-tertiary);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.testcase-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.testcase-badges {
+  display: flex;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.testcase-card .badge {
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.testcase-card .badge svg {
+  width: 12px;
+  height: 12px;
+}
+
+.testcase-card .badge.hidden {
+  background: rgba(139, 92, 246, 0.15);
+  color: #8b5cf6;
+}
+
+.testcase-card .badge.inactive {
+  background: rgba(107, 114, 128, 0.15);
+  color: #9ca3af;
+}
+
+.testcase-card .badge.weight {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+}
+
+.testcase-description {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin: 0 0 var(--spacing-sm);
+}
+
+/* I/O Blocks */
+.testcase-io {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+}
+
+.io-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.io-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.io-content {
+  margin: 0;
+  padding: var(--spacing-sm);
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 120px;
+  overflow-y: auto;
+  color: var(--text-primary);
+}
+
+.testcase-meta {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+}
+
+.testcase-meta .meta-item {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Test Case Actions */
+.testcase-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-xs);
+  padding-top: var(--spacing-sm);
+  border-top: var(--border-sm) solid var(--border-color);
+}
+
+.testcase-actions .action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: var(--bg-tertiary);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.testcase-actions .action-btn:hover {
+  background: var(--accent-subtle);
+  color: var(--accent-primary);
+}
+
+.testcase-actions .action-btn.toggle.active {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+}
+
+.testcase-actions .action-btn.visibility.hidden {
+  background: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
+}
+
+.testcase-actions .action-btn.delete:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.testcase-actions .action-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Empty State */
+.testcases-section .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xxl);
+  text-align: center;
+}
+
+.testcases-section .empty-state svg {
+  width: 56px;
+  height: 56px;
+  color: var(--text-muted);
+  margin-bottom: var(--spacing-md);
+  opacity: 0.5;
+}
+
+.testcases-section .empty-state h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-xs);
+}
+
+.testcases-section .empty-state p {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0 0 var(--spacing-lg);
+}
+
+/* Buttons */
+.testcase-manager-page .back-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.testcase-manager-page .back-btn:hover {
+  color: var(--accent-primary);
+}
+
+.testcase-manager-page .back-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.testcase-manager-page .btn-primary,
+.testcase-manager-page .btn-secondary {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border: none;
+}
+
+.testcase-manager-page .btn-primary {
+  background: var(--accent-primary);
+  color: white;
+}
+
+.testcase-manager-page .btn-primary:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.testcase-manager-page .btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.testcase-manager-page .btn-secondary {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: var(--border-sm) solid var(--border-color);
+}
+
+.testcase-manager-page .btn-secondary:hover {
+  background: var(--bg-secondary);
+}
+
+.testcase-manager-page .btn-primary svg,
+.testcase-manager-page .btn-secondary svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .testcase-manager-page {
+    padding: var(--spacing-md);
+  }
+
+  .testcase-manager-page .page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .testcase-manager-page .form-row,
+  .testcase-manager-page .form-row-4 {
+    grid-template-columns: 1fr;
+  }
+
+  .testcase-io {
+    grid-template-columns: 1fr;
+  }
+
+  .testcase-card-header {
+    flex-direction: column;
+  }
+}
+

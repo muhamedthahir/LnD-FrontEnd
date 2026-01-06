@@ -43,6 +43,12 @@ function CourseEdit() {
   // Expanded sections state
   const [expandedSections, setExpandedSections] = useState({})
   
+  // Content tab state per section (lessons, practice, assessment)
+  const [sectionContentTabs, setSectionContentTabs] = useState({})
+  
+  // Practice segments state
+  const [sectionPracticeSegments, setSectionPracticeSegments] = useState({})
+  
   // Lesson modal state
   const [showLessonModal, setShowLessonModal] = useState(false)
   const [selectedSectionId, setSelectedSectionId] = useState(null)
@@ -152,6 +158,25 @@ function CourseEdit() {
     } catch (error) {
       console.error('Error fetching lessons:', error)
       toast.error(ERROR_MESSAGES.LESSON_FETCH_FAILED)
+    }
+  }
+
+  const fetchSectionPracticeSegments = async (sectionId) => {
+    try {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.PRACTICE_SEGMENTS.LIST_BY_TOPIC(sectionId)}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        }
+      })
+      if (!response.ok) throw new Error('Failed to fetch practice segments')
+      const practiceSegments = await response.json()
+      setSectionPracticeSegments(prev => ({
+        ...prev,
+        [sectionId]: practiceSegments
+      }))
+    } catch (error) {
+      console.error('Error fetching practice segments:', error)
     }
   }
 
@@ -330,9 +355,30 @@ function CourseEdit() {
       [sectionId]: !prev[sectionId]
     }))
     
-    if (isExpanding && !sectionLessons[sectionId]) {
-      await fetchSectionLessons(sectionId)
+    if (isExpanding) {
+      // Set default content tab if not set
+      if (!sectionContentTabs[sectionId]) {
+        setSectionContentTabs(prev => ({
+          ...prev,
+          [sectionId]: 'lessons'
+        }))
+      }
+      // Fetch lessons if not already fetched
+      if (!sectionLessons[sectionId]) {
+        await fetchSectionLessons(sectionId)
+      }
+      // Fetch practice segments if not already fetched
+      if (!sectionPracticeSegments[sectionId]) {
+        await fetchSectionPracticeSegments(sectionId)
+      }
     }
+  }
+
+  const handleSectionContentTabChange = (sectionId, tab) => {
+    setSectionContentTabs(prev => ({
+      ...prev,
+      [sectionId]: tab
+    }))
   }
 
   const handleEditSection = (section) => {
@@ -558,90 +604,267 @@ function CourseEdit() {
                       </div>
                       {expandedSections[section.id] && (
                         <div className="section-content">
-                          {isEditable && (
-                            <div className="section-options">
-                              <Button 
-                                variant="secondary"
-                                onClick={() => {
-                                  setSelectedSectionId(section.id)
-                                  setShowLessonModal(true)
-                                }}
-                              >
-                                Add Lesson
-                              </Button>
-                              <Button variant="secondary">Add Practice Problems</Button>
-                              <Button variant="secondary">Add Assessment</Button>
+                          {/* Content Type Tabs */}
+                          <div className="content-type-tabs">
+                            <button 
+                              className={`content-tab ${(sectionContentTabs[section.id] || 'lessons') === 'lessons' ? 'active' : ''}`}
+                              onClick={() => handleSectionContentTabChange(section.id, 'lessons')}
+                            >
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                              </svg>
+                              Lessons
+                              <span className="tab-count">{sectionLessons[section.id]?.length || 0}</span>
+                            </button>
+                            <button 
+                              className={`content-tab ${sectionContentTabs[section.id] === 'practice' ? 'active' : ''}`}
+                              onClick={() => handleSectionContentTabChange(section.id, 'practice')}
+                            >
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                                <path d="M9 14l2 2 4-4"/>
+                              </svg>
+                              Practice
+                              <span className="tab-count">{sectionPracticeSegments[section.id]?.length || 0}</span>
+                            </button>
+                            <button 
+                              className={`content-tab ${sectionContentTabs[section.id] === 'assessment' ? 'active' : ''}`}
+                              onClick={() => handleSectionContentTabChange(section.id, 'assessment')}
+                            >
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M9 11l3 3L22 4"/>
+                                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                              </svg>
+                              Assessment
+                              <span className="tab-count">0</span>
+                            </button>
+                          </div>
+
+                          {/* Lessons Tab Content */}
+                          {(sectionContentTabs[section.id] || 'lessons') === 'lessons' && (
+                            <div className="tab-content">
+                              {isEditable && (
+                                <div className="tab-action-bar">
+                                  <Button 
+                                    variant="primary"
+                                    onClick={() => {
+                                      setSelectedSectionId(section.id)
+                                      setShowLessonModal(true)
+                                    }}
+                                  >
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                      <line x1="12" y1="5" x2="12" y2="19"/>
+                                      <line x1="5" y1="12" x2="19" y2="12"/>
+                                    </svg>
+                                    Add Lesson
+                                  </Button>
+                                </div>
+                              )}
+                              <div className="section-items">
+                                {sectionLessons[section.id] && sectionLessons[section.id].length > 0 ? (
+                                  <div className="lessons-list">
+                                    {sectionLessons[section.id].map(lesson => (
+                                      <div key={lesson.id} className="lesson-item">
+                                        <div className="lesson-info">
+                                          <h5>{lesson.name}</h5>
+                                          <span className="lesson-type">{lesson.segment_type.replace('lesson_', '')}</span>
+                                        </div>
+                                        <div className="lesson-actions">
+                                          <button 
+                                            className="icon-btn view"
+                                            onClick={async () => {
+                                              try {
+                                                const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.SEGMENTS.GET(lesson.id)}`, {
+                                                  headers: {
+                                                    'Content-Type': 'application/json',
+                                                    ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+                                                  }
+                                                })
+                                                if (!response.ok) throw new Error('Failed to fetch lesson')
+                                                const lessonData = await response.json()
+                                                setEditingLesson(lessonData)
+                                                setSelectedSectionId(section.id)
+                                                setShowLessonModal(true)
+                                              } catch (error) {
+                                                console.error('Error fetching lesson:', error)
+                                                toast.error(ERROR_MESSAGES.LESSON_FETCH_FAILED)
+                                              }
+                                            }}
+                                            title="View/Edit Lesson"
+                                          >
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                              <circle cx="12" cy="12" r="3"/>
+                                            </svg>
+                                          </button>
+                                          {isEditable && (
+                                            <>
+                                              <button 
+                                                className="icon-btn"
+                                                onClick={async () => {
+                                                  try {
+                                                    const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.SEGMENTS.GET(lesson.id)}`, {
+                                                      headers: {
+                                                        'Content-Type': 'application/json',
+                                                        ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+                                                      }
+                                                    })
+                                                    if (!response.ok) throw new Error('Failed to fetch lesson')
+                                                    const lessonData = await response.json()
+                                                    setEditingLesson(lessonData)
+                                                    setSelectedSectionId(section.id)
+                                                    setShowLessonModal(true)
+                                                  } catch (error) {
+                                                    console.error('Error fetching lesson:', error)
+                                                    toast.error(ERROR_MESSAGES.LESSON_FETCH_FAILED)
+                                                  }
+                                                }}
+                                                title="Edit Lesson"
+                                              >
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                                </svg>
+                                              </button>
+                                              <button 
+                                                className="icon-btn delete"
+                                                onClick={() => {
+                                                  setLessonToDelete(lesson)
+                                                  setSectionIdForDelete(section.id)
+                                                  setShowDeleteConfirm(true)
+                                                }}
+                                                title="Delete Lesson"
+                                              >
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                  <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                                </svg>
+                                              </button>
+                                            </>
+                                          )}
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <div className="empty-message">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                      <polyline points="14 2 14 8 20 8"></polyline>
+                                      <line x1="16" y1="13" x2="8" y2="13"></line>
+                                      <line x1="16" y1="17" x2="8" y2="17"></line>
+                                      <polyline points="10 9 9 9 8 9"></polyline>
+                                    </svg>
+                                    <p>No lessons added yet</p>
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           )}
-                          <div className="section-items">
-                            {sectionLessons[section.id] && sectionLessons[section.id].length > 0 ? (
-                              <div className="lessons-list">
-                                {sectionLessons[section.id].map(lesson => (
-                                  <div key={lesson.id} className="lesson-item">
-                                    <div className="lesson-info">
-                                      <h5>{lesson.name}</h5>
-                                      <span className="lesson-type">{lesson.segment_type.replace('lesson_', '')}</span>
-                                    </div>
-                                    {isEditable && (
-                                      <div className="lesson-actions">
-                                        <button 
-                                          className="icon-btn"
-                                          onClick={async () => {
-                                            try {
-                                              const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.SEGMENTS.GET(lesson.id)}`, {
-                                                headers: {
-                                                  'Content-Type': 'application/json',
-                                                  ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
-                                                }
-                                              })
-                                              if (!response.ok) throw new Error('Failed to fetch lesson')
-                                              const lessonData = await response.json()
-                                              setEditingLesson(lessonData)
-                                              setSelectedSectionId(section.id)
-                                              setShowLessonModal(true)
-                                            } catch (error) {
-                                              console.error('Error fetching lesson:', error)
-                                              toast.error(ERROR_MESSAGES.LESSON_FETCH_FAILED)
-                                            }
-                                          }}
-                                          title="Edit Lesson"
-                                        >
-                                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                                          </svg>
-                                        </button>
-                                        <button 
-                                          className="icon-btn"
-                                          onClick={() => {
-                                            setLessonToDelete(lesson)
-                                            setSectionIdForDelete(section.id)
-                                            setShowDeleteConfirm(true)
-                                          }}
-                                          title="Delete Lesson"
-                                        >
-                                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                                          </svg>
-                                        </button>
+
+                          {/* Practice Tab Content */}
+                          {sectionContentTabs[section.id] === 'practice' && (
+                            <div className="tab-content">
+                              {isEditable && (
+                                <div className="tab-action-bar">
+                                  <Button 
+                                    variant="primary"
+                                    onClick={() => navigate(`/admin/courses/${id}/topics/${section.id}/practice`)}
+                                  >
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                      <line x1="12" y1="5" x2="12" y2="19"/>
+                                      <line x1="5" y1="12" x2="19" y2="12"/>
+                                    </svg>
+                                    Manage Practice Problems
+                                  </Button>
+                                </div>
+                              )}
+                              <div className="section-items">
+                                {sectionPracticeSegments[section.id] && sectionPracticeSegments[section.id].length > 0 ? (
+                                  <div className="practice-segments-list">
+                                    {sectionPracticeSegments[section.id].map(segment => (
+                                      <div key={segment.id} className="practice-segment-item">
+                                        <div className="practice-segment-info">
+                                          <div className="practice-segment-header">
+                                            <h5>{segment.name}</h5>
+                                            <span className="segment-id">{segment.unique_id}</span>
+                                          </div>
+                                          {segment.description && (
+                                            <p className="segment-description">{segment.description}</p>
+                                          )}
+                                          <div className="segment-stats">
+                                            <span className="stat">
+                                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <polyline points="16 18 22 12 16 6"/>
+                                                <polyline points="8 6 2 12 8 18"/>
+                                              </svg>
+                                              {segment.programming_count || 0} Programming
+                                            </span>
+                                            <span className="stat">
+                                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <circle cx="12" cy="12" r="10"/>
+                                                <path d="M9 12l2 2 4-4"/>
+                                              </svg>
+                                              {segment.mcq_count || 0} MCQ
+                                            </span>
+                                          </div>
+                                        </div>
+                                        <div className="practice-segment-actions">
+                                          <button 
+                                            className="icon-btn"
+                                            onClick={() => navigate(`/admin/courses/${id}/topics/${section.id}/practice?id=${segment.id}`)}
+                                            title="Edit Practice Segment"
+                                          >
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                            </svg>
+                                          </button>
+                                        </div>
                                       </div>
-                                    )}
+                                    ))}
                                   </div>
-                                ))}
+                                ) : (
+                                  <div className="empty-message">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                                      <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                                      <path d="M9 14l2 2 4-4"/>
+                                    </svg>
+                                    <p>No practice problems added yet</p>
+                                  </div>
+                                )}
                               </div>
-                            ) : (
-                              <div className="empty-message">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                  <polyline points="14 2 14 8 20 8"></polyline>
-                                  <line x1="16" y1="13" x2="8" y2="13"></line>
-                                  <line x1="16" y1="17" x2="8" y2="17"></line>
-                                  <polyline points="10 9 9 9 8 9"></polyline>
-                                </svg>
-                                <p>No lessons added yet</p>
+                            </div>
+                          )}
+
+                          {/* Assessment Tab Content */}
+                          {sectionContentTabs[section.id] === 'assessment' && (
+                            <div className="tab-content">
+                              {isEditable && (
+                                <div className="tab-action-bar">
+                                  <Button variant="primary" disabled>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                      <line x1="12" y1="5" x2="12" y2="19"/>
+                                      <line x1="5" y1="12" x2="19" y2="12"/>
+                                    </svg>
+                                    Add Assessment
+                                  </Button>
+                                </div>
+                              )}
+                              <div className="section-items">
+                                <div className="empty-message">
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M9 11l3 3L22 4"/>
+                                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                                  </svg>
+                                  <p>No assessments added yet</p>
+                                  <small>Assessment feature coming soon</small>
+                                </div>
                               </div>
-                            )}
-                          </div>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>

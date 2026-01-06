@@ -10,6 +10,7 @@ import CurrentCourse from './pages/user/Courses/CurrentCourse/CurrentCourse'
 import Assessments from './pages/user/Assessments/Assessments'
 import CoursesManagement from './pages/admin/courses/CoursesManagement/CoursesManagement'
 import CourseEdit from './pages/admin/courses/CoursesManagement/CourseEdit/CourseEdit'
+import PracticeSegmentManager from './pages/admin/courses/PracticeSegmentManager/PracticeSegmentManager'
 import CourseAdministrations from './pages/admin/courses/CourseAdministrations/CourseAdministrations'
 import Users from './pages/admin/Users/Users'
 import CreateUser from './pages/admin/Users/CreateUser/CreateUser'
@@ -27,6 +28,7 @@ import QuestionBankDetail from './pages/admin/Questions/QuestionBankDetail'
 import QuestionList from './pages/admin/Questions/QuestionList'
 import QuestionForm from './pages/admin/Questions/QuestionForm'
 import QuestionDetail from './pages/admin/Questions/QuestionDetail'
+import TestCaseManager from './pages/admin/Questions/TestCaseManager'
 import CodeEditorLayout from './pages/CodeEditor/CodeEditorLayout'
 import './App.css'
 
@@ -54,6 +56,7 @@ function App() {
           <Route path="/admin/groups/create" element={<CreateGroup />} />
           <Route path="/admin/courses/management" element={<CoursesManagement />} />
           <Route path="/admin/courses/management/:id/edit" element={<CourseEdit />} />
+          <Route path="/admin/courses/:courseId/topics/:topicId/practice" element={<PracticeSegmentManager />} />
           <Route path="/admin/courses/administrations" element={<CourseAdministrations />} />
           <Route path="/admin/courses/administrations/create" element={<CreateAdministration />} />
           {/* Question Bank Routes */}
@@ -66,6 +69,7 @@ function App() {
           <Route path="/admin/questions/list/create" element={<QuestionForm />} />
           <Route path="/admin/questions/list/:id" element={<QuestionDetail />} />
           <Route path="/admin/questions/list/:id/edit" element={<QuestionForm />} />
+          <Route path="/admin/questions/list/:id/testcases" element={<TestCaseManager />} />
         </Route>
       </Routes>
     </ThemeProvider>

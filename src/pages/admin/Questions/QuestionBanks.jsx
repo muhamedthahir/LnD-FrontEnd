@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { useApi } from '../../../contexts/ApiContext'
@@ -16,22 +16,19 @@ function QuestionBanks() {
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [totalCount, setTotalCount] = useState(0)
+  
+  // Prevent duplicate API calls
+  const abortControllerRef = useRef(null)
 
-  useEffect(() => {
-    fetchQuestionBanks()
-  }, [currentPage, pageSize])
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (search !== undefined) {
-        setCurrentPage(1)
-        fetchQuestionBanks()
-      }
-    }, 300)
-    return () => clearTimeout(timer)
-  }, [search])
-
-  const fetchQuestionBanks = async () => {
+  const fetchQuestionBanks = useCallback(async () => {
+    if (!apiBaseUrl) return
+    
+    // Cancel previous request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+    }
+    abortControllerRef.current = new AbortController()
+    
     try {
       setLoading(true)
       const offset = (currentPage - 1) * pageSize
@@ -44,7 +41,8 @@ function QuestionBanks() {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
-        }
+        },
+        signal: abortControllerRef.current.signal
       })
 
       if (response.ok) {
@@ -55,12 +53,28 @@ function QuestionBanks() {
         toast.error('Failed to fetch question banks')
       }
     } catch (error) {
-      console.error('Error fetching question banks:', error)
-      toast.error('Failed to fetch question banks')
+      if (error.name !== 'AbortError') {
+        console.error('Error fetching question banks:', error)
+        toast.error('Failed to fetch question banks')
+      }
     } finally {
       setLoading(false)
     }
-  }
+  }, [apiBaseUrl, accessToken, currentPage, pageSize, search])
+
+  // Fetch when dependencies change
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchQuestionBanks()
+    }, search ? 300 : 0) // Debounce only for search
+    
+    return () => {
+      clearTimeout(timer)
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
+    }
+  }, [fetchQuestionBanks])
 
   const getStatusBadgeClass = (statusName) => {
     switch (statusName?.toUpperCase()) {

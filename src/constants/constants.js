@@ -131,6 +131,23 @@ export const API_ENDPOINTS = {
     TAGS: '/api/master-data/tags',
     CREATE_TAG: '/api/master-data/tags',
     CREATE_CATEGORY: '/api/master-data/categories'
+  },
+
+  // Practice Segments
+  PRACTICE_SEGMENTS: {
+    LIST_BY_TOPIC: (topicId) => `/api/practice-segments/topic/${topicId}`,
+    CREATE: '/api/practice-segments',
+    GET: (id) => `/api/practice-segments/${id}`,
+    UPDATE: (id) => `/api/practice-segments/${id}`,
+    DELETE: (id) => `/api/practice-segments/${id}`,
+    AVAILABLE_PROGRAMMING_QUESTIONS: (id) => `/api/practice-segments/${id}/available-programming-questions`,
+    AVAILABLE_MCQ_QUESTIONS: (id) => `/api/practice-segments/${id}/available-mcq-questions`,
+    PROGRAMMING_QUESTIONS: (id) => `/api/practice-segments/${id}/programming-questions`,
+    MCQ_QUESTIONS: (id) => `/api/practice-segments/${id}/mcq-questions`,
+    ADD_PROGRAMMING_QUESTION: (id) => `/api/practice-segments/${id}/programming-questions`,
+    REMOVE_PROGRAMMING_QUESTION: (id, questionId) => `/api/practice-segments/${id}/programming-questions/${questionId}`,
+    ADD_MCQ_QUESTION: (id) => `/api/practice-segments/${id}/mcq-questions`,
+    REMOVE_MCQ_QUESTION: (id, questionId) => `/api/practice-segments/${id}/mcq-questions/${questionId}`
   }
 }
 
@@ -181,7 +198,14 @@ export const SUCCESS_MESSAGES = {
   // Upload
   UPLOAD_SUCCESS: 'Document uploaded successfully',
   UPLOAD_MULTIPLE_SUCCESS: (count) => `Successfully uploaded ${count} document(s)`,
-  UPLOAD_DELETE_SUCCESS: 'Document deleted successfully'
+  UPLOAD_DELETE_SUCCESS: 'Document deleted successfully',
+
+  // Practice Segment
+  PRACTICE_SEGMENT_CREATED: 'Practice segment created successfully',
+  PRACTICE_SEGMENT_UPDATED: 'Practice segment updated successfully',
+  PRACTICE_SEGMENT_DELETED: 'Practice segment deleted successfully',
+  PRACTICE_QUESTION_ADDED: 'Question added to practice segment successfully',
+  PRACTICE_QUESTION_REMOVED: 'Question removed from practice segment successfully'
 }
 
 // Error Messages
@@ -249,7 +273,15 @@ export const ERROR_MESSAGES = {
   UPLOAD_DELETE_FAILED: 'Failed to delete document',
   UPLOAD_NO_FILE: 'Please select a file to upload',
   UPLOAD_FILE_TOO_LARGE: 'File size exceeds the maximum allowed limit',
-  UPLOAD_INVALID_TYPE: 'File type is not allowed'
+  UPLOAD_INVALID_TYPE: 'File type is not allowed',
+
+  // Practice Segment
+  PRACTICE_SEGMENT_CREATE_FAILED: 'Failed to create practice segment',
+  PRACTICE_SEGMENT_UPDATE_FAILED: 'Failed to update practice segment',
+  PRACTICE_SEGMENT_DELETE_FAILED: 'Failed to delete practice segment',
+  PRACTICE_SEGMENT_FETCH_FAILED: 'Failed to fetch practice segment',
+  PRACTICE_QUESTION_ADD_FAILED: 'Failed to add question to practice segment',
+  PRACTICE_QUESTION_REMOVE_FAILED: 'Failed to remove question from practice segment'
 }
 
 // Code Editor Placeholder Snippets

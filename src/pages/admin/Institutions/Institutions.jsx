@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { toast } from 'react-toastify'
 import Pagination from '../../../components/Pagination/Pagination'
 import { useApi } from '../../../contexts/ApiContext'
@@ -14,6 +14,10 @@ function Institutions() {
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [totalCount, setTotalCount] = useState(0)
+  
+  // Prevent duplicate API calls
+  const fetchingRef = useRef(false)
+  const abortControllerRef = useRef(null)
   const [showForm, setShowForm] = useState(false)
   const [showViewModal, setShowViewModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
@@ -25,11 +29,17 @@ function Institutions() {
   })
   const [errors, setErrors] = useState({})
 
-  useEffect(() => {
-    fetchInstitutions()
-  }, [search, currentPage, pageSize])
-
-  const fetchInstitutions = async () => {
+  const fetchInstitutions = useCallback(async () => {
+    // Prevent duplicate calls
+    if (fetchingRef.current || !apiBaseUrl) return
+    
+    // Cancel previous request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+    }
+    abortControllerRef.current = new AbortController()
+    
+    fetchingRef.current = true
     try {
       setLoading(true)
       const url = new URL(`${apiBaseUrl}${API_ENDPOINTS.INSTITUTIONS.LIST}`)
@@ -41,7 +51,8 @@ function Institutions() {
         headers: {
           'Content-Type': 'application/json',
           ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
-        }
+        },
+        signal: abortControllerRef.current.signal
       })
       
       if (response.ok) {
@@ -52,22 +63,27 @@ function Institutions() {
         toast.error(ERROR_MESSAGES.INSTITUTION_LIST_FAILED)
       }
     } catch (error) {
-      console.error('Error fetching institutions:', error)
-      toast.error(ERROR_MESSAGES.INSTITUTION_LIST_FAILED)
+      if (error.name !== 'AbortError') {
+        console.error('Error fetching institutions:', error)
+        toast.error(ERROR_MESSAGES.INSTITUTION_LIST_FAILED)
+      }
     } finally {
       setLoading(false)
+      fetchingRef.current = false
     }
-  }
+  }, [apiBaseUrl, accessToken, search, currentPage, pageSize])
 
+  // Fetch institutions when dependencies change
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (search !== undefined) {
-        setCurrentPage(1)
-        fetchInstitutions()
+    fetchInstitutions()
+    
+    // Cleanup on unmount
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
       }
-    }, 300)
-    return () => clearTimeout(timer)
-  }, [search])
+    }
+  }, [fetchInstitutions])
 
   const handleChange = (e) => {
     const { name, value } = e.target

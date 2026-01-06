@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import PasswordSetup from '../../components/PasswordSetup/PasswordSetup'
 import { useApi } from '../../contexts/ApiContext'
+import { useMasterData } from '../../hooks/useMasterData'
 import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES } from '../../constants/constants'
 import './Login.css'
 
 function Login() {
   const { apiBaseUrl, setTokens } = useApi()
+  const { loadAllData } = useMasterData()
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
     email: '',
@@ -119,6 +121,10 @@ function Login() {
       if (setTokens) {
         setTokens(data.accessToken, data.refreshToken)
       }
+      
+      // Load master data in background after login
+      // This pre-fetches data to avoid multiple calls later
+      loadAllData().catch(console.error)
       
       // Show success message
       toast.success('Login successful!')
