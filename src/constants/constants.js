@@ -322,6 +322,144 @@ int main() {
 `
 }
 
+// Default Code Templates for Programming Questions (Starter Code)
+export const DEFAULT_CODE_TEMPLATES = {
+  c: {
+    name: 'C',
+    template: `#include <stdio.h>
+
+int main() {
+    // Write your code here
+    
+    return 0;
+}`,
+    solution: `#include <stdio.h>
+
+int main() {
+    // Solution code here
+    
+    return 0;
+}`
+  },
+  
+  cpp: {
+    name: 'C++',
+    template: `#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+int main() {
+    // Write your code here
+    
+    return 0;
+}`,
+    solution: `#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+int main() {
+    // Solution code here
+    
+    return 0;
+}`
+  },
+  
+  java: {
+    name: 'Java',
+    template: `import java.util.*;
+
+public class Solution {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        // Write your code here
+        
+    }
+}`,
+    solution: `import java.util.*;
+
+public class Solution {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        // Solution code here
+        
+    }
+}`
+  },
+  
+  javascript: {
+    name: 'JavaScript',
+    template: `// Read input from stdin
+const readline = require('readline');
+
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
+// Write your code here
+rl.on('line', (line) => {
+    // Process each line of input
+    console.log(line);
+});`,
+    solution: `// Read input from stdin
+const readline = require('readline');
+
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
+// Solution code here
+rl.on('line', (line) => {
+    // Process each line of input
+    console.log(line);
+});`
+  },
+  
+  python: {
+    name: 'Python',
+    template: `# Write your code here
+
+def main():
+    # Read input
+    n = int(input())
+    
+    # Your solution
+    pass
+
+if __name__ == "__main__":
+    main()`,
+    solution: `# Solution code here
+
+def main():
+    # Read input
+    n = int(input())
+    
+    # Solution implementation
+    pass
+
+if __name__ == "__main__":
+    main()`
+  }
+}
+
+// Language name to key mapping (for matching with master data)
+export const LANGUAGE_KEY_MAP = {
+  'C': 'c',
+  'C++': 'cpp',
+  'Java': 'java',
+  'JavaScript': 'javascript',
+  'Python': 'python',
+  'python': 'python',
+  'java': 'java',
+  'javascript': 'javascript',
+  'c': 'c',
+  'cpp': 'cpp',
+  'c++': 'cpp'
+}
+
 // Validation Messages
 export const VALIDATION_MESSAGES = {
   // User

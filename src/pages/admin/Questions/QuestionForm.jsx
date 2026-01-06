@@ -3,7 +3,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { useApi } from '../../../contexts/ApiContext'
 import { useAutoLoadMasterData } from '../../../hooks/useMasterData'
-import { API_ENDPOINTS } from '../../../constants/constants'
+import { API_ENDPOINTS, DEFAULT_CODE_TEMPLATES, LANGUAGE_KEY_MAP } from '../../../constants/constants'
 import Dropdown from '../../../components/Dropdown/Dropdown'
 import Toggle from '../../../components/Toggle/Toggle'
 import RichTextEditor from '../../../components/RichTextEditor/RichTextEditor'
@@ -52,9 +52,13 @@ function QuestionForm() {
       constraints: '',
       sample_input: '',
       sample_output: '',
-      languages: []
+      languages: [],
+      code_templates: {} // { language_id: { template_code: '', solution_code: '' } }
     }
   })
+
+  // State for expanded code template editors
+  const [expandedTemplates, setExpandedTemplates] = useState({})
 
   // MCQ Options
   const [options, setOptions] = useState([
@@ -130,7 +134,14 @@ function QuestionForm() {
             constraints: progQuestion.constraints || '',
             sample_input: progQuestion.sample_input || '',
             sample_output: progQuestion.sample_output || '',
-            languages: progQuestion.languages?.map(l => l.id) || []
+            languages: progQuestion.languages?.map(l => l.id) || [],
+            code_templates: data.codeTemplates?.reduce((acc, ct) => {
+              acc[ct.language_id] = {
+                template_code: ct.template_code || '',
+                solution_code: ct.solution_code || ''
+              }
+              return acc
+            }, {}) || {}
           } : formData.programming_details
         })
         
@@ -178,14 +189,97 @@ function QuestionForm() {
     }
   }
 
+  const getLanguageKey = (languageId) => {
+    const language = languages.find(l => l.id === languageId)
+    if (!language) return null
+    return LANGUAGE_KEY_MAP[language.name] || LANGUAGE_KEY_MAP[language.name.toLowerCase()] || null
+  }
+
+  const getLanguageName = (languageId) => {
+    const language = languages.find(l => l.id === languageId)
+    return language?.name || ''
+  }
+
   const handleProgrammingChange = (field, value) => {
+    if (field === 'languages') {
+      // When languages change, prepopulate code templates for newly added languages
+      const currentTemplates = { ...formData.programming_details.code_templates }
+      const previousLanguages = formData.programming_details.languages || []
+      const newLanguages = value || []
+      
+      // Add templates for newly selected languages
+      newLanguages.forEach(langId => {
+        if (!currentTemplates[langId]) {
+          const langKey = getLanguageKey(langId)
+          if (langKey && DEFAULT_CODE_TEMPLATES[langKey]) {
+            currentTemplates[langId] = {
+              template_code: DEFAULT_CODE_TEMPLATES[langKey].template,
+              solution_code: DEFAULT_CODE_TEMPLATES[langKey].solution
+            }
+          } else {
+            currentTemplates[langId] = {
+              template_code: '// Write your code here\n',
+              solution_code: '// Solution code here\n'
+            }
+          }
+        }
+      })
+      
+      // Remove templates for unselected languages
+      previousLanguages.forEach(langId => {
+        if (!newLanguages.includes(langId)) {
+          delete currentTemplates[langId]
+        }
+      })
+      
+      setFormData(prev => ({
+        ...prev,
+        programming_details: {
+          ...prev.programming_details,
+          languages: value,
+          code_templates: currentTemplates
+        }
+      }))
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        programming_details: {
+          ...prev.programming_details,
+          [field]: value
+        }
+      }))
+    }
+  }
+
+  const handleCodeTemplateChange = (languageId, field, value) => {
     setFormData(prev => ({
       ...prev,
       programming_details: {
         ...prev.programming_details,
-        [field]: value
+        code_templates: {
+          ...prev.programming_details.code_templates,
+          [languageId]: {
+            ...prev.programming_details.code_templates[languageId],
+            [field]: value
+          }
+        }
       }
     }))
+  }
+
+  const toggleTemplateExpand = (languageId) => {
+    setExpandedTemplates(prev => ({
+      ...prev,
+      [languageId]: !prev[languageId]
+    }))
+  }
+
+  const resetTemplateToDefault = (languageId) => {
+    const langKey = getLanguageKey(languageId)
+    if (langKey && DEFAULT_CODE_TEMPLATES[langKey]) {
+      handleCodeTemplateChange(languageId, 'template_code', DEFAULT_CODE_TEMPLATES[langKey].template)
+      handleCodeTemplateChange(languageId, 'solution_code', DEFAULT_CODE_TEMPLATES[langKey].solution)
+    }
   }
 
   const handleTypeSelect = (typeId) => {
@@ -708,6 +802,106 @@ function QuestionForm() {
                     />
                   </div>
                 </div>
+              </div>
+
+              {/* Code Templates Section */}
+              <div className="form-section">
+                <h2>Code Templates (Starter Code)</h2>
+                <p className="section-hint">
+                  Define starter code templates for each selected language. These will be shown to users when they start coding.
+                </p>
+
+                {formData.programming_details.languages.length === 0 ? (
+                  <div className="empty-templates-message">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="16 18 22 12 16 6"/>
+                      <polyline points="8 6 2 12 8 18"/>
+                    </svg>
+                    <p>Select languages above to configure code templates</p>
+                  </div>
+                ) : (
+                  <div className="code-templates-list">
+                    {formData.programming_details.languages.map(langId => {
+                      const langName = getLanguageName(langId)
+                      const langKey = getLanguageKey(langId)
+                      const template = formData.programming_details.code_templates[langId] || {}
+                      const isExpanded = expandedTemplates[langId]
+                      
+                      return (
+                        <div key={langId} className={`code-template-item ${isExpanded ? 'expanded' : ''}`}>
+                          <div className="template-header" onClick={() => toggleTemplateExpand(langId)}>
+                            <div className="template-info">
+                              <span className="template-language">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <polyline points="16 18 22 12 16 6"/>
+                                  <polyline points="8 6 2 12 8 18"/>
+                                </svg>
+                                {langName}
+                              </span>
+                              <span className="template-status">
+                                {template.template_code ? 'Template configured' : 'No template'}
+                              </span>
+                            </div>
+                            <div className="template-actions">
+                              {DEFAULT_CODE_TEMPLATES[langKey] && (
+                                <button
+                                  type="button"
+                                  className="btn-reset"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    resetTemplateToDefault(langId)
+                                  }}
+                                  title="Reset to default template"
+                                >
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+                                    <path d="M21 3v5h-5"/>
+                                    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+                                    <path d="M3 21v-5h5"/>
+                                  </svg>
+                                </button>
+                              )}
+                              <svg 
+                                className={`expand-icon ${isExpanded ? 'expanded' : ''}`}
+                                viewBox="0 0 24 24" 
+                                fill="none" 
+                                stroke="currentColor" 
+                                strokeWidth="2"
+                              >
+                                <polyline points="6 9 12 15 18 9"/>
+                              </svg>
+                            </div>
+                          </div>
+                          
+                          {isExpanded && (
+                            <div className="template-content">
+                              <div className="form-group">
+                                <label>Starter Code (shown to users)</label>
+                                <textarea
+                                  value={template.template_code || ''}
+                                  onChange={(e) => handleCodeTemplateChange(langId, 'template_code', e.target.value)}
+                                  placeholder={`Enter starter code for ${langName}...`}
+                                  className="form-input code-input"
+                                  rows={12}
+                                />
+                              </div>
+                              <div className="form-group">
+                                <label>Solution Code (for reference, not shown to users)</label>
+                                <textarea
+                                  value={template.solution_code || ''}
+                                  onChange={(e) => handleCodeTemplateChange(langId, 'solution_code', e.target.value)}
+                                  placeholder={`Enter solution code for ${langName}...`}
+                                  className="form-input code-input"
+                                  rows={12}
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           )}
