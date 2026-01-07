@@ -45,11 +45,11 @@ export function useMasterData() {
   }, [dispatch, apiBaseUrl, accessToken, masterData.questionBanksLoaded])
 
   // Load institutions
-  const loadInstitutions = useCallback(async (force = false) => {
+  const loadInstitutions = useCallback(async (force = false, signal = null) => {
     if (!apiBaseUrl) return
     
     if (!masterData.institutionsLoaded || force) {
-      await dispatch(fetchInstitutions({ apiBaseUrl, accessToken }))
+      await dispatch(fetchInstitutions({ apiBaseUrl, accessToken, signal }))
     }
   }, [dispatch, apiBaseUrl, accessToken, masterData.institutionsLoaded])
 

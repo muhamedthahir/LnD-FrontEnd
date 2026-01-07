@@ -464,7 +464,7 @@ function CourseAdministrations() {
 
   const handleFinalUpdate = async () => {
     // Validate all fields and require groups/users to be selected for publish
-    if (!canSaveOrPublish()) {
+    if (!canSaveOrPublish) {
       // Show validation errors
       validateAll()
       return
@@ -509,7 +509,7 @@ function CourseAdministrations() {
 
   const handleSendInvite = async () => {
     // Validate all fields and require groups/users to be selected for publish
-    if (!canSaveOrPublish()) {
+    if (!canSaveOrPublish) {
       // Show validation errors
       validateAll()
       return

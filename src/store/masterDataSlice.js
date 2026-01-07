@@ -51,13 +51,14 @@ export const fetchQuestionBanks = createAsyncThunk(
 // Async thunk to fetch institutions
 export const fetchInstitutions = createAsyncThunk(
   'masterData/fetchInstitutions',
-  async ({ apiBaseUrl, accessToken }, { rejectWithValue }) => {
+  async ({ apiBaseUrl, accessToken, signal }, { rejectWithValue }) => {
     try {
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.INSTITUTIONS.ALL}`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
-        }
+        },
+        signal
       })
       
       if (!response.ok) {
@@ -67,6 +68,10 @@ export const fetchInstitutions = createAsyncThunk(
       const data = await response.json()
       return data.institutions || data || []
     } catch (error) {
+      // Don't treat abort as an error
+      if (error.name === 'AbortError') {
+        return rejectWithValue('Request cancelled')
+      }
       return rejectWithValue(error.message)
     }
   }
