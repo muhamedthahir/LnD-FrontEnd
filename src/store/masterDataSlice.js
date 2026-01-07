@@ -113,14 +113,145 @@ const masterDataSlice = createSlice({
   name: 'masterData',
   initialState,
   reducers: {
-    // Add a new tag
+    // =====================================================
+    // TAGS
+    // =====================================================
     addTag: (state, action) => {
       state.tags.push(action.payload)
     },
-    // Add a new category
+    updateTag: (state, action) => {
+      const index = state.tags.findIndex(t => t.id === action.payload.id)
+      if (index !== -1) {
+        state.tags[index] = action.payload
+      }
+    },
+    removeTag: (state, action) => {
+      state.tags = state.tags.filter(t => t.id !== action.payload)
+    },
+    
+    // =====================================================
+    // CATEGORIES
+    // =====================================================
     addCategory: (state, action) => {
       state.categories.push(action.payload)
     },
+    updateCategory: (state, action) => {
+      const index = state.categories.findIndex(c => c.id === action.payload.id)
+      if (index !== -1) {
+        state.categories[index] = action.payload
+      }
+    },
+    removeCategory: (state, action) => {
+      state.categories = state.categories.filter(c => c.id !== action.payload)
+    },
+    
+    // =====================================================
+    // INSTITUTIONS
+    // =====================================================
+    addInstitution: (state, action) => {
+      state.institutions.push(action.payload)
+    },
+    updateInstitution: (state, action) => {
+      const index = state.institutions.findIndex(i => i.id === action.payload.id)
+      if (index !== -1) {
+        state.institutions[index] = action.payload
+      }
+    },
+    removeInstitution: (state, action) => {
+      state.institutions = state.institutions.filter(i => i.id !== action.payload)
+    },
+    setInstitutions: (state, action) => {
+      state.institutions = action.payload
+      state.institutionsLoaded = true
+    },
+    
+    // =====================================================
+    // QUESTION BANKS
+    // =====================================================
+    addQuestionBank: (state, action) => {
+      state.questionBanks.push(action.payload)
+    },
+    updateQuestionBank: (state, action) => {
+      const index = state.questionBanks.findIndex(qb => qb.id === action.payload.id)
+      if (index !== -1) {
+        state.questionBanks[index] = action.payload
+      }
+    },
+    removeQuestionBank: (state, action) => {
+      state.questionBanks = state.questionBanks.filter(qb => qb.id !== action.payload)
+    },
+    setQuestionBanks: (state, action) => {
+      state.questionBanks = action.payload
+      state.questionBanksLoaded = true
+    },
+    
+    // =====================================================
+    // LANGUAGES
+    // =====================================================
+    addLanguage: (state, action) => {
+      state.languages.push(action.payload)
+    },
+    updateLanguage: (state, action) => {
+      const index = state.languages.findIndex(l => l.id === action.payload.id)
+      if (index !== -1) {
+        state.languages[index] = action.payload
+      }
+    },
+    removeLanguage: (state, action) => {
+      state.languages = state.languages.filter(l => l.id !== action.payload)
+    },
+    
+    // =====================================================
+    // LEVELS
+    // =====================================================
+    addLevel: (state, action) => {
+      state.levels.push(action.payload)
+    },
+    updateLevel: (state, action) => {
+      const index = state.levels.findIndex(l => l.id === action.payload.id)
+      if (index !== -1) {
+        state.levels[index] = action.payload
+      }
+    },
+    removeLevel: (state, action) => {
+      state.levels = state.levels.filter(l => l.id !== action.payload)
+    },
+    
+    // =====================================================
+    // STATUSES
+    // =====================================================
+    addStatus: (state, action) => {
+      state.statuses.push(action.payload)
+    },
+    updateStatus: (state, action) => {
+      const index = state.statuses.findIndex(s => s.id === action.payload.id)
+      if (index !== -1) {
+        state.statuses[index] = action.payload
+      }
+    },
+    removeStatus: (state, action) => {
+      state.statuses = state.statuses.filter(s => s.id !== action.payload)
+    },
+    
+    // =====================================================
+    // QUESTION TYPES
+    // =====================================================
+    addQuestionType: (state, action) => {
+      state.questionTypes.push(action.payload)
+    },
+    updateQuestionType: (state, action) => {
+      const index = state.questionTypes.findIndex(qt => qt.id === action.payload.id)
+      if (index !== -1) {
+        state.questionTypes[index] = action.payload
+      }
+    },
+    removeQuestionType: (state, action) => {
+      state.questionTypes = state.questionTypes.filter(qt => qt.id !== action.payload)
+    },
+    
+    // =====================================================
+    // UTILITY ACTIONS
+    // =====================================================
     // Clear all master data (on logout)
     clearMasterData: (state) => {
       return initialState
@@ -130,6 +261,16 @@ const masterDataSlice = createSlice({
       state.isLoaded = false
       state.questionBanksLoaded = false
       state.institutionsLoaded = false
+    },
+    // Refresh specific data type
+    invalidateInstitutions: (state) => {
+      state.institutionsLoaded = false
+    },
+    invalidateQuestionBanks: (state) => {
+      state.questionBanksLoaded = false
+    },
+    invalidateMasterData: (state) => {
+      state.isLoaded = false
     }
   },
   extraReducers: (builder) => {
@@ -187,7 +328,26 @@ const masterDataSlice = createSlice({
   }
 })
 
-export const { addTag, addCategory, clearMasterData, invalidateCache } = masterDataSlice.actions
+export const { 
+  // Tags
+  addTag, updateTag, removeTag,
+  // Categories
+  addCategory, updateCategory, removeCategory,
+  // Institutions
+  addInstitution, updateInstitution, removeInstitution, setInstitutions,
+  // Question Banks
+  addQuestionBank, updateQuestionBank, removeQuestionBank, setQuestionBanks,
+  // Languages
+  addLanguage, updateLanguage, removeLanguage,
+  // Levels
+  addLevel, updateLevel, removeLevel,
+  // Statuses
+  addStatus, updateStatus, removeStatus,
+  // Question Types
+  addQuestionType, updateQuestionType, removeQuestionType,
+  // Utility
+  clearMasterData, invalidateCache, invalidateInstitutions, invalidateQuestionBanks, invalidateMasterData
+} = masterDataSlice.actions
 
 // Selectors
 export const selectMasterData = (state) => state.masterData

@@ -223,6 +223,9 @@
 }
 
 .tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   background: transparent;
   border: none;
   padding: 6px 12px;
@@ -233,6 +236,12 @@
   border-radius: 4px;
   transition: all 0.2s ease;
   font-family: inherit;
+  position: relative;
+}
+
+.tab-btn svg {
+  width: 14px;
+  height: 14px;
 }
 
 .tab-btn:hover {
@@ -243,6 +252,20 @@
 .tab-btn.active {
   color: var(--text-primary, #e6edf3);
   background: rgba(255, 255, 255, 0.1);
+}
+
+/* Input indicator dot */
+.input-indicator {
+  width: 6px;
+  height: 6px;
+  background: #10b981;
+  border-radius: 50%;
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
 .output-title {
@@ -265,6 +288,76 @@
 .btn-clear:hover {
   background: rgba(248, 81, 73, 0.2);
   color: #f85149;
+}
+
+/* Custom Input Content */
+.input-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 16px;
+  overflow: hidden;
+  background: var(--bg-primary, #0d1117);
+}
+
+.custom-input-area {
+  flex: 1;
+  width: 100%;
+  resize: none;
+  background: var(--bg-secondary, #161b22);
+  border: 1px solid var(--border-color, #30363d);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-family: 'Fira Code', 'Consolas', monospace;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--text-primary, #e6edf3);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.custom-input-area:focus {
+  border-color: var(--accent-primary, #238636);
+  box-shadow: 0 0 0 3px rgba(35, 134, 54, 0.15);
+}
+
+.custom-input-area::placeholder {
+  color: var(--text-muted, #484f58);
+}
+
+.custom-input-area::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-input-area::-webkit-scrollbar-track {
+  background: var(--bg-tertiary, #1c2128);
+  border-radius: 4px;
+}
+
+.custom-input-area::-webkit-scrollbar-thumb {
+  background: var(--border-color, #30363d);
+  border-radius: 4px;
+}
+
+.custom-input-area::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted, #484f58);
+}
+
+.input-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: rgba(56, 139, 253, 0.1);
+  border: 1px solid rgba(56, 139, 253, 0.2);
+  border-radius: 6px;
+  font-size: 0.75rem;
+  color: #58a6ff;
+}
+
+.input-hint svg {
+  flex-shrink: 0;
 }
 
 .output-content {

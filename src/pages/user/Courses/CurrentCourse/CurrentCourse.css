@@ -132,6 +132,34 @@
   border-color: var(--success);
 }
 
+.sidebar-section-header .section-dot.in-progress {
+  background: var(--warning, #f59e0b);
+  border-color: var(--warning, #f59e0b);
+}
+
+.sidebar-section-header .section-info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  min-width: 0;
+}
+
+.sidebar-section-header .section-progress {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 0.125rem 0.375rem;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.sidebar-section-header .section-progress.completed {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+}
+
 .sidebar-section-header .section-title {
   flex: 1;
   font-size: 0.875rem;
@@ -196,6 +224,14 @@
   opacity: 0.8;
 }
 
+.sidebar-segment.in-progress {
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.sidebar-segment.in-progress .segment-icon {
+  color: var(--warning, #f59e0b);
+}
+
 .sidebar-segment .segment-icon {
   width: 1.25rem;
   height: 1.25rem;
@@ -235,6 +271,22 @@
 .segment-badge.assessment-badge {
   background: rgba(139, 92, 246, 0.1);
   color: #8b5cf6;
+}
+
+.segment-badge-group {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.segment-progress-badge {
+  font-size: 0.625rem;
+  padding: 0.125rem 0.375rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
 }
 
 .sidebar-segment.practice-segment:hover {

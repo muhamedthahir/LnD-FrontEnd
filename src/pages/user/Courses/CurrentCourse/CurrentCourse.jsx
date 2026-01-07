@@ -136,7 +136,8 @@ function CurrentCourse() {
 
   const fetchProgress = async () => {
     try {
-      const response = await fetch(`${apiBaseUrl}/api/user-courses/progress/${id}`, {
+      // Fetch detailed progress from submissions API
+      const response = await fetch(`${apiBaseUrl}/api/submissions/progress/course/${id}`, {
         headers: {
           'Content-Type': 'application/json',
           ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
@@ -146,9 +147,62 @@ function CurrentCourse() {
       if (response.ok) {
         const data = await response.json()
         setProgress(data)
+      } else {
+        // Fallback to old API if new one fails
+        const fallbackResponse = await fetch(`${apiBaseUrl}/api/user-courses/progress/${id}`, {
+          headers: {
+            'Content-Type': 'application/json',
+            ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+          }
+        })
+        if (fallbackResponse.ok) {
+          const data = await fallbackResponse.json()
+          setProgress(data)
+        }
       }
     } catch (error) {
       console.error('Error fetching progress:', error)
+    }
+  }
+
+  // Start a lesson (mark as in_progress)
+  const startLesson = async (segment, topicId) => {
+    try {
+      await fetch(`${apiBaseUrl}/api/submissions/lesson/start`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        },
+        body: JSON.stringify({
+          segment_id: segment.id,
+          topic_id: topicId,
+          course_id: parseInt(id)
+        })
+      })
+      // Refresh progress after starting lesson
+      await fetchProgress()
+    } catch (error) {
+      console.error('Error starting lesson:', error)
+    }
+  }
+
+  // Start a practice segment
+  const startPractice = async (practiceSegmentId) => {
+    try {
+      await fetch(`${apiBaseUrl}/api/submissions/practice/start`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        },
+        body: JSON.stringify({
+          practice_segment_id: practiceSegmentId,
+          course_id: parseInt(id)
+        })
+      })
+    } catch (error) {
+      console.error('Error starting practice:', error)
     }
   }
 
@@ -159,9 +213,10 @@ function CurrentCourse() {
     }))
   }
 
-  const handleSegmentClick = (segment, isPracticeSegment = false) => {
+  const handleSegmentClick = async (segment, isPracticeSegment = false, topicId = null) => {
     if (isPracticeSegment) {
-      // Navigate to the practice exercise page
+      // Start tracking practice segment and navigate
+      await startPractice(segment.id)
       navigate(`/courses/${id}/practice/${segment.id}`)
       return
     }
@@ -174,18 +229,63 @@ function CurrentCourse() {
       return
     }
     
-    // For regular lessons, display in the content area
+    // For regular lessons, start tracking and display in the content area
+    if (topicId) {
+      await startLesson(segment, topicId)
+    }
     setSelectedSegment(segment)
   }
 
-  const isSegmentCompleted = (segmentId) => {
-    return progress?.completed_segments?.includes(segmentId) || false
+  const getSegmentProgress = (segmentId, isPractice = false) => {
+    if (!progress?.topics) return { status: 'not_started', progress_percentage: 0 }
+    
+    for (const topic of progress.topics) {
+      if (isPractice) {
+        const practiceSegment = topic.practice_segments?.find(ps => ps.id === segmentId)
+        if (practiceSegment) {
+          return {
+            status: practiceSegment.progress_status || 'not_started',
+            progress_percentage: practiceSegment.progress_percentage || 0
+          }
+        }
+      } else {
+        const lesson = topic.lessons?.find(l => l.id === segmentId)
+        if (lesson) {
+          return {
+            status: lesson.progress_status || 'not_started',
+            progress_percentage: lesson.progress_percentage || 0
+          }
+        }
+      }
+    }
+    return { status: 'not_started', progress_percentage: 0 }
+  }
+
+  const getTopicProgress = (topicId) => {
+    if (!progress?.topics) return { status: 'not_started', progress_percentage: 0 }
+    const topic = progress.topics.find(t => t.id === topicId)
+    if (topic) {
+      return {
+        status: topic.progress_status || 'not_started',
+        progress_percentage: topic.progress_percentage || 0
+      }
+    }
+    return { status: 'not_started', progress_percentage: 0 }
+  }
+
+  const isSegmentCompleted = (segmentId, isPractice = false) => {
+    const { status } = getSegmentProgress(segmentId, isPractice)
+    return status === 'completed'
   }
 
   const isSectionCompleted = (sectionId) => {
-    const segments = sectionLessons[sectionId] || []
-    if (segments.length === 0) return false
-    return segments.every(segment => isSegmentCompleted(segment.id))
+    const { status } = getTopicProgress(sectionId)
+    return status === 'completed'
+  }
+
+  const isSectionInProgress = (sectionId) => {
+    const { status } = getTopicProgress(sectionId)
+    return status === 'in_progress'
   }
 
   const isPracticeExercise = (segment) => {
@@ -216,18 +316,33 @@ function CurrentCourse() {
 
   const handleMarkComplete = async (segmentId) => {
     try {
-      const response = await fetch(`${apiBaseUrl}/api/user-courses/complete-segment/${id}/${segmentId}`, {
+      // Use new submission API to mark complete
+      const response = await fetch(`${apiBaseUrl}/api/submissions/lesson/complete`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
-        }
+        },
+        body: JSON.stringify({ segment_id: segmentId })
       })
 
       if (response.ok) {
         await fetchProgress()
         // Trigger a custom event to notify header to refresh progress
         window.dispatchEvent(new CustomEvent('courseProgressUpdated', { detail: { courseId: id } }))
+      } else {
+        // Fallback to old API
+        const fallbackResponse = await fetch(`${apiBaseUrl}/api/user-courses/complete-segment/${id}/${segmentId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+          }
+        })
+        if (fallbackResponse.ok) {
+          await fetchProgress()
+          window.dispatchEvent(new CustomEvent('courseProgressUpdated', { detail: { courseId: id } }))
+        }
       }
     } catch (error) {
       console.error('Error marking segment complete:', error)
@@ -313,16 +428,26 @@ function CurrentCourse() {
                 return segmentType.includes('assessment')
               })
 
+              const topicProgress = getTopicProgress(section.id)
+              const sectionInProgress = isSectionInProgress(section.id)
+
               return (
                 <div key={section.id} className="sidebar-section">
                   <button
                     className="sidebar-section-header"
                     onClick={() => toggleSection(section.id)}
                   >
-                    <span className={`section-dot ${sectionCompleted ? 'completed' : ''}`}></span>
-                    <span className="section-title" title={section.name || section.title || 'Untitled Section'}>
-                      {section.name || section.title || 'Untitled Section'}
-                    </span>
+                    <span className={`section-dot ${sectionCompleted ? 'completed' : sectionInProgress ? 'in-progress' : ''}`}></span>
+                    <div className="section-info">
+                      <span className="section-title" title={section.name || section.title || 'Untitled Section'}>
+                        {section.name || section.title || 'Untitled Section'}
+                      </span>
+                      {topicProgress.progress_percentage > 0 && (
+                        <span className={`section-progress ${sectionCompleted ? 'completed' : ''}`}>
+                          {topicProgress.progress_percentage}%
+                        </span>
+                      )}
+                    </div>
                     <svg
                       className={`expand-icon ${isExpanded ? 'expanded' : ''}`}
                       viewBox="0 0 24 24"
@@ -338,15 +463,17 @@ function CurrentCourse() {
                     <div className="sidebar-segments">
                       {/* Regular Lessons */}
                       {regularLessons.map((segment) => {
-                        const isCompleted = isSegmentCompleted(segment.id)
+                        const segmentProgress = getSegmentProgress(segment.id)
+                        const isCompleted = segmentProgress.status === 'completed'
+                        const isInProgress = segmentProgress.status === 'in_progress'
                         const isSelected = selectedSegment?.id === segment.id
                         const segmentType = (segment.segment_type || '').toLowerCase()
 
                         return (
                           <button
                             key={`lesson-${segment.id}`}
-                            className={`sidebar-segment ${isSelected ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}
-                            onClick={() => handleSegmentClick(segment)}
+                            className={`sidebar-segment ${isSelected ? 'active' : ''} ${isCompleted ? 'completed' : ''} ${isInProgress ? 'in-progress' : ''}`}
+                            onClick={() => handleSegmentClick(segment, false, section.id)}
                           >
                             <div className="segment-icon">
                               {isCompleted ? (
@@ -382,13 +509,15 @@ function CurrentCourse() {
 
                       {/* Practice Segments */}
                       {practiceSegments.map((segment) => {
-                        const isCompleted = isSegmentCompleted(`practice-${segment.id}`)
+                        const segmentProgress = getSegmentProgress(segment.id, true)
+                        const isCompleted = segmentProgress.status === 'completed'
+                        const isInProgress = segmentProgress.status === 'in_progress'
 
                         return (
                           <button
                             key={`practice-${segment.id}`}
-                            className={`sidebar-segment practice-segment ${isCompleted ? 'completed' : ''}`}
-                            onClick={() => handleSegmentClick(segment, true)}
+                            className={`sidebar-segment practice-segment ${isCompleted ? 'completed' : ''} ${isInProgress ? 'in-progress' : ''}`}
+                            onClick={() => handleSegmentClick(segment, true, section.id)}
                           >
                             <div className="segment-icon practice">
                               {isCompleted ? (
@@ -402,7 +531,12 @@ function CurrentCourse() {
                               )}
                             </div>
                             <span className="segment-title">{segment.name || 'Practice Exercise'}</span>
-                            <span className="segment-badge practice-badge">Practice</span>
+                            <div className="segment-badge-group">
+                              <span className="segment-badge practice-badge">Practice</span>
+                              {segmentProgress.progress_percentage > 0 && segmentProgress.progress_percentage < 100 && (
+                                <span className="segment-progress-badge">{segmentProgress.progress_percentage}%</span>
+                              )}
+                            </div>
                           </button>
                         )
                       })}

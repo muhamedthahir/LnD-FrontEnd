@@ -17,11 +17,12 @@ function CodeEditor({
   const [editorHeight, setEditorHeight] = useState(65) // percentage
   const [code, setCode] = useState('')
   const [output, setOutput] = useState('')
+  const [userInput, setUserInput] = useState('') // Custom input for programs
   const [language, setLanguage] = useState('')
   const [isRunning, setIsRunning] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [testResults, setTestResults] = useState([])
-  const [activeTab, setActiveTab] = useState('output') // 'output' or 'testcases'
+  const [activeTab, setActiveTab] = useState('input') // 'input', 'output' or 'testcases'
   const containerRef = useRef(null)
   const editorRef = useRef(null)
   const isDragging = useRef(false)
@@ -122,20 +123,27 @@ function CodeEditor({
     if (isRunning) return
     
     setIsRunning(true)
-    setOutput(`> Running ${language} code...\n`)
+    setOutput(`> Running ${language} code...\n${userInput ? '> With custom input\n' : ''}`)
     setActiveTab('output')
 
     try {
+      const requestBody = {
+        language: language,
+        code: code
+      }
+      
+      // Include user input if provided
+      if (userInput.trim()) {
+        requestBody.input = userInput
+      }
+
       const response = await fetch(`${apiBaseUrl}/api/codeExecute`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
         },
-        body: JSON.stringify({
-          language: language,
-          code: code
-        })
+        body: JSON.stringify(requestBody)
       })
 
       const result = await response.json()
@@ -254,17 +262,69 @@ function CodeEditor({
     if (isSubmitting) return
     
     setIsSubmitting(true)
+    setOutput(`> Submitting solution...\n`)
+    setActiveTab('output')
     
     try {
+      // Run all test cases before submitting
+      let testCasesPassed = 0
+      let testCasesTotal = testCases.length
+      
+      if (testCasesTotal > 0) {
+        setOutput(`> Running ${testCasesTotal} test cases...\n`)
+        
+        for (const testCase of testCases) {
+          try {
+            const requestBody = {
+              language: language,
+              code: code
+            }
+            if (testCase.input) {
+              requestBody.input = testCase.input
+            }
+            
+            const response = await fetch(`${apiBaseUrl}/api/codeExecute`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+              },
+              body: JSON.stringify(requestBody)
+            })
+            
+            const result = await response.json()
+            
+            if (response.ok && result.run) {
+              const actualOutput = (result.run.stdout || '').trim()
+              const expectedOutput = (testCase.expected_result || '').trim()
+              if (actualOutput === expectedOutput) {
+                testCasesPassed++
+              }
+            }
+          } catch (error) {
+            console.error('Test case execution error:', error)
+          }
+        }
+        
+        setOutput(`> Test Results: ${testCasesPassed}/${testCasesTotal} passed\n`)
+      }
+      
       if (onSubmit) {
-        await onSubmit({
+        const result = await onSubmit({
           code,
           language,
-          questionId
+          questionId,
+          testCasesPassed,
+          testCasesTotal
         })
+        
+        if (result) {
+          const statusMsg = result.result?.successful ? '✓ All test cases passed!' : `✗ ${testCasesPassed}/${testCasesTotal} test cases passed`
+          setOutput(prev => prev + `> Submission recorded\n> ${statusMsg}\n`)
+        }
       } else {
         // Default submission behavior
-        setOutput(`> Submitting solution...\n\n// Submission results will appear here`)
+        setOutput(prev => prev + `> Submission completed`)
       }
     } catch (error) {
       setOutput(`> Submission failed: ${error.message}`)
@@ -274,8 +334,13 @@ function CodeEditor({
   }
 
   const handleClearOutput = () => {
-    setOutput('')
-    setTestResults([])
+    if (activeTab === 'input') {
+      setUserInput('')
+    } else if (activeTab === 'output') {
+      setOutput('')
+    } else {
+      setTestResults([])
+    }
   }
 
   // Get visible test cases (non-hidden)
@@ -397,13 +462,23 @@ function CodeEditor({
         </div>
       </div>
 
-      {/* Output/TestCases Section */}
+      {/* Input/Output/TestCases Section */}
       <div 
         className="output-section"
         style={{ height: `${100 - editorHeight}%` }}
       >
         <div className="output-header">
           <div className="output-tabs">
+            <button 
+              className={`tab-btn ${activeTab === 'input' ? 'active' : ''}`}
+              onClick={() => setActiveTab('input')}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14">
+                <path d="M4 12h16M4 12l4-4M4 12l4 4"/>
+              </svg>
+              Input
+              {userInput.trim() && <span className="input-indicator"></span>}
+            </button>
             <button 
               className={`tab-btn ${activeTab === 'output' ? 'active' : ''}`}
               onClick={() => setActiveTab('output')}
@@ -424,7 +499,25 @@ function CodeEditor({
           </button>
         </div>
         
-        {activeTab === 'output' ? (
+        {activeTab === 'input' ? (
+          <div className="input-content">
+            <textarea
+              className="custom-input-area"
+              value={userInput}
+              onChange={(e) => setUserInput(e.target.value)}
+              placeholder="Enter your input here (one value per line for multiple inputs)..."
+              spellCheck={false}
+            />
+            <div className="input-hint">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="16" x2="12" y2="12"/>
+                <line x1="12" y1="8" x2="12.01" y2="8"/>
+              </svg>
+              This input will be passed to your program via stdin when you click "Run"
+            </div>
+          </div>
+        ) : activeTab === 'output' ? (
           <div className="output-content">
             <pre>{output || '// Run your code to see output here'}</pre>
           </div>

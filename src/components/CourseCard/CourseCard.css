@@ -148,6 +148,36 @@
   color: #f59e0b;
 }
 
+/* Progress Bar Styles */
+.course-progress-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: auto;
+}
+
+.course-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.course-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+  border-radius: var(--radius-sm);
+  transition: width var(--transition-fast);
+}
+
+.course-progress-text {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-align: right;
+}
+
 @media (max-width: 768px) {
   .course-card {
     min-height: 192px;

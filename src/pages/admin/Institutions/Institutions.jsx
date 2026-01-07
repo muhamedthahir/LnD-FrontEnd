@@ -1,12 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useDispatch } from 'react-redux'
 import { toast } from 'react-toastify'
 import Pagination from '../../../components/Pagination/Pagination'
 import { useApi } from '../../../contexts/ApiContext'
 import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES, VALIDATION_MESSAGES } from '../../../constants/constants'
+import { addInstitution, updateInstitution, invalidateInstitutions } from '../../../store/masterDataSlice'
 import '../Users/Users.css'
 import './Institutions.css'
 
 function Institutions() {
+  const dispatch = useDispatch()
   const { apiBaseUrl, accessToken } = useApi()
   const [institutions, setInstitutions] = useState([])
   const [loading, setLoading] = useState(true)
@@ -15,9 +18,10 @@ function Institutions() {
   const [pageSize, setPageSize] = useState(10)
   const [totalCount, setTotalCount] = useState(0)
   
-  // Prevent duplicate API calls
+  // Prevent duplicate API calls and track mount status
   const fetchingRef = useRef(false)
   const abortControllerRef = useRef(null)
+  const isMountedRef = useRef(true)
   const [showForm, setShowForm] = useState(false)
   const [showViewModal, setShowViewModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
@@ -29,15 +33,9 @@ function Institutions() {
   })
   const [errors, setErrors] = useState({})
 
-  const fetchInstitutions = useCallback(async () => {
+  const fetchInstitutions = useCallback(async (signal) => {
     // Prevent duplicate calls
     if (fetchingRef.current || !apiBaseUrl) return
-    
-    // Cancel previous request
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort()
-    }
-    abortControllerRef.current = new AbortController()
     
     fetchingRef.current = true
     try {
@@ -52,8 +50,11 @@ function Institutions() {
           'Content-Type': 'application/json',
           ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
         },
-        signal: abortControllerRef.current.signal
+        signal
       })
+      
+      // Only update state if component is still mounted
+      if (!isMountedRef.current) return
       
       if (response.ok) {
         const data = await response.json()
@@ -63,25 +64,32 @@ function Institutions() {
         toast.error(ERROR_MESSAGES.INSTITUTION_LIST_FAILED)
       }
     } catch (error) {
-      if (error.name !== 'AbortError') {
+      if (error.name !== 'AbortError' && isMountedRef.current) {
         console.error('Error fetching institutions:', error)
         toast.error(ERROR_MESSAGES.INSTITUTION_LIST_FAILED)
       }
     } finally {
-      setLoading(false)
+      if (isMountedRef.current) {
+        setLoading(false)
+      }
       fetchingRef.current = false
     }
   }, [apiBaseUrl, accessToken, search, currentPage, pageSize])
 
   // Fetch institutions when dependencies change
   useEffect(() => {
-    fetchInstitutions()
+    isMountedRef.current = true
+    
+    // Create a new AbortController for this effect instance
+    const controller = new AbortController()
+    abortControllerRef.current = controller
+    
+    fetchInstitutions(controller.signal)
     
     // Cleanup on unmount
     return () => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort()
-      }
+      isMountedRef.current = false
+      controller.abort()
     }
   }, [fetchInstitutions])
 
@@ -150,7 +158,10 @@ function Institutions() {
         setSelectedInstitution(null)
         setErrors({})
         toast.success(selectedInstitution ? SUCCESS_MESSAGES.INSTITUTION_UPDATED : SUCCESS_MESSAGES.INSTITUTION_CREATED)
-        fetchInstitutions()
+        // Refresh the list with current abort controller
+        if (abortControllerRef.current) {
+          fetchInstitutions(abortControllerRef.current.signal)
+        }
       } else {
         const data = await response.json()
         toast.error(data.error || ERROR_MESSAGES.INSTITUTION_CREATE_FAILED)

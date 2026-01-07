@@ -374,8 +374,36 @@ function PracticeExercise() {
                   codeTemplates={currentQuestion.codeTemplates || []}
                   testCases={currentQuestion.testCases || []}
                   onSubmit={async (data) => {
-                    console.log('Submitting code:', data)
-                    // TODO: Implement submission logic
+                    try {
+                      const response = await fetch(`${apiBaseUrl}/api/submissions/programming/submit`, {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+                        },
+                        body: JSON.stringify({
+                          programming_question_id: currentQuestion.id,
+                          practice_segment_id: parseInt(practiceId),
+                          course_id: parseInt(courseId),
+                          submitted_code: data.code,
+                          language_used: data.language,
+                          test_cases_passed: data.testCasesPassed || 0,
+                          test_cases_total: data.testCasesTotal || 0
+                        })
+                      })
+                      
+                      if (response.ok) {
+                        const result = await response.json()
+                        console.log('Submission result:', result)
+                        // Dispatch event to update progress in sidebar
+                        window.dispatchEvent(new CustomEvent('courseProgressUpdated', { detail: { courseId } }))
+                        return result
+                      } else {
+                        console.error('Submission failed')
+                      }
+                    } catch (error) {
+                      console.error('Error submitting code:', error)
+                    }
                   }}
                 />
               </div>
