@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, useNavigate, useOutletContext } from 'react-router-dom'
 import { useApi } from '../../../../contexts/ApiContext'
 import { API_ENDPOINTS } from '../../../../constants/constants'
@@ -19,6 +19,8 @@ function CurrentCourse() {
   const [progress, setProgress] = useState(null)
   const [expandedSections, setExpandedSections] = useState({})
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [currentSegmentTopicId, setCurrentSegmentTopicId] = useState(null)
+  const progressUpdateTimeoutRef = useRef(null)
 
   useEffect(() => {
     if (id) {
@@ -231,10 +233,98 @@ function CurrentCourse() {
     
     // For regular lessons, start tracking and display in the content area
     if (topicId) {
+      setCurrentSegmentTopicId(topicId)
       await startLesson(segment, topicId)
     }
     setSelectedSegment(segment)
   }
+
+  // Update media progress (video/audio)
+  const updateMediaProgress = useCallback(async (currentPosition, totalDuration, progressPercent) => {
+    if (!selectedSegment || !currentSegmentTopicId) return
+    
+    // Debounce progress updates
+    if (progressUpdateTimeoutRef.current) {
+      clearTimeout(progressUpdateTimeoutRef.current)
+    }
+    
+    progressUpdateTimeoutRef.current = setTimeout(async () => {
+      try {
+        await fetch(`${apiBaseUrl}/api/submissions/lesson/media-progress`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+          },
+          body: JSON.stringify({
+            segment_id: selectedSegment.id,
+            current_position: currentPosition,
+            total_duration: totalDuration,
+            topic_id: currentSegmentTopicId,
+            course_id: parseInt(id)
+          })
+        })
+      } catch (error) {
+        console.error('Error updating media progress:', error)
+      }
+    }, 1000) // Debounce for 1 second
+  }, [selectedSegment, currentSegmentTopicId, id, apiBaseUrl, accessToken])
+
+  // Handle media completion (when threshold is met)
+  const handleMediaComplete = useCallback(async (currentPosition, totalDuration, progressPercent) => {
+    if (!selectedSegment) return
+    
+    // Clear any pending updates
+    if (progressUpdateTimeoutRef.current) {
+      clearTimeout(progressUpdateTimeoutRef.current)
+    }
+    
+    try {
+      // Send final progress update
+      await fetch(`${apiBaseUrl}/api/submissions/lesson/media-progress`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        },
+        body: JSON.stringify({
+          segment_id: selectedSegment.id,
+          current_position: totalDuration,
+          total_duration: totalDuration,
+          topic_id: currentSegmentTopicId,
+          course_id: parseInt(id)
+        })
+      })
+      
+      // Refresh progress
+      await fetchProgress()
+      
+      // Notify other components
+      window.dispatchEvent(new CustomEvent('courseProgressUpdated', { detail: { courseId: id } }))
+    } catch (error) {
+      console.error('Error marking media as complete:', error)
+    }
+  }, [selectedSegment, currentSegmentTopicId, id, apiBaseUrl, accessToken])
+
+  // Handle document/PDF completion
+  const handleDocumentComplete = useCallback(async () => {
+    if (!selectedSegment) return
+    
+    try {
+      await handleMarkComplete(selectedSegment.id)
+    } catch (error) {
+      console.error('Error marking document as complete:', error)
+    }
+  }, [selectedSegment])
+
+  // Clean up timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (progressUpdateTimeoutRef.current) {
+        clearTimeout(progressUpdateTimeoutRef.current)
+      }
+    }
+  }, [])
 
   const getSegmentProgress = (segmentId, isPractice = false) => {
     if (!progress?.topics) return { status: 'not_started', progress_percentage: 0 }
@@ -635,7 +725,10 @@ function CurrentCourse() {
                           
                           // Check if this is a document segment
                           const segmentType = (selectedSegment.segment_type || '').toLowerCase();
-                          if (segmentType === 'lesson_document' && typeof contentObj === 'object' && contentObj !== null) {
+                          const isPdfSegment = segmentType === 'lesson_document';
+                          const segmentIsComplete = isSegmentCompleted(selectedSegment.id);
+                          
+                          if (isPdfSegment && typeof contentObj === 'object' && contentObj !== null) {
                             // Handle document content - check for files array first
                             if (contentObj.files && Array.isArray(contentObj.files) && contentObj.files.length > 0) {
                               // Multiple files (uploaded documents)
@@ -645,77 +738,56 @@ function CurrentCourse() {
                                 contentType: file.contentType || file.type || ''
                               }));
                               return (
-                                <>
-                                  <DocumentViewer files={files} compact={false} />
-                                  {!isSegmentCompleted(selectedSegment.id) && (
-                                    <button 
-                                      className="btn-mark-complete"
-                                      onClick={() => handleMarkComplete(selectedSegment.id)}
-                                    >
-                                      Mark as Complete
-                                    </button>
-                                  )}
-                                </>
+                                <DocumentViewer 
+                                  files={files} 
+                                  compact={false} 
+                                  showMarkComplete={!segmentIsComplete}
+                                  isComplete={segmentIsComplete}
+                                  segmentId={selectedSegment.id}
+                                  onComplete={handleDocumentComplete}
+                                />
                               );
                             } else if (contentObj.source === 'upload' && (contentObj.presignedUrl || contentObj.url)) {
                               // Single uploaded file
                               return (
-                                <>
-                                  <DocumentViewer 
-                                    url={contentObj.presignedUrl || contentObj.url}
-                                    fileName={contentObj.fileName || selectedSegment.name || 'Document'}
-                                    contentType={contentObj.contentType || contentObj.type || ''}
-                                    compact={false}
-                                  />
-                                  {!isSegmentCompleted(selectedSegment.id) && (
-                                    <button 
-                                      className="btn-mark-complete"
-                                      onClick={() => handleMarkComplete(selectedSegment.id)}
-                                    >
-                                      Mark as Complete
-                                    </button>
-                                  )}
-                                </>
+                                <DocumentViewer 
+                                  url={contentObj.presignedUrl || contentObj.url}
+                                  fileName={contentObj.fileName || selectedSegment.name || 'Document'}
+                                  contentType={contentObj.contentType || contentObj.type || ''}
+                                  compact={false}
+                                  showMarkComplete={!segmentIsComplete}
+                                  isComplete={segmentIsComplete}
+                                  segmentId={selectedSegment.id}
+                                  onComplete={handleDocumentComplete}
+                                />
                               );
                             } else if (contentObj.source === 'embedded' && contentObj.url) {
                               // Embedded document URL
                               return (
-                                <>
-                                  <DocumentViewer 
-                                    url={contentObj.url}
-                                    fileName={selectedSegment.name || contentObj.fileName || 'Document'}
-                                    contentType={contentObj.contentType || ''}
-                                    compact={false}
-                                  />
-                                  {!isSegmentCompleted(selectedSegment.id) && (
-                                    <button 
-                                      className="btn-mark-complete"
-                                      onClick={() => handleMarkComplete(selectedSegment.id)}
-                                    >
-                                      Mark as Complete
-                                    </button>
-                                  )}
-                                </>
+                                <DocumentViewer 
+                                  url={contentObj.url}
+                                  fileName={selectedSegment.name || contentObj.fileName || 'Document'}
+                                  contentType={contentObj.contentType || ''}
+                                  compact={false}
+                                  showMarkComplete={!segmentIsComplete}
+                                  isComplete={segmentIsComplete}
+                                  segmentId={selectedSegment.id}
+                                  onComplete={handleDocumentComplete}
+                                />
                               );
                             } else if (contentObj.url || contentObj.presignedUrl) {
                               // Fallback: if there's a URL but no source specified
                               return (
-                                <>
-                                  <DocumentViewer 
-                                    url={contentObj.presignedUrl || contentObj.url}
-                                    fileName={contentObj.fileName || selectedSegment.name || 'Document'}
-                                    contentType={contentObj.contentType || contentObj.type || ''}
-                                    compact={false}
-                                  />
-                                  {!isSegmentCompleted(selectedSegment.id) && (
-                                    <button 
-                                      className="btn-mark-complete"
-                                      onClick={() => handleMarkComplete(selectedSegment.id)}
-                                    >
-                                      Mark as Complete
-                                    </button>
-                                  )}
-                                </>
+                                <DocumentViewer 
+                                  url={contentObj.presignedUrl || contentObj.url}
+                                  fileName={contentObj.fileName || selectedSegment.name || 'Document'}
+                                  contentType={contentObj.contentType || contentObj.type || ''}
+                                  compact={false}
+                                  showMarkComplete={!segmentIsComplete}
+                                  isComplete={segmentIsComplete}
+                                  segmentId={selectedSegment.id}
+                                  onComplete={handleDocumentComplete}
+                                />
                               );
                             }
                           }
@@ -727,6 +799,9 @@ function CurrentCourse() {
                             // Handle video content
                             if (segmentType.includes('video') || contentObj.type === 'video') {
                               const videoUrl = contentObj.presignedUrl || contentObj.url || '';
+                              const segmentProgress = getSegmentProgress(selectedSegment.id);
+                              const thresholdValue = selectedSegment.threshold_value || 100;
+                              
                               if (contentObj.source === 'embedded' && videoUrl) {
                                 return (
                                   <div className="embedded-video">
@@ -737,6 +812,17 @@ function CurrentCourse() {
                                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                       allowFullScreen
                                     />
+                                    {/* Note: Embedded videos can't track progress automatically */}
+                                    {!isSegmentCompleted(selectedSegment.id) && (
+                                      <div className="embedded-video-complete">
+                                        <button 
+                                          className="btn-mark-complete"
+                                          onClick={() => handleMarkComplete(selectedSegment.id)}
+                                        >
+                                          Mark as Complete
+                                        </button>
+                                      </div>
+                                    )}
                                   </div>
                                 );
                               }
@@ -745,6 +831,11 @@ function CurrentCourse() {
                                   <VideoPlayer 
                                     url={videoUrl}
                                     fileName={contentObj.fileName || ''}
+                                    segmentId={selectedSegment.id}
+                                    thresholdValue={thresholdValue}
+                                    initialProgress={segmentProgress.progress_percentage || 0}
+                                    onProgressUpdate={updateMediaProgress}
+                                    onComplete={handleMediaComplete}
                                   />
                                 );
                               }
@@ -753,11 +844,19 @@ function CurrentCourse() {
                             // Handle audio content
                             if (segmentType.includes('audio') || contentObj.type === 'audio') {
                               const audioUrl = contentObj.presignedUrl || contentObj.url || '';
+                              const segmentProgress = getSegmentProgress(selectedSegment.id);
+                              const thresholdValue = selectedSegment.threshold_value || 100;
+                              
                               if (audioUrl) {
                                 return (
                                   <AudioPlayer 
                                     url={audioUrl}
                                     fileName={contentObj.fileName || ''}
+                                    segmentId={selectedSegment.id}
+                                    thresholdValue={thresholdValue}
+                                    initialProgress={segmentProgress.progress_percentage || 0}
+                                    onProgressUpdate={updateMediaProgress}
+                                    onComplete={handleMediaComplete}
                                   />
                                 );
                               }
@@ -765,6 +864,8 @@ function CurrentCourse() {
                             
                             // Handle document content
                             if (segmentType.includes('document') || contentObj.type === 'document') {
+                              const docSegmentIsComplete = isSegmentCompleted(selectedSegment.id);
+                              
                               // Handle embedded URL
                               if (contentObj.source === 'embedded' && contentObj.url) {
                                 return (
@@ -772,6 +873,10 @@ function CurrentCourse() {
                                     url={contentObj.url}
                                     fileName={contentObj.fileName || 'Document'}
                                     showViewer={true}
+                                    showMarkComplete={!docSegmentIsComplete}
+                                    isComplete={docSegmentIsComplete}
+                                    segmentId={selectedSegment.id}
+                                    onComplete={handleDocumentComplete}
                                   />
                                 );
                               }
@@ -785,6 +890,10 @@ function CurrentCourse() {
                                   <DocumentViewer 
                                     files={filesWithUrls}
                                     showViewer={true}
+                                    showMarkComplete={!docSegmentIsComplete}
+                                    isComplete={docSegmentIsComplete}
+                                    segmentId={selectedSegment.id}
+                                    onComplete={handleDocumentComplete}
                                   />
                                 );
                               }
@@ -796,6 +905,10 @@ function CurrentCourse() {
                                     url={docUrl}
                                     fileName={contentObj.fileName || 'Document'}
                                     showViewer={true}
+                                    showMarkComplete={!docSegmentIsComplete}
+                                    isComplete={docSegmentIsComplete}
+                                    segmentId={selectedSegment.id}
+                                    onComplete={handleDocumentComplete}
                                   />
                                 );
                               }

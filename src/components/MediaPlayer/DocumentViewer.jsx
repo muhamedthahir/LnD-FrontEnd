@@ -10,6 +10,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/b
 /**
  * DocumentViewer component for displaying documents
  * Supports PDF (react-pdf), DOCX (docx-preview), and download links for other types
+ * Tracks progress and allows marking as complete when reaching end
  */
 function DocumentViewer({ 
   url, 
@@ -18,7 +19,13 @@ function DocumentViewer({
   compact = false,
   files = null,
   onError = null,
-  showViewer = true
+  showViewer = true,
+  onProgressUpdate = null,    // Callback for progress updates: (currentPage, totalPages, progressPercent)
+  onComplete = null,          // Callback when user marks as complete
+  onReachedEnd = null,        // Callback when user reaches last page
+  showMarkComplete = false,   // Show mark as complete button
+  isComplete = false,         // Initial completion status
+  segmentId = null            // Segment ID for tracking
 }) {
   const [error, setError] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -28,6 +35,8 @@ function DocumentViewer({
   const [numPages, setNumPages] = useState(null)
   const [pageNumber, setPageNumber] = useState(1)
   const [scale, setScale] = useState(1.0)
+  const [hasReachedEnd, setHasReachedEnd] = useState(isComplete)
+  const [maxPageReached, setMaxPageReached] = useState(1)
   
   // DOCX specific
   const docxContainerRef = useRef(null)
@@ -181,12 +190,44 @@ function DocumentViewer({
     setNumPages(numPages)
     setPageNumber(1)
     setLoading(false)
+    // Check if single page document - auto mark as reached end
+    if (numPages === 1) {
+      setHasReachedEnd(true)
+      if (onReachedEnd) onReachedEnd(1, 1, 100)
+    }
   }
 
   const goToPrevPage = () => setPageNumber(prev => Math.max(prev - 1, 1))
-  const goToNextPage = () => setPageNumber(prev => Math.min(prev + 1, numPages || 1))
+  
+  const goToNextPage = () => {
+    const nextPage = Math.min(pageNumber + 1, numPages || 1)
+    setPageNumber(nextPage)
+    
+    // Track max page reached
+    if (nextPage > maxPageReached) {
+      setMaxPageReached(nextPage)
+      const progress = Math.round((nextPage / (numPages || 1)) * 100)
+      if (onProgressUpdate) {
+        onProgressUpdate(nextPage, numPages, progress)
+      }
+    }
+    
+    // Check if reached end
+    if (nextPage === numPages && !hasReachedEnd) {
+      setHasReachedEnd(true)
+      if (onReachedEnd) onReachedEnd(nextPage, numPages, 100)
+    }
+  }
+  
   const zoomIn = () => setScale(prev => Math.min(prev + 0.2, 3))
   const zoomOut = () => setScale(prev => Math.max(prev - 0.2, 0.5))
+
+  // Handle mark as complete
+  const handleMarkComplete = () => {
+    if (onComplete) {
+      onComplete(pageNumber, numPages, 100)
+    }
+  }
 
   // Handle multiple files - list view (compact or download only)
   if (files && files.length > 0 && (compact || !showViewer)) {
@@ -294,6 +335,18 @@ function DocumentViewer({
                   </svg>
                 </button>
               </div>
+              
+              {/* Progress indicator */}
+              {numPages > 1 && (
+                <div className="pdf-progress-indicator">
+                  <div className="pdf-progress-bar">
+                    <div 
+                      className="pdf-progress-fill" 
+                      style={{ width: `${Math.round((maxPageReached / numPages) * 100)}%` }}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
             <div className="pdf-document-wrapper">
               <Document
@@ -315,6 +368,44 @@ function DocumentViewer({
                 />
               </Document>
             </div>
+            
+            {/* Mark as Complete button for PDF */}
+            {showMarkComplete && (
+              <div className="pdf-complete-section">
+                {isComplete ? (
+                  <div className="pdf-completed-badge">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    <span>Completed</span>
+                  </div>
+                ) : (
+                  <button 
+                    className={`btn-mark-complete-pdf ${hasReachedEnd ? 'enabled' : 'disabled'}`}
+                    onClick={handleMarkComplete}
+                    disabled={!hasReachedEnd}
+                    title={hasReachedEnd ? 'Mark as complete' : 'Read all pages to enable'}
+                  >
+                    {hasReachedEnd ? (
+                      <>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                        Mark as Complete
+                      </>
+                    ) : (
+                      <>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                          <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        Read to the end to complete ({maxPageReached}/{numPages} pages)
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         )
       }
