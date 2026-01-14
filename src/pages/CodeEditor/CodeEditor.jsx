@@ -24,7 +24,7 @@ function CodeEditor({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isInteractive, setIsInteractive] = useState(false) // Interactive execution mode
   const [testResults, setTestResults] = useState([])
-  const [activeTab, setActiveTab] = useState('input') // 'input', 'output', 'testcases' or 'history'
+  const [activeTab, setActiveTab] = useState('custom') // 'custom', 'testcases' or 'history'
   const [submissionHistory, setSubmissionHistory] = useState([])
   const [loadingHistory, setLoadingHistory] = useState(false)
   const containerRef = useRef(null)
@@ -33,6 +33,9 @@ function CodeEditor({
   const previousQuestionIdRef = useRef(null)
   const wsRef = useRef(null) // WebSocket reference
   const outputRef = useRef(null) // Reference to output container for auto-scroll
+  
+  // Feature flag for interactive mode - set to false for now
+  const useInteractiveMode = false
 
   // Default languages if none provided
   const defaultLanguages = [
@@ -91,7 +94,7 @@ function CodeEditor({
         setOutput('')
         setUserInput('')
         setTestResults([])
-        setActiveTab('input')
+        setActiveTab('custom')
       }
       
       // Fetch submission history
@@ -247,10 +250,17 @@ function CodeEditor({
   const handleRunCode = async () => {
     if (isRunning) return
     
+    // Use Piston batch mode when interactive mode is disabled
+    if (!useInteractiveMode) {
+      handleRunCodeBatch()
+      return
+    }
+    
+    // Interactive mode (WebSocket) - currently disabled
     setIsRunning(true)
     setIsInteractive(true)
     setOutput(`> Running ${language} code (Interactive Mode)...\n`)
-    setActiveTab('output')
+    setActiveTab('custom')
 
     // Close existing WebSocket if any
     if (wsRef.current) {
@@ -352,10 +362,12 @@ function CodeEditor({
     }
   }
 
-  // Fallback batch execution (original method using Piston HTTP API)
+  // Batch execution using Piston HTTP API
   const handleRunCodeBatch = async () => {
+    setIsRunning(true)
     setIsInteractive(false)
-    setOutput(`> Running ${language} code (Batch Mode)...\n${userInput ? '> With custom input\n' : ''}`)
+    setOutput(`> Running ${language} code...\n${userInput ? '> With custom input\n' : ''}`)
+    setActiveTab('custom')
 
     try {
       const requestBody = {
@@ -568,9 +580,8 @@ function CodeEditor({
   }
 
   const handleClearOutput = () => {
-    if (activeTab === 'input') {
+    if (activeTab === 'custom') {
       setUserInput('')
-    } else if (activeTab === 'output') {
       setOutput('')
     } else if (activeTab === 'testcases') {
       setTestResults([])
@@ -636,7 +647,7 @@ function CodeEditor({
             </select>
           </div>
           <div className="code-actions">
-            {isRunning && isInteractive ? (
+            {useInteractiveMode && isRunning && isInteractive ? (
               <button className="btn-stop-header" onClick={handleStopExecution}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <rect x="6" y="6" width="12" height="12"/>
@@ -747,20 +758,14 @@ function CodeEditor({
         <div className="output-header">
           <div className="output-tabs">
             <button 
-              className={`tab-btn ${activeTab === 'input' ? 'active' : ''}`}
-              onClick={() => setActiveTab('input')}
+              className={`tab-btn ${activeTab === 'custom' ? 'active' : ''}`}
+              onClick={() => setActiveTab('custom')}
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14">
-                <path d="M4 12h16M4 12l4-4M4 12l4 4"/>
+                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
               </svg>
-              Input
+              Custom Testcase
               {userInput.trim() && <span className="input-indicator"></span>}
-            </button>
-            <button 
-              className={`tab-btn ${activeTab === 'output' ? 'active' : ''}`}
-              onClick={() => setActiveTab('output')}
-            >
-              Output
             </button>
             {hasTestCases && (
               <button 
@@ -782,31 +787,43 @@ function CodeEditor({
           </button>
         </div>
         
-        {activeTab === 'input' ? (
-          <div className="input-content">
-            <textarea
-              className="custom-input-area"
-              value={userInput}
-              onChange={(e) => setUserInput(e.target.value)}
-              placeholder="Enter your input here (one value per line for multiple inputs)..."
-              spellCheck={false}
-            />
-            <div className="input-hint">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="12" y1="16" x2="12" y2="12"/>
-                <line x1="12" y1="8" x2="12.01" y2="8"/>
-              </svg>
-              This input will be passed to your program via stdin when you click "Run"
+        {activeTab === 'custom' ? (
+          <div className="custom-testcase-content">
+            <div className="custom-testcase-grid">
+              {/* Input Section */}
+              <div className="custom-input-section">
+                <label className="section-label">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14">
+                    <path d="M4 12h16M4 12l4-4M4 12l4 4"/>
+                  </svg>
+                  Input
+                </label>
+                <textarea
+                  className="custom-input-area"
+                  value={userInput}
+                  onChange={(e) => setUserInput(e.target.value)}
+                  placeholder="Enter your input here (one value per line for multiple inputs)..."
+                  spellCheck={false}
+                  disabled={isRunning}
+                />
+              </div>
+              
+              {/* Output Section */}
+              <div className="custom-output-section">
+                <label className="section-label">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14">
+                    <path d="M20 12h-16M20 12l-4 4M20 12l-4-4"/>
+                  </svg>
+                  Output
+                </label>
+                <pre ref={outputRef} className="custom-output-area">
+                  {output || '// Run your code to see output here'}
+                </pre>
+              </div>
             </div>
-          </div>
-        ) : activeTab === 'output' ? (
-          <div className="output-content">
-            <pre ref={outputRef} className={isInteractive ? 'interactive-output' : ''}>
-              {output || '// Run your code to see output here'}
-            </pre>
-            {/* Interactive Input Area */}
-            {isInteractive && isRunning && (
+            
+            {/* Interactive Input Area - only shown when interactive mode is enabled */}
+            {useInteractiveMode && isInteractive && isRunning && (
               <div className="interactive-input-area">
                 <form onSubmit={handleInteractiveInputSubmit} className="interactive-input-form">
                   <input

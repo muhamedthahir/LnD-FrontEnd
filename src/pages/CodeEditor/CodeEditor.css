@@ -909,3 +909,116 @@
   animation: pulse-glow 2s infinite;
 }
 
+/* Custom Testcase Tab Styles */
+.custom-testcase-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg-primary, #0d1117);
+}
+
+.custom-testcase-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border-color, #30363d);
+  overflow: hidden;
+}
+
+.custom-input-section,
+.custom-output-section {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary, #0d1117);
+  overflow: hidden;
+}
+
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--bg-secondary, #161b22);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary, #8b949e);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border-color, #30363d);
+}
+
+.section-label svg {
+  opacity: 0.7;
+}
+
+.custom-input-section .custom-input-area {
+  flex: 1;
+  width: 100%;
+  padding: 12px;
+  background: var(--bg-primary, #0d1117);
+  border: none;
+  border-radius: 0;
+  color: var(--text-primary, #e6edf3);
+  font-family: 'Fira Code', 'Consolas', monospace;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  resize: none;
+  outline: none;
+}
+
+.custom-input-section .custom-input-area::placeholder {
+  color: var(--text-muted, #484f58);
+}
+
+.custom-input-section .custom-input-area:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.custom-output-area {
+  flex: 1;
+  margin: 0;
+  padding: 12px;
+  background: var(--bg-primary, #0d1117);
+  color: var(--text-primary, #e6edf3);
+  font-family: 'Fira Code', 'Consolas', monospace;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow: auto;
+}
+
+/* Scrollbars for custom testcase */
+.custom-input-section .custom-input-area::-webkit-scrollbar,
+.custom-output-area::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-input-section .custom-input-area::-webkit-scrollbar-track,
+.custom-output-area::-webkit-scrollbar-track {
+  background: var(--bg-secondary, #161b22);
+}
+
+.custom-input-section .custom-input-area::-webkit-scrollbar-thumb,
+.custom-output-area::-webkit-scrollbar-thumb {
+  background: var(--border-color, #30363d);
+  border-radius: 4px;
+}
+
+.custom-input-section .custom-input-area::-webkit-scrollbar-thumb:hover,
+.custom-output-area::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted, #484f58);
+}
+
+/* Responsive for custom testcase */
+@media (max-width: 768px) {
+  .custom-testcase-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+}
+
