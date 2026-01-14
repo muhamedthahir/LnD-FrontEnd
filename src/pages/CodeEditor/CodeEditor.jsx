@@ -463,7 +463,7 @@ function CodeEditor({
           body: JSON.stringify({
             language: language,
             code: code,
-            input: testCase.input
+            stdin: testCase.input
           })
         })
 
