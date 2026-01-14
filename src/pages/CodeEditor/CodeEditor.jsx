@@ -18,9 +18,11 @@ function CodeEditor({
   const [code, setCode] = useState('')
   const [output, setOutput] = useState('')
   const [userInput, setUserInput] = useState('') // Custom input for programs
+  const [interactiveInput, setInteractiveInput] = useState('') // Input for interactive mode
   const [language, setLanguage] = useState('')
   const [isRunning, setIsRunning] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isInteractive, setIsInteractive] = useState(false) // Interactive execution mode
   const [testResults, setTestResults] = useState([])
   const [activeTab, setActiveTab] = useState('input') // 'input', 'output', 'testcases' or 'history'
   const [submissionHistory, setSubmissionHistory] = useState([])
@@ -29,6 +31,8 @@ function CodeEditor({
   const editorRef = useRef(null)
   const isDragging = useRef(false)
   const previousQuestionIdRef = useRef(null)
+  const wsRef = useRef(null) // WebSocket reference
+  const outputRef = useRef(null) // Reference to output container for auto-scroll
 
   // Default languages if none provided
   const defaultLanguages = [
@@ -191,12 +195,167 @@ function CodeEditor({
     document.removeEventListener('mouseup', handleMouseUp)
   }, [handleMouseMove])
 
+  // Get WebSocket URL from API base URL
+  const getWsUrl = () => {
+    const url = new URL(apiBaseUrl)
+    const protocol = url.protocol === 'https:' ? 'wss:' : 'ws:'
+    return `${protocol}//${url.host}/ws/code-execute`
+  }
+
+  // Clean up WebSocket on unmount
+  useEffect(() => {
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close()
+        wsRef.current = null
+      }
+    }
+  }, [])
+
+  // Auto-scroll output when new content is added
+  useEffect(() => {
+    if (outputRef.current && isInteractive) {
+      outputRef.current.scrollTop = outputRef.current.scrollHeight
+    }
+  }, [output, isInteractive])
+
+  // Handle interactive input submission
+  const handleInteractiveInputSubmit = (e) => {
+    e.preventDefault()
+    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return
+    
+    // Send input to WebSocket
+    wsRef.current.send(JSON.stringify({
+      type: 'input',
+      input: interactiveInput
+    }))
+    
+    // Show what user typed in output
+    setOutput(prev => prev + interactiveInput + '\n')
+    setInteractiveInput('')
+  }
+
+  // Stop execution
+  const handleStopExecution = () => {
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({ type: 'kill' }))
+    }
+    setIsRunning(false)
+    setIsInteractive(false)
+  }
+
   const handleRunCode = async () => {
     if (isRunning) return
     
     setIsRunning(true)
-    setOutput(`> Running ${language} code...\n${userInput ? '> With custom input\n' : ''}`)
+    setIsInteractive(true)
+    setOutput(`> Running ${language} code (Interactive Mode)...\n`)
     setActiveTab('output')
+
+    // Close existing WebSocket if any
+    if (wsRef.current) {
+      wsRef.current.close()
+      wsRef.current = null
+    }
+
+    try {
+      const wsUrl = getWsUrl()
+      console.log('[CodeEditor] Connecting to WebSocket:', wsUrl)
+      
+      const ws = new WebSocket(wsUrl)
+      wsRef.current = ws
+
+      ws.onopen = () => {
+        console.log('[CodeEditor] WebSocket connected')
+        // Send code execution request
+        ws.send(JSON.stringify({
+          type: 'execute',
+          language: language,
+          code: code
+        }))
+      }
+
+      ws.onmessage = (event) => {
+        try {
+          const message = JSON.parse(event.data)
+          console.log('[CodeEditor] WS message:', message.type)
+
+          switch (message.type) {
+            case 'connected':
+              console.log('[CodeEditor] Session ID:', message.sessionId)
+              break
+
+            case 'status':
+              if (message.status === 'running') {
+                setOutput(prev => prev + '> Code is now running. You can type input below.\n\n')
+              } else if (message.status === 'killed') {
+                setOutput(prev => prev + '\n> Execution stopped by user.\n')
+                setIsRunning(false)
+                setIsInteractive(false)
+              }
+              break
+
+            case 'output':
+              setOutput(prev => prev + message.data)
+              break
+
+            case 'exit':
+              setOutput(prev => {
+                const exitMsg = message.exitCode === 0 
+                  ? '\n> Program completed successfully.' 
+                  : `\n> Program exited with code ${message.exitCode}`
+                return prev + exitMsg
+              })
+              setIsRunning(false)
+              setIsInteractive(false)
+              
+              if (onRunComplete) {
+                onRunComplete({ success: message.exitCode === 0, output: output })
+              }
+              break
+
+            case 'error':
+              setOutput(prev => prev + `\n> Error: ${message.message}\n`)
+              setIsRunning(false)
+              setIsInteractive(false)
+              break
+
+            default:
+              console.log('[CodeEditor] Unknown message type:', message.type)
+          }
+        } catch (err) {
+          console.error('[CodeEditor] Error parsing WS message:', err)
+        }
+      }
+
+      ws.onerror = (error) => {
+        console.error('[CodeEditor] WebSocket error:', error)
+        setOutput(prev => prev + '\n> WebSocket connection error. Falling back to batch mode...\n')
+        // Fall back to batch execution
+        ws.close()
+        handleRunCodeBatch()
+      }
+
+      ws.onclose = () => {
+        console.log('[CodeEditor] WebSocket closed')
+        if (isRunning) {
+          setIsRunning(false)
+          setIsInteractive(false)
+        }
+      }
+
+    } catch (error) {
+      console.error('[CodeEditor] Error setting up WebSocket:', error)
+      setOutput(`> Failed to connect: ${error.message}\n> Falling back to batch mode...\n`)
+      // Fall back to batch execution
+      handleRunCodeBatch()
+    }
+  }
+
+  // Fallback batch execution (original method using Piston HTTP API)
+  const handleRunCodeBatch = async () => {
+    setIsInteractive(false)
+    setOutput(`> Running ${language} code (Batch Mode)...\n${userInput ? '> With custom input\n' : ''}`)
 
     try {
       const requestBody = {
@@ -206,7 +365,7 @@ function CodeEditor({
       
       // Include user input if provided
       if (userInput.trim()) {
-        requestBody.input = userInput
+        requestBody.stdin = userInput
       }
 
       const response = await fetch(`${apiBaseUrl}/api/codeExecute`, {
@@ -477,23 +636,32 @@ function CodeEditor({
             </select>
           </div>
           <div className="code-actions">
-            <button className="btn-run" onClick={handleRunCode} disabled={isRunning}>
-              {isRunning ? (
-                <>
-                  <svg className="spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="10" strokeDasharray="32" strokeDashoffset="12"/>
-                  </svg>
-                  Running...
-                </>
-              ) : (
-                <>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polygon points="5 3 19 12 5 21 5 3"/>
-                  </svg>
-                  Run
-                </>
-              )}
-            </button>
+            {isRunning && isInteractive ? (
+              <button className="btn-stop-header" onClick={handleStopExecution}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="6" y="6" width="12" height="12"/>
+                </svg>
+                Stop
+              </button>
+            ) : (
+              <button className="btn-run" onClick={handleRunCode} disabled={isRunning}>
+                {isRunning ? (
+                  <>
+                    <svg className="spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10" strokeDasharray="32" strokeDashoffset="12"/>
+                    </svg>
+                    Running...
+                  </>
+                ) : (
+                  <>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polygon points="5 3 19 12 5 21 5 3"/>
+                    </svg>
+                    Run
+                  </>
+                )}
+              </button>
+            )}
             {hasTestCases && (
               <button 
                 className="btn-run-tests" 
@@ -634,7 +802,39 @@ function CodeEditor({
           </div>
         ) : activeTab === 'output' ? (
           <div className="output-content">
-            <pre>{output || '// Run your code to see output here'}</pre>
+            <pre ref={outputRef} className={isInteractive ? 'interactive-output' : ''}>
+              {output || '// Run your code to see output here'}
+            </pre>
+            {/* Interactive Input Area */}
+            {isInteractive && isRunning && (
+              <div className="interactive-input-area">
+                <form onSubmit={handleInteractiveInputSubmit} className="interactive-input-form">
+                  <input
+                    type="text"
+                    value={interactiveInput}
+                    onChange={(e) => setInteractiveInput(e.target.value)}
+                    placeholder="Type input and press Enter..."
+                    className="interactive-input"
+                    autoFocus
+                  />
+                  <button type="submit" className="btn-send-input">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
+                      <line x1="22" y1="2" x2="11" y2="13"/>
+                      <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                    </svg>
+                  </button>
+                  <button type="button" className="btn-stop" onClick={handleStopExecution}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
+                      <rect x="6" y="6" width="12" height="12"/>
+                    </svg>
+                    Stop
+                  </button>
+                </form>
+                <div className="interactive-hint">
+                  Press Enter to send input • Click Stop to terminate
+                </div>
+              </div>
+            )}
           </div>
         ) : activeTab === 'testcases' ? (
           <div className="testcases-content">
