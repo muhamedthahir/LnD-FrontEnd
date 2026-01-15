@@ -526,6 +526,88 @@
   height: 18px;
 }
 
+/* Document Complete Section (for non-PDF documents) */
+.doc-complete-section {
+  padding: 16px;
+  background: var(--bg-secondary, #222);
+  border-top: 1px solid var(--border-color, #333);
+  display: flex;
+  justify-content: center;
+  margin-top: auto;
+}
+
+.btn-mark-complete-doc {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--success, #10b981);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-mark-complete-doc:hover {
+  background: var(--success-hover, #059669);
+  transform: translateY(-1px);
+}
+
+.btn-mark-complete-doc svg {
+  width: 18px;
+  height: 18px;
+}
+
+.doc-completed-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--success, #10b981);
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.doc-completed-badge svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Update DOCX viewer to support mark complete */
+.docx-viewer {
+  display: flex;
+  flex-direction: column;
+}
+
+.docx-viewer .docx-container {
+  flex: 1;
+}
+
+/* Update Image viewer to support mark complete */
+.image-viewer {
+  display: flex;
+  flex-direction: column;
+  min-height: 400px;
+}
+
+.image-viewer img {
+  flex: 1;
+  object-fit: contain;
+  max-height: 60vh;
+}
+
+/* Update unsupported file to support mark complete */
+.unsupported-file {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .document-viewer-container.viewer-mode {

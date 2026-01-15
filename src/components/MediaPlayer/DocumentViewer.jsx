@@ -381,27 +381,14 @@ function DocumentViewer({
                   </div>
                 ) : (
                   <button 
-                    className={`btn-mark-complete-pdf ${hasReachedEnd ? 'enabled' : 'disabled'}`}
+                    className="btn-mark-complete-pdf enabled"
                     onClick={handleMarkComplete}
-                    disabled={!hasReachedEnd}
-                    title={hasReachedEnd ? 'Mark as complete' : 'Read all pages to enable'}
+                    title="Mark as done"
                   >
-                    {hasReachedEnd ? (
-                      <>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <polyline points="20 6 9 17 4 12"/>
-                        </svg>
-                        Mark as Complete
-                      </>
-                    ) : (
-                      <>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                          <circle cx="12" cy="12" r="3"/>
-                        </svg>
-                        Read to the end to complete ({maxPageReached}/{numPages} pages)
-                      </>
-                    )}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    Mark as Done
                   </button>
                 )}
               </div>
@@ -415,6 +402,30 @@ function DocumentViewer({
         return (
           <div className="docx-viewer">
             <div ref={docxContainerRef} className="docx-container" />
+            {/* Mark as Complete button for DOCX */}
+            {showMarkComplete && (
+              <div className="doc-complete-section">
+                {isComplete ? (
+                  <div className="doc-completed-badge">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    <span>Completed</span>
+                  </div>
+                ) : (
+                  <button 
+                    className="btn-mark-complete-doc"
+                    onClick={handleMarkComplete}
+                    title="Mark as done"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    Mark as Done
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         )
       }
@@ -429,6 +440,30 @@ function DocumentViewer({
               onLoad={() => setLoading(false)}
               onError={handleError}
             />
+            {/* Mark as Complete button for Images */}
+            {showMarkComplete && (
+              <div className="doc-complete-section">
+                {isComplete ? (
+                  <div className="doc-completed-badge">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    <span>Completed</span>
+                  </div>
+                ) : (
+                  <button 
+                    className="btn-mark-complete-doc"
+                    onClick={handleMarkComplete}
+                    title="Mark as done"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    Mark as Done
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         )
       }
@@ -453,6 +488,30 @@ function DocumentViewer({
             </svg>
             Download File
           </a>
+          {/* Mark as Complete button for unsupported files */}
+          {showMarkComplete && (
+            <div className="doc-complete-section">
+              {isComplete ? (
+                <div className="doc-completed-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  <span>Completed</span>
+                </div>
+              ) : (
+                <button 
+                  className="btn-mark-complete-doc"
+                  onClick={handleMarkComplete}
+                  title="Mark as done"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  Mark as Done
+                </button>
+              )}
+            </div>
+          )}
         </div>
       )
     }
