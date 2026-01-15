@@ -620,6 +620,15 @@
     margin-top: var(--spacing-sm);
   }
 
+  .section-progress {
+    flex: 1;
+    margin-right: 0;
+  }
+
+  .section-progress-bar {
+    width: 60px;
+  }
+
   .lessons-list {
     padding-left: var(--spacing-lg);
   }
@@ -635,58 +644,43 @@
   }
 }
 
-/* Course Progress Section */
-.course-progress-section {
-  margin-top: var(--spacing-lg);
-  padding: var(--spacing-md);
-  background: var(--bg-secondary);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-color);
-}
-
-.course-progress-header {
-  display: flex;
-  justify-content: space-between;
+/* Course Progress Badge - Simple highlighted percentage */
+.course-progress-badge {
+  display: inline-flex;
   align-items: center;
-  margin-bottom: var(--spacing-sm);
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  font-weight: 600;
+  transition: all var(--transition-fast);
 }
 
-.progress-label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text-secondary);
+.course-progress-badge.in-progress {
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
 }
 
-.progress-value {
-  font-size: 1rem;
+.course-progress-badge.completed {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.course-progress-badge .badge-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.course-progress-badge .badge-percent {
+  font-size: 1.25rem;
   font-weight: 700;
-  color: var(--primary);
 }
 
-.course-progress-bar {
-  width: 100%;
-  height: 8px;
-  background: var(--bg-tertiary);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-}
-
-.course-progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--primary) 0%, #10b981 100%);
-  border-radius: var(--radius-sm);
-  transition: width 0.5s ease;
-}
-
-.progress-stats {
-  display: flex;
-  gap: var(--spacing-md);
-  margin-top: var(--spacing-sm);
-}
-
-.progress-stat {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
+.course-progress-badge .badge-text {
+  font-size: 0.875rem;
+  opacity: 0.9;
 }
 
 /* Resume Button Style */
@@ -709,37 +703,66 @@
   height: 1rem;
 }
 
-/* Topic Progress Mini */
-.topic-progress-mini {
+/* Section Progress Bar */
+.section-progress {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
   margin-right: var(--spacing-md);
-}
-
-.topic-progress-bar-mini {
-  width: 60px;
-  height: 4px;
+  padding: var(--spacing-xs) var(--spacing-sm);
   background: var(--bg-tertiary);
-  border-radius: 2px;
+  border-radius: var(--radius-md);
+}
+
+.section-progress.in-progress {
+  background: rgba(99, 102, 241, 0.08);
+}
+
+.section-progress.completed {
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.section-progress-bar {
+  width: 80px;
+  height: 6px;
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
   overflow: hidden;
+  border: 1px solid var(--border-color);
 }
 
-.topic-progress-fill-mini {
+.section-progress.in-progress .section-progress-bar {
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+.section-progress.completed .section-progress-bar {
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.section-progress-fill {
   height: 100%;
-  background: var(--primary);
-  border-radius: 2px;
-  transition: width 0.3s ease;
+  background: linear-gradient(90deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+  border-radius: var(--radius-sm);
+  transition: width 0.4s ease;
 }
 
-.topic-progress-text {
+.section-progress-fill.completed {
+  background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+}
+
+.section-progress-text {
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-secondary);
-  min-width: 32px;
+  min-width: 36px;
+  text-align: right;
 }
 
-.topic-progress-text.completed {
+.section-progress.in-progress .section-progress-text {
+  color: var(--accent-primary);
+}
+
+.section-progress-text.completed {
   color: #10b981;
 }
 

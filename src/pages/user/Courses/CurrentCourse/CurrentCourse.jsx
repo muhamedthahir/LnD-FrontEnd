@@ -254,7 +254,7 @@ function CurrentCourse() {
     
     progressUpdateTimeoutRef.current = setTimeout(async () => {
       try {
-        await fetch(`${apiBaseUrl}/api/submissions/lesson/media-progress`, {
+        const response = await fetch(`${apiBaseUrl}/api/submissions/lesson/media-progress`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -268,10 +268,18 @@ function CurrentCourse() {
             course_id: parseInt(id)
           })
         })
+        
+        if (response.ok) {
+          // Refresh progress to update UI
+          await fetchProgress()
+          
+          // Notify other components about progress update
+          window.dispatchEvent(new CustomEvent('courseProgressUpdated', { detail: { courseId: id } }))
+        }
       } catch (error) {
         console.error('Error updating media progress:', error)
       }
-    }, 1000) // Debounce for 1 second
+    }, 2000) // Debounce for 2 seconds to reduce API calls
   }, [selectedSegment, currentSegmentTopicId, id, apiBaseUrl, accessToken])
 
   // Handle media completion (when threshold is met)

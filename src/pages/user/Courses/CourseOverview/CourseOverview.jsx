@@ -30,6 +30,19 @@ function CourseOverview() {
       fetchSections()
       fetchCourseProgress()
     }
+    
+    // Listen for progress updates to refresh course progress
+    const handleProgressUpdate = (event) => {
+      if (event.detail?.courseId === id || event.detail?.courseId === parseInt(id)) {
+        fetchCourseProgress()
+      }
+    }
+    
+    window.addEventListener('courseProgressUpdated', handleProgressUpdate)
+    
+    return () => {
+      window.removeEventListener('courseProgressUpdated', handleProgressUpdate)
+    }
   }, [id])
 
   useEffect(() => {
@@ -47,10 +60,16 @@ function CourseOverview() {
 
       if (response.ok) {
         const data = await response.json()
-        setCourseProgress(data)
+        // Normalize the progress data to use consistent field names
+        const normalizedData = {
+          ...data,
+          progress_percentage: data.overall_progress || data.progress_percentage || 0,
+          status: data.overall_status || data.status || 'not_started'
+        }
+        setCourseProgress(normalizedData)
         
         // Check if user has started the course (has any progress)
-        const hasProgress = data.progress_percentage > 0 || 
+        const hasProgress = normalizedData.progress_percentage > 0 || 
           data.topics?.some(t => t.progress_status === 'in_progress' || t.progress_status === 'completed')
         setHasStarted(hasProgress)
         
@@ -377,26 +396,22 @@ function CourseOverview() {
             </button>
           </div>
           
-          {/* Course Progress Bar */}
-          {courseProgress && courseProgress.progress_percentage > 0 && (
-            <div className="course-progress-section">
-              <div className="course-progress-header">
-                <span className="progress-label">Course Progress</span>
-                <span className="progress-value">{courseProgress.progress_percentage}%</span>
-              </div>
-              <div className="course-progress-bar">
-                <div 
-                  className="course-progress-fill" 
-                  style={{ width: `${courseProgress.progress_percentage}%` }}
-                />
-              </div>
-              <div className="progress-stats">
-                {courseProgress.topics_completed !== undefined && (
-                  <span className="progress-stat">
-                    {courseProgress.topics_completed}/{courseProgress.topics_total || sections.length} Topics
-                  </span>
-                )}
-              </div>
+          {/* Course Progress Badge */}
+          {(courseProgress?.progress_percentage > 0 || hasStarted) && (
+            <div className={`course-progress-badge ${courseProgress?.progress_percentage >= 100 ? 'completed' : 'in-progress'}`}>
+              {courseProgress?.progress_percentage >= 100 ? (
+                <>
+                  <svg className="badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  <span className="badge-text">Course Completed</span>
+                </>
+              ) : (
+                <>
+                  <span className="badge-percent">{courseProgress?.progress_percentage || 0}%</span>
+                  <span className="badge-text">Completed</span>
+                </>
+              )}
             </div>
           )}
           {course.short_description && (
@@ -516,17 +531,17 @@ function CourseOverview() {
                       </div>
                     </div>
                     <div className="section-header-right">
-                      {/* Topic Progress */}
-                      {topicProgress && topicProgress.progress_percentage > 0 && (
-                        <div className="topic-progress-mini">
-                          <div className="topic-progress-bar-mini">
+                      {/* Topic Progress Bar - Always visible for sections with content */}
+                      {totalItems > 0 && (
+                        <div className={`section-progress ${topicProgress?.progress_status === 'completed' ? 'completed' : topicProgress?.progress_percentage > 0 ? 'in-progress' : ''}`}>
+                          <div className="section-progress-bar">
                             <div 
-                              className="topic-progress-fill-mini" 
-                              style={{ width: `${topicProgress.progress_percentage}%` }}
+                              className={`section-progress-fill ${topicProgress?.progress_status === 'completed' ? 'completed' : ''}`}
+                              style={{ width: `${topicProgress?.progress_percentage || 0}%` }}
                             />
                           </div>
-                          <span className={`topic-progress-text ${topicProgress.progress_status === 'completed' ? 'completed' : ''}`}>
-                            {topicProgress.progress_percentage}%
+                          <span className={`section-progress-text ${topicProgress?.progress_status === 'completed' ? 'completed' : ''}`}>
+                            {topicProgress?.progress_percentage || 0}%
                           </span>
                         </div>
                       )}

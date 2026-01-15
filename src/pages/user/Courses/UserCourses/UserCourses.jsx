@@ -17,6 +17,17 @@ function UserCourses() {
 
   useEffect(() => {
     fetchCourses()
+    
+    // Listen for progress updates to refresh course list
+    const handleProgressUpdate = () => {
+      fetchCourses()
+    }
+    
+    window.addEventListener('courseProgressUpdated', handleProgressUpdate)
+    
+    return () => {
+      window.removeEventListener('courseProgressUpdated', handleProgressUpdate)
+    }
   }, [])
 
   useEffect(() => {
