@@ -21,6 +21,7 @@ function LessonModal({ isOpen, onClose, onAdd, sectionId, editingLesson = null, 
   const [isDragging, setIsDragging] = useState(false)
   const [showTextColorPicker, setShowTextColorPicker] = useState(false)
   const [showBgColorPicker, setShowBgColorPicker] = useState(false)
+  const [thresholdValue, setThresholdValue] = useState(100) // Completion threshold for video/audio (0-100)
   
   // Existing media from S3 (when editing)
   const [existingMediaUrl, setExistingMediaUrl] = useState(null)
@@ -53,6 +54,7 @@ function LessonModal({ isOpen, onClose, onAdd, sectionId, editingLesson = null, 
     setDocumentUrl('')
     setShowTextColorPicker(false)
     setShowBgColorPicker(false)
+    setThresholdValue(100)
     setExistingMediaUrl(null)
     setExistingMediaFileName('')
     setExistingDocuments([])
@@ -68,6 +70,9 @@ function LessonModal({ isOpen, onClose, onAdd, sectionId, editingLesson = null, 
     if (editingLesson && isOpen) {
       // Set lesson name
       setLessonName(editingLesson.name || '')
+      
+      // Set threshold value (default to 100 if not set)
+      setThresholdValue(editingLesson.threshold_value !== undefined ? editingLesson.threshold_value : 100)
       
       // Determine content type from segment_type
       let contentTypeValue = 'article'
@@ -280,7 +285,8 @@ function LessonModal({ isOpen, onClose, onAdd, sectionId, editingLesson = null, 
       sectionId,
       lessonId: editingLesson?.id || null,
       existingMediaUrl, // Pass existing media URL so parent knows if it needs to upload
-      existingDocuments
+      existingDocuments,
+      thresholdValue: (contentType === 'video' || contentType === 'audio') ? thresholdValue : 100
     })
   }
 
@@ -1318,6 +1324,50 @@ function LessonModal({ isOpen, onClose, onAdd, sectionId, editingLesson = null, 
                     </div>
                   </div>
                 )}
+              </div>
+
+              {/* Completion Threshold for Video/Audio */}
+              <div className="threshold-section">
+                <div className="form-group">
+                  <label>
+                    Completion Threshold (%)
+                    <span className="help-text">
+                      User must watch/listen to at least this percentage to mark as complete
+                    </span>
+                  </label>
+                  <div className="threshold-input-wrapper">
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={thresholdValue}
+                      onChange={(e) => {
+                        let val = parseInt(e.target.value, 10)
+                        if (isNaN(val)) val = 100
+                        if (val < 0) val = 0
+                        if (val > 100) val = 100
+                        setThresholdValue(val)
+                      }}
+                      className="threshold-input"
+                    />
+                    <span className="threshold-unit">%</span>
+                  </div>
+                  <div className="threshold-slider">
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={thresholdValue}
+                      onChange={(e) => setThresholdValue(parseInt(e.target.value, 10))}
+                      className="slider"
+                    />
+                    <div className="slider-labels">
+                      <span>0%</span>
+                      <span>50%</span>
+                      <span>100%</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}

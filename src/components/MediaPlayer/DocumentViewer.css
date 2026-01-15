@@ -446,6 +446,86 @@
   word-wrap: break-word;
 }
 
+/* PDF Progress Indicator */
+.pdf-progress-indicator {
+  margin-left: auto;
+  padding-left: 12px;
+}
+
+.pdf-progress-bar {
+  width: 80px;
+  height: 4px;
+  background: var(--bg-tertiary, #333);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.pdf-progress-fill {
+  height: 100%;
+  background: var(--primary, #6366f1);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* PDF Complete Section */
+.pdf-complete-section {
+  padding: 12px 16px;
+  background: var(--bg-secondary, #222);
+  border-top: 1px solid var(--border-color, #333);
+  display: flex;
+  justify-content: center;
+}
+
+.btn-mark-complete-pdf {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-mark-complete-pdf.enabled {
+  background: var(--success, #10b981);
+  color: white;
+}
+
+.btn-mark-complete-pdf.enabled:hover {
+  background: var(--success-hover, #059669);
+}
+
+.btn-mark-complete-pdf.disabled {
+  background: var(--bg-tertiary, #333);
+  color: var(--text-secondary, #888);
+  cursor: not-allowed;
+}
+
+.btn-mark-complete-pdf svg {
+  width: 18px;
+  height: 18px;
+}
+
+.pdf-completed-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--success, #10b981);
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.pdf-completed-badge svg {
+  width: 18px;
+  height: 18px;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .document-viewer-container.viewer-mode {
@@ -482,6 +562,17 @@
     margin-top: 8px;
     width: 100%;
     justify-content: center;
+  }
+  
+  .pdf-progress-indicator {
+    margin-left: 0;
+    padding-left: 0;
+    width: 100%;
+    margin-top: 8px;
+  }
+  
+  .pdf-progress-bar {
+    width: 100%;
   }
   
   .docx-container .docx-wrapper {

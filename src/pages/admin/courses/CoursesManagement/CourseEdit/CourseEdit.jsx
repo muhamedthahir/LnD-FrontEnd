@@ -32,7 +32,8 @@ function CourseEdit() {
     category: '',
     competency_level: '',
     short_description: '',
-    course_outcomes: ''
+    course_outcomes: '',
+    has_to_go_by_section: false
   })
   
   // Settings state
@@ -90,7 +91,8 @@ function CourseEdit() {
         category: data.category || '',
         competency_level: data.competency_level || '',
         short_description: data.short_description || '',
-        course_outcomes: data.course_outcomes || ''
+        course_outcomes: data.course_outcomes || '',
+        has_to_go_by_section: data.has_to_go_by_section || false
       })
       setTags(data.category ? [data.category] : [])
       setThumbnail(data.thumbnail)
@@ -212,7 +214,8 @@ function CourseEdit() {
         ...courseForm,
         status,
         thumbnail,
-        tags: tags.join(',')
+        tags: tags.join(','),
+        has_to_go_by_section: courseForm.has_to_go_by_section
       }
 
       let response
@@ -1018,6 +1021,27 @@ function CourseEdit() {
             </div>
 
             <div className="settings-section">
+              <h3>Course Progression</h3>
+              <div className="setting-item">
+                <div className="setting-info">
+                  <label>Sequential Topic Completion</label>
+                  <p className="setting-description">
+                    When enabled, users must complete each topic in order before moving to the next one.
+                  </p>
+                </div>
+                <label className="toggle-switch">
+                  <input
+                    type="checkbox"
+                    checked={courseForm.has_to_go_by_section}
+                    onChange={(e) => setCourseForm({ ...courseForm, has_to_go_by_section: e.target.checked })}
+                    disabled={!isEditable}
+                  />
+                  <span className="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div className="settings-section">
               <h3>Tags</h3>
               {isEditable ? (
                 <>
@@ -1213,7 +1237,8 @@ function CourseEdit() {
                   description: '',
                   segment_type: segmentType,
                   order_index: lessonData.lessonId ? (editingLesson?.order_index || 0) : 0,
-                  content
+                  content,
+                  threshold_value: lessonData.thresholdValue
                 })
               })
 
@@ -1234,7 +1259,8 @@ function CourseEdit() {
                     description: '',
                     segment_type: segmentType,
                     order_index: editingLesson?.order_index || 0,
-                    content: lessonData.content
+                    content: lessonData.content,
+                    threshold_value: lessonData.thresholdValue
                   })
                 })
 
@@ -1254,7 +1280,8 @@ function CourseEdit() {
                     description: '',
                     segment_type: segmentType,
                     order_index: 0,
-                    content: lessonData.content
+                    content: lessonData.content,
+                    threshold_value: lessonData.thresholdValue
                   })
                 })
 

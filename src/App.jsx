@@ -7,6 +7,8 @@ import Dashboard from './pages/user/Dashboard/Dashboard'
 import UserCourses from './pages/user/Courses/UserCourses/UserCourses'
 import CourseOverview from './pages/user/Courses/CourseOverview/CourseOverview'
 import CurrentCourse from './pages/user/Courses/CurrentCourse/CurrentCourse'
+import PracticeExercise from './pages/user/Courses/PracticeExercise/PracticeExercise'
+import CourseAssessment from './pages/user/Courses/CourseAssessment/CourseAssessment'
 import Assessments from './pages/user/Assessments/Assessments'
 import CoursesManagement from './pages/admin/courses/CoursesManagement/CoursesManagement'
 import CourseEdit from './pages/admin/courses/CoursesManagement/CourseEdit/CourseEdit'
@@ -45,6 +47,8 @@ function App() {
           <Route path="/courses/user-courses" element={<UserCourses />} />
           <Route path="/courses/:id" element={<CourseOverview />} />
           <Route path="/courses/:id/current" element={<CurrentCourse />} />
+          <Route path="/courses/:courseId/practice/:practiceId" element={<PracticeExercise />} />
+          <Route path="/courses/:courseId/assessment/:segmentId" element={<CourseAssessment />} />
           <Route path="/assessments" element={<Assessments />} />
           <Route path="/admin/institutions" element={<Institutions />} />
           <Route path="/admin/institutions/create" element={<CreateInstitution />} />

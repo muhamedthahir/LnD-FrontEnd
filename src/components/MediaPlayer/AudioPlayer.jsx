@@ -1,16 +1,22 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import './AudioPlayer.css'
 
 /**
  * AudioPlayer component for displaying audio content
  * Custom styled audio player with play/pause, progress, and volume controls
+ * Tracks playback progress and reports to parent/backend
  */
 function AudioPlayer({ 
   url, 
   fileName = '', 
   compact = false,
   autoPlay = false,
-  onError = null
+  onError = null,
+  onProgressUpdate = null,  // Callback for progress updates: (currentTime, duration, progressPercent)
+  onComplete = null,        // Callback when threshold is met
+  thresholdValue = 100,     // Percentage threshold to mark as complete
+  segmentId = null,         // Segment ID for tracking
+  initialProgress = 0       // Initial progress percentage
 }) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [duration, setDuration] = useState(0)
@@ -18,7 +24,10 @@ function AudioPlayer({
   const [volume, setVolume] = useState(1)
   const [error, setError] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [progressPercent, setProgressPercent] = useState(initialProgress)
+  const [isComplete, setIsComplete] = useState(initialProgress >= thresholdValue)
   const audioRef = useRef(null)
+  const lastReportedProgressRef = useRef(0)
 
   useEffect(() => {
     const audio = audioRef.current
@@ -30,12 +39,44 @@ function AudioPlayer({
     }
 
     const handleTimeUpdate = () => {
-      setCurrentTime(audio.currentTime)
+      const current = audio.currentTime
+      const total = audio.duration
+      setCurrentTime(current)
+      
+      if (total > 0 && !isNaN(total)) {
+        const progress = Math.round((current / total) * 100)
+        setProgressPercent(progress)
+        
+        // Report progress every 5% change
+        if (Math.abs(progress - lastReportedProgressRef.current) >= 5) {
+          lastReportedProgressRef.current = progress
+          if (onProgressUpdate) {
+            onProgressUpdate(current, total, progress)
+          }
+        }
+        
+        // Check if threshold is met
+        if (progress >= thresholdValue && !isComplete) {
+          setIsComplete(true)
+          if (onComplete) {
+            onComplete(current, total, progress)
+          }
+        }
+      }
     }
 
     const handleEnded = () => {
       setIsPlaying(false)
-      setCurrentTime(0)
+      // Mark as 100% when audio ends
+      if (onProgressUpdate) {
+        onProgressUpdate(audio.duration, audio.duration, 100)
+      }
+      if (!isComplete && 100 >= thresholdValue) {
+        setIsComplete(true)
+        if (onComplete) {
+          onComplete(audio.duration, audio.duration, 100)
+        }
+      }
     }
 
     const handleError = (e) => {
@@ -55,7 +96,7 @@ function AudioPlayer({
       audio.removeEventListener('ended', handleEnded)
       audio.removeEventListener('error', handleError)
     }
-  }, [url, onError])
+  }, [url, onError, onProgressUpdate, onComplete, thresholdValue, isComplete])
 
   const togglePlay = () => {
     if (!audioRef.current) return
@@ -161,18 +202,36 @@ function AudioPlayer({
           
           <div className="progress-row">
             <span className="time">{formatTime(currentTime)}</span>
-            <input
-              type="range"
-              className="progress-slider"
-              min="0"
-              max={duration || 0}
-              value={currentTime}
-              onChange={handleProgressChange}
-              disabled={loading}
-            />
+            <div className="audio-progress-wrapper">
+              <input
+                type="range"
+                className="progress-slider"
+                min="0"
+                max={duration || 0}
+                value={currentTime}
+                onChange={handleProgressChange}
+                disabled={loading}
+              />
+              {thresholdValue < 100 && (
+                <div 
+                  className="audio-threshold-marker" 
+                  style={{ left: `${thresholdValue}%` }}
+                  title={`Completion threshold: ${thresholdValue}%`}
+                />
+              )}
+            </div>
             <span className="time">{formatTime(duration)}</span>
           </div>
         </div>
+
+        {/* Completion Status */}
+        {isComplete && (
+          <div className="audio-complete-badge" title="Completed">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+        )}
 
         {/* Volume Control */}
         {!compact && (
@@ -194,6 +253,15 @@ function AudioPlayer({
           </div>
         )}
       </div>
+      
+      {/* Progress percentage display */}
+      {!compact && (
+        <div className="audio-progress-info">
+          <span className={`audio-progress-percent ${isComplete ? 'complete' : ''}`}>
+            {isComplete ? 'Completed' : `${progressPercent}% listened`}
+          </span>
+        </div>
+      )}
     </div>
   )
 }

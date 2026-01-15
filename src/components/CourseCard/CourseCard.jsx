@@ -1,7 +1,7 @@
 import { useNavigate, useOutletContext } from 'react-router-dom'
 import './CourseCard.css'
 
-function CourseCard({ course }) {
+function CourseCard({ course, showProgress = false }) {
   const navigate = useNavigate()
   const { user } = useOutletContext() || {}
   const isAdmin = user?.role === 'primary_admin' || user?.role === 'college_admin'
@@ -15,6 +15,9 @@ function CourseCard({ course }) {
       navigate(`/courses/${course.id}`)
     }
   }
+
+  // Get progress percentage (default to 0 if not available)
+  const progressPercentage = course.progress_percentage || 0
 
   return (
     <div className="course-card" onClick={handleClick}>
@@ -44,11 +47,27 @@ function CourseCard({ course }) {
       <div className="course-info">
         <div className="course-category">{course.category || 'Uncategorized'}</div>
         <h3 className="course-name">{course.name}</h3>
-        <div className="course-status-wrapper">
-          <span className={`course-status ${course.status}`}>
-            {course.status === 'published' ? 'Published' : 'Draft'}
-          </span>
-        </div>
+        
+        {/* Progress Bar for user courses */}
+        {showProgress && (
+          <div className="course-progress-container">
+            <div className="course-progress-bar">
+              <div 
+                className="course-progress-fill" 
+                style={{ width: `${progressPercentage}%` }}
+              />
+            </div>
+            <span className="course-progress-text">{progressPercentage}% Complete</span>
+          </div>
+        )}
+        
+        {!showProgress && (
+          <div className="course-status-wrapper">
+            <span className={`course-status ${course.status}`}>
+              {course.status === 'published' ? 'Published' : 'Draft'}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   )

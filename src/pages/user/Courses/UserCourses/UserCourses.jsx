@@ -44,8 +44,16 @@ function UserCourses() {
       enrollments.forEach(enrollment => {
         const courseId = enrollment.course_id
         if (courseId && !courseMap.has(courseId)) {
-          // Determine enrollment status
+          // Determine enrollment status and normalize it
+          // Database may use 'inProgress' or 'in_progress', and 'Expired' or 'expired'
           let enrollmentStatus = enrollment.status || 'invited'
+          
+          // Normalize status to snake_case lowercase
+          if (enrollmentStatus === 'inProgress') {
+            enrollmentStatus = 'in_progress'
+          } else if (enrollmentStatus === 'Expired') {
+            enrollmentStatus = 'expired'
+          }
           
           // Check if course is expired (compare end_date from administration)
           if (enrollment.end_date) {
@@ -66,7 +74,10 @@ function UserCourses() {
             thumbnail: enrollment.thumbnail || null,
             enrollment_status: enrollmentStatus,
             start_date: enrollment.start_date,
-            end_date: enrollment.end_date
+            end_date: enrollment.end_date,
+            progress_percentage: enrollment.progress_percentage || 0,
+            has_to_go_by_section: enrollment.has_to_go_by_section || false,
+            last_accessed_at: enrollment.last_accessed_at
           })
         }
       })
@@ -211,7 +222,11 @@ function UserCourses() {
       ) : (
         <div className="courses-grid">
           {filteredCourses.map(course => (
-            <CourseCard key={course.id} course={course} />
+            <CourseCard 
+              key={course.id} 
+              course={course} 
+              showProgress={activeTab === 'in_progress' || activeTab === 'completed'}
+            />
           ))}
         </div>
       )}
