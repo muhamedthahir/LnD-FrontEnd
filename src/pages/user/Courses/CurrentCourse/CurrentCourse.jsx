@@ -214,8 +214,8 @@ function CurrentCourse() {
       [sectionId]: !prev[sectionId]
     }))
   }
-
-  const handleSegmentClick = async (segment, isPracticeSegment = false, topicId = null, navigateToQuiz = false) => {
+  
+    const handleSegmentClick = async (segment, isPracticeSegment = false, topicId = null, navigateToQuiz = false) => {
     if (isPracticeSegment) {
       // Start tracking practice segment and navigate
       await startPractice(segment.id)
@@ -1042,5 +1042,5 @@ function CurrentCourse() {
   )
 }
 
-export default CurrentCourse
+export default CurrentCourse;
 

@@ -307,6 +307,32 @@ function Users() {
     }
   }
 
+  const handleResendOTP = async (userId) => {
+    try {
+      const response = await fetch(
+        `${apiBaseUrl}${API_ENDPOINTS.USERS.RESEND_OTP(userId)}`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': accessToken ? `Bearer ${accessToken}` : undefined,
+            'Content-Type': 'application/json'
+          }
+        }
+      )
+      
+      if (response.ok) {
+        toast.success('OTP has been resent successfully')
+        setMenuOpen(null)
+      } else {
+        const data = await response.json()
+        toast.error(data.error || 'Failed to resend OTP')
+      }
+    } catch (error) {
+      console.error('Error resending OTP:', error)
+      toast.error('Failed to resend OTP')
+    }
+  }
+
   const handleDeleteClick = (userId) => {
     const user = users.find(u => u.id === userId)
     setUserToDelete(userId)
@@ -790,6 +816,12 @@ function Users() {
                                 setShowResetModal(true)
                                 setMenuOpen(null)
                               }}>Reset Password</button>
+                              {/* Show Resend OTP only for pending users */}
+                              {u.status === 'pending' && (
+                                <button onClick={() => handleResendOTP(u.id)} className="resend-otp-option">
+                                  Resend OTP
+                                </button>
+                              )}
                               {/* Don't show delete option for primary admins or current user */}
                               {u.role !== 'primary_admin' && u.id !== user?.id && (
                                 <button onClick={() => handleDeleteClick(u.id)} className="delete-option">

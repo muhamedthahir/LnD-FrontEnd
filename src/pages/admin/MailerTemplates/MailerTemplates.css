@@ -1,0 +1,374 @@
+/* Mailer Templates Specific Styles */
+
+.mailer-form-card {
+  max-width: 100%;
+}
+
+.mailer-form-card .form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.mailer-form-card .form-group {
+  margin-bottom: var(--spacing-md);
+}
+
+.mailer-form-card textarea {
+  font-family: inherit;
+  resize: vertical;
+}
+
+.code-textarea {
+  font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  background: var(--bg-tertiary);
+  border: var(--border-sm) solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+}
+
+.form-hint {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.form-section-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: var(--spacing-lg) 0 var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: var(--border-sm) solid var(--border-color);
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent-primary);
+}
+
+/* Template Name Cell */
+.template-name-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.template-name {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.template-category {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  width: fit-content;
+}
+
+/* Unique ID Code */
+.unique-id-code {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.8rem;
+  background: var(--bg-tertiary);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  color: var(--accent-primary);
+}
+
+/* Type Badges */
+.type-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.badge-promotional {
+  background: rgba(236, 72, 153, 0.15);
+  color: #ec4899;
+}
+
+.badge-transactional {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+}
+
+.badge-notification {
+  background: rgba(168, 85, 247, 0.15);
+  color: #a855f7;
+}
+
+.badge-reminder {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+}
+
+/* Status Badge */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-badge.active {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+.status-badge.inactive {
+  background: rgba(107, 114, 128, 0.15);
+  color: #6b7280;
+}
+
+/* Subject Cell */
+.subject-cell {
+  max-width: 300px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Usage Cell */
+.usage-cell {
+  text-align: center;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* Icon Buttons */
+.btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: var(--border-sm) solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-icon:hover {
+  background: var(--bg-tertiary);
+  color: var(--accent-primary);
+  border-color: var(--border-color);
+}
+
+.btn-icon.delete:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.btn-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* View Modal */
+.template-view-modal {
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.template-view-header {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+}
+
+.view-section {
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-md);
+  border-bottom: var(--border-sm) solid var(--border-color);
+}
+
+.view-section:last-of-type {
+  border-bottom: none;
+}
+
+.view-field {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+}
+
+.view-field label {
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 120px;
+}
+
+.view-field code {
+  font-family: 'Fira Code', monospace;
+  background: var(--bg-tertiary);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  color: var(--accent-primary);
+}
+
+/* Tags List */
+.tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+}
+
+.tag {
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.variable-tag {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+  font-family: 'Fira Code', monospace;
+}
+
+/* Template Preview Code */
+.template-preview-code {
+  background: var(--bg-tertiary);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  font-family: 'Fira Code', monospace;
+  font-size: 0.8rem;
+  overflow-x: auto;
+  max-height: 300px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* View Stats */
+.view-stats {
+  display: flex;
+  gap: var(--spacing-lg);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-md);
+  border-top: var(--border-sm) solid var(--border-color);
+}
+
+/* Edit Modal */
+.mailer-form-modal {
+  max-width: 900px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* Preview Modal */
+.preview-modal {
+  max-width: 900px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.preview-variables {
+  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-md);
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+}
+
+.preview-variables h4 {
+  margin-bottom: var(--spacing-md);
+  color: var(--text-primary);
+}
+
+.variables-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.rendered-preview {
+  margin-top: var(--spacing-lg);
+}
+
+.preview-section {
+  margin-bottom: var(--spacing-lg);
+}
+
+.preview-section h4 {
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.preview-subject {
+  font-size: 1.125rem;
+  font-weight: 500;
+  padding: var(--spacing-md);
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+}
+
+.preview-frame {
+  background: #ffffff;
+  border: var(--border-sm) solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  min-height: 200px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .mailer-form-card .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .view-field {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+  
+  .view-field label {
+    min-width: auto;
+  }
+  
+  .view-stats {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+  
+  .variables-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .action-buttons {
+    flex-wrap: wrap;
+  }
+}
+

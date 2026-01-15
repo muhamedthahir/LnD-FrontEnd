@@ -23,6 +23,7 @@ import Groups from './pages/admin/Groups/Groups'
 import CreateGroup from './pages/admin/Groups/CreateGroup/CreateGroup'
 import Institutions from './pages/admin/Institutions/Institutions'
 import CreateInstitution from './pages/admin/Institutions/CreateInstitution/CreateInstitution'
+import MailerTemplates from './pages/admin/MailerTemplates/MailerTemplates'
 import CreateAdministration from './pages/admin/courses/CourseAdministrations/CreateAdministration/CreateAdministration'
 // Question Bank Pages
 import QuestionBanks from './pages/admin/Questions/QuestionBanks'
@@ -54,6 +55,7 @@ function App() {
           <Route path="/assessments" element={<Assessments />} />
           <Route path="/admin/institutions" element={<Institutions />} />
           <Route path="/admin/institutions/create" element={<CreateInstitution />} />
+          <Route path="/admin/mailer-templates" element={<MailerTemplates />} />
           <Route path="/admin/users" element={<Users />} />
           <Route path="/admin/users/create" element={<CreateUser />} />
           <Route path="/admin/assessments/management" element={<AssessmentManagement />} />

@@ -17,6 +17,7 @@ export const API_ENDPOINTS = {
     UPDATE: (id) => `/api/admin/users/${id}`,
     DELETE: (id) => `/api/admin/users/${id}`,
     RESET_PASSWORD: (id) => `/api/admin/users/${id}/reset-password`,
+    RESEND_OTP: (id) => `/api/admin/users/${id}/resend-otp`,
     BULK_TEMPLATE: '/api/admin/users/bulk/template',
     BULK_UPLOAD: '/api/admin/users/bulk/upload'
   },

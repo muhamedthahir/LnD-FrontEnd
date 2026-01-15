@@ -546,6 +546,14 @@
   pointer-events: auto;
 }
 
+.menu-dropdown button.resend-otp-option {
+  color: #3b82f6;
+}
+
+.menu-dropdown button.resend-otp-option:hover {
+  background: rgba(59, 130, 246, 0.1);
+}
+
 .modal-overlay {
   position: fixed;
   inset: 0;
