@@ -413,6 +413,7 @@ function CourseEdit() {
 
   const isPublished = course?.status === 'published'
   const isEditable = !isPublished || editMode
+  const isViewOnly = isPublished && !editMode // View-only mode for published courses
 
   return (
     <div className="course-edit-page">
@@ -429,6 +430,8 @@ function CourseEdit() {
               <Button 
                 variant="primary" 
                 onClick={() => setEditMode(true)}
+                disabled={true}
+                title="Cannot edit published courses"
               >
                 Edit Course
               </Button>
@@ -883,7 +886,12 @@ function CourseEdit() {
             {!editMode ? (
               <div className="course-details-view">
                 {isPublished && (
-                  <Button variant="primary" onClick={() => setEditMode(true)}>
+                  <Button 
+                    variant="primary" 
+                    onClick={() => setEditMode(true)}
+                    disabled={true}
+                    title="Cannot edit published courses"
+                  >
                     Edit Course
                   </Button>
                 )}
@@ -920,6 +928,8 @@ function CourseEdit() {
                     value={courseForm.name}
                     onChange={(e) => setCourseForm({ ...courseForm, name: e.target.value })}
                     placeholder="Enter course name"
+                    disabled={isViewOnly}
+                    readOnly={isViewOnly}
                   />
                 </div>
                 <div className="form-group">
@@ -929,6 +939,8 @@ function CourseEdit() {
                     value={courseForm.category}
                     onChange={(e) => setCourseForm({ ...courseForm, category: e.target.value })}
                     placeholder="Enter category"
+                    disabled={isViewOnly}
+                    readOnly={isViewOnly}
                   />
                 </div>
                 <div className="form-group">
@@ -938,6 +950,8 @@ function CourseEdit() {
                     onChange={(e) => setCourseForm({ ...courseForm, short_description: e.target.value })}
                     placeholder="Enter short description"
                     rows="3"
+                    disabled={isViewOnly}
+                    readOnly={isViewOnly}
                   />
                 </div>
                 <div className="form-group">
@@ -945,6 +959,7 @@ function CourseEdit() {
                   <select
                     value={courseForm.competency_level}
                     onChange={(e) => setCourseForm({ ...courseForm, competency_level: e.target.value })}
+                    disabled={isViewOnly}
                   >
                     <option value="">Select Competency Level</option>
                     <option value="beginner">Beginner</option>
@@ -961,22 +976,26 @@ function CourseEdit() {
                     onChange={(e) => setCourseForm({ ...courseForm, course_outcomes: e.target.value })}
                     placeholder="Describe what students will learn"
                     rows="4"
+                    disabled={isViewOnly}
+                    readOnly={isViewOnly}
                   />
                 </div>
-                <div className="form-actions">
-                  <Button variant="secondary" onClick={() => setEditMode(false)}>
-                    Cancel
-                  </Button>
-                  <Button 
-                    variant="primary" 
-                    onClick={async () => {
-                      await saveCourse(course?.status || 'draft')
-                      setEditMode(false)
-                    }}
-                  >
-                    Update Course
-                  </Button>
-                </div>
+                {!isViewOnly && (
+                  <div className="form-actions">
+                    <Button variant="secondary" onClick={() => setEditMode(false)}>
+                      Cancel
+                    </Button>
+                    <Button 
+                      variant="primary" 
+                      onClick={async () => {
+                        await saveCourse(course?.status || 'draft')
+                        setEditMode(false)
+                      }}
+                    >
+                      Update Course
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </div>

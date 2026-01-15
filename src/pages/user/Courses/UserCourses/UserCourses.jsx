@@ -66,6 +66,9 @@ function UserCourses() {
             enrollmentStatus = 'expired'
           }
           
+          const progressPercentage = enrollment.progress_percentage || 0
+          const hasStarted = enrollment.last_accessed_at || enrollment.started_at || progressPercentage > 0
+          
           // Check if course is expired (compare end_date from administration)
           if (enrollment.end_date) {
             const endDate = new Date(enrollment.end_date)
@@ -73,6 +76,24 @@ function UserCourses() {
             if (endDate < now && enrollmentStatus !== 'completed') {
               enrollmentStatus = 'expired'
             }
+          }
+          
+          // Categorize course based on status and progress
+          // Invited: status is 'invited' and user hasn't started (no progress, no last_accessed_at)
+          if (enrollmentStatus === 'invited' && !hasStarted) {
+            enrollmentStatus = 'invited'
+          }
+          // In Progress: user has started (has progress or last_accessed_at) but not completed
+          else if (hasStarted && progressPercentage < 100 && enrollmentStatus !== 'expired' && enrollmentStatus !== 'completed') {
+            enrollmentStatus = 'in_progress'
+          }
+          // Completed: progress is 100% or status is completed
+          else if (progressPercentage === 100 || enrollmentStatus === 'completed') {
+            enrollmentStatus = 'completed'
+          }
+          // Expired: status is expired or course end_date has passed
+          else if (enrollmentStatus === 'expired' || enrollmentStatus === 'Expired') {
+            enrollmentStatus = 'expired'
           }
           
           courseMap.set(courseId, {
@@ -86,9 +107,10 @@ function UserCourses() {
             enrollment_status: enrollmentStatus,
             start_date: enrollment.start_date,
             end_date: enrollment.end_date,
-            progress_percentage: enrollment.progress_percentage || 0,
+            progress_percentage: progressPercentage,
             has_to_go_by_section: enrollment.has_to_go_by_section || false,
-            last_accessed_at: enrollment.last_accessed_at
+            last_accessed_at: enrollment.last_accessed_at,
+            started_at: enrollment.started_at
           })
         }
       })
@@ -128,12 +150,16 @@ function UserCourses() {
   const getStatusMatch = (enrollmentStatus) => {
     switch (activeTab) {
       case 'invited':
+        // Invited: course added but not started
         return enrollmentStatus === 'invited'
       case 'in_progress':
-        return enrollmentStatus === 'in_progress' || enrollmentStatus === 'enrolled'
+        // In Progress: user has started working on the course
+        return enrollmentStatus === 'in_progress'
       case 'completed':
+        // Completed: user has completed 100% of the course
         return enrollmentStatus === 'completed'
       case 'expired':
+        // Expired: course has expired or user was removed from group
         return enrollmentStatus === 'expired'
       default:
         return false
