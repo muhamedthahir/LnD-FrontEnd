@@ -315,6 +315,31 @@
   color: #8b5cf6;
 }
 
+.sidebar-segment .segment-icon.quiz {
+  color: #f59e0b;
+}
+
+/* Quiz Segment Styles */
+.practice-segment-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.sidebar-segment.quiz-segment:hover {
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.sidebar-segment.quiz-segment.active {
+  background: rgba(245, 158, 11, 0.1);
+  border-left-color: #f59e0b;
+}
+
+.segment-badge.quiz-badge {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
 /* Main Content */
 .course-main-content {
   flex: 1;

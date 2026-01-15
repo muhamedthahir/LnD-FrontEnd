@@ -215,11 +215,15 @@ function CurrentCourse() {
     }))
   }
 
-  const handleSegmentClick = async (segment, isPracticeSegment = false, topicId = null) => {
+  const handleSegmentClick = async (segment, isPracticeSegment = false, topicId = null, navigateToQuiz = false) => {
     if (isPracticeSegment) {
       // Start tracking practice segment and navigate
       await startPractice(segment.id)
-      navigate(`/courses/${id}/practice/${segment.id}`)
+      if (navigateToQuiz) {
+        navigate(`/courses/${id}/quiz/${segment.id}`)
+      } else {
+        navigate(`/courses/${id}/practice/${segment.id}`)
+      }
       return
     }
     
@@ -602,32 +606,92 @@ function CurrentCourse() {
                         const segmentProgress = getSegmentProgress(segment.id, true)
                         const isCompleted = segmentProgress.status === 'completed'
                         const isInProgress = segmentProgress.status === 'in_progress'
+                        const hasProgrammingQuestions = (segment.programming_count || 0) > 0
+                        const hasMcqQuestions = (segment.mcq_count || 0) > 0
 
                         return (
-                          <button
-                            key={`practice-${segment.id}`}
-                            className={`sidebar-segment practice-segment ${isCompleted ? 'completed' : ''} ${isInProgress ? 'in-progress' : ''}`}
-                            onClick={() => handleSegmentClick(segment, true, section.id)}
-                          >
-                            <div className="segment-icon practice">
-                              {isCompleted ? (
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                  <polyline points="20 6 9 17 4 12"/>
-                                </svg>
-                              ) : (
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-                                </svg>
-                              )}
-                            </div>
-                            <span className="segment-title">{segment.name || 'Practice Exercise'}</span>
-                            <div className="segment-badge-group">
-                              <span className="segment-badge practice-badge">Practice</span>
-                              {segmentProgress.progress_percentage > 0 && segmentProgress.progress_percentage < 100 && (
-                                <span className="segment-progress-badge">{segmentProgress.progress_percentage}%</span>
-                              )}
-                            </div>
-                          </button>
+                          <div key={`practice-${segment.id}`} className="practice-segment-group">
+                            {/* Practice Exercise Button (for programming questions) */}
+                            {hasProgrammingQuestions && (
+                              <button
+                                className={`sidebar-segment practice-segment ${isCompleted ? 'completed' : ''} ${isInProgress ? 'in-progress' : ''}`}
+                                onClick={() => handleSegmentClick(segment, true, section.id, false)}
+                              >
+                                <div className="segment-icon practice">
+                                  {isCompleted ? (
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                      <polyline points="20 6 9 17 4 12"/>
+                                    </svg>
+                                  ) : (
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                      <polyline points="16 18 22 12 16 6"/>
+                                      <polyline points="8 6 2 12 8 18"/>
+                                    </svg>
+                                  )}
+                                </div>
+                                <span className="segment-title">{segment.name || 'Practice Exercise'}</span>
+                                <div className="segment-badge-group">
+                                  <span className="segment-badge practice-badge">Code</span>
+                                  {segmentProgress.progress_percentage > 0 && segmentProgress.progress_percentage < 100 && (
+                                    <span className="segment-progress-badge">{segmentProgress.progress_percentage}%</span>
+                                  )}
+                                </div>
+                              </button>
+                            )}
+
+                            {/* Quiz Button (for MCQ/Multiselect questions) */}
+                            {hasMcqQuestions && (
+                              <button
+                                className={`sidebar-segment quiz-segment ${isCompleted ? 'completed' : ''} ${isInProgress ? 'in-progress' : ''}`}
+                                onClick={() => handleSegmentClick(segment, true, section.id, true)}
+                              >
+                                <div className="segment-icon quiz">
+                                  {isCompleted ? (
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                      <polyline points="20 6 9 17 4 12"/>
+                                    </svg>
+                                  ) : (
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                      <circle cx="12" cy="12" r="10"/>
+                                      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                                      <line x1="12" y1="17" x2="12.01" y2="17"/>
+                                    </svg>
+                                  )}
+                                </div>
+                                <span className="segment-title">{segment.name || 'Quiz'}</span>
+                                <div className="segment-badge-group">
+                                  <span className="segment-badge quiz-badge">Quiz</span>
+                                  {segmentProgress.progress_percentage > 0 && segmentProgress.progress_percentage < 100 && (
+                                    <span className="segment-progress-badge">{segmentProgress.progress_percentage}%</span>
+                                  )}
+                                </div>
+                              </button>
+                            )}
+
+                            {/* Show combined segment if it has both types but user might want to see it differently */}
+                            {!hasProgrammingQuestions && !hasMcqQuestions && (
+                              <button
+                                className={`sidebar-segment practice-segment ${isCompleted ? 'completed' : ''} ${isInProgress ? 'in-progress' : ''}`}
+                                onClick={() => handleSegmentClick(segment, true, section.id, false)}
+                              >
+                                <div className="segment-icon practice">
+                                  {isCompleted ? (
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                      <polyline points="20 6 9 17 4 12"/>
+                                    </svg>
+                                  ) : (
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                                    </svg>
+                                  )}
+                                </div>
+                                <span className="segment-title">{segment.name || 'Practice'}</span>
+                                <div className="segment-badge-group">
+                                  <span className="segment-badge practice-badge">Practice</span>
+                                </div>
+                              </button>
+                            )}
+                          </div>
                         )
                       })}
 
