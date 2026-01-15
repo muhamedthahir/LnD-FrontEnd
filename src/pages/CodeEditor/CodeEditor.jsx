@@ -523,7 +523,7 @@ function CodeEditor({
               code: code
             }
             if (testCase.input) {
-              requestBody.input = testCase.input
+              requestBody.stdin = testCase.input
             }
             
             const response = await fetch(`${apiBaseUrl}/api/codeExecute`, {
