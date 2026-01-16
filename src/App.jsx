@@ -34,6 +34,7 @@ import QuestionForm from './pages/admin/Questions/QuestionForm'
 import QuestionDetail from './pages/admin/Questions/QuestionDetail'
 import TestCaseManager from './pages/admin/Questions/TestCaseManager'
 import CodeEditorLayout from './pages/CodeEditor/CodeEditorLayout'
+import PersonalDetails from './pages/PersonalDetails/PersonalDetails'
 import './App.css'
 
 function App() {
@@ -46,6 +47,7 @@ function App() {
         <Route path="/codeeditor" element={<CodeEditorLayout />} />
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/personal-details" element={<PersonalDetails />} />
           <Route path="/courses/user-courses" element={<UserCourses />} />
           <Route path="/courses/:id" element={<CourseOverview />} />
           <Route path="/courses/:id/current" element={<CurrentCourse />} />

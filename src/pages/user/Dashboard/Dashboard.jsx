@@ -1,8 +1,14 @@
-import { useOutletContext } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useOutletContext, useNavigate, Link } from 'react-router-dom'
+import { useApi } from '../../../contexts/ApiContext'
 import './Dashboard.css'
 
 function Dashboard() {
   const { user } = useOutletContext()
+  const { apiBaseUrl, accessToken } = useApi()
+  const navigate = useNavigate()
+  const [profileCompletion, setProfileCompletion] = useState(null)
+  const [showNotification, setShowNotification] = useState(true)
 
   const getRoleDisplay = (role) => {
     const roleMap = {
@@ -11,6 +17,35 @@ function Dashboard() {
       'student': 'Student'
     }
     return roleMap[role] || role
+  }
+
+  useEffect(() => {
+    checkProfileCompletion()
+
+    // Listen for profile updates
+    const handleProfileUpdate = () => {
+      checkProfileCompletion()
+    }
+    window.addEventListener('profileUpdated', handleProfileUpdate)
+    return () => window.removeEventListener('profileUpdated', handleProfileUpdate)
+  }, [])
+
+  const checkProfileCompletion = async () => {
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/user-details/completion`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
+        }
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setProfileCompletion(data)
+      }
+    } catch (error) {
+      console.error('Error checking profile completion:', error)
+    }
   }
 
   if (!user) {
@@ -24,6 +59,51 @@ function Dashboard() {
 
   return (
     <div className="dashboard">
+      {/* Profile Completion Notification */}
+      {profileCompletion && !profileCompletion.isComplete && showNotification && (
+        <div className="profile-notification">
+          <div className="notification-content">
+            <div className="notification-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+            </div>
+            <div className="notification-text">
+              <strong>Complete your profile!</strong>
+              <p>
+                Your profile is {profileCompletion.completionPercentage}% complete. 
+                Please add your {profileCompletion.missingRequired.slice(0, 3).map(f => f.replace(/_/g, ' ')).join(', ')}
+                {profileCompletion.missingRequired.length > 3 ? ` and ${profileCompletion.missingRequired.length - 3} more fields` : ''}.
+              </p>
+            </div>
+            <Link to="/personal-details" className="notification-action">
+              Complete Now
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </Link>
+            <button 
+              className="notification-close" 
+              onClick={() => setShowNotification(false)}
+              aria-label="Dismiss notification"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+          <div className="notification-progress">
+            <div 
+              className="notification-progress-bar" 
+              style={{ width: `${profileCompletion.completionPercentage}%` }}
+            />
+          </div>
+        </div>
+      )}
+
       <header className="dashboard-header">
         <div className="header-content">
           <h1>Welcome, {user.name}!</h1>
