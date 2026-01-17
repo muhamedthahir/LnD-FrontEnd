@@ -35,20 +35,18 @@ function AssessmentEdit() {
     is_locked: false
   })
   
-  // Question selection
-  const [showQuestionModal, setShowQuestionModal] = useState(false)
-  const [questionType, setQuestionType] = useState('PROGRAMMING')
-  const [selectedSegmentId, setSelectedSegmentId] = useState(null)
+  // Question selection (inline in segment)
+  const [activeQuestionSection, setActiveQuestionSection] = useState(null) // { segmentId, type }
   const [availableQuestions, setAvailableQuestions] = useState([])
   const [selectedQuestions, setSelectedQuestions] = useState([])
-  const [questionSearch, setQuestionSearch] = useState('')
   const [questionBanks, setQuestionBanks] = useState([])
   const [selectedQuestionBank, setSelectedQuestionBank] = useState('')
   const [loadingQuestions, setLoadingQuestions] = useState(false)
   const [questionFilters, setQuestionFilters] = useState({
-    difficulty: '',
-    status: ''
+    search: '',
+    level: ''
   })
+  const [levels, setLevels] = useState([])
   
   // Dropdowns
   const [institutions, setInstitutions] = useState([])
@@ -241,8 +239,23 @@ function AssessmentEdit() {
     }
   }
 
+  // Fetch levels for filter
+  const fetchLevels = async () => {
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/master-data/levels`, {
+        headers: getAuthHeader()
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setLevels(data.levels || data || [])
+      }
+    } catch (error) {
+      console.error('Error fetching levels:', error)
+    }
+  }
+
   // Fetch questions from selected bank
-  const fetchQuestionsFromBank = async (bankId, type) => {
+  const fetchQuestionsFromBank = async (bankId, type, filters = {}) => {
     if (!bankId) {
       setAvailableQuestions([])
       return
@@ -250,16 +263,18 @@ function AssessmentEdit() {
     
     setLoadingQuestions(true)
     try {
-      // Get questions from the bank
-      const questionTypeId = type === 'PROGRAMMING' ? 1 : 2 // Assuming 1=Programming, 2=MCQ
+      const questionTypeId = type === 'PROGRAMMING' ? 1 : 2
       const params = new URLSearchParams({
         question_bank_id: bankId,
         question_type_id: questionTypeId,
         limit: '200'
       })
       
-      if (questionFilters.difficulty) {
-        params.append('level_id', questionFilters.difficulty)
+      if (filters.level) {
+        params.append('level_id', filters.level)
+      }
+      if (filters.search) {
+        params.append('search', filters.search)
       }
       
       const response = await fetch(`${apiBaseUrl}/api/questions?${params}`, {
@@ -278,44 +293,73 @@ function AssessmentEdit() {
     }
   }
 
-  // Question handlers
-  const handleAddQuestions = async (segmentId, type) => {
-    setSelectedSegmentId(segmentId)
-    setQuestionType(type)
-    setSelectedQuestions([])
-    setQuestionSearch('')
-    setSelectedQuestionBank('')
-    setAvailableQuestions([])
-    setQuestionFilters({ difficulty: '', status: '' })
+  // Toggle question section visibility
+  const handleToggleQuestionSection = async (segmentId, type) => {
+    const key = `${segmentId}-${type}`
+    const currentKey = activeQuestionSection ? `${activeQuestionSection.segmentId}-${activeQuestionSection.type}` : null
     
-    // Fetch question banks
-    await fetchQuestionBanks()
-    
-    setShowQuestionModal(true)
+    if (currentKey === key) {
+      // Close section
+      setActiveQuestionSection(null)
+      setAvailableQuestions([])
+      setSelectedQuestions([])
+      setSelectedQuestionBank('')
+      setQuestionFilters({ search: '', level: '' })
+    } else {
+      // Open section
+      setActiveQuestionSection({ segmentId, type })
+      setAvailableQuestions([])
+      setSelectedQuestions([])
+      setSelectedQuestionBank('')
+      setQuestionFilters({ search: '', level: '' })
+      
+      // Fetch question banks and levels
+      await Promise.all([fetchQuestionBanks(), fetchLevels()])
+    }
   }
 
   // Handle question bank change
   const handleQuestionBankChange = (bankId) => {
     setSelectedQuestionBank(bankId)
     setSelectedQuestions([])
-    fetchQuestionsFromBank(bankId, questionType)
+    if (activeQuestionSection) {
+      fetchQuestionsFromBank(bankId, activeQuestionSection.type, questionFilters)
+    }
   }
 
-  const handleSaveQuestions = async () => {
-    if (selectedQuestions.length === 0) {
-      toast.warning('Please select at least one question')
-      return
+  // Handle filter change
+  const handleFilterChange = (filterName, value) => {
+    const newFilters = { ...questionFilters, [filterName]: value }
+    setQuestionFilters(newFilters)
+    if (selectedQuestionBank && activeQuestionSection) {
+      fetchQuestionsFromBank(selectedQuestionBank, activeQuestionSection.type, newFilters)
     }
+  }
 
+  // Toggle question selection
+  const toggleQuestionSelection = (questionId) => {
+    setSelectedQuestions(prev => 
+      prev.includes(questionId) 
+        ? prev.filter(id => id !== questionId)
+        : [...prev, questionId]
+    )
+  }
+
+  // Add selected questions to segment
+  const handleAddSelectedQuestions = async () => {
+    if (!activeQuestionSection || selectedQuestions.length === 0) return
+    
+    const { segmentId, type } = activeQuestionSection
+    
     try {
-      const endpoint = questionType === 'PROGRAMMING'
+      const endpoint = type === 'PROGRAMMING'
         ? `${apiBaseUrl}/api/assessment/segments/programming-questions`
         : `${apiBaseUrl}/api/assessment/segments/mcq-questions`
 
       for (const questionId of selectedQuestions) {
-        const body = questionType === 'PROGRAMMING'
-          ? { segment_id: selectedSegmentId, programming_question_id: questionId }
-          : { segment_id: selectedSegmentId, mcq_question_id: questionId }
+        const body = type === 'PROGRAMMING'
+          ? { segment_id: segmentId, programming_question_id: questionId }
+          : { segment_id: segmentId, mcq_question_id: questionId }
 
         await fetch(endpoint, {
           method: 'POST',
@@ -324,14 +368,15 @@ function AssessmentEdit() {
         })
       }
 
-      toast.success('Questions added successfully!')
-      setShowQuestionModal(false)
-      fetchSegmentDetails(selectedSegmentId)
+      toast.success(`${selectedQuestions.length} questions added!`)
+      setSelectedQuestions([])
+      fetchSegmentDetails(segmentId)
     } catch (error) {
       console.error('Error adding questions:', error)
       toast.error('Failed to add questions')
     }
   }
+
 
   const handleRemoveQuestion = async (segmentId, questionId, type) => {
     if (!window.confirm('Remove this question from segment?')) return
@@ -386,11 +431,10 @@ function AssessmentEdit() {
     return `${minutes} min`
   }
 
-  const filteredQuestions = availableQuestions.filter(q => {
-    const searchLower = questionSearch.toLowerCase()
-    const title = q.title || q.question_text || ''
-    return title.toLowerCase().includes(searchLower)
-  })
+  // Check if question section is active for a segment
+  const isQuestionSectionActive = (segmentId, type) => {
+    return activeQuestionSection?.segmentId === segmentId && activeQuestionSection?.type === type
+  }
 
   if (loading) {
     return (
@@ -625,21 +669,28 @@ function AssessmentEdit() {
                         </span>
                       </div>
 
+                      {/* Programming Questions Section */}
                       <div className="questions-section">
                         <div className="questions-header">
-                          <h5>Programming Questions</h5>
-                          <Button variant="outline" size="small" onClick={() => handleAddQuestions(segment.id, 'PROGRAMMING')}>
-                            + Add
+                          <h5>Programming Questions ({segment.programming_questions?.length || 0})</h5>
+                          <Button 
+                            variant={isQuestionSectionActive(segment.id, 'PROGRAMMING') ? 'primary' : 'outline'} 
+                            size="small" 
+                            onClick={() => handleToggleQuestionSection(segment.id, 'PROGRAMMING')}
+                          >
+                            {isQuestionSectionActive(segment.id, 'PROGRAMMING') ? '✕ Close' : '+ Add Questions'}
                           </Button>
                         </div>
-                        {segment.programming_questions?.length > 0 ? (
+                        
+                        {segment.programming_questions?.length > 0 && (
                           <div className="questions-list">
                             {segment.programming_questions.map((q, qi) => (
                               <div key={q.id} className="question-item">
                                 <span className="question-order">{qi + 1}</span>
+                                <span className="question-id">#{q.programming_question_id}</span>
                                 <span className="question-title">{q.title}</span>
-                                <span className="question-difficulty">{q.difficulty}</span>
-                                <span className="question-marks">{q.weightage_override || q.default_weightage} pts</span>
+                                <span className="question-difficulty">{q.difficulty || q.level_name}</span>
+                                <span className="question-marks">{q.weightage_override || q.default_weightage || 1} pts</span>
                                 <button 
                                   className="remove-btn"
                                   onClick={() => handleRemoveQuestion(segment.id, q.programming_question_id, 'PROGRAMMING')}
@@ -649,26 +700,151 @@ function AssessmentEdit() {
                               </div>
                             ))}
                           </div>
-                        ) : (
+                        )}
+
+                        {/* Inline Question Selection for Programming */}
+                        {isQuestionSectionActive(segment.id, 'PROGRAMMING') && (
+                          <div className="inline-question-selector">
+                            <div className="selector-filters">
+                              <div className="filter-row">
+                                <div className="filter-item">
+                                  <label>Question Bank</label>
+                                  <select 
+                                    value={selectedQuestionBank} 
+                                    onChange={(e) => handleQuestionBankChange(e.target.value)}
+                                  >
+                                    <option value="">-- Select Question Bank --</option>
+                                    {questionBanks.map(bank => (
+                                      <option key={bank.id} value={bank.id}>
+                                        {bank.name} ({bank.question_count || 0}) {bank.institution_name ? `- ${bank.institution_name}` : ''}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+                                <div className="filter-item">
+                                  <label>Level</label>
+                                  <select 
+                                    value={questionFilters.level} 
+                                    onChange={(e) => handleFilterChange('level', e.target.value)}
+                                  >
+                                    <option value="">All Levels</option>
+                                    {levels.map(level => (
+                                      <option key={level.id} value={level.id}>{level.name}</option>
+                                    ))}
+                                  </select>
+                                </div>
+                                <div className="filter-item search">
+                                  <label>Search</label>
+                                  <input
+                                    type="text"
+                                    placeholder="Search by ID, title, tags..."
+                                    value={questionFilters.search}
+                                    onChange={(e) => handleFilterChange('search', e.target.value)}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+
+                            {!selectedQuestionBank ? (
+                              <div className="selector-empty">Select a question bank to view questions</div>
+                            ) : loadingQuestions ? (
+                              <div className="selector-loading"><div className="spinner"></div> Loading...</div>
+                            ) : availableQuestions.length === 0 ? (
+                              <div className="selector-empty">No programming questions found</div>
+                            ) : (
+                              <>
+                                <div className="questions-table-container">
+                                  <table className="questions-table">
+                                    <thead>
+                                      <tr>
+                                        <th style={{width: '40px'}}></th>
+                                        <th style={{width: '70px'}}>ID</th>
+                                        <th>Title</th>
+                                        <th style={{width: '100px'}}>Level</th>
+                                        <th>Tags</th>
+                                        <th style={{width: '60px'}}>Pts</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {availableQuestions.map(q => (
+                                        <tr 
+                                          key={q.id} 
+                                          className={selectedQuestions.includes(q.id) ? 'selected' : ''}
+                                          onClick={() => toggleQuestionSelection(q.id)}
+                                        >
+                                          <td>
+                                            <input 
+                                              type="checkbox" 
+                                              checked={selectedQuestions.includes(q.id)}
+                                              onChange={() => toggleQuestionSelection(q.id)}
+                                              onClick={(e) => e.stopPropagation()}
+                                            />
+                                          </td>
+                                          <td><code>#{q.id}</code></td>
+                                          <td className="title-cell">
+                                            <span className="q-title">{q.title}</span>
+                                            {q.description && <span className="q-desc">{q.description?.substring(0, 80)}...</span>}
+                                          </td>
+                                          <td>
+                                            <span className={`level-badge ${(q.level_name || 'easy').toLowerCase()}`}>
+                                              {q.level_name || 'Easy'}
+                                            </span>
+                                          </td>
+                                          <td className="tags-cell">
+                                            {q.tags?.slice(0, 3).map((tag, i) => (
+                                              <span key={i} className="tag">{tag.name || tag}</span>
+                                            ))}
+                                            {q.tags?.length > 3 && <span className="tag more">+{q.tags.length - 3}</span>}
+                                          </td>
+                                          <td>{q.weightage || 1}</td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                                <div className="selector-actions">
+                                  <span className="selection-count">{selectedQuestions.length} selected</span>
+                                  <Button 
+                                    variant="primary" 
+                                    size="small"
+                                    onClick={handleAddSelectedQuestions}
+                                    disabled={selectedQuestions.length === 0}
+                                  >
+                                    Add {selectedQuestions.length} Questions
+                                  </Button>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        )}
+
+                        {!isQuestionSectionActive(segment.id, 'PROGRAMMING') && segment.programming_questions?.length === 0 && (
                           <p className="no-questions">No programming questions added</p>
                         )}
                       </div>
 
+                      {/* MCQ Questions Section */}
                       <div className="questions-section">
                         <div className="questions-header">
-                          <h5>MCQ Questions</h5>
-                          <Button variant="outline" size="small" onClick={() => handleAddQuestions(segment.id, 'MCQ')}>
-                            + Add
+                          <h5>MCQ Questions ({segment.mcq_questions?.length || 0})</h5>
+                          <Button 
+                            variant={isQuestionSectionActive(segment.id, 'MCQ') ? 'primary' : 'outline'} 
+                            size="small" 
+                            onClick={() => handleToggleQuestionSection(segment.id, 'MCQ')}
+                          >
+                            {isQuestionSectionActive(segment.id, 'MCQ') ? '✕ Close' : '+ Add Questions'}
                           </Button>
                         </div>
-                        {segment.mcq_questions?.length > 0 ? (
+                        
+                        {segment.mcq_questions?.length > 0 && (
                           <div className="questions-list">
                             {segment.mcq_questions.map((q, qi) => (
                               <div key={q.id} className="question-item">
                                 <span className="question-order">{qi + 1}</span>
+                                <span className="question-id">#{q.mcq_question_id}</span>
                                 <span className="question-title">{q.question_text?.substring(0, 60)}...</span>
-                                <span className="question-difficulty">{q.difficulty}</span>
-                                <span className="question-marks">{q.weightage_override || q.default_weightage} pts</span>
+                                <span className="question-difficulty">{q.difficulty || q.level_name}</span>
+                                <span className="question-marks">{q.weightage_override || q.default_weightage || 1} pts</span>
                                 <button 
                                   className="remove-btn"
                                   onClick={() => handleRemoveQuestion(segment.id, q.mcq_question_id, 'MCQ')}
@@ -678,7 +854,125 @@ function AssessmentEdit() {
                               </div>
                             ))}
                           </div>
-                        ) : (
+                        )}
+
+                        {/* Inline Question Selection for MCQ */}
+                        {isQuestionSectionActive(segment.id, 'MCQ') && (
+                          <div className="inline-question-selector">
+                            <div className="selector-filters">
+                              <div className="filter-row">
+                                <div className="filter-item">
+                                  <label>Question Bank</label>
+                                  <select 
+                                    value={selectedQuestionBank} 
+                                    onChange={(e) => handleQuestionBankChange(e.target.value)}
+                                  >
+                                    <option value="">-- Select Question Bank --</option>
+                                    {questionBanks.map(bank => (
+                                      <option key={bank.id} value={bank.id}>
+                                        {bank.name} ({bank.question_count || 0}) {bank.institution_name ? `- ${bank.institution_name}` : ''}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+                                <div className="filter-item">
+                                  <label>Level</label>
+                                  <select 
+                                    value={questionFilters.level} 
+                                    onChange={(e) => handleFilterChange('level', e.target.value)}
+                                  >
+                                    <option value="">All Levels</option>
+                                    {levels.map(level => (
+                                      <option key={level.id} value={level.id}>{level.name}</option>
+                                    ))}
+                                  </select>
+                                </div>
+                                <div className="filter-item search">
+                                  <label>Search</label>
+                                  <input
+                                    type="text"
+                                    placeholder="Search by ID, title, tags..."
+                                    value={questionFilters.search}
+                                    onChange={(e) => handleFilterChange('search', e.target.value)}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+
+                            {!selectedQuestionBank ? (
+                              <div className="selector-empty">Select a question bank to view questions</div>
+                            ) : loadingQuestions ? (
+                              <div className="selector-loading"><div className="spinner"></div> Loading...</div>
+                            ) : availableQuestions.length === 0 ? (
+                              <div className="selector-empty">No MCQ questions found</div>
+                            ) : (
+                              <>
+                                <div className="questions-table-container">
+                                  <table className="questions-table">
+                                    <thead>
+                                      <tr>
+                                        <th style={{width: '40px'}}></th>
+                                        <th style={{width: '70px'}}>ID</th>
+                                        <th>Question</th>
+                                        <th style={{width: '100px'}}>Level</th>
+                                        <th>Tags</th>
+                                        <th style={{width: '60px'}}>Pts</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {availableQuestions.map(q => (
+                                        <tr 
+                                          key={q.id} 
+                                          className={selectedQuestions.includes(q.id) ? 'selected' : ''}
+                                          onClick={() => toggleQuestionSelection(q.id)}
+                                        >
+                                          <td>
+                                            <input 
+                                              type="checkbox" 
+                                              checked={selectedQuestions.includes(q.id)}
+                                              onChange={() => toggleQuestionSelection(q.id)}
+                                              onClick={(e) => e.stopPropagation()}
+                                            />
+                                          </td>
+                                          <td><code>#{q.id}</code></td>
+                                          <td className="title-cell">
+                                            <span className="q-title">{q.title || q.question_text?.substring(0, 80)}</span>
+                                            {q.description && <span className="q-desc">{q.description?.substring(0, 80)}...</span>}
+                                          </td>
+                                          <td>
+                                            <span className={`level-badge ${(q.level_name || 'easy').toLowerCase()}`}>
+                                              {q.level_name || 'Easy'}
+                                            </span>
+                                          </td>
+                                          <td className="tags-cell">
+                                            {q.tags?.slice(0, 3).map((tag, i) => (
+                                              <span key={i} className="tag">{tag.name || tag}</span>
+                                            ))}
+                                            {q.tags?.length > 3 && <span className="tag more">+{q.tags.length - 3}</span>}
+                                          </td>
+                                          <td>{q.weightage || 1}</td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                                <div className="selector-actions">
+                                  <span className="selection-count">{selectedQuestions.length} selected</span>
+                                  <Button 
+                                    variant="primary" 
+                                    size="small"
+                                    onClick={handleAddSelectedQuestions}
+                                    disabled={selectedQuestions.length === 0}
+                                  >
+                                    Add {selectedQuestions.length} Questions
+                                  </Button>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        )}
+
+                        {!isQuestionSectionActive(segment.id, 'MCQ') && segment.mcq_questions?.length === 0 && (
                           <p className="no-questions">No MCQ questions added</p>
                         )}
                       </div>
@@ -766,133 +1060,6 @@ function AssessmentEdit() {
         </div>
       )}
 
-      {/* Question Selection Modal */}
-      {showQuestionModal && (
-        <div className="modal-overlay" onClick={() => setShowQuestionModal(false)}>
-          <div className="modal-content large" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Add {questionType === 'PROGRAMMING' ? 'Programming' : 'MCQ'} Questions</h2>
-              <button className="close-btn" onClick={() => setShowQuestionModal(false)}>×</button>
-            </div>
-            
-            <div className="modal-body">
-              {/* Question Bank Selection */}
-              <div className="question-filters">
-                <div className="filter-group">
-                  <label>Question Bank</label>
-                  <select
-                    value={selectedQuestionBank}
-                    onChange={(e) => handleQuestionBankChange(e.target.value)}
-                  >
-                    <option value="">-- Select Question Bank --</option>
-                    {questionBanks.map(bank => (
-                      <option key={bank.id} value={bank.id}>
-                        {bank.name} ({bank.question_count || 0} questions)
-                        {bank.institution_name ? ` - ${bank.institution_name}` : ''}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                
-                <div className="filter-group search-filter">
-                  <label>Search</label>
-                  <input
-                    type="text"
-                    value={questionSearch}
-                    onChange={(e) => setQuestionSearch(e.target.value)}
-                    placeholder="Search by title or ID..."
-                  />
-                </div>
-              </div>
-
-              {/* Questions List */}
-              <div className="questions-selection-list">
-                {!selectedQuestionBank ? (
-                  <div className="empty-selection">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="48" height="48">
-                      <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                    </svg>
-                    <p>Select a question bank to view questions</p>
-                  </div>
-                ) : loadingQuestions ? (
-                  <div className="loading-questions">
-                    <div className="spinner"></div>
-                    <p>Loading questions...</p>
-                  </div>
-                ) : filteredQuestions.length === 0 ? (
-                  <div className="empty-selection">
-                    <p>No {questionType === 'PROGRAMMING' ? 'programming' : 'MCQ'} questions found in this bank</p>
-                  </div>
-                ) : (
-                  filteredQuestions.map(q => (
-                    <div 
-                      key={q.id} 
-                      className={`selection-item ${selectedQuestions.includes(q.id) ? 'selected' : ''}`}
-                      onClick={() => {
-                        if (selectedQuestions.includes(q.id)) {
-                          setSelectedQuestions(prev => prev.filter(id => id !== q.id))
-                        } else {
-                          setSelectedQuestions(prev => [...prev, q.id])
-                        }
-                      }}
-                    >
-                      <div className="selection-checkbox">
-                        {selectedQuestions.includes(q.id) && (
-                          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
-                          </svg>
-                        )}
-                      </div>
-                      <div className="selection-info">
-                        <div className="selection-header">
-                          <span className="selection-id">#{q.id}</span>
-                          <span className={`difficulty-badge ${(q.level_name || 'easy').toLowerCase()}`}>
-                            {q.level_name || 'Easy'}
-                          </span>
-                          {q.status_name && (
-                            <span className={`status-tag ${q.status_name.toLowerCase()}`}>
-                              {q.status_name}
-                            </span>
-                          )}
-                        </div>
-                        <span className="selection-title">{q.title || q.question_text}</span>
-                        <div className="selection-meta">
-                          <span className="meta-item">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="12" height="12">
-                              <circle cx="12" cy="12" r="10"/>
-                              <path d="M12 6v6l4 2"/>
-                            </svg>
-                            {q.weightage || 1} pts
-                          </span>
-                          {q.question_type_name && (
-                            <span className="meta-item type-tag">{q.question_type_name}</span>
-                          )}
-                          {q.tags && q.tags.length > 0 && (
-                            <span className="meta-tags">
-                              {q.tags.slice(0, 3).map((tag, i) => (
-                                <span key={i} className="tag">{tag.name || tag}</span>
-                              ))}
-                              {q.tags.length > 3 && <span className="tag more">+{q.tags.length - 3}</span>}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-
-            <div className="modal-footer">
-              <span className="selected-count">{selectedQuestions.length} selected</span>
-              <Button variant="secondary" onClick={() => setShowQuestionModal(false)}>Cancel</Button>
-              <Button variant="primary" onClick={handleSaveQuestions} disabled={selectedQuestions.length === 0}>
-                Add Selected
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
