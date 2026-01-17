@@ -290,7 +290,7 @@ function PracticeExercise() {
                     <div className="question-header">
                       <h2 className="question-title">{currentQuestion.title}</h2>
                       <span className={`difficulty-badge ${getDifficultyClass(currentQuestion.difficulty_level)}`}>
-                        {currentQuestion.difficulty_level || 'Medium'}
+                        {currentQuestion.level_name || 'Medium'}
                       </span>
                     </div>
                     <div className="question-content">
