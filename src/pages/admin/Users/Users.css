@@ -351,6 +351,18 @@
   background: var(--bg-secondary);
 }
 
+.user-name-link {
+  color: var(--text-primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color var(--transition-fast);
+}
+
+.user-name-link:hover {
+  color: var(--accent-primary);
+  text-decoration: underline;
+}
+
 .role-badge {
   padding: 0.25rem 0.75rem;
   border-radius: var(--radius-sm);

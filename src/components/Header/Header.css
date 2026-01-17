@@ -253,6 +253,37 @@ html[data-sidebar-collapsed="true"] .app-header {
   margin: var(--spacing-xs) 0;
 }
 
+.user-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  width: 100%;
+  padding: var(--spacing-md);
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: left;
+}
+
+.user-menu-item:hover {
+  background: var(--bg-secondary);
+  color: var(--accent-primary);
+}
+
+.user-menu-item svg {
+  width: 1rem;
+  height: 1rem;
+  color: var(--text-secondary);
+}
+
+.user-menu-item:hover svg {
+  color: var(--accent-primary);
+}
+
 .user-menu-logout {
   display: flex;
   align-items: center;

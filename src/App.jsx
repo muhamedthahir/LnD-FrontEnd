@@ -16,6 +16,7 @@ import CourseEdit from './pages/admin/courses/CoursesManagement/CourseEdit/Cours
 import PracticeSegmentManager from './pages/admin/courses/PracticeSegmentManager/PracticeSegmentManager'
 import CourseAdministrations from './pages/admin/courses/CourseAdministrations/CourseAdministrations'
 import Users from './pages/admin/Users/Users'
+import UserDetail from './pages/admin/Users/UserDetail/UserDetail'
 import CreateUser from './pages/admin/Users/CreateUser/CreateUser'
 import AssessmentManagement from './pages/admin/assessments/AssessmentManagement/AssessmentManagement'
 import AssessmentAdministration from './pages/admin/assessments/AssessmentAdministration/AssessmentAdministration'
@@ -24,6 +25,7 @@ import CreateGroup from './pages/admin/Groups/CreateGroup/CreateGroup'
 import Institutions from './pages/admin/Institutions/Institutions'
 import CreateInstitution from './pages/admin/Institutions/CreateInstitution/CreateInstitution'
 import MailerTemplates from './pages/admin/MailerTemplates/MailerTemplates'
+import Settings from './pages/admin/Settings/Settings'
 import CreateAdministration from './pages/admin/courses/CourseAdministrations/CreateAdministration/CreateAdministration'
 // Question Bank Pages
 import QuestionBanks from './pages/admin/Questions/QuestionBanks'
@@ -34,6 +36,7 @@ import QuestionForm from './pages/admin/Questions/QuestionForm'
 import QuestionDetail from './pages/admin/Questions/QuestionDetail'
 import TestCaseManager from './pages/admin/Questions/TestCaseManager'
 import CodeEditorLayout from './pages/CodeEditor/CodeEditorLayout'
+import PersonalDetails from './pages/PersonalDetails/PersonalDetails'
 import './App.css'
 
 function App() {
@@ -46,6 +49,7 @@ function App() {
         <Route path="/codeeditor" element={<CodeEditorLayout />} />
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/personal-details" element={<PersonalDetails />} />
           <Route path="/courses/user-courses" element={<UserCourses />} />
           <Route path="/courses/:id" element={<CourseOverview />} />
           <Route path="/courses/:id/current" element={<CurrentCourse />} />
@@ -56,8 +60,10 @@ function App() {
           <Route path="/admin/institutions" element={<Institutions />} />
           <Route path="/admin/institutions/create" element={<CreateInstitution />} />
           <Route path="/admin/mailer-templates" element={<MailerTemplates />} />
+          <Route path="/admin/settings" element={<Settings />} />
           <Route path="/admin/users" element={<Users />} />
           <Route path="/admin/users/create" element={<CreateUser />} />
+          <Route path="/admin/users/:id" element={<UserDetail />} />
           <Route path="/admin/assessments/management" element={<AssessmentManagement />} />
           <Route path="/admin/assessments/administrations" element={<AssessmentAdministration />} />
           <Route path="/admin/groups" element={<Groups />} />

@@ -13,6 +13,7 @@ export const API_ENDPOINTS = {
   // Users
   USERS: {
     LIST: '/api/admin/users',
+    GET: (id) => `/api/admin/users/${id}`,
     CREATE: '/api/admin/users',
     UPDATE: (id) => `/api/admin/users/${id}`,
     DELETE: (id) => `/api/admin/users/${id}`,

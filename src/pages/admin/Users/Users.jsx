@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { useOutletContext } from 'react-router-dom'
+import { useOutletContext, Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import Pagination from '../../../components/Pagination/Pagination'
 import ConfirmModal from '../../../components/ConfirmModal/ConfirmModal'
@@ -774,7 +774,11 @@ function Users() {
                 <tbody>
                   {users.map((u) => (
                     <tr key={u.id}>
-                      <td>{u.name}</td>
+                      <td>
+                        <Link to={`/admin/users/${u.id}`} className="user-name-link">
+                          {u.name}
+                        </Link>
+                      </td>
                       <td>{u.email}</td>
                       <td>
                         <span className={`role-badge role-${u.role}`}>
