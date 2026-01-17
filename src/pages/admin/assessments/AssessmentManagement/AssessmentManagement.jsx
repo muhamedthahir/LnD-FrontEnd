@@ -1,24 +1,490 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useApi } from '../../../../contexts/ApiContext'
+import { toast } from 'react-toastify'
+import Button from '../../../../components/Button/Button'
+import Pagination from '../../../../components/Pagination/Pagination'
 import './AssessmentManagement.css'
 
 function AssessmentManagement() {
+  const { apiBaseUrl, accessToken } = useApi()
+  const navigate = useNavigate()
+  
+  const [assessments, setAssessments] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
+  const [selectedStatus, setSelectedStatus] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+  const [totalCount, setTotalCount] = useState(0)
+  
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    institution_id: '',
+    topic_id: ''
+  })
+  const [errors, setErrors] = useState({})
+  const [institutions, setInstitutions] = useState([])
+  const [topics, setTopics] = useState([])
+
+  const fetchAssessments = useCallback(async () => {
+    if (!apiBaseUrl) return
+    
+    try {
+      setLoading(true)
+      const params = new URLSearchParams({
+        page: currentPage,
+        pageSize: pageSize,
+        ...(search && { search }),
+        ...(selectedStatus && { status: selectedStatus })
+      })
+
+      const response = await fetch(`${apiBaseUrl}/api/assessment/assessments?${params}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
+        }
+      })
+
+      if (!response.ok) throw new Error('Failed to fetch assessments')
+
+      const data = await response.json()
+      setAssessments(data.assessments || [])
+      setTotalCount(data.total || 0)
+    } catch (error) {
+      console.error('Error fetching assessments:', error)
+      toast.error('Failed to fetch assessments')
+    } finally {
+      setLoading(false)
+    }
+  }, [apiBaseUrl, accessToken, search, selectedStatus, currentPage, pageSize])
+
+  const fetchDropdownData = async () => {
+    try {
+      // Fetch institutions
+      const instResponse = await fetch(`${apiBaseUrl}/api/institutions`, {
+        headers: { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` }
+      })
+      if (instResponse.ok) {
+        const data = await instResponse.json()
+        setInstitutions(data.institutions || data || [])
+      }
+
+      // Fetch topics
+      const topicResponse = await fetch(`${apiBaseUrl}/api/topics`, {
+        headers: { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` }
+      })
+      if (topicResponse.ok) {
+        const data = await topicResponse.json()
+        setTopics(data.topics || data || [])
+      }
+    } catch (error) {
+      console.error('Error fetching dropdown data:', error)
+    }
+  }
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchAssessments()
+    }, search ? 300 : 0)
+    
+    return () => clearTimeout(timer)
+  }, [fetchAssessments])
+
+  useEffect(() => {
+    fetchDropdownData()
+  }, [apiBaseUrl])
+
+  const handleCreateAssessment = () => {
+    setShowCreateModal(true)
+    setFormData({ title: '', description: '', institution_id: '', topic_id: '' })
+    setErrors({})
+  }
+
+  const validateForm = () => {
+    const newErrors = {}
+    if (!formData.title.trim()) {
+      newErrors.title = 'Title is required'
+    }
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleSave = async (continueEditing = false) => {
+    if (!validateForm()) return
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/assessment/assessments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
+        },
+        body: JSON.stringify(formData)
+      })
+
+      if (!response.ok) throw new Error('Failed to create assessment')
+
+      const data = await response.json()
+      toast.success('Assessment created successfully!')
+      setShowCreateModal(false)
+      
+      if (continueEditing) {
+        navigate(`/admin/assessments/${data.assessment.id}/edit`)
+      } else {
+        fetchAssessments()
+      }
+    } catch (error) {
+      console.error('Error creating assessment:', error)
+      toast.error('Failed to create assessment')
+    }
+  }
+
+  const handleStatusChange = async (id, newStatus) => {
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/assessment/assessments/${id}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
+        },
+        body: JSON.stringify({ status: newStatus })
+      })
+
+      if (!response.ok) throw new Error('Failed to update status')
+
+      toast.success('Status updated successfully!')
+      fetchAssessments()
+    } catch (error) {
+      console.error('Error updating status:', error)
+      toast.error('Failed to update status')
+    }
+  }
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this assessment?')) return
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/assessment/assessments/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
+        }
+      })
+
+      if (!response.ok) throw new Error('Failed to delete assessment')
+
+      toast.success('Assessment deleted successfully!')
+      fetchAssessments()
+    } catch (error) {
+      console.error('Error deleting assessment:', error)
+      toast.error('Failed to delete assessment')
+    }
+  }
+
+  const handleDuplicate = async (id) => {
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/assessment/assessments/${id}/duplicate`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
+        }
+      })
+
+      if (!response.ok) throw new Error('Failed to duplicate assessment')
+
+      toast.success('Assessment duplicated successfully!')
+      fetchAssessments()
+    } catch (error) {
+      console.error('Error duplicating assessment:', error)
+      toast.error('Failed to duplicate assessment')
+    }
+  }
+
+  const getStatusBadgeClass = (status) => {
+    switch (status) {
+      case 'PUBLISHED': return 'status-badge published'
+      case 'DRAFT': return 'status-badge draft'
+      case 'ARCHIVED': return 'status-badge archived'
+      default: return 'status-badge'
+    }
+  }
+
+  const formatDuration = (seconds) => {
+    if (!seconds) return '0m'
+    const hours = Math.floor(seconds / 3600)
+    const minutes = Math.floor((seconds % 3600) / 60)
+    if (hours > 0) return `${hours}h ${minutes}m`
+    return `${minutes}m`
+  }
+
   return (
-    <div className="courses-page">
-      <div className="courses-header">
-        <h1>Assessments</h1>
-        <p>View and manage your assessments</p>
+    <div className="assessment-management-page">
+      <div className="page-header">
+        <div>
+          <h1>Assessment Management</h1>
+          <p>Create and manage assessments for your organization</p>
+        </div>
+        <Button variant="primary" onClick={handleCreateAssessment}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          Create Assessment
+        </Button>
       </div>
-      <div className="courses-empty">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M9 11l3 3L22 4"/>
-          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-        </svg>
-        <h3>No assessments available</h3>
-        <p>Assessments will appear here once they are assigned to you.</p>
+
+      <div className="filters-section">
+        <div className="filter-group">
+          <input
+            type="text"
+            className="search-input"
+            placeholder="Search assessments..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        <div className="filter-group">
+          <select
+            className="filter-select"
+            value={selectedStatus}
+            onChange={(e) => setSelectedStatus(e.target.value)}
+          >
+            <option value="">All Status</option>
+            <option value="DRAFT">Draft</option>
+            <option value="PUBLISHED">Published</option>
+            <option value="ARCHIVED">Archived</option>
+          </select>
+        </div>
       </div>
+
+      {loading ? (
+        <div className="loading-state">
+          <div className="spinner"></div>
+          <p>Loading assessments...</p>
+        </div>
+      ) : assessments.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M9 11l3 3L22 4"/>
+              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+            </svg>
+          </div>
+          <h3>No Assessments Found</h3>
+          <p>Get started by creating your first assessment.</p>
+          <Button variant="primary" onClick={handleCreateAssessment}>Create Assessment</Button>
+        </div>
+      ) : (
+        <>
+          <div className="assessments-table-container">
+            <table className="assessments-table">
+              <thead>
+                <tr>
+                  <th>Assessment</th>
+                  <th>Segments</th>
+                  <th>Duration</th>
+                  <th>Configurations</th>
+                  <th>Status</th>
+                  <th>Created</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {assessments.map(assessment => (
+                  <tr key={assessment.id}>
+                    <td>
+                      <div className="assessment-info">
+                        <span className="assessment-id">{assessment.unique_id}</span>
+                        <span className="assessment-title">{assessment.title}</span>
+                        {assessment.topic_name && (
+                          <span className="assessment-topic">{assessment.topic_name}</span>
+                        )}
+                      </div>
+                    </td>
+                    <td>
+                      <span className="count-badge">{assessment.segment_count || 0}</span>
+                    </td>
+                    <td>{formatDuration(assessment.total_duration)}</td>
+                    <td>
+                      <span className="count-badge">{assessment.config_count || 0}</span>
+                    </td>
+                    <td>
+                      <span className={getStatusBadgeClass(assessment.status)}>
+                        {assessment.status}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="date-text">
+                        {new Date(assessment.created_at).toLocaleDateString()}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="action-buttons">
+                        <button 
+                          className="action-btn edit"
+                          onClick={() => navigate(`/admin/assessments/${assessment.id}/edit`)}
+                          title="Edit"
+                        >
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                          </svg>
+                        </button>
+                        <button 
+                          className="action-btn config"
+                          onClick={() => navigate(`/admin/assessments/${assessment.id}/configurations`)}
+                          title="Configurations"
+                        >
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
+                            <circle cx="12" cy="12" r="3"/>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                          </svg>
+                        </button>
+                        <button 
+                          className="action-btn duplicate"
+                          onClick={() => handleDuplicate(assessment.id)}
+                          title="Duplicate"
+                        >
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                          </svg>
+                        </button>
+                        {assessment.status === 'DRAFT' && (
+                          <button 
+                            className="action-btn publish"
+                            onClick={() => handleStatusChange(assessment.id, 'PUBLISHED')}
+                            title="Publish"
+                          >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
+                              <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                          </button>
+                        )}
+                        {assessment.status === 'PUBLISHED' && (
+                          <button 
+                            className="action-btn archive"
+                            onClick={() => handleStatusChange(assessment.id, 'ARCHIVED')}
+                            title="Archive"
+                          >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
+                              <polyline points="21 8 21 21 3 21 3 8"/>
+                              <rect x="1" y="3" width="22" height="5"/>
+                              <line x1="10" y1="12" x2="14" y2="12"/>
+                            </svg>
+                          </button>
+                        )}
+                        <button 
+                          className="action-btn delete"
+                          onClick={() => handleDelete(assessment.id)}
+                          title="Delete"
+                        >
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                          </svg>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {totalCount > pageSize && (
+            <div className="pagination-wrapper">
+              <Pagination
+                currentPage={currentPage}
+                pageSize={pageSize}
+                totalCount={totalCount}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={setPageSize}
+              />
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Create Assessment Modal */}
+      {showCreateModal && (
+        <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Create New Assessment</h2>
+              <button className="close-btn" onClick={() => setShowCreateModal(false)}>×</button>
+            </div>
+            
+            <div className="modal-body">
+              <div className="form-group">
+                <label>Assessment Title <span className="required">*</span></label>
+                <input
+                  type="text"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  className={errors.title ? 'error' : ''}
+                  placeholder="Enter assessment title"
+                />
+                {errors.title && <span className="error-text">{errors.title}</span>}
+              </div>
+
+              <div className="form-group">
+                <label>Description</label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Enter assessment description"
+                  rows="3"
+                />
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Institution</label>
+                  <select
+                    value={formData.institution_id}
+                    onChange={(e) => setFormData({ ...formData, institution_id: e.target.value })}
+                  >
+                    <option value="">Select Institution</option>
+                    {institutions.map(inst => (
+                      <option key={inst.id} value={inst.id}>{inst.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>Topic</label>
+                  <select
+                    value={formData.topic_id}
+                    onChange={(e) => setFormData({ ...formData, topic_id: e.target.value })}
+                  >
+                    <option value="">Select Topic</option>
+                    {topics.map(topic => (
+                      <option key={topic.id} value={topic.id}>{topic.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <Button variant="secondary" onClick={() => setShowCreateModal(false)}>
+                Cancel
+              </Button>
+              <Button variant="outline" onClick={() => handleSave(false)}>
+                Save as Draft
+              </Button>
+              <Button variant="primary" onClick={() => handleSave(true)}>
+                Continue to Edit
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
 
 export default AssessmentManagement
-

@@ -20,6 +20,13 @@ import UserDetail from './pages/admin/Users/UserDetail/UserDetail'
 import CreateUser from './pages/admin/Users/CreateUser/CreateUser'
 import AssessmentManagement from './pages/admin/assessments/AssessmentManagement/AssessmentManagement'
 import AssessmentAdministration from './pages/admin/assessments/AssessmentAdministration/AssessmentAdministration'
+import AssessmentEdit from './pages/admin/assessments/AssessmentEdit/AssessmentEdit'
+import AssessmentConfigurations from './pages/admin/assessments/AssessmentConfigurations/AssessmentConfigurations'
+import AssessmentUserMapping from './pages/admin/assessments/AssessmentUserMapping/AssessmentUserMapping'
+// User Assessment Pages
+import AssessmentStart from './pages/user/Assessments/AssessmentStart/AssessmentStart'
+import AssessmentTake from './pages/user/Assessments/AssessmentTake/AssessmentTake'
+import AssessmentResults from './pages/user/Assessments/AssessmentResults/AssessmentResults'
 import Groups from './pages/admin/Groups/Groups'
 import CreateGroup from './pages/admin/Groups/CreateGroup/CreateGroup'
 import Institutions from './pages/admin/Institutions/Institutions'
@@ -56,7 +63,12 @@ function App() {
           <Route path="/courses/:courseId/practice/:practiceId" element={<PracticeExercise />} />
           <Route path="/courses/:courseId/quiz/:practiceId" element={<Quiz />} />
           <Route path="/courses/:courseId/assessment/:segmentId" element={<CourseAssessment />} />
+          {/* User Assessment Routes */}
           <Route path="/assessments" element={<Assessments />} />
+          <Route path="/user/assessments" element={<Assessments />} />
+          <Route path="/user/assessments/:mappingId/start" element={<AssessmentStart />} />
+          <Route path="/user/assessments/:mappingId/take" element={<AssessmentTake />} />
+          <Route path="/user/assessments/:mappingId/results" element={<AssessmentResults />} />
           <Route path="/admin/institutions" element={<Institutions />} />
           <Route path="/admin/institutions/create" element={<CreateInstitution />} />
           <Route path="/admin/mailer-templates" element={<MailerTemplates />} />
@@ -64,8 +76,12 @@ function App() {
           <Route path="/admin/users" element={<Users />} />
           <Route path="/admin/users/create" element={<CreateUser />} />
           <Route path="/admin/users/:id" element={<UserDetail />} />
+          {/* Admin Assessment Routes */}
           <Route path="/admin/assessments/management" element={<AssessmentManagement />} />
+          <Route path="/admin/assessments/:id/edit" element={<AssessmentEdit />} />
+          <Route path="/admin/assessments/:id/configurations" element={<AssessmentConfigurations />} />
           <Route path="/admin/assessments/administrations" element={<AssessmentAdministration />} />
+          <Route path="/admin/assessments/administrators/:adminId/users" element={<AssessmentUserMapping />} />
           <Route path="/admin/groups" element={<Groups />} />
           <Route path="/admin/groups/create" element={<CreateGroup />} />
           <Route path="/admin/courses/management" element={<CoursesManagement />} />
