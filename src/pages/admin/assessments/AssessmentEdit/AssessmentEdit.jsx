@@ -42,6 +42,13 @@ function AssessmentEdit() {
   const [availableQuestions, setAvailableQuestions] = useState([])
   const [selectedQuestions, setSelectedQuestions] = useState([])
   const [questionSearch, setQuestionSearch] = useState('')
+  const [questionBanks, setQuestionBanks] = useState([])
+  const [selectedQuestionBank, setSelectedQuestionBank] = useState('')
+  const [loadingQuestions, setLoadingQuestions] = useState(false)
+  const [questionFilters, setQuestionFilters] = useState({
+    difficulty: '',
+    status: ''
+  })
   
   // Dropdowns
   const [institutions, setInstitutions] = useState([])
@@ -219,28 +226,79 @@ function AssessmentEdit() {
     }
   }
 
+  // Fetch question banks
+  const fetchQuestionBanks = async () => {
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/question-banks?limit=100`, {
+        headers: getAuthHeader()
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setQuestionBanks(data.questionBanks || data || [])
+      }
+    } catch (error) {
+      console.error('Error fetching question banks:', error)
+    }
+  }
+
+  // Fetch questions from selected bank
+  const fetchQuestionsFromBank = async (bankId, type) => {
+    if (!bankId) {
+      setAvailableQuestions([])
+      return
+    }
+    
+    setLoadingQuestions(true)
+    try {
+      // Get questions from the bank
+      const questionTypeId = type === 'PROGRAMMING' ? 1 : 2 // Assuming 1=Programming, 2=MCQ
+      const params = new URLSearchParams({
+        question_bank_id: bankId,
+        question_type_id: questionTypeId,
+        limit: '200'
+      })
+      
+      if (questionFilters.difficulty) {
+        params.append('level_id', questionFilters.difficulty)
+      }
+      
+      const response = await fetch(`${apiBaseUrl}/api/questions?${params}`, {
+        headers: getAuthHeader()
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        setAvailableQuestions(data.questions || [])
+      }
+    } catch (error) {
+      console.error('Error fetching questions:', error)
+      setAvailableQuestions([])
+    } finally {
+      setLoadingQuestions(false)
+    }
+  }
+
   // Question handlers
   const handleAddQuestions = async (segmentId, type) => {
     setSelectedSegmentId(segmentId)
     setQuestionType(type)
     setSelectedQuestions([])
     setQuestionSearch('')
+    setSelectedQuestionBank('')
+    setAvailableQuestions([])
+    setQuestionFilters({ difficulty: '', status: '' })
     
-    try {
-      const endpoint = type === 'PROGRAMMING' 
-        ? `${apiBaseUrl}/api/questions?type=programming&pageSize=100`
-        : `${apiBaseUrl}/api/questions?type=mcq&pageSize=100`
-      
-      const response = await fetch(endpoint, { headers: getAuthHeader() })
-      if (response.ok) {
-        const data = await response.json()
-        setAvailableQuestions(data.questions || data || [])
-      }
-    } catch (error) {
-      console.error('Error fetching questions:', error)
-    }
+    // Fetch question banks
+    await fetchQuestionBanks()
     
     setShowQuestionModal(true)
+  }
+
+  // Handle question bank change
+  const handleQuestionBankChange = (bankId) => {
+    setSelectedQuestionBank(bankId)
+    setSelectedQuestions([])
+    fetchQuestionsFromBank(bankId, questionType)
   }
 
   const handleSaveQuestions = async () => {
@@ -718,18 +776,53 @@ function AssessmentEdit() {
             </div>
             
             <div className="modal-body">
-              <div className="search-box">
-                <input
-                  type="text"
-                  value={questionSearch}
-                  onChange={(e) => setQuestionSearch(e.target.value)}
-                  placeholder="Search questions..."
-                />
+              {/* Question Bank Selection */}
+              <div className="question-filters">
+                <div className="filter-group">
+                  <label>Question Bank</label>
+                  <select
+                    value={selectedQuestionBank}
+                    onChange={(e) => handleQuestionBankChange(e.target.value)}
+                  >
+                    <option value="">-- Select Question Bank --</option>
+                    {questionBanks.map(bank => (
+                      <option key={bank.id} value={bank.id}>
+                        {bank.name} ({bank.question_count || 0} questions)
+                        {bank.institution_name ? ` - ${bank.institution_name}` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div className="filter-group search-filter">
+                  <label>Search</label>
+                  <input
+                    type="text"
+                    value={questionSearch}
+                    onChange={(e) => setQuestionSearch(e.target.value)}
+                    placeholder="Search by title or ID..."
+                  />
+                </div>
               </div>
 
+              {/* Questions List */}
               <div className="questions-selection-list">
-                {filteredQuestions.length === 0 ? (
-                  <p className="no-results">No questions found</p>
+                {!selectedQuestionBank ? (
+                  <div className="empty-selection">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="48" height="48">
+                      <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                    </svg>
+                    <p>Select a question bank to view questions</p>
+                  </div>
+                ) : loadingQuestions ? (
+                  <div className="loading-questions">
+                    <div className="spinner"></div>
+                    <p>Loading questions...</p>
+                  </div>
+                ) : filteredQuestions.length === 0 ? (
+                  <div className="empty-selection">
+                    <p>No {questionType === 'PROGRAMMING' ? 'programming' : 'MCQ'} questions found in this bank</p>
+                  </div>
                 ) : (
                   filteredQuestions.map(q => (
                     <div 
@@ -751,10 +844,38 @@ function AssessmentEdit() {
                         )}
                       </div>
                       <div className="selection-info">
+                        <div className="selection-header">
+                          <span className="selection-id">#{q.id}</span>
+                          <span className={`difficulty-badge ${(q.level_name || 'easy').toLowerCase()}`}>
+                            {q.level_name || 'Easy'}
+                          </span>
+                          {q.status_name && (
+                            <span className={`status-tag ${q.status_name.toLowerCase()}`}>
+                              {q.status_name}
+                            </span>
+                          )}
+                        </div>
                         <span className="selection-title">{q.title || q.question_text}</span>
-                        <span className="selection-meta">
-                          {q.difficulty} • {q.weightage || 1} pts
-                        </span>
+                        <div className="selection-meta">
+                          <span className="meta-item">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="12" height="12">
+                              <circle cx="12" cy="12" r="10"/>
+                              <path d="M12 6v6l4 2"/>
+                            </svg>
+                            {q.weightage || 1} pts
+                          </span>
+                          {q.question_type_name && (
+                            <span className="meta-item type-tag">{q.question_type_name}</span>
+                          )}
+                          {q.tags && q.tags.length > 0 && (
+                            <span className="meta-tags">
+                              {q.tags.slice(0, 3).map((tag, i) => (
+                                <span key={i} className="tag">{tag.name || tag}</span>
+                              ))}
+                              {q.tags.length > 3 && <span className="tag more">+{q.tags.length - 3}</span>}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))
@@ -765,7 +886,9 @@ function AssessmentEdit() {
             <div className="modal-footer">
               <span className="selected-count">{selectedQuestions.length} selected</span>
               <Button variant="secondary" onClick={() => setShowQuestionModal(false)}>Cancel</Button>
-              <Button variant="primary" onClick={handleSaveQuestions}>Add Selected</Button>
+              <Button variant="primary" onClick={handleSaveQuestions} disabled={selectedQuestions.length === 0}>
+                Add Selected
+              </Button>
             </div>
           </div>
         </div>
