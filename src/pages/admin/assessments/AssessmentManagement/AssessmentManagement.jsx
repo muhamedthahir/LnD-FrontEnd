@@ -17,17 +17,6 @@ function AssessmentManagement() {
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [totalCount, setTotalCount] = useState(0)
-  
-  const [showCreateModal, setShowCreateModal] = useState(false)
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    institution_id: '',
-    topic_id: ''
-  })
-  const [errors, setErrors] = useState({})
-  const [institutions, setInstitutions] = useState([])
-  const [topics, setTopics] = useState([])
 
   const fetchAssessments = useCallback(async () => {
     if (!apiBaseUrl) return
@@ -61,30 +50,6 @@ function AssessmentManagement() {
     }
   }, [apiBaseUrl, accessToken, search, selectedStatus, currentPage, pageSize])
 
-  const fetchDropdownData = async () => {
-    try {
-      // Fetch institutions
-      const instResponse = await fetch(`${apiBaseUrl}/api/institutions`, {
-        headers: { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` }
-      })
-      if (instResponse.ok) {
-        const data = await instResponse.json()
-        setInstitutions(data.institutions || data || [])
-      }
-
-      // Fetch topics
-      const topicResponse = await fetch(`${apiBaseUrl}/api/topics`, {
-        headers: { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` }
-      })
-      if (topicResponse.ok) {
-        const data = await topicResponse.json()
-        setTopics(data.topics || data || [])
-      }
-    } catch (error) {
-      console.error('Error fetching dropdown data:', error)
-    }
-  }
-
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchAssessments()
@@ -92,55 +57,6 @@ function AssessmentManagement() {
     
     return () => clearTimeout(timer)
   }, [fetchAssessments])
-
-  useEffect(() => {
-    fetchDropdownData()
-  }, [apiBaseUrl])
-
-  const handleCreateAssessment = () => {
-    setShowCreateModal(true)
-    setFormData({ title: '', description: '', institution_id: '', topic_id: '' })
-    setErrors({})
-  }
-
-  const validateForm = () => {
-    const newErrors = {}
-    if (!formData.title.trim()) {
-      newErrors.title = 'Title is required'
-    }
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  const handleSave = async (continueEditing = false) => {
-    if (!validateForm()) return
-
-    try {
-      const response = await fetch(`${apiBaseUrl}/api/assessment/assessments`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
-        },
-        body: JSON.stringify(formData)
-      })
-
-      if (!response.ok) throw new Error('Failed to create assessment')
-
-      const data = await response.json()
-      toast.success('Assessment created successfully!')
-      setShowCreateModal(false)
-      
-      if (continueEditing) {
-        navigate(`/admin/assessments/${data.assessment.id}/edit`)
-      } else {
-        fetchAssessments()
-      }
-    } catch (error) {
-      console.error('Error creating assessment:', error)
-      toast.error('Failed to create assessment')
-    }
-  }
 
   const handleStatusChange = async (id, newStatus) => {
     try {
@@ -227,7 +143,7 @@ function AssessmentManagement() {
           <h1>Assessment Management</h1>
           <p>Create and manage assessments for your organization</p>
         </div>
-        <Button variant="primary" onClick={handleCreateAssessment}>
+        <Button variant="primary" onClick={() => navigate('/admin/assessments/create')}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
             <path d="M12 5v14M5 12h14"/>
           </svg>
@@ -274,7 +190,7 @@ function AssessmentManagement() {
           </div>
           <h3>No Assessments Found</h3>
           <p>Get started by creating your first assessment.</p>
-          <Button variant="primary" onClick={handleCreateAssessment}>Create Assessment</Button>
+          <Button variant="primary" onClick={() => navigate('/admin/assessments/create')}>Create Assessment</Button>
         </div>
       ) : (
         <>
@@ -408,82 +324,7 @@ function AssessmentManagement() {
         </>
       )}
 
-      {/* Create Assessment Modal */}
-      {showCreateModal && (
-        <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Create New Assessment</h2>
-              <button className="close-btn" onClick={() => setShowCreateModal(false)}>×</button>
-            </div>
-            
-            <div className="modal-body">
-              <div className="form-group">
-                <label>Assessment Title <span className="required">*</span></label>
-                <input
-                  type="text"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className={errors.title ? 'error' : ''}
-                  placeholder="Enter assessment title"
-                />
-                {errors.title && <span className="error-text">{errors.title}</span>}
-              </div>
-
-              <div className="form-group">
-                <label>Description</label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Enter assessment description"
-                  rows="3"
-                />
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Institution</label>
-                  <select
-                    value={formData.institution_id}
-                    onChange={(e) => setFormData({ ...formData, institution_id: e.target.value })}
-                  >
-                    <option value="">Select Institution</option>
-                    {institutions.map(inst => (
-                      <option key={inst.id} value={inst.id}>{inst.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label>Topic</label>
-                  <select
-                    value={formData.topic_id}
-                    onChange={(e) => setFormData({ ...formData, topic_id: e.target.value })}
-                  >
-                    <option value="">Select Topic</option>
-                    {topics.map(topic => (
-                      <option key={topic.id} value={topic.id}>{topic.name}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div className="modal-footer">
-              <Button variant="secondary" onClick={() => setShowCreateModal(false)}>
-                Cancel
-              </Button>
-              <Button variant="outline" onClick={() => handleSave(false)}>
-                Save as Draft
-              </Button>
-              <Button variant="primary" onClick={() => handleSave(true)}>
-                Continue to Edit
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+      </div>
   )
 }
 
