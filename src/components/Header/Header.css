@@ -129,7 +129,7 @@ html[data-sidebar-collapsed="true"] .app-header {
   border-color: var(--accent-primary);
 }
 
-.user-avatar {
+.user-avatar.header-user-avatar {
   width: 1.5rem;
   height: 1.5rem;
   border-radius: var(--radius-sm);

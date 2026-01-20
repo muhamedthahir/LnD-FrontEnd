@@ -127,7 +127,7 @@ function Dashboard() {
               </div>
               <div className="detail-item">
                 <span className="detail-label">Role:</span>
-                <span className="detail-value role-badge">{getRoleDisplay(user.role)}</span>
+                <span className="detail-value role-badge dashboard-role-badge">{getRoleDisplay(user.role)}</span>
               </div>
               {user.college_name && (
                 <div className="detail-item">

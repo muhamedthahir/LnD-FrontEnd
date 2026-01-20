@@ -338,7 +338,7 @@ function Institutions() {
               {search && (
                 <button 
                   onClick={() => setSearch('')}
-                  className="btn-clear-filters"
+                  className="btn-clear-filters institutions-btn-clear-filters"
                   title="Clear search"
                 >
                   <svg viewBox="64 64 896 896" focusable="false" width="1em" height="1em" fill="currentColor" aria-hidden="true">

@@ -225,6 +225,11 @@
   margin-top: var(--spacing-lg);
 }
 
+.institutions-btn-clear-filters {
+  background: var(--accent-primary);
+  color: var(--bg-primary);
+}
+
 .table-inner-box {
   background: var(--bg-card);
   border: none;
