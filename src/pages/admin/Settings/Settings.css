@@ -358,7 +358,7 @@
   margin-bottom: var(--spacing-md);
 }
 
-.form-group > label:not(.checkbox-label) {
+.form-group.settings > label:not(.checkbox-label) {
   display: block;
   font-size: 0.8125rem;
   font-weight: 600;

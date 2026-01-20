@@ -427,7 +427,7 @@ function Settings() {
             <h2>{isEditing ? 'Edit' : 'Add'} {config.name.slice(0, -1)}</h2>
             <form onSubmit={handleSubmit}>
               {config.fields.map(field => (
-                <div className="form-group" key={field.key}>
+                <div className="form-group settings" key={field.key}>
                   <label>
                     {field.label} {field.required && '*'}
                   </label>

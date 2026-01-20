@@ -665,8 +665,8 @@
 .remember-me input:checked + .checkmark::after {
   content: '';
   position: absolute;
-  left: 0.3125rem;
-  top: 0.125rem;
+  left: 25%;
+  top: 6%;
   width: var(--spacing-xs);
   height: var(--spacing-sm);
   border: solid var(--bg-primary);
