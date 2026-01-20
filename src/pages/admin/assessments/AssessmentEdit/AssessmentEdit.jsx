@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useApi } from '../../../../contexts/ApiContext'
+import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify'
 import Button from '../../../../components/Button/Button'
 import './AssessmentEdit.css'
@@ -9,7 +10,7 @@ function AssessmentEdit() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { apiBaseUrl, accessToken } = useApi()
-  
+  const { questionTypes } = useSelector(state => state.masterData);
   const [assessment, setAssessment] = useState(null)
   const [segments, setSegments] = useState([])
   const [loading, setLoading] = useState(true)
@@ -263,7 +264,8 @@ function AssessmentEdit() {
     
     setLoadingQuestions(true)
     try {
-      const questionTypeId = type === 'PROGRAMMING' ? 1 : 2
+      console.log(type, questionTypes);
+      const questionTypeId = questionTypes.filter((e) => e.name.toLowerCase() === type.toLowerCase())[0].id;
       const params = new URLSearchParams({
         question_bank_id: bankId,
         question_type_id: questionTypeId,
@@ -358,8 +360,8 @@ function AssessmentEdit() {
 
       for (const questionId of selectedQuestions) {
         const body = type === 'PROGRAMMING'
-          ? { segment_id: segmentId, programming_question_id: questionId }
-          : { segment_id: segmentId, mcq_question_id: questionId }
+          ? { segment_id: segmentId, question_id: questionId }
+          : { segment_id: segmentId, question_id: questionId }
 
         await fetch(endpoint, {
           method: 'POST',
@@ -688,7 +690,7 @@ function AssessmentEdit() {
                               <div key={q.id} className="question-item">
                                 <span className="question-order">{qi + 1}</span>
                                 <span className="question-id">#{q.programming_question_id}</span>
-                                <span className="question-title">{q.title}</span>
+                                <span className="question-title">{q.name}</span>
                                 <span className="question-difficulty">{q.difficulty || q.level_name}</span>
                                 <span className="question-marks">{q.weightage_override || q.default_weightage || 1} pts</span>
                                 <button 
@@ -782,8 +784,7 @@ function AssessmentEdit() {
                                           </td>
                                           <td><code>#{q.id}</code></td>
                                           <td className="title-cell">
-                                            <span className="q-title">{q.title}</span>
-                                            {q.description && <span className="q-desc">{q.description?.substring(0, 80)}...</span>}
+                                            <span className="q-title">{q.name}</span>
                                           </td>
                                           <td>
                                             <span className={`level-badge ${(q.level_name || 'easy').toLowerCase()}`}>
@@ -842,7 +843,7 @@ function AssessmentEdit() {
                               <div key={q.id} className="question-item">
                                 <span className="question-order">{qi + 1}</span>
                                 <span className="question-id">#{q.mcq_question_id}</span>
-                                <span className="question-title">{q.question_text?.substring(0, 60)}...</span>
+                                <span className="question-title">{q.name?.substring(0, 60)}...</span>
                                 <span className="question-difficulty">{q.difficulty || q.level_name}</span>
                                 <span className="question-marks">{q.weightage_override || q.default_weightage || 1} pts</span>
                                 <button 
