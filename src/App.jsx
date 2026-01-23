@@ -36,6 +36,8 @@ import CreateInstitution from './pages/admin/Institutions/CreateInstitution/Crea
 import MailerTemplates from './pages/admin/MailerTemplates/MailerTemplates'
 import Settings from './pages/admin/Settings/Settings'
 import CreateAdministration from './pages/admin/courses/CourseAdministrations/CreateAdministration/CreateAdministration'
+import AdministrationDetail from './pages/admin/courses/CourseAdministrations/AdministrationDetail/AdministrationDetail'
+import ProgressReport from './pages/admin/courses/CourseAdministrations/ProgressReport/ProgressReport'
 // Question Bank Pages
 import QuestionBanks from './pages/admin/Questions/QuestionBanks'
 import QuestionBankForm from './pages/admin/Questions/QuestionBankForm'
@@ -93,6 +95,8 @@ function App() {
           <Route path="/admin/courses/:courseId/topics/:topicId/practice" element={<PracticeSegmentManager />} />
           <Route path="/admin/courses/administrations" element={<CourseAdministrations />} />
           <Route path="/admin/courses/administrations/create" element={<CreateAdministration />} />
+          <Route path="/admin/courses/administrations/:id" element={<AdministrationDetail />} />
+          <Route path="/admin/courses/administrations/:id/users/:userId/progress" element={<ProgressReport />} />
           {/* Question Bank Routes */}
           <Route path="/admin/questions" element={<Navigate to="/admin/questions/banks" replace />} />
           <Route path="/admin/questions/banks" element={<QuestionBanks />} />

@@ -53,7 +53,7 @@ function AssessmentUserMapping() {
       })
       if (mappingsRes.ok) {
         const data = await mappingsRes.json()
-        setUserMappings(data || [])
+        setUserMappings(data.mappings || [])
       }
     } catch (error) {
       console.error('Error fetching data:', error)

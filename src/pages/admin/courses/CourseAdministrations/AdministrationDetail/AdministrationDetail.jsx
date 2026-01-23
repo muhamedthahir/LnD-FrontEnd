@@ -1,0 +1,801 @@
+import { useState, useEffect, useMemo } from 'react'
+import { useParams, useNavigate, Link } from 'react-router-dom'
+import { toast } from 'react-toastify'
+import { useApi } from '../../../../../contexts/ApiContext'
+import { API_ENDPOINTS } from '../../../../../constants/constants'
+import Button from '../../../../../components/Button/Button'
+import './AdministrationDetail.css'
+
+function AdministrationDetail() {
+  const { id } = useParams()
+  const navigate = useNavigate()
+  const { apiBaseUrl, accessToken } = useApi()
+  
+  const [administration, setAdministration] = useState(null)
+  const [courses, setCourses] = useState([])
+  const [colleges, setColleges] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [isEditing, setIsEditing] = useState(false)
+  const [formData, setFormData] = useState({
+    administrationName: '',
+    displayId: '',
+    category: '',
+    competencyLevel: '',
+    courseId: '',
+    startTime: '',
+    endTime: '',
+    college: '',
+    candidateType: 'group',
+    groupDegree: '',
+    groupDepartment: '',
+    groupYear: '',
+    selectedGroups: [],
+    individualUsers: []
+  })
+  const [errors, setErrors] = useState({})
+  const [availableGroups, setAvailableGroups] = useState([])
+  const [groupSearch, setGroupSearch] = useState('')
+  const [userSearch, setUserSearch] = useState('')
+  const [availableUsers, setAvailableUsers] = useState([])
+  const [saving, setSaving] = useState(false)
+  const [enrolledUsers, setEnrolledUsers] = useState([])
+  const [loadingEnrolledUsers, setLoadingEnrolledUsers] = useState(false)
+
+  useEffect(() => {
+    fetchAdministrationDetails()
+    fetchCourses()
+    fetchColleges()
+    fetchEnrolledUsers()
+  }, [id])
+
+  useEffect(() => {
+    if (formData.college && formData.candidateType === 'group') {
+      fetchGroupsForCollege()
+    }
+  }, [formData.college, formData.candidateType, formData.groupDegree, formData.groupDepartment, formData.groupYear])
+
+  useEffect(() => {
+    if (formData.college && formData.candidateType === 'individual') {
+      fetchUsersForCollege()
+    }
+  }, [formData.college, formData.candidateType])
+
+  const fetchAdministrationDetails = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.ADMINISTRATIONS.GET(id)}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        }
+      })
+      
+      if (response.ok) {
+        let data = await response.json()
+        data = data.administration
+        setAdministration(data)
+        // Populate form data
+        setFormData({
+          administrationName: data.administration_name || '',
+          displayId: data.display_id || '',
+          category: data.category || '',
+          competencyLevel: data.competency_level || '',
+          courseId: data.course_id || '',
+          startTime: data.start_date ? new Date(data.start_date).toISOString().slice(0, 16) : '',
+          endTime: data.end_date ? new Date(data.end_date).toISOString().slice(0, 16) : '',
+          college: data.college || '',
+          candidateType: 'group',
+          groupDegree: '',
+          groupDepartment: '',
+          groupYear: '',
+          selectedGroups: [],
+          individualUsers: []
+        })
+      } else {
+        toast.error('Failed to fetch administration details')
+        navigate('/admin/courses/administrations')
+      }
+    } catch (error) {
+      console.error('Error fetching administration:', error)
+      toast.error('Error loading administration details')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchCourses = async () => {
+    try {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.COURSES.LIST}?limit=1000`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        }
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        setCourses(data.courses || [])
+      }
+    } catch (error) {
+      console.error('Error fetching courses:', error)
+    }
+  }
+
+  const fetchColleges = async () => {
+    try {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.INSTITUTIONS.ALL}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        }
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        setColleges((data.institutions || []).map(inst => typeof inst === 'string' ? inst : inst.name))
+      }
+    } catch (error) {
+      console.error('Error fetching colleges:', error)
+    }
+  }
+
+  const fetchGroupsForCollege = async () => {
+    try {
+      const params = new URLSearchParams({
+        college: formData.college,
+        ...(formData.groupDegree && { degree: formData.groupDegree }),
+        ...(formData.groupDepartment && { department: formData.groupDepartment }),
+        ...(formData.groupYear && { year: formData.groupYear })
+      })
+
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.GROUPS.LIST}?${params}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        }
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        setAvailableGroups(data.groups || [])
+      }
+    } catch (error) {
+      console.error('Error fetching groups:', error)
+    }
+  }
+
+  const fetchUsersForCollege = async () => {
+    try {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.USERS.LIST}?college=${encodeURIComponent(formData.college)}&limit=1000`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        }
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        const students = (data.users || []).filter(u => u.role === 'student')
+        setAvailableUsers(students)
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error)
+    }
+  }
+
+  const fetchEnrolledUsers = async () => {
+    try {
+      setLoadingEnrolledUsers(true)
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.ADMINISTRATIONS.ENROLLED_USERS(id)}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        }
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        setEnrolledUsers(data.enrolledUsers || [])
+      }
+    } catch (error) {
+      console.error('Error fetching enrolled users:', error)
+    } finally {
+      setLoadingEnrolledUsers(false)
+    }
+  }
+
+  const getProgressStatus = (user) => {
+    if (!user.course_status && !user.started_at) return 'Not Started'
+    if (user.completed_at) return 'Completed'
+    if (user.started_at) return 'In Progress'
+    return user.course_status || 'Not Started'
+  }
+
+  const getProgressColor = (percentage) => {
+    if (percentage >= 100) return 'var(--success, #10b981)'
+    if (percentage >= 50) return 'var(--accent-primary)'
+    if (percentage > 0) return 'var(--warning, #f59e0b)'
+    return 'var(--text-muted)'
+  }
+
+  const formatLastVisited = (dateString) => {
+    if (!dateString) return 'Never'
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffTime = Math.abs(now - date)
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+    
+    if (diffDays === 0) return 'Today'
+    if (diffDays === 1) return 'Yesterday'
+    if (diffDays < 7) return `${diffDays} days ago`
+    return date.toLocaleDateString()
+  }
+
+  const validateForm = () => {
+    const newErrors = {}
+    if (!formData.administrationName.trim()) {
+      newErrors.administrationName = 'Administration name is required'
+    }
+    if (!formData.startTime) {
+      newErrors.startTime = 'Start time is required'
+    }
+    if (!formData.endTime) {
+      newErrors.endTime = 'End time is required'
+    }
+    if (formData.startTime && formData.endTime && new Date(formData.startTime) >= new Date(formData.endTime)) {
+      newErrors.endTime = 'End time must be after start time'
+    }
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const canPublish = useMemo(() => {
+    if (!formData.administrationName.trim()) return false
+    if (!formData.startTime) return false
+    if (!formData.endTime) return false
+    if (formData.startTime && formData.endTime && new Date(formData.startTime) >= new Date(formData.endTime)) return false
+    
+    if (formData.candidateType === 'group') {
+      if (!formData.selectedGroups || formData.selectedGroups.length === 0) {
+        return false
+      }
+    } else if (formData.candidateType === 'individual') {
+      if (!formData.individualUsers || formData.individualUsers.length === 0) {
+        return false
+      }
+    }
+    
+    return true
+  }, [formData])
+
+  const handleSave = async () => {
+    if (!validateForm()) return
+    
+    setSaving(true)
+    try {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.ADMINISTRATIONS.UPDATE(id)}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        },
+        body: JSON.stringify({
+          administrationName: formData.administrationName,
+          startTime: formData.startTime,
+          endTime: formData.endTime,
+          candidateType: formData.candidateType,
+          groupCollege: formData.college,
+          groupDegree: formData.groupDegree,
+          groupDepartment: formData.groupDepartment,
+          groupYear: formData.groupYear,
+          selectedGroups: formData.selectedGroups,
+          individualCollege: formData.college,
+          individualUsers: formData.individualUsers,
+          courseId: formData.courseId
+        })
+      })
+
+      if (response.ok) {
+        toast.success('Administration updated successfully')
+        setIsEditing(false)
+        fetchAdministrationDetails()
+      } else {
+        const error = await response.json()
+        toast.error(error.error || 'Error updating administration')
+      }
+    } catch (error) {
+      console.error('Error updating administration:', error)
+      toast.error('Error updating administration')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const filteredGroups = availableGroups.filter(group => 
+    group.name.toLowerCase().includes(groupSearch.toLowerCase())
+  )
+
+  const filteredUsers = availableUsers.filter(user => 
+    (user.email && user.email.toLowerCase().includes(userSearch.toLowerCase())) ||
+    (user.name && user.name.toLowerCase().includes(userSearch.toLowerCase())) ||
+    (user.username && user.username.toLowerCase().includes(userSearch.toLowerCase()))
+  )
+
+  const handleAddGroup = (groupId) => {
+    if (!formData.selectedGroups.includes(groupId)) {
+      setFormData(prev => ({
+        ...prev,
+        selectedGroups: [...prev.selectedGroups, groupId]
+      }))
+      setGroupSearch('')
+    }
+  }
+
+  const handleRemoveGroup = (groupId) => {
+    setFormData(prev => ({
+      ...prev,
+      selectedGroups: prev.selectedGroups.filter(id => id !== groupId)
+    }))
+  }
+
+  const handleAddUser = (user) => {
+    if (!formData.individualUsers.find(u => u.id === user.id)) {
+      setFormData(prev => ({
+        ...prev,
+        individualUsers: [...prev.individualUsers, user]
+      }))
+      setUserSearch('')
+    }
+  }
+
+  const handleRemoveUser = (userId) => {
+    setFormData(prev => ({
+      ...prev,
+      individualUsers: prev.individualUsers.filter(u => u.id !== userId)
+    }))
+  }
+
+  const getCourseName = (courseId) => {
+    const course = courses.find(c => c.id === courseId)
+    return course ? course.name : '-'
+  }
+
+  const formatDate = (dateString) => {
+    if (!dateString) return '-'
+    return new Date(dateString).toLocaleString()
+  }
+
+  const getStatusBadge = (status) => {
+    return (
+      <span className={`status-badge ${status}`}>
+        {status === 'published' ? (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        ) : (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="15" y1="9" x2="9" y2="15"></line>
+            <line x1="9" y1="9" x2="15" y2="15"></line>
+          </svg>
+        )}
+        {status === 'published' ? 'Published' : 'Draft'}
+      </span>
+    )
+  }
+
+  if (loading) {
+    return (
+      <div className="administration-detail-page">
+        <div className="loading">Loading administration details...</div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="administration-detail-page">
+      <div className="detail-header">
+        <button 
+          className="btn-back"
+          onClick={() => navigate('/admin/courses/administrations')}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          Back to Administrations
+        </button>
+        <div className="header-actions">
+          {!isEditing ? (
+            <Button variant="primary" onClick={() => setIsEditing(true)}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+              Edit Administration
+            </Button>
+          ) : (
+            <>
+              <Button variant="secondary" onClick={() => {
+                setIsEditing(false)
+                fetchAdministrationDetails()
+              }}>
+                Cancel
+              </Button>
+              <Button 
+                variant="primary" 
+                onClick={handleSave}
+                disabled={saving}
+              >
+                {saving ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </>
+          )}
+        </div>
+      </div>
+
+      <div className="detail-content">
+        <div className="detail-card">
+          <div className="card-header">
+            <h2>Administration Details</h2>
+            {administration && getStatusBadge(administration.status)}
+          </div>
+          
+          <div className="detail-grid">
+            <div className="detail-item">
+              <label>Administration ID</label>
+              <span>{formData.displayId || administration?.id || '-'}</span>
+            </div>
+            
+            <div className="detail-item">
+              <label>Administration Name {isEditing && <span className="required">*</span>}</label>
+              {isEditing ? (
+                <div className="form-group">
+                  <input
+                    type="text"
+                    value={formData.administrationName}
+                    onChange={(e) => setFormData({ ...formData, administrationName: e.target.value })}
+                    className={errors.administrationName ? 'error' : ''}
+                    placeholder="Enter administration name"
+                  />
+                  {errors.administrationName && <div className="error-text">{errors.administrationName}</div>}
+                </div>
+              ) : (
+                <span>{formData.administrationName || '-'}</span>
+              )}
+            </div>
+
+            <div className="detail-item">
+              <label>College</label>
+              <span>{formData.college || '-'}</span>
+            </div>
+
+            <div className="detail-item">
+              <label>Category</label>
+              <span className="category-badge">{formData.category || '-'}</span>
+            </div>
+
+            <div className="detail-item">
+              <label>Competency Level</label>
+              <span className="competency-badge">{formData.competencyLevel || '-'}</span>
+            </div>
+
+            <div className="detail-item">
+              <label>Course</label>
+              <span>{getCourseName(formData.courseId)}</span>
+            </div>
+
+            <div className="detail-item">
+              <label>Start Time {isEditing && <span className="required">*</span>}</label>
+              {isEditing ? (
+                <div className="form-group">
+                  <input
+                    type="datetime-local"
+                    value={formData.startTime}
+                    onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
+                    className={errors.startTime ? 'error' : ''}
+                  />
+                  {errors.startTime && <div className="error-text">{errors.startTime}</div>}
+                </div>
+              ) : (
+                <span>{formatDate(formData.startTime)}</span>
+              )}
+            </div>
+
+            <div className="detail-item">
+              <label>End Time {isEditing && <span className="required">*</span>}</label>
+              {isEditing ? (
+                <div className="form-group">
+                  <input
+                    type="datetime-local"
+                    value={formData.endTime}
+                    onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+                    className={errors.endTime ? 'error' : ''}
+                  />
+                  {errors.endTime && <div className="error-text">{errors.endTime}</div>}
+                </div>
+              ) : (
+                <span>{formatDate(formData.endTime)}</span>
+              )}
+            </div>
+
+            <div className="detail-item">
+              <label>Total Invites</label>
+              <span>{administration?.total_invites || 0}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Enrolled Users Section - Always visible, not editable */}
+        {administration?.status === 'published' && (
+          <div className="detail-card">
+            <div className="card-header">
+              <h2>Enrolled Users</h2>
+              <span className="enrolled-count">{enrolledUsers.length} users</span>
+            </div>
+            
+            {loadingEnrolledUsers ? (
+              <div className="loading-section">Loading enrolled users...</div>
+            ) : enrolledUsers.length === 0 ? (
+              <div className="empty-enrolled">
+                <p>No users enrolled in this administration yet.</p>
+              </div>
+            ) : (
+              <div className="enrolled-table-wrapper">
+                <table className="enrolled-table">
+                  <thead>
+                    <tr>
+                      <th>User Name</th>
+                      <th>Email</th>
+                      <th>Progress</th>
+                      <th>Status</th>
+                      <th>Started At</th>
+                      <th>Last Visited</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {enrolledUsers.map(user => (
+                      <tr key={user.enrollment_id}>
+                        <td>
+                          <Link 
+                            to={`/admin/users/${user.user_id}`}
+                            className="user-name-link"
+                          >
+                            {user.user_name}
+                          </Link>
+                        </td>
+                        <td>{user.user_email}</td>
+                        <td>
+                          <div className="progress-cell">
+                            <div className="progress-bar-container">
+                              <div 
+                                className="progress-bar-fill"
+                                style={{ 
+                                  width: `${user.progress_percentage || 0}%`,
+                                  backgroundColor: getProgressColor(user.progress_percentage || 0)
+                                }}
+                              />
+                            </div>
+                            <span className="progress-text">{user.progress_percentage || 0}%</span>
+                          </div>
+                        </td>
+                        <td>
+                          <span className={`status-badge ${getProgressStatus(user).toLowerCase().replace(' ', '-')}`}>
+                            {getProgressStatus(user)}
+                          </span>
+                        </td>
+                        <td>{user.started_at ? formatDate(user.started_at) : '-'}</td>
+                        <td>{formatLastVisited(user.last_accessed_at)}</td>
+                        <td>
+                          <button
+                            className="btn-view-report"
+                            onClick={() => navigate(`/admin/courses/administrations/${id}/users/${user.user_id}/progress`)}
+                            title="View Progress Report"
+                          >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                              <polyline points="14 2 14 8 20 8"></polyline>
+                              <line x1="16" y1="13" x2="8" y2="13"></line>
+                              <line x1="16" y1="17" x2="8" y2="17"></line>
+                              <polyline points="10 9 9 9 8 9"></polyline>
+                            </svg>
+                            View Report
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {isEditing && administration?.status === 'draft' && (
+          <div className="detail-card">
+            <div className="card-header">
+              <h2>Invite Candidates</h2>
+            </div>
+            
+            <div className="form-section">
+              <div className="form-group">
+                <label>Add Candidates By</label>
+                <div className="toggle-selector">
+                  <button
+                    type="button"
+                    className={`toggle-option ${formData.candidateType === 'group' ? 'active' : ''}`}
+                    onClick={() => setFormData({ ...formData, candidateType: 'group' })}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="9" cy="7" r="4"></circle>
+                      <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    <span>Group</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`toggle-option ${formData.candidateType === 'individual' ? 'active' : ''}`}
+                    onClick={() => setFormData({ ...formData, candidateType: 'individual' })}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <span>Individual Users</span>
+                  </button>
+                </div>
+              </div>
+
+              {formData.candidateType === 'group' ? (
+                <>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Degree (Optional)</label>
+                      <input
+                        type="text"
+                        value={formData.groupDegree}
+                        onChange={(e) => setFormData({ ...formData, groupDegree: e.target.value, selectedGroups: [] })}
+                        placeholder="Enter degree"
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label>Department (Optional)</label>
+                      <input
+                        type="text"
+                        value={formData.groupDepartment}
+                        onChange={(e) => setFormData({ ...formData, groupDepartment: e.target.value, selectedGroups: [] })}
+                        placeholder="Enter department"
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label>Year (Optional)</label>
+                      <input
+                        type="text"
+                        value={formData.groupYear}
+                        onChange={(e) => setFormData({ ...formData, groupYear: e.target.value, selectedGroups: [] })}
+                        placeholder="Enter year"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Select Groups</label>
+                    <input
+                      type="text"
+                      value={groupSearch}
+                      onChange={(e) => setGroupSearch(e.target.value)}
+                      placeholder="Search groups..."
+                      className="search-input"
+                    />
+                    {groupSearch && filteredGroups.length > 0 && (
+                      <div className="suggestions-dropdown">
+                        {filteredGroups.map(group => (
+                          <div
+                            key={group.id}
+                            className="suggestion-item"
+                            onClick={() => handleAddGroup(group.id)}
+                          >
+                            {group.name}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {formData.selectedGroups.length > 0 && (
+                    <div className="selected-items">
+                      <label>Selected Groups:</label>
+                      <div className="selected-tags">
+                        {formData.selectedGroups.map(groupId => {
+                          const group = availableGroups.find(g => g.id === groupId)
+                          return group ? (
+                            <span key={groupId} className="selected-tag">
+                              {group.name}
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveGroup(groupId)}
+                                className="remove-tag"
+                              >
+                                ×
+                              </button>
+                            </span>
+                          ) : null
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <div className="form-group">
+                    <label>User Email ID or Username</label>
+                    <input
+                      type="text"
+                      value={userSearch}
+                      onChange={(e) => setUserSearch(e.target.value)}
+                      placeholder="Search by email or username..."
+                      className="search-input"
+                    />
+                    {userSearch && filteredUsers.length > 0 && (
+                      <div className="suggestions-dropdown">
+                        {filteredUsers.map(user => (
+                          <div
+                            key={user.id}
+                            className="suggestion-item"
+                            onClick={() => handleAddUser(user)}
+                          >
+                            {user.name} ({user.email})
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {formData.individualUsers.length > 0 && (
+                    <div className="selected-items">
+                      <label>Selected Users:</label>
+                      <div className="selected-tags">
+                        {formData.individualUsers.map(user => (
+                          <span key={user.id} className="selected-tag">
+                            {user.name} ({user.email})
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveUser(user.id)}
+                              className="remove-tag"
+                            >
+                              ×
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+
+            <div className="publish-section">
+              <Button 
+                variant="primary" 
+                onClick={handleSave}
+                disabled={!canPublish || saving}
+              >
+                {saving ? 'Publishing...' : 'Publish Administration'}
+              </Button>
+              <p className="publish-note">
+                {!canPublish && 'Select at least one group or user to publish this administration.'}
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export default AdministrationDetail
+

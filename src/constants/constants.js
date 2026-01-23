@@ -60,7 +60,9 @@ export const API_ENDPOINTS = {
     GET: (id) => `/api/administrations/${id}`,
     UPDATE: (id) => `/api/administrations/${id}`,
     DELETE: (id) => `/api/administrations/${id}`,
-    DRAFT: '/api/administrations/draft'
+    DRAFT: '/api/administrations/draft',
+    ENROLLED_USERS: (id) => `/api/administrations/${id}/enrolled-users`,
+    USER_PROGRESS: (id, userId) => `/api/administrations/${id}/users/${userId}/progress`
   },
   
   // Topics (Sections)

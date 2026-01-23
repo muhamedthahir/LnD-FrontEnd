@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { useOutletContext } from 'react-router-dom'
+import { useOutletContext, useNavigate, Link } from 'react-router-dom'
 import Button from '../../../../components/Button/Button'
 import Pagination from '../../../../components/Pagination/Pagination'
 import { useApi } from '../../../../contexts/ApiContext'
@@ -8,6 +8,7 @@ import './CourseAdministrations.css'
 
 function CourseAdministrations() {
   const { user } = useOutletContext()
+  const navigate = useNavigate()
   const { apiBaseUrl, accessToken } = useApi()
   const [courses, setCourses] = useState([])
   const [colleges, setColleges] = useState([])
@@ -697,11 +698,18 @@ function CourseAdministrations() {
                     </tr>
                   </thead>
                   <tbody>
-                    {paginatedAdministrations.map(admin => (
-                      <tr key={admin.id}>
-                        <td>{admin.displayId || admin.id}</td>
-                        <td>{admin.administrationName}</td>
-                        <td>{admin.college || '-'}</td>
+{paginatedAdministrations.map(admin => (
+                                      <tr key={admin.id}>
+                                        <td>{admin.displayId || admin.id}</td>
+                                        <td>
+                                          <Link 
+                                            to={`/admin/courses/administrations/${admin.id}`}
+                                            className="admin-name-link"
+                                          >
+                                            {admin.administrationName}
+                                          </Link>
+                                        </td>
+                                        <td>{admin.college || '-'}</td>
                         <td>
                           <div className="status-icon-container">
                             {admin.status === 'published' ? (
@@ -720,20 +728,20 @@ function CourseAdministrations() {
                         <td>{admin.totalInvites || 0}</td>
                         <td>{admin.startDate ? new Date(admin.startDate).toLocaleDateString() : '-'}</td>
                         <td>{admin.endDate ? new Date(admin.endDate).toLocaleDateString() : '-'}</td>
-                        <td>
-                          <div className="action-buttons">
-                            <button
-                              className="btn-edit"
-                              onClick={() => handleViewEdit(admin)}
-                              title="View/Edit Administration"
-                            >
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                <circle cx="12" cy="12" r="3"></circle>
-                              </svg>
-                            </button>
-                          </div>
-                        </td>
+<td>
+                                          <div className="action-buttons">
+                                            <button
+                                              className="btn-edit"
+                                              onClick={() => navigate(`/admin/courses/administrations/${admin.id}`)}
+                                              title="View/Edit Administration"
+                                            >
+                                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                <circle cx="12" cy="12" r="3"></circle>
+                                              </svg>
+                                            </button>
+                                          </div>
+                                        </td>
                       </tr>
                     ))}
                   </tbody>
