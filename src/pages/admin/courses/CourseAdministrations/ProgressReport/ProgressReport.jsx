@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useApi } from '../../../../../contexts/ApiContext'
 import { API_ENDPOINTS } from '../../../../../constants/constants'
-import './ProgressReport.css'
+import styles from './ProgressReport.module.css'
 
 function ProgressReport() {
   const { id, userId } = useParams()
@@ -63,8 +63,11 @@ function ProgressReport() {
   }
 
   const getStatusClass = (status) => {
-    if (!status) return 'not-started'
-    return status.toLowerCase().replace('_', '-').replace(' ', '-')
+    if (!status) return styles.statusNotStarted
+    const s = status.toLowerCase().replace('_', '-').replace(' ', '-')
+    if (s === 'completed') return styles.statusCompleted
+    if (s === 'in-progress' || s === 'in_progress') return styles.statusInProgress
+    return styles.statusNotStarted
   }
 
   const getProgressColor = (percentage) => {
@@ -77,9 +80,9 @@ function ProgressReport() {
 
   if (loading) {
     return (
-      <div className="progress-report-page">
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
+      <div className={styles.progressReportPage}>
+        <div className={styles.loadingContainer}>
+          <div className={styles.loadingSpinner}></div>
           <p>Loading progress report...</p>
         </div>
       </div>
@@ -88,8 +91,8 @@ function ProgressReport() {
 
   if (!reportData) {
     return (
-      <div className="progress-report-page">
-        <div className="error-container">
+      <div className={styles.progressReportPage}>
+        <div className={styles.errorContainer}>
           <p>Failed to load progress report</p>
           <button onClick={() => navigate(-1)}>Go Back</button>
         </div>
@@ -100,11 +103,11 @@ function ProgressReport() {
   const { user, course, administration, courseProgress, topics } = reportData
 
   return (
-    <div className="progress-report-page">
+    <div className={styles.progressReportPage}>
       {/* Header */}
-      <div className="report-header">
+      <div className={styles.reportHeader}>
         <button 
-          className="btn-back"
+          className={styles.btnBack}
           onClick={() => navigate(`/admin/courses/administrations/${id}`)}
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -115,118 +118,90 @@ function ProgressReport() {
         <h1>Progress Report</h1>
       </div>
 
-      {/* User & Course Info Cards */}
-      <div className="info-cards-grid">
-        {/* User Details Card */}
-        <div className="info-card user-card">
-          <div className="card-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-              <circle cx="12" cy="7" r="4"></circle>
-            </svg>
-          </div>
-          <div className="card-content">
-            <h3>Student Information</h3>
-            <div className="info-grid">
-              <div className="info-item">
-                <label>Name</label>
-                <span>
-                  <Link to={`/admin/users/${user.id}`} className="user-link">
-                    {user.name}
-                  </Link>
-                </span>
-              </div>
-              <div className="info-item">
-                <label>Email</label>
-                <span>{user.email}</span>
-              </div>
-              <div className="info-item">
-                <label>College</label>
-                <span>{user.college_name || '-'}</span>
-              </div>
-              <div className="info-item">
-                <label>Department</label>
-                <span>{user.department || '-'}</span>
-              </div>
-              <div className="info-item">
-                <label>Roll Number</label>
-                <span>{user.roll_number || '-'}</span>
-              </div>
+      {/* Student Information - Full Width */}
+      <div className={`${styles.infoCard} ${styles.userCard} ${styles.fullWidthCard}`}>
+        <div className={styles.cardIcon}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <div className={styles.cardContent}>
+          <h3>Student Information</h3>
+          <div className={styles.infoGridHorizontal}>
+            <div className={styles.infoItem}>
+              <label>Name</label>
+              <span>
+                <Link to={`/admin/users/${user.id}`} className={styles.userLink}>
+                  {user.name}
+                </Link>
+              </span>
+            </div>
+            <div className={styles.infoItem}>
+              <label>Email</label>
+              <span>{user.email}</span>
+            </div>
+            <div className={styles.infoItem}>
+              <label>College</label>
+              <span>{user.college_name || '-'}</span>
+            </div>
+            <div className={styles.infoItem}>
+              <label>Department</label>
+              <span>{user.department || '-'}</span>
+            </div>
+            <div className={styles.infoItem}>
+              <label>Roll Number</label>
+              <span>{user.roll_number || '-'}</span>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Course Details Card */}
-        <div className="info-card course-card">
-          <div className="card-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-            </svg>
-          </div>
-          <div className="card-content">
-            <h3>Course Information</h3>
-            <div className="info-grid">
-              <div className="info-item full-width">
-                <label>Course Name</label>
-                <span className="course-name">{course.name}</span>
-              </div>
-              <div className="info-item full-width">
-                <label>Description</label>
-                <span className="description">{course.description || '-'}</span>
-              </div>
-              <div className="info-item">
-                <label>Category</label>
-                <span className="badge category">{course.category || '-'}</span>
-              </div>
-              <div className="info-item">
-                <label>Level</label>
-                <span className="badge level">{course.competency_level || '-'}</span>
-              </div>
-            </div>
-          </div>
+      {/* Course & Administration Info - Combined Card */}
+      <div className={`${styles.infoCard} ${styles.courseAdminCard} ${styles.fullWidthCard}`}>
+        <div className={styles.cardIcon}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+          </svg>
         </div>
-
-        {/* Administration Details Card */}
-        <div className="info-card admin-card">
-          <div className="card-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-              <line x1="16" y1="2" x2="16" y2="6"></line>
-              <line x1="8" y1="2" x2="8" y2="6"></line>
-              <line x1="3" y1="10" x2="21" y2="10"></line>
-            </svg>
-          </div>
-          <div className="card-content">
-            <h3>Administration Details</h3>
-            <div className="info-grid">
-              <div className="info-item">
-                <label>Administration ID</label>
-                <span className="mono">{administration.display_id || administration.id}</span>
-              </div>
-              <div className="info-item">
-                <label>Name</label>
-                <span>{administration.name}</span>
-              </div>
-              <div className="info-item">
-                <label>Start Date</label>
-                <span>{formatDate(administration.start_date)}</span>
-              </div>
-              <div className="info-item">
-                <label>End Date</label>
-                <span>{formatDate(administration.end_date)}</span>
-              </div>
+        <div className={styles.cardContent}>
+          <h3>Course & Administration Details</h3>
+          <div className={styles.infoGridHorizontal}>
+            <div className={styles.infoItem}>
+              <label>Course Name</label>
+              <span className={styles.courseName}>{course.name}</span>
+            </div>
+            <div className={styles.infoItem}>
+              <label>Category</label>
+              <span className={`${styles.badge} ${styles.badgeCategory}`}>{course.category || '-'}</span>
+            </div>
+            <div className={styles.infoItem}>
+              <label>Level</label>
+              <span className={`${styles.badge} ${styles.badgeLevel}`}>{course.competency_level || '-'}</span>
+            </div>
+            <div className={styles.infoItem}>
+              <label>Administration</label>
+              <span>{administration.name}</span>
+            </div>
+            <div className={styles.infoItem}>
+              <label>Start Date</label>
+              <span>{formatDate(administration.start_date)}</span>
+            </div>
+            <div className={styles.infoItem}>
+              <label>End Date</label>
+              <span>{formatDate(administration.end_date)}</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Course Progress Overview */}
-      <div className="progress-overview-card">
+      <div className={styles.progressOverviewCard}>
         <h2>Course Progress Overview</h2>
-        <div className="progress-stats">
-          <div className="stat-item">
-            <div className="stat-circle" style={{ '--progress-color': getProgressColor(courseProgress.progress_percentage) }}>
+        <div className={styles.progressStats}>
+          <div className={styles.statItem}>
+            <div className={styles.statCircle} style={{ '--progress-color': getProgressColor(courseProgress.progress_percentage) }}>
               <svg viewBox="0 0 36 36">
                 <path
                   d="M18 2.0845
@@ -247,27 +222,27 @@ function ProgressReport() {
                   strokeLinecap="round"
                 />
               </svg>
-              <span className="stat-value">{courseProgress.progress_percentage}%</span>
+              <span className={styles.statValue}>{courseProgress.progress_percentage}%</span>
             </div>
-            <span className="stat-label">Overall Progress</span>
+            <span className={styles.statLabel}>Overall Progress</span>
           </div>
           
-          <div className="stat-details">
-            <div className="detail-row">
+          <div className={styles.statDetails}>
+            <div className={styles.detailRow}>
               <label>Status</label>
-              <span className={`status-badge ${getStatusClass(courseProgress.status)}`}>
+              <span className={`${styles.statusBadge} ${getStatusClass(courseProgress.status)}`}>
                 {courseProgress.status || 'Not Started'}
               </span>
             </div>
-            <div className="detail-row">
+            <div className={styles.detailRow}>
               <label>Started At</label>
               <span>{formatDate(courseProgress.started_at)}</span>
             </div>
-            <div className="detail-row">
+            <div className={styles.detailRow}>
               <label>Completed At</label>
               <span>{formatDate(courseProgress.completed_at)}</span>
             </div>
-            <div className="detail-row">
+            <div className={styles.detailRow}>
               <label>Last Visited</label>
               <span>{formatDate(courseProgress.last_accessed_at)}</span>
             </div>
@@ -276,144 +251,157 @@ function ProgressReport() {
       </div>
 
       {/* Topic-wise Progress */}
-      <div className="topics-section">
+      <div className={styles.topicsSection}>
         <h2>Topic-wise Progress</h2>
         
         {topics.length === 0 ? (
-          <div className="empty-topics">
+          <div className={styles.emptyTopics}>
             <p>No topics available for this course.</p>
           </div>
         ) : (
-          <div className="topics-list">
+          <div className={styles.topicsList}>
             {topics.map((topic, index) => (
-              <div key={topic.id} className="topic-card">
+              <div key={topic.id} className={styles.topicCard}>
                 <div 
-                  className={`topic-header ${expandedTopics[topic.id] ? 'expanded' : ''}`}
+                  className={`${styles.topicHeader} ${expandedTopics[topic.id] ? styles.topicHeaderExpanded : ''}`}
                   onClick={() => toggleTopic(topic.id)}
                 >
-                  <div className="topic-info">
-                    <span className="topic-number">{index + 1}</span>
-                    <div className="topic-details">
+                  <div className={styles.topicInfo}>
+                    <span className={styles.topicNumber}>{index + 1}</span>
+                    <div className={styles.topicDetails}>
                       <h4>{topic.name || topic.title}</h4>
-                      <p className="topic-meta">
+                      <p className={styles.topicMeta}>
                         {topic.progress?.segments_completed || 0} / {topic.progress?.segments_total || 0} segments completed
                       </p>
                     </div>
                   </div>
                   
-                  <div className="topic-progress">
-                    <div className="progress-bar-wrapper">
+                  <div className={styles.topicProgress}>
+                    <div className={styles.progressBarWrapper}>
                       <div 
-                        className="progress-bar-fill"
+                        className={styles.progressBarFill}
                         style={{ 
                           width: `${topic.progress?.progress_percentage || 0}%`,
                           backgroundColor: getProgressColor(topic.progress?.progress_percentage || 0)
                         }}
                       />
                     </div>
-                    <span className="progress-text">{topic.progress?.progress_percentage || 0}%</span>
-                    <span className={`status-badge small ${getStatusClass(topic.progress?.status)}`}>
+                    <span className={styles.progressText}>{topic.progress?.progress_percentage || 0}%</span>
+                    <span className={`${styles.statusBadge} ${styles.statusBadgeSmall} ${getStatusClass(topic.progress?.status)}`}>
                       {topic.progress?.status || 'Not Started'}
                     </span>
-                    <svg className="expand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <svg className={`${styles.expandIcon} ${expandedTopics[topic.id] ? styles.expandIconRotated : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
                   </div>
                 </div>
 
                 {expandedTopics[topic.id] && (
-                  <div className="topic-content">
-                    <div className="topic-stats">
-                      <div className="mini-stat">
+                  <div className={styles.topicContent}>
+                    <div className={styles.topicStats}>
+                      <div className={styles.miniStat}>
                         <label>Started</label>
                         <span>{formatDate(topic.progress?.started_at)}</span>
                       </div>
-                      <div className="mini-stat">
+                      <div className={styles.miniStat}>
                         <label>Completed</label>
                         <span>{formatDate(topic.progress?.completed_at)}</span>
                       </div>
                     </div>
 
                     {/* Segments List */}
-                    <div className="segments-list">
+                    <div className={styles.segmentsList}>
                       {topic.segments && topic.segments.length > 0 ? (
-                        topic.segments.map((segment, segIndex) => (
-                          <div key={`${segment.segment_type}-${segment.id}`} className="segment-item">
-                            <div 
-                              className={`segment-header ${segment.questions?.length > 0 ? 'clickable' : ''} ${expandedSegments[`${segment.segment_type}-${segment.id}`] ? 'expanded' : ''}`}
-                              onClick={() => segment.questions?.length > 0 && toggleSegment(`${segment.segment_type}-${segment.id}`)}
-                            >
-                              <div className="segment-info">
-                                <span className={`segment-type-badge ${segment.segment_type}`}>
-                                  {segment.segment_type === 'lesson' ? '📖' : segment.segment_type === 'mcq' ? '❓' : '💻'}
-                                  {segment.segment_type}
-                                </span>
-                                <span className="segment-title">{segment.title || segment.name}</span>
-                              </div>
-                              
-                              <div className="segment-progress-info">
-                                <div className="mini-progress-bar">
-                                  <div 
-                                    className="mini-progress-fill"
-                                    style={{ 
-                                      width: `${segment.progress?.progress_percentage || 0}%`,
-                                      backgroundColor: getProgressColor(segment.progress?.progress_percentage || 0)
-                                    }}
-                                  />
-                                </div>
-                                <span className="segment-progress-text">{segment.progress?.progress_percentage || 0}%</span>
-                                <span className={`status-badge tiny ${getStatusClass(segment.progress?.status)}`}>
-                                  {segment.progress?.status || 'Not Started'}
-                                </span>
-                                {segment.questions?.length > 0 && (
-                                  <svg className="expand-icon small" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <polyline points="6 9 12 15 18 9"></polyline>
-                                  </svg>
-                                )}
-                              </div>
-                            </div>
-
-                            {/* Questions List */}
-                            {expandedSegments[`${segment.segment_type}-${segment.id}`] && segment.questions?.length > 0 && (
-                              <div className="questions-list">
-                                <div className="questions-header">
-                                  <span>Question</span>
-                                  <span>Type</span>
-                                  <span>Score</span>
-                                  <span>Attempts</span>
-                                  <span>Status</span>
-                                </div>
-                                {segment.questions.map((question, qIndex) => (
-                                  <div key={question.id} className="question-row">
-                                    <span className="question-text">
-                                      {qIndex + 1}. {question.question_text?.substring(0, 50)}
-                                      {question.question_text?.length > 50 ? '...' : ''}
-                                    </span>
-                                    <span className={`question-type ${question.question_type}`}>
-                                      {question.question_type === 'mcq' ? 'MCQ' : 'Code'}
-                                    </span>
-                                    <span className="question-score">
-                                      {question.question_type === 'mcq' 
-                                        ? `${question.best_score || 0}/${question.max_score || 100}`
-                                        : question.test_cases_passed !== undefined 
-                                          ? `${question.test_cases_passed}/${question.test_cases_total}`
-                                          : `${question.score || 0}/${question.max_score || 100}`
-                                      }
-                                    </span>
-                                    <span className="question-attempts">
-                                      {question.attempt_count || (question.status === 'submitted' ? 1 : 0)}
-                                    </span>
-                                    <span className={`question-status ${question.is_correct ? 'correct' : question.status === 'answered' || question.status === 'submitted' ? 'attempted' : 'unattempted'}`}>
-                                      {question.is_correct ? '✓ Correct' : question.status === 'answered' || question.status === 'submitted' ? 'Attempted' : 'Not Attempted'}
-                                    </span>
+                        topic.segments.map((segment, segIndex) => {
+                          const isPractice = segment.type_category === 'practice';
+                          const hasQuestions = segment.questions?.length > 0;
+                          const isExpandable = isPractice && hasQuestions;
+                          const isExpanded = expandedSegments[`${segment.type_category}-${segment.id}`];
+                          
+                          return (
+                            <div key={`${segment.type_category}-${segment.id}`} className={styles.segmentCard}>
+                              <div 
+                                className={`${styles.segmentHeader} ${isExpandable ? styles.segmentHeaderClickable : ''} ${isExpanded ? styles.segmentHeaderExpanded : ''}`}
+                                onClick={() => isExpandable && toggleSegment(`${segment.type_category}-${segment.id}`)}
+                              >
+                                <div className={styles.segmentInfo}>
+                                  <span className={`${styles.segmentTypeBadge} ${segment.type_category === 'lesson' ? styles.segmentTypeBadgeLesson : styles.segmentTypeBadgePractice}`}>
+                                    {segment.type_category === 'lesson' ? '📖' : '💻'}
+                                  </span>
+                                  <div className={styles.segmentDetails}>
+                                    <h5>{segment.title || segment.name}</h5>
+                                    <p className={styles.segmentMeta}>
+                                      {segment.type_category === 'lesson' ? 'Lesson' : 'Practice'}
+                                    </p>
                                   </div>
-                                ))}
+                                </div>
+                                
+                                <div className={styles.segmentProgress}>
+                                  <span className={`${styles.statusBadge} ${styles.statusBadgeTiny} ${getStatusClass(segment.progress?.status)}`}>
+                                    {segment.progress?.status || 'Not Started'}
+                                  </span>
+                                  <div className={`${styles.progressBarWrapper} ${styles.progressBarWrapperSmall}`}>
+                                    <div 
+                                      className={styles.progressBarFill}
+                                      style={{ 
+                                        width: `${segment.progress?.progress_percentage || 0}%`,
+                                        backgroundColor: getProgressColor(segment.progress?.progress_percentage || 0)
+                                      }}
+                                    />
+                                  </div>
+                                  <span className={styles.progressText}>{segment.progress?.progress_percentage || 0}%</span>
+                                  {isExpandable && (
+                                    <svg className={`${styles.expandIcon} ${styles.expandIconSmall} ${isExpanded ? styles.expandIconRotated : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                      <polyline points="6 9 12 15 18 9"></polyline>
+                                    </svg>
+                                  )}
+                                </div>
                               </div>
-                            )}
-                          </div>
-                        ))
+
+                              {/* Questions List - Expandable for Practice segments */}
+                              {isExpanded && hasQuestions && (
+                                <div className={styles.segmentContent}>
+                                  <div className={styles.questionsList}>
+                                    <div className={styles.questionsHeader}>
+                                      <span>Question</span>
+                                      <span>Type</span>
+                                      <span>Score</span>
+                                      <span>Attempts</span>
+                                      <span>Status</span>
+                                    </div>
+                                    {segment.questions.map((question, qIndex) => (
+                                      <div key={question.id} className={styles.questionRow}>
+                                        <span className={styles.questionText}>
+                                          {qIndex + 1}. {question.question_text?.substring(0, 50)}
+                                          {question.question_text?.length > 50 ? '...' : ''}
+                                        </span>
+                                        <span className={`${styles.questionType} ${question.question_type === 'mcq' ? styles.questionTypeMcq : styles.questionTypeProgramming}`}>
+                                          {question.question_type === 'mcq' ? 'MCQ' : 'Code'}
+                                        </span>
+                                        <span className={styles.questionScore}>
+                                          {question.question_type === 'mcq' 
+                                            ? `${question.best_score || 0}/${question.max_score || 100}`
+                                            : question.test_cases_passed !== undefined 
+                                              ? `${question.test_cases_passed}/${question.test_cases_total}`
+                                              : `${question.score || 0}/${question.max_score || 100}`
+                                          }
+                                        </span>
+                                        <span className={styles.questionAttempts}>
+                                          {question.attempt_count || (question.status === 'submitted' ? 1 : 0)}
+                                        </span>
+                                        <span className={`${styles.questionStatus} ${question.is_correct ? styles.questionStatusCorrect : question.status === 'answered' || question.status === 'submitted' ? styles.questionStatusAttempted : styles.questionStatusUnattempted}`}>
+                                          {question.is_correct ? '✓ Correct' : question.status === 'answered' || question.status === 'submitted' ? 'Attempted' : 'Not Attempted'}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })
                       ) : (
-                        <div className="empty-segments">
+                        <div className={styles.emptySegments}>
                           <p>No segments in this topic.</p>
                         </div>
                       )}
@@ -430,5 +418,3 @@ function ProgressReport() {
 }
 
 export default ProgressReport
-
-

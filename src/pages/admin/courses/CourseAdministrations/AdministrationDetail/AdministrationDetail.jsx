@@ -38,6 +38,8 @@ function AdministrationDetail() {
   const [userSearch, setUserSearch] = useState('')
   const [availableUsers, setAvailableUsers] = useState([])
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [enrolledUsers, setEnrolledUsers] = useState([])
   const [loadingEnrolledUsers, setLoadingEnrolledUsers] = useState(false)
 
@@ -71,10 +73,13 @@ function AdministrationDetail() {
       })
       
       if (response.ok) {
-        let data = await response.json()
-        data = data.administration
+        const responseData = await response.json()
+        const data = responseData.administration
+        const savedGroups = responseData.selectedGroups || []
         setAdministration(data)
-        // Populate form data
+        // Set available groups from saved groups
+        setAvailableGroups(savedGroups)
+        // Populate form data with saved groups
         setFormData({
           administrationName: data.administration_name || '',
           displayId: data.display_id || '',
@@ -88,7 +93,7 @@ function AdministrationDetail() {
           groupDegree: '',
           groupDepartment: '',
           groupYear: '',
-          selectedGroups: [],
+          selectedGroups: savedGroups.map(g => g.id),
           individualUsers: []
         })
       } else {
@@ -311,6 +316,38 @@ function AdministrationDetail() {
     }
   }
 
+  const handleDelete = async () => {
+    setDeleting(true)
+    try {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.ADMINISTRATIONS.DELETE(id)}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        }
+      })
+
+      if (response.ok) {
+        toast.success('Administration deleted successfully')
+        navigate('/admin/courses/administrations')
+      } else {
+        const error = await response.json()
+        toast.error(error.error || 'Error deleting administration')
+      }
+    } catch (error) {
+      console.error('Error deleting administration:', error)
+      toast.error('Error deleting administration')
+    } finally {
+      setDeleting(false)
+      setShowDeleteConfirm(false)
+    }
+  }
+
+  const canDelete = () => {
+    // Can only delete if no enrollments/invites
+    return !administration?.total_invites || administration.total_invites === 0
+  }
+
   const filteredGroups = availableGroups.filter(group => 
     group.name.toLowerCase().includes(groupSearch.toLowerCase())
   )
@@ -406,13 +443,26 @@ function AdministrationDetail() {
         </button>
         <div className="header-actions">
           {!isEditing ? (
-            <Button variant="primary" onClick={() => setIsEditing(true)}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-              </svg>
-              Edit Administration
-            </Button>
+            <>
+              <Button variant="primary" onClick={() => setIsEditing(true)}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+                Edit Administration
+              </Button>
+              {canDelete() && (
+                <Button variant="danger" onClick={() => setShowDeleteConfirm(true)}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                  </svg>
+                  Delete
+                </Button>
+              )}
+            </>
           ) : (
             <>
               <Button variant="secondary" onClick={() => {
@@ -683,32 +733,61 @@ function AdministrationDetail() {
                   </div>
 
                   <div className="form-group">
-                    <label>Select Groups</label>
+                    <label>Available Groups for {formData.college}</label>
                     <input
                       type="text"
                       value={groupSearch}
                       onChange={(e) => setGroupSearch(e.target.value)}
-                      placeholder="Search groups..."
+                      placeholder="Filter groups..."
                       className="search-input"
                     />
-                    {groupSearch && filteredGroups.length > 0 && (
-                      <div className="suggestions-dropdown">
-                        {filteredGroups.map(group => (
-                          <div
-                            key={group.id}
-                            className="suggestion-item"
-                            onClick={() => handleAddGroup(group.id)}
-                          >
-                            {group.name}
-                          </div>
-                        ))}
+                  </div>
+
+                  {/* Available Groups List */}
+                  <div className="available-groups-section">
+                    {availableGroups.length === 0 ? (
+                      <div className="no-groups-message">
+                        No groups available for this institution. Create groups first.
+                      </div>
+                    ) : (
+                      <div className="groups-list">
+                        {filteredGroups.map(group => {
+                          const isSelected = formData.selectedGroups.includes(group.id)
+                          return (
+                            <div 
+                              key={group.id} 
+                              className={`group-item ${isSelected ? 'selected' : ''}`}
+                              onClick={() => isSelected ? handleRemoveGroup(group.id) : handleAddGroup(group.id)}
+                            >
+                              <div className="group-checkbox">
+                                {isSelected ? (
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                  </svg>
+                                ) : null}
+                              </div>
+                              <div className="group-info">
+                                <span className="group-name">{group.name}</span>
+                                <span className="group-meta">
+                                  {group.degree && `${group.degree} • `}
+                                  {group.department && `${group.department} • `}
+                                  {group.passout_year && `Year ${group.passout_year}`}
+                                  {!group.degree && !group.department && !group.passout_year && 'No additional info'}
+                                </span>
+                              </div>
+                              <span className="group-member-count">
+                                {group.member_count || 0} members
+                              </span>
+                            </div>
+                          )
+                        })}
                       </div>
                     )}
                   </div>
 
                   {formData.selectedGroups.length > 0 && (
                     <div className="selected-items">
-                      <label>Selected Groups:</label>
+                      <label>Selected Groups ({formData.selectedGroups.length}):</label>
                       <div className="selected-tags">
                         {formData.selectedGroups.map(groupId => {
                           const group = availableGroups.find(g => g.id === groupId)
@@ -793,6 +872,37 @@ function AdministrationDetail() {
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="modal-overlay">
+          <div className="modal-content delete-modal">
+            <div className="modal-header">
+              <h3>Delete Administration</h3>
+              <button className="modal-close" onClick={() => setShowDeleteConfirm(false)}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+            <div className="modal-body">
+              <p>Are you sure you want to delete this administration?</p>
+              <p className="warning-text">
+                <strong>"{formData.administrationName}"</strong> will be permanently deleted. This action cannot be undone.
+              </p>
+            </div>
+            <div className="modal-actions">
+              <Button variant="secondary" onClick={() => setShowDeleteConfirm(false)} disabled={deleting}>
+                Cancel
+              </Button>
+              <Button variant="danger" onClick={handleDelete} disabled={deleting}>
+                {deleting ? 'Deleting...' : 'Delete Administration'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

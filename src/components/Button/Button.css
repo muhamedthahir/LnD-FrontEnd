@@ -124,6 +124,18 @@
   background: #dc2626;
 }
 
+/* Danger Button (Full size) */
+.btn-danger {
+  background: var(--error, #ef4444);
+  color: white;
+  border: none;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #dc2626;
+  transform: translateY(-0.0625rem);
+}
+
 /* Review Button */
 .btn-review {
   padding: var(--spacing-xs) var(--spacing-sm);

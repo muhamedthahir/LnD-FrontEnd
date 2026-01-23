@@ -487,32 +487,61 @@ function CreateAdministration() {
                   </div>
 
                   <div className="form-group">
-                    <label>Select Groups</label>
+                    <label>Available Groups for {formData.college}</label>
                     <input
                       type="text"
                       value={groupSearch}
                       onChange={(e) => setGroupSearch(e.target.value)}
-                      placeholder="Search groups..."
+                      placeholder="Filter groups..."
                       className="search-input"
                     />
-                    {groupSearch && filteredGroups.length > 0 && (
-                      <div className="suggestions-dropdown">
-                        {filteredGroups.map(group => (
-                          <div
-                            key={group.id}
-                            className="suggestion-item"
-                            onClick={() => handleAddGroup(group.id)}
-                          >
-                            {group.name}
-                          </div>
-                        ))}
+                  </div>
+
+                  {/* Available Groups List */}
+                  <div className="available-groups-section">
+                    {availableGroups.length === 0 ? (
+                      <div className="no-groups-message">
+                        No groups available for this institution. Create groups first.
+                      </div>
+                    ) : (
+                      <div className="groups-list">
+                        {filteredGroups.map(group => {
+                          const isSelected = formData.selectedGroups.includes(group.id)
+                          return (
+                            <div 
+                              key={group.id} 
+                              className={`group-item ${isSelected ? 'selected' : ''}`}
+                              onClick={() => isSelected ? handleRemoveGroup(group.id) : handleAddGroup(group.id)}
+                            >
+                              <div className="group-checkbox">
+                                {isSelected ? (
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                  </svg>
+                                ) : null}
+                              </div>
+                              <div className="group-info">
+                                <span className="group-name">{group.name}</span>
+                                <span className="group-meta">
+                                  {group.degree && `${group.degree} • `}
+                                  {group.department && `${group.department} • `}
+                                  {group.passout_year && `Year ${group.passout_year}`}
+                                  {!group.degree && !group.department && !group.passout_year && 'No additional info'}
+                                </span>
+                              </div>
+                              <span className="group-member-count">
+                                {group.member_count || 0} members
+                              </span>
+                            </div>
+                          )
+                        })}
                       </div>
                     )}
                   </div>
 
                   {formData.selectedGroups.length > 0 && (
                     <div className="selected-items">
-                      <label>Selected Groups:</label>
+                      <label>Selected Groups ({formData.selectedGroups.length}):</label>
                       <div className="selected-tags">
                         {formData.selectedGroups.map(groupId => {
                           const group = availableGroups.find(g => g.id === groupId)
