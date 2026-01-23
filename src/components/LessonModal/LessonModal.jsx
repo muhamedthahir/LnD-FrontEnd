@@ -196,8 +196,9 @@ function LessonModal({ isOpen, onClose, onAdd, sectionId, editingLesson = null, 
   }
 
   const handleAdd = () => {
-    if (!lessonName.trim()) {
-      toast.error('Please enter a lesson name')
+    // Validate required field: lesson name
+    if (!lessonName || !lessonName.trim()) {
+      toast.error('Missing required field: Lesson name is required')
       return
     }
 
@@ -212,7 +213,7 @@ function LessonModal({ isOpen, onClose, onAdd, sectionId, editingLesson = null, 
     } else if (contentType === 'video') {
       if (videoEmbedded) {
         if (!videoUrl.trim()) {
-          toast.error('Please enter a video URL')
+          toast.error('Missing required field: Please enter a video URL')
           return
         }
         content = {
@@ -221,14 +222,26 @@ function LessonModal({ isOpen, onClose, onAdd, sectionId, editingLesson = null, 
           url: videoUrl
         }
       } else {
-        if (!videoFile) {
-          toast.error('Please upload a video file or provide an embedded URL')
+        // When editing, existingMediaUrl is valid; otherwise require videoFile
+        if (!videoFile && !existingMediaUrl) {
+          toast.error('Missing required field: Please upload a video file or provide an embedded URL')
           return
         }
-        content = {
-          type: 'video',
-          source: 'upload',
-          file: videoFile // In production, this would be uploaded to S3
+        // If there's existing media, use it; otherwise use the new file
+        if (existingMediaUrl && !videoFile) {
+          // Keep existing media - content will be handled by parent
+          content = {
+            type: 'video',
+            source: 'upload',
+            url: existingMediaUrl,
+            fileName: existingMediaFileName
+          }
+        } else {
+          content = {
+            type: 'video',
+            source: 'upload',
+            file: videoFile // In production, this would be uploaded to S3
+          }
         }
       }
     } else if (contentType === 'audio') {
