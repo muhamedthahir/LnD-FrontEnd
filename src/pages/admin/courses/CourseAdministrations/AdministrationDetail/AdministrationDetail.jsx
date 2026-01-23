@@ -42,6 +42,8 @@ function AdministrationDetail() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [enrolledUsers, setEnrolledUsers] = useState([])
   const [loadingEnrolledUsers, setLoadingEnrolledUsers] = useState(false)
+  const [updatingProgress, setUpdatingProgress] = useState(false)
+  const [progressUpdateResult, setProgressUpdateResult] = useState(null)
 
   useEffect(() => {
     fetchAdministrationDetails()
@@ -348,6 +350,48 @@ function AdministrationDetail() {
     return !administration?.total_invites || administration.total_invites === 0
   }
 
+  const handleUpdateProgress = async () => {
+    setUpdatingProgress(true)
+    setProgressUpdateResult(null)
+    try {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.ADMINISTRATIONS.UPDATE_ALL_PROGRESS(id)}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        }
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        toast.success(data.message || 'Progress updated successfully')
+        setProgressUpdateResult({
+          success: true,
+          total_users: data.total_users,
+          users_updated: data.users_updated
+        })
+        // Refresh enrolled users to show updated progress
+        fetchEnrolledUsers()
+      } else {
+        toast.error(data.error || 'Error updating progress')
+        setProgressUpdateResult({
+          success: false,
+          error: data.error
+        })
+      }
+    } catch (error) {
+      console.error('Error updating progress:', error)
+      toast.error('Error updating progress')
+      setProgressUpdateResult({
+        success: false,
+        error: error.message
+      })
+    } finally {
+      setUpdatingProgress(false)
+    }
+  }
+
   const filteredGroups = availableGroups.filter(group => 
     group.name.toLowerCase().includes(groupSearch.toLowerCase())
   )
@@ -579,9 +623,59 @@ function AdministrationDetail() {
         {administration?.status === 'published' && (
           <div className="detail-card">
             <div className="card-header">
-              <h2>Enrolled Users</h2>
-              <span className="enrolled-count">{enrolledUsers.length} users</span>
+              <div className="card-header-left">
+                <h2>Enrolled Users</h2>
+                <span className="enrolled-count">{enrolledUsers.length} users</span>
+              </div>
+              <div className="card-header-actions">
+                <Button 
+                  variant="primary" 
+                  onClick={handleUpdateProgress}
+                  disabled={updatingProgress || enrolledUsers.length === 0}
+                  className="btn-update-progress"
+                >
+                  {updatingProgress ? (
+                    <>
+                      <svg className="spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                      </svg>
+                      Updating Progress...
+                    </>
+                  ) : (
+                    <>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"></path>
+                      </svg>
+                      Update All Progress
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
+            
+            {progressUpdateResult && (
+              <div className={`progress-update-result ${progressUpdateResult.success ? 'success' : 'error'}`}>
+                {progressUpdateResult.success ? (
+                  <p>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Successfully updated progress for {progressUpdateResult.users_updated} of {progressUpdateResult.total_users} users. 
+                    Email notifications have been sent to admins.
+                  </p>
+                ) : (
+                  <p>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="15" y1="9" x2="9" y2="15"></line>
+                      <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
+                    Error: {progressUpdateResult.error}
+                  </p>
+                )}
+                <button className="dismiss-result" onClick={() => setProgressUpdateResult(null)}>×</button>
+              </div>
+            )}
             
             {loadingEnrolledUsers ? (
               <div className="loading-section">Loading enrolled users...</div>
