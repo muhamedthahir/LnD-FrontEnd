@@ -13,6 +13,7 @@ function ProgressReport() {
   const [reportData, setReportData] = useState(null)
   const [expandedTopics, setExpandedTopics] = useState({})
   const [expandedSegments, setExpandedSegments] = useState({})
+  const [codeModalData, setCodeModalData] = useState(null)
 
   useEffect(() => {
     fetchProgressReport()
@@ -366,8 +367,10 @@ function ProgressReport() {
                                       <span>Question</span>
                                       <span>Type</span>
                                       <span>Score</span>
+                                      <span>Test Cases</span>
                                       <span>Attempts</span>
                                       <span>Status</span>
+                                      <span>Action</span>
                                     </div>
                                     {segment.questions.map((question, qIndex) => (
                                       <div key={question.id} className={styles.questionRow}>
@@ -381,16 +384,46 @@ function ProgressReport() {
                                         <span className={styles.questionScore}>
                                           {question.question_type === 'mcq' 
                                             ? `${question.best_score || 0}/${question.max_score || 100}`
-                                            : question.test_cases_passed !== undefined 
-                                              ? `${question.test_cases_passed}/${question.test_cases_total}`
-                                              : `${question.score || 0}/${question.max_score || 100}`
+                                            : `${question.best_score || 0}/${question.max_score || 100}`
+                                          }
+                                        </span>
+                                        <span className={styles.questionTestCases}>
+                                          {question.question_type === 'programming' 
+                                            ? `${question.best_test_cases_passed || 0}/${question.test_cases_total || 0}`
+                                            : '-'
                                           }
                                         </span>
                                         <span className={styles.questionAttempts}>
-                                          {question.attempt_count || (question.status === 'submitted' ? 1 : 0)}
+                                          {question.attempt_count || 0}
                                         </span>
-                                        <span className={`${styles.questionStatus} ${question.is_correct ? styles.questionStatusCorrect : question.status === 'answered' || question.status === 'submitted' ? styles.questionStatusAttempted : styles.questionStatusUnattempted}`}>
-                                          {question.is_correct ? '✓ Correct' : question.status === 'answered' || question.status === 'submitted' ? 'Attempted' : 'Not Attempted'}
+                                        <span className={`${styles.questionStatus} ${question.is_correct ? styles.questionStatusCorrect : question.status === 'answered' || question.status === 'submitted' || question.status === 'completed' ? styles.questionStatusAttempted : styles.questionStatusUnattempted}`}>
+                                          {question.is_correct ? '✓ Correct' : question.status === 'answered' || question.status === 'submitted' || question.status === 'completed' ? 'Attempted' : 'Not Attempted'}
+                                        </span>
+                                        <span className={styles.questionAction}>
+                                          {question.question_type === 'programming' && (question.best_submitted_code || question.last_submitted_code) ? (
+                                            <button 
+                                              className={styles.btnShowCode}
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                setCodeModalData({
+                                                  questionName: question.question_text,
+                                                  language: question.language_used || 'Unknown',
+                                                  code: question.best_submitted_code || question.last_submitted_code,
+                                                  bestScore: question.best_score,
+                                                  testCasesPassed: question.best_test_cases_passed,
+                                                  testCasesTotal: question.test_cases_total
+                                                });
+                                              }}
+                                            >
+                                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <polyline points="16 18 22 12 16 6"></polyline>
+                                                <polyline points="8 6 2 12 8 18"></polyline>
+                                              </svg>
+                                              View Code
+                                            </button>
+                                          ) : (
+                                            <span className={styles.noAction}>-</span>
+                                          )}
                                         </span>
                                       </div>
                                     ))}
@@ -413,6 +446,63 @@ function ProgressReport() {
           </div>
         )}
       </div>
+
+      {/* Code Modal */}
+      {codeModalData && (
+        <div className={styles.codeModalOverlay} onClick={() => setCodeModalData(null)}>
+          <div className={styles.codeModal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.codeModalHeader}>
+              <div className={styles.codeModalTitle}>
+                <h3>{codeModalData.questionName}</h3>
+                <div className={styles.codeModalMeta}>
+                  <span className={styles.languageBadge}>{codeModalData.language}</span>
+                  <span className={styles.scoreBadge}>
+                    Score: {codeModalData.bestScore}/{100}
+                  </span>
+                  <span className={styles.testCasesBadge}>
+                    Test Cases: {codeModalData.testCasesPassed}/{codeModalData.testCasesTotal}
+                  </span>
+                </div>
+              </div>
+              <button 
+                className={styles.codeModalClose}
+                onClick={() => setCodeModalData(null)}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+            <div className={styles.codeModalBody}>
+              <pre className={styles.codeBlock}>
+                <code>{codeModalData.code}</code>
+              </pre>
+            </div>
+            <div className={styles.codeModalFooter}>
+              <button 
+                className={styles.btnCopyCode}
+                onClick={() => {
+                  navigator.clipboard.writeText(codeModalData.code);
+                  alert('Code copied to clipboard!');
+                }}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                Copy Code
+              </button>
+              <button 
+                className={styles.btnCloseModal}
+                onClick={() => setCodeModalData(null)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
