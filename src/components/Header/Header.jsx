@@ -163,7 +163,7 @@ function Header({ user, logout, onToggleSidebar, isSidebarCollapsed }) {
             onClick={() => setShowUserMenu(!showUserMenu)}
             aria-label="User menu"
           >
-            <div className="user-avatar header-user-avatar">
+            <div className="user-avatar  header-user-avatar">
               {getUserInitial()}
             </div>
             <span className="user-name">{getUserName()}</span>
