@@ -304,47 +304,74 @@ function DocumentViewer({
         return (
           <div className="pdf-viewer">
             <div className="pdf-controls">
-              <button onClick={goToPrevPage} disabled={pageNumber <= 1} className="pdf-btn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polyline points="15 18 9 12 15 6"/>
-                </svg>
-              </button>
-              <span className="page-info">
-                Page {pageNumber} of {numPages || '...'}
-              </span>
-              <button onClick={goToNextPage} disabled={pageNumber >= (numPages || 1)} className="pdf-btn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polyline points="9 18 15 12 9 6"/>
-                </svg>
-              </button>
-              <div className="zoom-controls">
-                <button onClick={zoomOut} className="pdf-btn">
+              <div className="pdf-controls-left">
+                <button onClick={goToPrevPage} disabled={pageNumber <= 1} className="pdf-btn">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="11" cy="11" r="8"/>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                    <line x1="8" y1="11" x2="14" y2="11"/>
+                    <polyline points="15 18 9 12 15 6"/>
                   </svg>
                 </button>
-                <span className="zoom-level">{Math.round(scale * 100)}%</span>
-                <button onClick={zoomIn} className="pdf-btn">
+                <span className="page-info">
+                  Page {pageNumber} of {numPages || '...'}
+                </span>
+                <button onClick={goToNextPage} disabled={pageNumber >= (numPages || 1)} className="pdf-btn">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="11" cy="11" r="8"/>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                    <line x1="11" y1="8" x2="11" y2="14"/>
-                    <line x1="8" y1="11" x2="14" y2="11"/>
+                    <polyline points="9 18 15 12 9 6"/>
                   </svg>
                 </button>
+                <div className="zoom-controls">
+                  <button onClick={zoomOut} className="pdf-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="11" cy="11" r="8"/>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                      <line x1="8" y1="11" x2="14" y2="11"/>
+                    </svg>
+                  </button>
+                  <span className="zoom-level">{Math.round(scale * 100)}%</span>
+                  <button onClick={zoomIn} className="pdf-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="11" cy="11" r="8"/>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                      <line x1="11" y1="8" x2="11" y2="14"/>
+                      <line x1="8" y1="11" x2="14" y2="11"/>
+                    </svg>
+                  </button>
+                </div>
+                
+                {/* Progress indicator */}
+                {numPages > 1 && (
+                  <div className="pdf-progress-indicator">
+                    <div className="pdf-progress-bar">
+                      <div 
+                        className="pdf-progress-fill" 
+                        style={{ width: `${Math.round((maxPageReached / numPages) * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
               
-              {/* Progress indicator */}
-              {numPages > 1 && (
-                <div className="pdf-progress-indicator">
-                  <div className="pdf-progress-bar">
-                    <div 
-                      className="pdf-progress-fill" 
-                      style={{ width: `${Math.round((maxPageReached / numPages) * 100)}%` }}
-                    />
-                  </div>
+              {/* Mark as Complete button at top right for PDF */}
+              {showMarkComplete && (
+                <div className="pdf-complete-header">
+                  {isComplete ? (
+                    <div className="pdf-completed-badge-small">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                      <span>Completed</span>
+                    </div>
+                  ) : (
+                    <button 
+                      className="btn-mark-complete-header"
+                      onClick={handleMarkComplete}
+                      title="Mark as done"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                      Mark as Complete
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -368,31 +395,6 @@ function DocumentViewer({
                 />
               </Document>
             </div>
-            
-            {/* Mark as Complete button for PDF */}
-            {showMarkComplete && (
-              <div className="pdf-complete-section">
-                {isComplete ? (
-                  <div className="pdf-completed-badge">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <polyline points="20 6 9 17 4 12"/>
-                    </svg>
-                    <span>Completed</span>
-                  </div>
-                ) : (
-                  <button 
-                    className="btn-mark-complete-pdf enabled"
-                    onClick={handleMarkComplete}
-                    title="Mark as done"
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <polyline points="20 6 9 17 4 12"/>
-                    </svg>
-                    Mark as Done
-                  </button>
-                )}
-              </div>
-            )}
           </div>
         )
       }
@@ -401,12 +403,11 @@ function DocumentViewer({
       if (isDOCX(currentDoc.fileName)) {
         return (
           <div className="docx-viewer">
-            <div ref={docxContainerRef} className="docx-container" />
-            {/* Mark as Complete button for DOCX */}
+            {/* Mark as Complete button at top right for DOCX */}
             {showMarkComplete && (
-              <div className="doc-complete-section">
+              <div className="doc-header-controls">
                 {isComplete ? (
-                  <div className="doc-completed-badge">
+                  <div className="doc-completed-badge-small">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <polyline points="20 6 9 17 4 12"/>
                     </svg>
@@ -414,18 +415,19 @@ function DocumentViewer({
                   </div>
                 ) : (
                   <button 
-                    className="btn-mark-complete-doc"
+                    className="btn-mark-complete-header"
                     onClick={handleMarkComplete}
                     title="Mark as done"
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <polyline points="20 6 9 17 4 12"/>
                     </svg>
-                    Mark as Done
+                    Mark as Complete
                   </button>
                 )}
               </div>
             )}
+            <div ref={docxContainerRef} className="docx-container" />
           </div>
         )
       }
@@ -434,17 +436,11 @@ function DocumentViewer({
       if (isImage(currentDoc.fileName)) {
         return (
           <div className="image-viewer">
-            <img 
-              src={currentDoc.uri} 
-              alt={currentDoc.fileName}
-              onLoad={() => setLoading(false)}
-              onError={handleError}
-            />
-            {/* Mark as Complete button for Images */}
+            {/* Mark as Complete button at top right for Images */}
             {showMarkComplete && (
-              <div className="doc-complete-section">
+              <div className="doc-header-controls">
                 {isComplete ? (
-                  <div className="doc-completed-badge">
+                  <div className="doc-completed-badge-small">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <polyline points="20 6 9 17 4 12"/>
                     </svg>
@@ -452,18 +448,24 @@ function DocumentViewer({
                   </div>
                 ) : (
                   <button 
-                    className="btn-mark-complete-doc"
+                    className="btn-mark-complete-header"
                     onClick={handleMarkComplete}
                     title="Mark as done"
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <polyline points="20 6 9 17 4 12"/>
                     </svg>
-                    Mark as Done
+                    Mark as Complete
                   </button>
                 )}
               </div>
             )}
+            <img 
+              src={currentDoc.uri} 
+              alt={currentDoc.fileName}
+              onLoad={() => setLoading(false)}
+              onError={handleError}
+            />
           </div>
         )
       }
@@ -476,23 +478,11 @@ function DocumentViewer({
       // Unsupported - show download card
       return (
         <div className="unsupported-file">
-          {getFileIcon(currentDoc.fileName)}
-          <span className="unsupported-message">
-            Preview not available for {getExtension(currentDoc.fileName).toUpperCase()} files
-          </span>
-          <a href={currentDoc.uri} target="_blank" rel="noopener noreferrer" className="download-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="7 10 12 15 17 10"/>
-              <line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
-            Download File
-          </a>
-          {/* Mark as Complete button for unsupported files */}
+          {/* Mark as Complete button at top right for unsupported files */}
           {showMarkComplete && (
-            <div className="doc-complete-section">
+            <div className="doc-header-controls unsupported-header">
               {isComplete ? (
-                <div className="doc-completed-badge">
+                <div className="doc-completed-badge-small">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polyline points="20 6 9 17 4 12"/>
                   </svg>
@@ -500,18 +490,32 @@ function DocumentViewer({
                 </div>
               ) : (
                 <button 
-                  className="btn-mark-complete-doc"
+                  className="btn-mark-complete-header"
                   onClick={handleMarkComplete}
                   title="Mark as done"
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polyline points="20 6 9 17 4 12"/>
                   </svg>
-                  Mark as Done
+                  Mark as Complete
                 </button>
               )}
             </div>
           )}
+          <div className="unsupported-content">
+            {getFileIcon(currentDoc.fileName)}
+            <span className="unsupported-message">
+              Preview not available for {getExtension(currentDoc.fileName).toUpperCase()} files
+            </span>
+            <a href={currentDoc.uri} target="_blank" rel="noopener noreferrer" className="download-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              Download File
+            </a>
+          </div>
         </div>
       )
     }
