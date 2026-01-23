@@ -286,6 +286,10 @@
   border: var(--border-sm) solid var(--border-color);
   border-radius: var(--radius-md);
   padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  max-height: 500px;
+  overflow: hidden;
 }
 
 .questions-section.available .section-header h3 {
@@ -334,7 +338,7 @@
 
 .question-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--spacing-md);
   padding: var(--spacing-sm) var(--spacing-md);
   background: var(--bg-secondary);
@@ -354,7 +358,7 @@
 .question-info {
   flex: 1;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--spacing-sm);
   min-width: 0;
 }
@@ -381,15 +385,18 @@
 .question-name {
   font-size: 0.875rem;
   color: var(--text-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  flex: 1;
+  min-width: 0;
 }
 
 .question-meta {
   display: flex;
   gap: var(--spacing-xs);
   flex-shrink: 0;
+  align-self: flex-start;
 }
 
 .question-item .badge {
@@ -447,6 +454,8 @@
   font-size: 0.75rem;
   font-weight: 500;
   cursor: pointer;
+  flex-shrink: 0;
+  align-self: flex-start;
   transition: all var(--transition-fast);
 }
 
@@ -481,8 +490,10 @@
 }
 
 .available-list {
-  max-height: 300px;
+  max-height: 400px;
   overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
 }
 
 /* Form Card */
