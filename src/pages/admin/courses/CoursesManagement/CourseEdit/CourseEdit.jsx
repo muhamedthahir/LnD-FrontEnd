@@ -885,16 +885,14 @@ function CourseEdit() {
           <div className="details-tab">
             {!editMode ? (
               <div className="course-details-view">
-                {isPublished && (
-                  <Button 
-                    variant="primary" 
-                    onClick={() => setEditMode(true)}
-                    disabled={true}
-                    title="Cannot edit published courses"
-                  >
-                    Edit Course
-                  </Button>
-                )}
+                <Button 
+                  variant="primary" 
+                  onClick={() => setEditMode(true)}
+                  disabled={isPublished}
+                  title={isPublished ? "Cannot edit published courses" : "Edit course details"}
+                >
+                  Edit Course
+                </Button>
                 <div className="details-content">
                   <div className="detail-item">
                     <label>Course Name</label>
@@ -1142,6 +1140,19 @@ function CourseEdit() {
           }
         }}
         onAdd={async (lessonData) => {
+          // Validate that a topic/section is selected
+          if (!selectedSectionId) {
+            toast.error('Missing required field: Please select a topic/section')
+            return
+          }
+          
+          // Validate that the selected section has a name
+          const selectedSection = sections.find(s => s.id === selectedSectionId)
+          if (!selectedSection || !selectedSection.name || !selectedSection.name.trim()) {
+            toast.error('Missing required field: Topic name is required')
+            return
+          }
+          
           setSavingLesson(true)
           try {
             let segmentType = 'articles'
