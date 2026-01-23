@@ -15,7 +15,8 @@ function Dropdown({
   className = '',
   renderOption = null, // Custom option renderer
   valueKey = 'id',
-  labelKey = 'name'
+  labelKey = 'name',
+  onCreateNew = null // Callback for creating new items (e.g., tags)
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
@@ -61,6 +62,12 @@ function Dropdown({
         getOptionLabel(option).toLowerCase().includes(searchTerm.toLowerCase())
       )
     : options
+
+  // Check if search term doesn't match any existing option (for creating new tags)
+  const hasExactMatch = searchTerm && filteredOptions.some(option => 
+    getOptionLabel(option).toLowerCase() === searchTerm.toLowerCase().trim()
+  )
+  const showCreateOption = onCreateNew && searchTerm && searchTerm.trim() && !hasExactMatch
 
   const getSelectedLabel = () => {
     if (multiple && Array.isArray(value)) {
@@ -181,7 +188,23 @@ function Dropdown({
             )}
             
             <div className="dropdown-options">
-              {filteredOptions.length === 0 ? (
+              {showCreateOption && (
+                <div
+                  className="dropdown-option dropdown-create-option"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onCreateNew(searchTerm.trim())
+                    setSearchTerm('')
+                  }}
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                  </svg>
+                  <span>Add "{searchTerm.trim()}"</span>
+                </div>
+              )}
+              {filteredOptions.length === 0 && !showCreateOption ? (
                 <div className="dropdown-empty">No options found</div>
               ) : (
                 filteredOptions.map((option, index) => (

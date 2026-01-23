@@ -23,7 +23,7 @@ function QuestionForm() {
   // Use Redux for master data
   const { 
     levels, statuses, questionTypes, languages, categories, tags, 
-    questionBanks, loadQuestionBanks, isLoaded 
+    questionBanks, loadQuestionBanks, loadMasterData, isLoaded 
   } = useAutoLoadMasterData()
   
   const masterData = { levels, statuses, questionTypes, languages, categories, tags }
@@ -193,6 +193,38 @@ function QuestionForm() {
             : prev.tags
         }))
       }
+    }
+  }
+
+  const handleCreateNewTag = async (tagName) => {
+    try {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.MASTER_DATA.CREATE_TAG}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
+        },
+        body: JSON.stringify({ name: tagName })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        // Reload master data to get the new tag
+        await loadMasterData(true)
+        // Add the new tag to the selected tags
+        const newTagId = data.tag.id
+        setFormData(prev => ({
+          ...prev,
+          tags: [...(prev.tags || []), newTagId]
+        }))
+        toast.success(`Tag "${tagName}" created successfully`)
+      } else {
+        const errorData = await response.json()
+        toast.error(errorData.error || 'Failed to create tag')
+      }
+    } catch (error) {
+      console.error('Error creating tag:', error)
+      toast.error('Failed to create tag')
     }
   }
 
@@ -725,6 +757,7 @@ function QuestionForm() {
                       placeholder="Select tags"
                       multiple
                       searchable
+                      onCreateNew={handleCreateNewTag}
                       renderOption={(tag) => (
                         <span className="tag-option">
                           <span className="tag-color" style={{ backgroundColor: tag.color || '#6366f1' }} />
