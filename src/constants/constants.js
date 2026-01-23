@@ -108,7 +108,9 @@ export const API_ENDPOINTS = {
     UPDATE: (id) => `/api/questions/${id}`,
     DELETE: (id) => `/api/questions/${id}`,
     ADD_TO_BANK: (id) => `/api/questions/${id}/add-to-bank`,
-    REMOVE_FROM_BANK: (id) => `/api/questions/${id}/remove-from-bank`
+    REMOVE_FROM_BANK: (id) => `/api/questions/${id}/remove-from-bank`,
+    BULK_MCQ_TEMPLATE: '/api/questions/bulk-upload/mcq/template',
+    BULK_MCQ_UPLOAD: '/api/questions/bulk-upload/mcq'
   },
 
   // Test Cases
