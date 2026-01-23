@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useOutletContext, useNavigate, Link } from 'react-router-dom'
 import { useApi } from '../../../contexts/ApiContext'
-import './Dashboard.css'
+import styles from './Dashboard.module.css'
 
 function Dashboard() {
   const { user } = useOutletContext()
@@ -50,7 +50,7 @@ function Dashboard() {
 
   if (!user) {
     return (
-      <div className="dashboard-loading">
+      <div className={styles.dashboardLoading}>
         <div className="spinner"></div>
         <p>Loading...</p>
       </div>
@@ -58,19 +58,19 @@ function Dashboard() {
   }
 
   return (
-    <div className="dashboard">
+    <div className={styles.dashboard}>
       {/* Profile Completion Notification */}
       {profileCompletion && !profileCompletion.isComplete && showNotification && (
-        <div className="profile-notification">
-          <div className="notification-content">
-            <div className="notification-icon">
+        <div className={styles.profileNotification}>
+          <div className={styles.notificationContent}>
+            <div className={styles.notificationIcon}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="12" cy="12" r="10"/>
                 <line x1="12" y1="8" x2="12" y2="12"/>
                 <line x1="12" y1="16" x2="12.01" y2="16"/>
               </svg>
             </div>
-            <div className="notification-text">
+            <div className={styles.notificationText}>
               <strong>Complete your profile!</strong>
               <p>
                 Your profile is {profileCompletion.completionPercentage}% complete. 
@@ -78,14 +78,14 @@ function Dashboard() {
                 {profileCompletion.missingRequired.length > 3 ? ` and ${profileCompletion.missingRequired.length - 3} more fields` : ''}.
               </p>
             </div>
-            <Link to="/personal-details" className="notification-action">
+            <Link to="/personal-details" className={styles.notificationAction}>
               Complete Now
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M5 12h14M12 5l7 7-7 7"/>
               </svg>
             </Link>
             <button 
-              className="notification-close" 
+              className={styles.notificationClose} 
               onClick={() => setShowNotification(false)}
               aria-label="Dismiss notification"
             >
@@ -95,59 +95,59 @@ function Dashboard() {
               </svg>
             </button>
           </div>
-          <div className="notification-progress">
+          <div className={styles.notificationProgress}>
             <div 
-              className="notification-progress-bar" 
+              className={styles.notificationProgressBar} 
               style={{ width: `${profileCompletion.completionPercentage}%` }}
             />
           </div>
         </div>
       )}
 
-      <header className="dashboard-header">
-        <div className="header-content">
+      <header className={styles.dashboardHeader}>
+        <div className={styles.headerContent}>
           <h1>Welcome, {user.name}!</h1>
         </div>
       </header>
 
-      <main className="dashboard-main">
-        <div className="dashboard-container">
-          <div className="user-info-card">
-            <div className="user-avatar">
+      <main className={styles.dashboardMain}>
+        <div className={styles.dashboardContainer}>
+          <div className={styles.userInfoCard}>
+            <div className={styles.userAvatar}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                 <circle cx="12" cy="7" r="4"/>
               </svg>
             </div>
             <h2>{user.name}</h2>
-            <div className="user-details">
-              <div className="detail-item">
-                <span className="detail-label">Email:</span>
-                <span className="detail-value">{user.email}</span>
+            <div className={styles.userDetails}>
+              <div className={styles.detailItem}>
+                <span className={styles.detailLabel}>Email:</span>
+                <span className={styles.detailValue}>{user.email}</span>
               </div>
-              <div className="detail-item">
-                <span className="detail-label">Role:</span>
-                <span className="detail-value role-badge dashboard-role-badge">{getRoleDisplay(user.role)}</span>
+              <div className={styles.detailItem}>
+                <span className={styles.detailLabel}>Role:</span>
+                <span className={`${styles.detailValue} ${styles.roleBadge}`}>{getRoleDisplay(user.role)}</span>
               </div>
               {user.college_name && (
-                <div className="detail-item">
-                  <span className="detail-label">College:</span>
-                  <span className="detail-value">{user.college_name}</span>
+                <div className={styles.detailItem}>
+                  <span className={styles.detailLabel}>College:</span>
+                  <span className={styles.detailValue}>{user.college_name}</span>
                 </div>
               )}
             </div>
           </div>
 
-          <div className="dashboard-content">
-            <div className="welcome-section">
+          <div className={styles.dashboardContent}>
+            <div className={styles.welcomeSection}>
               <h3>Dashboard</h3>
               <p>This is a dummy dashboard page. You have successfully logged in!</p>
               <p>Your authentication is working correctly with Passport.js.</p>
             </div>
 
-            <div className="info-cards">
-              <div className="info-card">
-                <div className="info-icon">
+            <div className={styles.infoCards}>
+              <div className={styles.infoCard}>
+                <div className={styles.infoIcon}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M12 2L2 7l10 5 10-5-10-5z"/>
                     <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
@@ -155,11 +155,11 @@ function Dashboard() {
                 </div>
                 <h4>Courses</h4>
                 <p>Manage and view your courses</p>
-                <span className="coming-soon">Coming Soon</span>
+                <span className={styles.comingSoon}>Coming Soon</span>
               </div>
 
-              <div className="info-card">
-                <div className="info-icon">
+              <div className={styles.infoCard}>
+                <div className={styles.infoIcon}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M9 11l3 3L22 4"/>
                     <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
@@ -167,11 +167,11 @@ function Dashboard() {
                 </div>
                 <h4>Progress</h4>
                 <p>Track your learning progress</p>
-                <span className="coming-soon">Coming Soon</span>
+                <span className={styles.comingSoon}>Coming Soon</span>
               </div>
 
-              <div className="info-card">
-                <div className="info-icon">
+              <div className={styles.infoCard}>
+                <div className={styles.infoIcon}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M12 2L2 7l10 5 10-5-10-5z"/>
                     <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
@@ -179,7 +179,7 @@ function Dashboard() {
                 </div>
                 <h4>Assessments</h4>
                 <p>Take and review assessments</p>
-                <span className="coming-soon">Coming Soon</span>
+                <span className={styles.comingSoon}>Coming Soon</span>
               </div>
             </div>
           </div>
