@@ -64,7 +64,8 @@ export const API_ENDPOINTS = {
     ENROLLED_USERS: (id) => `/api/administrations/${id}/enrolled-users`,
     USER_PROGRESS: (id, userId) => `/api/administrations/${id}/users/${userId}/progress`,
     UPDATE_ALL_PROGRESS: (id) => `/api/administrations/${id}/update-progress`,
-    PROGRESS_HISTORY: (id) => `/api/administrations/${id}/progress-history`
+    PROGRESS_HISTORY: (id) => `/api/administrations/${id}/progress-history`,
+    FORCE_EXPIRE_USER: (id, userId) => `/api/administrations/${id}/users/${userId}/force-expire`
   },
   
   // Topics (Sections)

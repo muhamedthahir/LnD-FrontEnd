@@ -44,6 +44,9 @@ function AdministrationDetail() {
   const [loadingEnrolledUsers, setLoadingEnrolledUsers] = useState(false)
   const [updatingProgress, setUpdatingProgress] = useState(false)
   const [progressUpdateResult, setProgressUpdateResult] = useState(null)
+  const [showForceExpireConfirm, setShowForceExpireConfirm] = useState(false)
+  const [userToExpire, setUserToExpire] = useState(null)
+  const [forceExpiring, setForceExpiring] = useState(false)
 
   useEffect(() => {
     fetchAdministrationDetails()
@@ -392,6 +395,43 @@ function AdministrationDetail() {
     }
   }
 
+  const handleForceExpireClick = (user) => {
+    setUserToExpire(user)
+    setShowForceExpireConfirm(true)
+  }
+
+  const handleForceExpireConfirm = async () => {
+    if (!userToExpire) return
+
+    setForceExpiring(true)
+    try {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.ADMINISTRATIONS.FORCE_EXPIRE_USER(id, userToExpire.user_id)}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        }
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        toast.success(data.message || 'Course force expired successfully')
+        setShowForceExpireConfirm(false)
+        setUserToExpire(null)
+        // Refresh enrolled users to show updated status
+        fetchEnrolledUsers()
+      } else {
+        toast.error(data.error || 'Error force expiring course')
+      }
+    } catch (error) {
+      console.error('Error force expiring course:', error)
+      toast.error('Error force expiring course')
+    } finally {
+      setForceExpiring(false)
+    }
+  }
+
   const filteredGroups = availableGroups.filter(group => 
     group.name.toLowerCase().includes(groupSearch.toLowerCase())
   )
@@ -731,20 +771,31 @@ function AdministrationDetail() {
                         <td>{user.started_at ? formatDate(user.started_at) : '-'}</td>
                         <td>{formatLastVisited(user.last_accessed_at)}</td>
                         <td>
-                          <button
-                            className="btn-view-report"
-                            onClick={() => navigate(`/admin/courses/administrations/${id}/users/${user.user_id}/progress`)}
-                            title="View Progress Report"
-                          >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                              <polyline points="14 2 14 8 20 8"></polyline>
-                              <line x1="16" y1="13" x2="8" y2="13"></line>
-                              <line x1="16" y1="17" x2="8" y2="17"></line>
-                              <polyline points="10 9 9 9 8 9"></polyline>
-                            </svg>
-                            View Report
-                          </button>
+                          <div className="action-buttons">
+                            <button
+                              className="btn-view-report"
+                              onClick={() => navigate(`/admin/courses/administrations/${id}/users/${user.user_id}/progress`)}
+                              title="View Progress Report"
+                            >
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10 9 9 9 8 9"></polyline>
+                              </svg>
+                            </button>
+                            <button
+                              className="btn-force-expire"
+                              onClick={() => handleForceExpireClick(user)}
+                              title="Force Expire Course"
+                            >
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                              </svg>
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -992,6 +1043,83 @@ function AdministrationDetail() {
               </Button>
               <Button variant="danger" onClick={handleDelete} disabled={deleting}>
                 {deleting ? 'Deleting...' : 'Delete Administration'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Force Expire Confirmation Modal */}
+      {showForceExpireConfirm && userToExpire && (
+        <div className="modal-overlay" onClick={() => {
+          if (!forceExpiring) {
+            setShowForceExpireConfirm(false)
+            setUserToExpire(null)
+          }
+        }}>
+          <div className="modal-content force-expire-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Force Expire Course</h3>
+              <button className="modal-close" onClick={() => {
+                if (!forceExpiring) {
+                  setShowForceExpireConfirm(false)
+                  setUserToExpire(null)
+                }
+              }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+            <div className="modal-body">
+              <div className="warning-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                  <line x1="12" y1="9" x2="12" y2="13"></line>
+                  <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+              </div>
+              <p className="warning-title">This is a sensitive action!</p>
+              <p>Are you sure you want to force expire the course for <strong>{userToExpire.user_name}</strong>?</p>
+              <p className="warning-text">
+                This will immediately expire the course for this user, regardless of the administration's end time. 
+                The user will lose access to the course immediately. This action cannot be undone.
+              </p>
+              <div className="confirmation-input">
+                <label>Type "EXPIRE" to confirm:</label>
+                <input
+                  type="text"
+                  id="expire-confirm-input"
+                  placeholder="Type EXPIRE to confirm"
+                  autoComplete="off"
+                />
+              </div>
+            </div>
+            <div className="modal-actions">
+              <Button 
+                variant="secondary" 
+                onClick={() => {
+                  setShowForceExpireConfirm(false)
+                  setUserToExpire(null)
+                }} 
+                disabled={forceExpiring}
+              >
+                Cancel
+              </Button>
+              <Button 
+                variant="danger" 
+                onClick={() => {
+                  const input = document.getElementById('expire-confirm-input')
+                  if (input && input.value.trim().toUpperCase() === 'EXPIRE') {
+                    handleForceExpireConfirm()
+                  } else {
+                    toast.error('Please type "EXPIRE" to confirm')
+                  }
+                }} 
+                disabled={forceExpiring}
+              >
+                {forceExpiring ? 'Expiring...' : 'Force Expire'}
               </Button>
             </div>
           </div>
