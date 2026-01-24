@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useTheme } from '../../contexts/ThemeContext'
 import ThemeToggle from '../ThemeToggle/ThemeToggle'
-import './Sidebar.css'
+import styles from './Sidebar.module.css'
 
 function Sidebar({ user, isCollapsed }) {
   const location = useLocation()
@@ -20,21 +20,21 @@ function Sidebar({ user, isCollapsed }) {
   const isPrimaryAdmin = user?.role === 'primary_admin'
 
   return (
-    <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
-      <div className="sidebar-header">
+    <aside className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ''}`}>
+      <div className={styles.header}>
         <h2>Menu</h2>
-        <div className="sidebar-header-actions">
-          <div className="sidebar-theme-toggle">
+        <div className={styles.headerActions}>
+          <div className={styles.themeToggle}>
             <ThemeToggle />
           </div>
         </div>
       </div>
       
-      <nav className="sidebar-nav">
+      <nav className={styles.nav}>
         {/* Dashboard - Standalone */}
         <Link 
           to="/dashboard" 
-          className={`nav-item ${isActive('/dashboard') ? 'active' : ''}`}
+          className={`${styles.navItem} ${isActive('/dashboard') ? styles.active : ''}`}
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <rect x="3" y="3" width="7" height="7"/>
@@ -48,13 +48,13 @@ function Sidebar({ user, isCollapsed }) {
 
         {/* User Administration Section */}
         {isAdmin && (
-          <div className="nav-section">
-            <div className="nav-section-label">User Administration</div>
+          <div className={styles.navSection}>
+            <div className={styles.sectionLabel}>User Administration</div>
             
             {isPrimaryAdmin && (
               <Link 
                 to="/admin/institutions" 
-                className={`nav-item ${isActive('/admin') && location.pathname.includes('institutions') ? 'active' : ''}`}
+                className={`${styles.navItem} ${isActive('/admin') && location.pathname.includes('institutions') ? styles.active : ''}`}
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M3 21h18v-2H3v2z"/>
@@ -71,7 +71,7 @@ function Sidebar({ user, isCollapsed }) {
 
             <Link 
               to="/admin/users" 
-              className={`nav-item ${isActive('/admin') && location.pathname.includes('users') ? 'active' : ''}`}
+              className={`${styles.navItem} ${isActive('/admin') && location.pathname.includes('users') ? styles.active : ''}`}
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
@@ -84,7 +84,7 @@ function Sidebar({ user, isCollapsed }) {
 
             <Link 
               to="/admin/groups" 
-              className={`nav-item ${isActive('/admin') && location.pathname.includes('groups') ? 'active' : ''}`}
+              className={`${styles.navItem} ${isActive('/admin') && location.pathname.includes('groups') ? styles.active : ''}`}
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="6" r="2.2"/>
@@ -100,7 +100,7 @@ function Sidebar({ user, isCollapsed }) {
             {isPrimaryAdmin && (
               <Link 
                 to="/admin/mailer-templates" 
-                className={`nav-item ${isActive('/admin') && location.pathname.includes('mailer-templates') ? 'active' : ''}`}
+                className={`${styles.navItem} ${isActive('/admin') && location.pathname.includes('mailer-templates') ? styles.active : ''}`}
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
@@ -115,12 +115,12 @@ function Sidebar({ user, isCollapsed }) {
 
         {/* Question Management Section */}
         {isAdmin && (
-          <div className="nav-section">
-            <div className="nav-section-label">Question Management</div>
+          <div className={styles.navSection}>
+            <div className={styles.sectionLabel}>Question Management</div>
             
             <Link 
               to="/admin/questions/banks" 
-              className={`nav-item ${location.pathname.includes('/questions/banks') ? 'active' : ''}`}
+              className={`${styles.navItem} ${location.pathname.includes('/questions/banks') ? styles.active : ''}`}
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -133,7 +133,7 @@ function Sidebar({ user, isCollapsed }) {
 
             <Link 
               to="/admin/questions/list" 
-              className={`nav-item ${location.pathname.includes('/questions/list') ? 'active' : ''}`}
+              className={`${styles.navItem} ${location.pathname.includes('/questions/list') ? styles.active : ''}`}
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="12" cy="12" r="10"/>
@@ -146,13 +146,13 @@ function Sidebar({ user, isCollapsed }) {
         )}
 
         {/* Course Management Section */}
-        <div className="nav-section">
-          <div className="nav-section-label">Course</div>
+        <div className={styles.navSection}>
+          <div className={styles.sectionLabel}>Course</div>
           
           {!isAdmin && (
             <Link 
               to="/courses/user-courses" 
-              className={`nav-item ${isActive('/courses/user-courses') ? 'active' : ''}`}
+              className={`${styles.navItem} ${isActive('/courses/user-courses') ? styles.active : ''}`}
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
@@ -166,7 +166,7 @@ function Sidebar({ user, isCollapsed }) {
             <>
               <Link 
                 to="/admin/courses/management" 
-                className={`nav-item ${isActive('/admin') && location.pathname.includes('courses/management') ? 'active' : ''}`}
+                className={`${styles.navItem} ${isActive('/admin') && location.pathname.includes('courses/management') ? styles.active : ''}`}
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
@@ -177,7 +177,7 @@ function Sidebar({ user, isCollapsed }) {
 
               <Link 
                 to="/admin/courses/administrations" 
-                className={`nav-item ${isActive('/admin') && location.pathname.includes('courses/administrations') ? 'active' : ''}`}
+                className={`${styles.navItem} ${isActive('/admin') && location.pathname.includes('courses/administrations') ? styles.active : ''}`}
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M9 11l3 3L22 4"/>
@@ -190,13 +190,13 @@ function Sidebar({ user, isCollapsed }) {
         </div>
 
         {/* Assessment Management Section */}
-        <div className="nav-section">
-          <div className="nav-section-label">Assessment</div>
+        <div className={styles.navSection}>
+          <div className={styles.sectionLabel}>Assessment</div>
           
           {!isPrimaryAdmin && (
             <Link 
               to="/assessments" 
-              className={`nav-item ${isActive('/assessments') ? 'active' : ''}`}
+              className={`${styles.navItem} ${isActive('/assessments') ? styles.active : ''}`}
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M9 11l3 3L22 4"/>
@@ -210,7 +210,7 @@ function Sidebar({ user, isCollapsed }) {
             <>
               <Link 
                 to="/admin/assessments/management" 
-                className={`nav-item ${isActive('/admin') && location.pathname.includes('assessments/management') ? 'active' : ''}`}
+                className={`${styles.navItem} ${isActive('/admin') && location.pathname.includes('assessments/management') ? styles.active : ''}`}
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
@@ -221,7 +221,7 @@ function Sidebar({ user, isCollapsed }) {
 
               <Link 
                 to="/admin/assessments/administrations" 
-                className={`nav-item ${isActive('/admin') && location.pathname.includes('assessments/administrations') ? 'active' : ''}`}
+                className={`${styles.navItem} ${isActive('/admin') && location.pathname.includes('assessments/administrations') ? styles.active : ''}`}
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M9 11l3 3L22 4"/>

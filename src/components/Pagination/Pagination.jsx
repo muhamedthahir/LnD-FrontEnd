@@ -1,5 +1,5 @@
 import React from 'react'
-import './Pagination.css'
+import styles from './Pagination.module.css'
 
 const Pagination = ({
   currentPage,
@@ -47,17 +47,17 @@ const Pagination = ({
   }
 
   return (
-    <div className="pagination-container">
-      <div className="pagination-info">
+    <div className={styles.container}>
+      <div className={styles.info}>
         <span>
           Showing {startItem} to {endItem} of {totalCount} {itemName}
         </span>
-        <div className="page-size-selector">
+        <div className={styles.pageSizeSelector}>
           <label>Per page:</label>
           <select 
             value={pageSize} 
             onChange={handlePageSizeChange}
-            className="page-size-select"
+            className={styles.pageSizeSelect}
           >
             {pageSizeOptions.map(option => (
               <option key={option} value={option}>
@@ -68,9 +68,9 @@ const Pagination = ({
         </div>
       </div>
       
-      <div className="pagination-controls">
+      <div className={styles.controls}>
         <button
-          className="pagination-btn"
+          className={styles.btn}
           onClick={() => onPageChange(1)}
           disabled={currentPage === 1}
           title="First page"
@@ -81,7 +81,7 @@ const Pagination = ({
           </svg>
         </button>
         <button
-          className="pagination-btn"
+          className={styles.btn}
           onClick={() => onPageChange(Math.max(1, currentPage - 1))}
           disabled={currentPage === 1}
           title="Previous page"
@@ -94,7 +94,7 @@ const Pagination = ({
         {getPageNumbers().map(pageNum => (
           <button
             key={pageNum}
-            className={`pagination-btn ${currentPage === pageNum ? 'active' : ''}`}
+            className={`${styles.btn} ${currentPage === pageNum ? styles.active : ''}`}
             onClick={() => onPageChange(pageNum)}
           >
             {pageNum}
@@ -102,7 +102,7 @@ const Pagination = ({
         ))}
         
         <button
-          className="pagination-btn"
+          className={styles.btn}
           onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
           disabled={currentPage === totalPages}
           title="Next page"
@@ -112,7 +112,7 @@ const Pagination = ({
           </svg>
         </button>
         <button
-          className="pagination-btn"
+          className={styles.btn}
           onClick={() => onPageChange(totalPages)}
           disabled={currentPage === totalPages}
           title="Last page"

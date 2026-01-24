@@ -151,14 +151,14 @@ function Layout() {
 
   if (loading) {
     return (
-      <div className="layout-loading">
+      <div className={styles.loading}>
         <div className="spinner"></div>
       </div>
     )
   }
 
   return (
-    <div className="layout">
+    <div className={styles.layout}>
       <Sidebar user={user} isCollapsed={isSidebarCollapsed} />
       <Header 
         user={user} 
@@ -166,7 +166,7 @@ function Layout() {
         onToggleSidebar={toggleSidebar}
         isSidebarCollapsed={isSidebarCollapsed}
       />
-      <main className="layout-main">
+      <main className={styles.main}>
         <Outlet context={{ user, logout }} />
       </main>
     </div>

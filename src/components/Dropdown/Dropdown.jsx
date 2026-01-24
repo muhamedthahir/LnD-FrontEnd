@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import './Dropdown.css'
+import styles from './Dropdown.module.css'
 
 function Dropdown({
   options = [],
@@ -130,9 +130,9 @@ function Dropdown({
     : value !== null && value !== undefined && value !== ''
 
   return (
-    <div className={`dropdown-wrapper ${className}`}>
+    <div className={`${styles.wrapper} ${className}`}>
       {label && (
-        <label className="dropdown-label">
+        <label className={styles.label}>
           {label}
           {required && <span className="required">*</span>}
         </label>
@@ -140,17 +140,17 @@ function Dropdown({
       
       <div 
         ref={dropdownRef}
-        className={`dropdown-container ${isOpen ? 'open' : ''} ${disabled ? 'disabled' : ''} ${error ? 'error' : ''}`}
+        className={`${styles.container} ${isOpen ? styles.open : ''} ${disabled ? styles.disabled : ''} ${error ? styles.error : ''}`}
       >
-        <div className="dropdown-header" onClick={handleToggle}>
-          <span className={`dropdown-value ${!hasValue ? 'placeholder' : ''}`}>
+        <div className={styles.header} onClick={handleToggle}>
+          <span className={`${styles.value} ${!hasValue ? styles.placeholder : ''}`}>
             {getSelectedLabel()}
           </span>
-          <div className="dropdown-actions">
+          <div className={styles.actions}>
             {hasValue && !disabled && (
               <button 
                 type="button" 
-                className="dropdown-clear" 
+                className={styles.clear} 
                 onClick={handleClear}
                 title="Clear"
               >
@@ -161,7 +161,7 @@ function Dropdown({
               </button>
             )}
             <svg 
-              className={`dropdown-arrow ${isOpen ? 'open' : ''}`}
+              className={`${styles.arrow} ${isOpen ? styles.open : ''}`}
               viewBox="0 0 24 24" 
               fill="none" 
               stroke="currentColor" 
@@ -173,9 +173,9 @@ function Dropdown({
         </div>
 
         {isOpen && (
-          <div className="dropdown-menu">
+          <div className={styles.menu}>
             {searchable && (
-              <div className="dropdown-search">
+              <div className={styles.search}>
                 <input
                   ref={searchInputRef}
                   type="text"
@@ -187,10 +187,10 @@ function Dropdown({
               </div>
             )}
             
-            <div className="dropdown-options">
+            <div className={styles.options}>
               {showCreateOption && (
                 <div
-                  className="dropdown-option dropdown-create-option"
+                  className={`${styles.option} ${styles.createOption}`}
                   onClick={(e) => {
                     e.stopPropagation()
                     onCreateNew(searchTerm.trim())
@@ -205,16 +205,16 @@ function Dropdown({
                 </div>
               )}
               {filteredOptions.length === 0 && !showCreateOption ? (
-                <div className="dropdown-empty">No options found</div>
+                <div className={styles.empty}>No options found</div>
               ) : (
                 filteredOptions.map((option, index) => (
                   <div
                     key={getOptionValue(option) || index}
-                    className={`dropdown-option ${isSelected(option) ? 'selected' : ''}`}
+                    className={`${styles.option} ${isSelected(option) ? styles.selected : ''}`}
                     onClick={() => handleOptionClick(option)}
                   >
                     {multiple && (
-                      <span className={`dropdown-checkbox ${isSelected(option) ? 'checked' : ''}`}>
+                      <span className={`${styles.checkbox} ${isSelected(option) ? styles.checked : ''}`}>
                         {isSelected(option) && (
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                             <polyline points="20 6 9 17 4 12"/>
@@ -231,7 +231,7 @@ function Dropdown({
         )}
       </div>
 
-      {error && <span className="dropdown-error">{error}</span>}
+      {error && <span className={styles.error}>{error}</span>}
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import './Button.css'
+import styles from './Button.module.css'
 
 function Button({ 
   children, 
@@ -9,7 +9,7 @@ function Button({
   className = '',
   ...props 
 }) {
-  const buttonClasses = `btn btn-${variant} ${className}`.trim()
+  const buttonClasses = `${styles.button} ${styles[variant]} ${className}`.trim()
   
   return (
     <button

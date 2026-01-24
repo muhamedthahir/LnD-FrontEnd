@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import './DoubleInputModal.css'
+import styles from './DoubleInputModal.module.css'
 
 function DoubleInputModal({ 
   isOpen, 
@@ -47,13 +47,13 @@ function DoubleInputModal({
   if (!isOpen) return null
 
   return (
-    <div className="double-input-modal-overlay" onClick={onClose}>
-      <div className="double-input-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="double-input-modal-header">
+    <div className={styles.overlay} onClick={onClose}>
+      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.header}>
           <h3>{title}</h3>
         </div>
-        <div className="double-input-modal-body">
-          <div className="input-group">
+        <div className={styles.body}>
+          <div className={styles.inputGroup}>
             <label>{label1}</label>
             <input
               type={type1}
@@ -64,7 +64,7 @@ function DoubleInputModal({
               autoFocus
             />
           </div>
-          <div className="input-group">
+          <div className={styles.inputGroup}>
             <label>{label2}</label>
             <input
               type={type2}
@@ -75,11 +75,11 @@ function DoubleInputModal({
             />
           </div>
         </div>
-        <div className="double-input-modal-footer">
-          <button className="btn-cancel" onClick={onClose}>
+        <div className={styles.footer}>
+          <button className={styles.cancelBtn} onClick={onClose}>
             {cancelText}
           </button>
-          <button className="btn-confirm" onClick={handleConfirm} disabled={!value1.trim() || !value2.trim()}>
+          <button className={styles.confirmBtn} onClick={handleConfirm} disabled={!value1.trim() || !value2.trim()}>
             {confirmText}
           </button>
         </div>

@@ -1,4 +1,4 @@
-import './Toggle.css'
+import styles from './Toggle.module.css'
 
 function Toggle({
   checked = false,
@@ -15,16 +15,16 @@ function Toggle({
   }
 
   return (
-    <label className={`toggle-container toggle-${size} ${disabled ? 'disabled' : ''} ${className}`}>
+    <label className={`${styles.container} ${styles[size]} ${disabled ? styles.disabled : ''} ${className}`}>
       <input
         type="checkbox"
         checked={checked}
         onChange={handleChange}
         disabled={disabled}
-        className="toggle-input"
+        className={styles.input}
       />
-      <span className="toggle-slider"></span>
-      {label && <span className="toggle-label">{label}</span>}
+      <span className={styles.slider}></span>
+      {label && <span className={styles.label}>{label}</span>}
     </label>
   )
 }

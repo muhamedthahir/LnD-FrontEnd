@@ -1,0 +1,114 @@
+.container {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+  user-select: none;
+}
+
+.container.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.input {
+  display: none;
+}
+
+.slider {
+  position: relative;
+  display: inline-block;
+  background: var(--bg-tertiary);
+  border-radius: 100px;
+  transition: all var(--transition-fast);
+}
+
+.slider::before {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: var(--text-secondary);
+  transition: all var(--transition-fast);
+}
+
+/* Size variants */
+.small .slider {
+  width: 36px;
+  height: 20px;
+}
+
+.small .slider::before {
+  width: 16px;
+  height: 16px;
+  top: 2px;
+  left: 2px;
+}
+
+.medium .slider {
+  width: 48px;
+  height: 24px;
+}
+
+.medium .slider::before {
+  width: 20px;
+  height: 20px;
+  top: 2px;
+  left: 2px;
+}
+
+.large .slider {
+  width: 60px;
+  height: 30px;
+}
+
+.large .slider::before {
+  width: 26px;
+  height: 26px;
+  top: 2px;
+  left: 2px;
+}
+
+/* Checked state */
+.input:checked + .slider {
+  background: var(--accent-primary);
+}
+
+.input:checked + .slider::before {
+  background: white;
+}
+
+.small .input:checked + .slider::before {
+  transform: translateX(16px);
+}
+
+.medium .input:checked + .slider::before {
+  transform: translateX(24px);
+}
+
+.large .input:checked + .slider::before {
+  transform: translateX(30px);
+}
+
+/* Hover state */
+.container:not(.disabled):hover .slider {
+  background: var(--bg-secondary);
+}
+
+.container:not(.disabled):hover .input:checked + .slider {
+  background: var(--accent-secondary);
+}
+
+/* Label */
+.label {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+/* Focus state */
+.input:focus-visible + .slider {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+

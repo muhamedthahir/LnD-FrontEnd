@@ -1,0 +1,135 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  width: 90%;
+  max-width: 25rem;
+  box-shadow: var(--shadow-lg);
+  animation: slideUp 0.3s ease-out;
+  overflow: hidden;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(1rem);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.header {
+  padding: var(--spacing-lg);
+  border-bottom: var(--border-sm) solid var(--border-color);
+}
+
+.header h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.body {
+  padding: var(--spacing-lg);
+}
+
+.body p {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin: 0;
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+.footer {
+  display: flex;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  border-top: var(--border-sm) solid var(--border-color);
+  justify-content: flex-end;
+}
+
+.cancelBtn,
+.confirmBtn {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border: none;
+}
+
+.cancelBtn {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: var(--border-sm) solid var(--border-color);
+}
+
+.cancelBtn:hover {
+  background: var(--bg-tertiary);
+}
+
+.confirmBtn {
+  background: var(--error);
+  color: white;
+}
+
+.confirmBtn:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.confirmBtn.disabled,
+.confirmBtn:disabled {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  opacity: 0.5;
+  cursor: not-allowed;
+  border: var(--border-sm) solid var(--border-color);
+}
+
+.confirmBtn.disabled:hover,
+.confirmBtn:disabled:hover {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+}
+
+.error {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: rgba(239, 68, 68, 0.1);
+  border: var(--border-sm) solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-md);
+}
+
+.error p {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin: 0;
+  font-weight: 500;
+}
+
+

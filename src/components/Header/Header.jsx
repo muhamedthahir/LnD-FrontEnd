@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { useApi } from '../../contexts/ApiContext'
-import './Header.css'
+import styles from './Header.module.css'
 
 function Header({ user, logout, onToggleSidebar, isSidebarCollapsed }) {
   const navigate = useNavigate()
@@ -122,10 +122,10 @@ function Header({ user, logout, onToggleSidebar, isSidebarCollapsed }) {
   }
 
   return (
-    <header className="app-header">
-      <div className="header-left">
+    <header className={styles.header}>
+      <div className={styles.left}>
         <button 
-          className="sidebar-toggle-btn-header"
+          className={styles.sidebarToggle}
           onClick={onToggleSidebar}
           title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
@@ -141,34 +141,34 @@ function Header({ user, logout, onToggleSidebar, isSidebarCollapsed }) {
         
         {/* Course Progress Bar - shown only on current course page */}
         {isCurrentCoursePage && courseProgress && (
-          <div className="header-course-progress">
+          <div className={styles.courseProgress}>
             {courseName && (
-              <span className="header-course-name">{courseName}</span>
+              <span className={styles.courseName}>{courseName}</span>
             )}
-            <div className="header-progress-bar">
+            <div className={styles.progressBar}>
               <div 
-                className="header-progress-fill" 
+                className={styles.progressFill} 
                 style={{ width: `${courseProgress.progress_percentage || 0}%` }}
               ></div>
             </div>
-            <span className="header-progress-text">{courseProgress.progress_percentage || 0}%</span>
+            <span className={styles.progressText}>{courseProgress.progress_percentage || 0}%</span>
           </div>
         )}
       </div>
 
-      <div className="header-right">
-        <div className="user-menu-container" ref={menuRef}>
+      <div className={styles.right}>
+        <div className={styles.userMenuContainer} ref={menuRef}>
           <button 
-            className="user-profile-btn"
+            className={styles.userProfileBtn}
             onClick={() => setShowUserMenu(!showUserMenu)}
             aria-label="User menu"
           >
-            <div className="user-avatar  header-user-avatar">
+            <div className={`${styles.userAvatar} ${styles.headerUserAvatar}`}>
               {getUserInitial()}
             </div>
-            <span className="user-name">{getUserName()}</span>
+            <span className={styles.userName}>{getUserName()}</span>
             <svg 
-              className={`user-menu-arrow ${showUserMenu ? 'open' : ''}`}
+              className={`${styles.menuArrow} ${showUserMenu ? styles.open : ''}`}
               viewBox="0 0 24 24" 
               fill="none" 
               stroke="currentColor" 
@@ -179,20 +179,20 @@ function Header({ user, logout, onToggleSidebar, isSidebarCollapsed }) {
           </button>
 
           {showUserMenu && (
-            <div className="user-menu-dropdown">
-              <div className="user-menu-info">
-                <div className="user-avatar-large">
+            <div className={styles.menuDropdown}>
+              <div className={styles.menuInfo}>
+                <div className={styles.avatarLarge}>
                   {getUserInitial()}
                 </div>
-                <div className="user-menu-details">
-                  <div className="user-menu-name">{getUserName()}</div>
-                  <div className="user-menu-email">{user?.email || ''}</div>
-                  <div className="user-menu-role">{user?.role?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) || ''}</div>
+                <div className={styles.menuDetails}>
+                  <div className={styles.menuName}>{getUserName()}</div>
+                  <div className={styles.menuEmail}>{user?.email || ''}</div>
+                  <div className={styles.menuRole}>{user?.role?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) || ''}</div>
                 </div>
               </div>
-              <div className="user-menu-divider"></div>
+              <div className={styles.menuDivider}></div>
               <button 
-                className="user-menu-item"
+                className={styles.menuItem}
                 onClick={() => {
                   navigate('/personal-details')
                   setShowUserMenu(false)
@@ -207,7 +207,7 @@ function Header({ user, logout, onToggleSidebar, isSidebarCollapsed }) {
               {user?.role === 'primary_admin' && (
                 <>
                   <button 
-                    className="user-menu-item"
+                    className={styles.menuItem}
                     onClick={() => {
                       navigate('/admin/settings')
                       setShowUserMenu(false)
@@ -221,9 +221,9 @@ function Header({ user, logout, onToggleSidebar, isSidebarCollapsed }) {
                   </button>
                 </>
               )}
-              <div className="user-menu-divider"></div>
+              <div className={styles.menuDivider}></div>
               <button 
-                className="user-menu-logout"
+                className={styles.menuLogout}
                 onClick={handleLogout}
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
