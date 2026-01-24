@@ -91,4 +91,3 @@ After converting each component:
 - Keep truly global styles in `index.css` and `App.css`
 - Test thoroughly after each conversion
 
-

@@ -125,7 +125,7 @@ function Header({ user, logout, onToggleSidebar, isSidebarCollapsed }) {
     <header className={styles.header}>
       <div className={styles.left}>
         <button 
-          className={styles.sidebarToggle}
+          className={styles.sidebarToggleBtn}
           onClick={onToggleSidebar}
           title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}

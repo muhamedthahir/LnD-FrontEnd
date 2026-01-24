@@ -5,7 +5,7 @@ import Sidebar from '../Sidebar/Sidebar'
 import Header from '../Header/Header'
 import { useApi } from '../../contexts/ApiContext'
 import { API_ENDPOINTS } from '../../constants/constants'
-import './Layout.css'
+import styles from './Layout.module.css'
 
 function Layout() {
   const { apiBaseUrl, accessToken, refreshToken, clearTokens } = useApi()

@@ -44,4 +44,3 @@ Write-Host "  1. Update imports: import styles from './Component.module.css'" -F
 Write-Host "  2. Update className: className={styles.className}" -ForegroundColor White
 Write-Host "  3. Handle dynamic classes: className={`${styles.base} ${styles[variant]}`}" -ForegroundColor White
 
-

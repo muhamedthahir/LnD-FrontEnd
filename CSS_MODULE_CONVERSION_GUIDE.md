@@ -57,4 +57,3 @@ import styles from './ComponentName.module.css'
 - Keep global styles in `index.css` and `App.css` only
 - Test each component after conversion
 
-

@@ -31,7 +31,7 @@
   transition: all var(--transition-fast);
 }
 
-/* Size variants */
+/* Size variants - using composition */
 .small .slider {
   width: 36px;
   height: 20px;
@@ -68,12 +68,12 @@
   left: 2px;
 }
 
-/* Checked state */
-.input:checked + .slider {
+/* Checked state - CSS modules handle scoped classes with pseudo-selectors */
+.container .input:checked + .slider {
   background: var(--accent-primary);
 }
 
-.input:checked + .slider::before {
+.container .input:checked + .slider::before {
   background: white;
 }
 
@@ -106,9 +106,7 @@
 }
 
 /* Focus state */
-.input:focus-visible + .slider {
+.container .input:focus-visible + .slider {
   outline: 2px solid var(--accent-primary);
   outline-offset: 2px;
 }
-
-

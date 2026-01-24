@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import styles from './InputModal.module.css'
+import './InputModal.css'
 
 function InputModal({ 
   isOpen, 
@@ -40,12 +40,12 @@ function InputModal({
   if (!isOpen) return null
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.header}>
+    <div className="input-modal-overlay" onClick={onClose}>
+      <div className="input-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="input-modal-header">
           <h3>{title}</h3>
         </div>
-        <div className={styles.body}>
+        <div className="input-modal-body">
           <label>{label}</label>
           <input
             type={type}
@@ -56,11 +56,11 @@ function InputModal({
             autoFocus
           />
         </div>
-        <div className={styles.footer}>
-          <button className={styles.cancelBtn} onClick={onClose}>
+        <div className="input-modal-footer">
+          <button className="btn-cancel" onClick={onClose}>
             {cancelText}
           </button>
-          <button className={styles.confirmBtn} onClick={handleConfirm} disabled={!value.trim()}>
+          <button className="btn-confirm" onClick={handleConfirm} disabled={!value.trim()}>
             {confirmText}
           </button>
         </div>
