@@ -16,6 +16,29 @@
   transform: translateY(-0.125rem);
 }
 
+.course-card.expired {
+  opacity: 0.7;
+  cursor: not-allowed;
+  position: relative;
+}
+
+.course-card.expired:hover {
+  transform: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.course-card.expired::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.05);
+  pointer-events: none;
+  border-radius: var(--radius-md);
+}
+
 /* Top Half - Thumbnail */
 .course-thumbnail {
   width: 100%;
@@ -176,6 +199,26 @@
   font-weight: 500;
   color: var(--text-secondary);
   text-align: right;
+}
+
+/* Expired Badge */
+.course-expired-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-top: auto;
+}
+
+.course-expired-badge svg {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex-shrink: 0;
 }
 
 @media (max-width: 768px) {

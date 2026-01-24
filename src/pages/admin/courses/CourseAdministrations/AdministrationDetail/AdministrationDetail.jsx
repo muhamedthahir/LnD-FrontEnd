@@ -215,6 +215,10 @@ function AdministrationDetail() {
   }
 
   const getProgressStatus = (user) => {
+    // Check if enrollment is expired
+    if (user.enrollment_status === 'Expired') return 'Expired'
+    // Check if user_courses status is expired
+    if (user.course_status === 'expired') return 'Expired'
     if (!user.course_status && !user.started_at) return 'Not Started'
     if (user.completed_at) return 'Completed'
     if (user.started_at) return 'In Progress'
