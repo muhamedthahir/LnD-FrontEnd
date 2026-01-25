@@ -4,7 +4,7 @@ import { useApi } from '../../../../contexts/ApiContext'
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify'
 import Button from '../../../../components/Button/Button'
-import './AssessmentEdit.css'
+import styles from './AssessmentEdit.module.css'
 
 function AssessmentEdit() {
   const { id } = useParams()
@@ -440,9 +440,9 @@ function AssessmentEdit() {
 
   if (loading) {
     return (
-      <div className="assessment-edit-page">
-        <div className="loading-state">
-          <div className="spinner"></div>
+      <div className={styles.assessmentEditPage}>
+        <div className={styles.loadingState}>
+          <div className={styles.spinner}></div>
           <p>Loading assessment...</p>
         </div>
       </div>
@@ -451,8 +451,8 @@ function AssessmentEdit() {
 
   if (!assessment) {
     return (
-      <div className="assessment-edit-page">
-        <div className="error-state">
+      <div className={styles.assessmentEditPage}>
+        <div className={styles.errorState}>
           <h3>Assessment not found</h3>
           <Button onClick={() => navigate('/admin/assessments/management')}>Back to List</Button>
         </div>
@@ -461,36 +461,36 @@ function AssessmentEdit() {
   }
 
   return (
-    <div className="assessment-edit-page">
-      <div className="page-header">
-        <div className="header-left">
-          <button className="back-btn" onClick={() => navigate('/admin/assessments/management')}>
+    <div className={styles.assessmentEditPage}>
+      <div className={styles.pageHeader}>
+        <div className={styles.headerLeft}>
+          <button className={styles.backBtn} onClick={() => navigate('/admin/assessments/management')}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
               <path d="M19 12H5M12 19l-7-7 7-7"/>
             </svg>
           </button>
           <div>
-            <span className="assessment-id">{assessment.unique_id}</span>
+            <span className={styles.assessmentId}>{assessment.unique_id}</span>
             <h1>{assessment.title}</h1>
           </div>
         </div>
-        <div className="header-actions">
-          <span className={`status-badge ${assessment.status.toLowerCase()}`}>{assessment.status}</span>
+        <div className={styles.headerActions}>
+          <span className={`${styles.statusBadge} ${styles[assessment.status.toLowerCase()]}`}>{assessment.status}</span>
           <Button variant="outline" onClick={() => navigate(`/admin/assessments/${id}/configurations`)}>
             Configurations
           </Button>
         </div>
       </div>
 
-      <div className="tabs">
+      <div className={styles.tabs}>
         <button 
-          className={`tab ${activeTab === 'details' ? 'active' : ''}`}
+          className={`${styles.tab} ${activeTab === 'details' ? styles.active : ''}`}
           onClick={() => setActiveTab('details')}
         >
           Details
         </button>
         <button 
-          className={`tab ${activeTab === 'segments' ? 'active' : ''}`}
+          className={`${styles.tab} ${activeTab === 'segments' ? styles.active : ''}`}
           onClick={() => setActiveTab('segments')}
         >
           Segments ({segments.length})
@@ -498,9 +498,9 @@ function AssessmentEdit() {
       </div>
 
       {activeTab === 'details' && (
-        <div className="tab-content">
-          <div className="details-form">
-            <div className="form-group">
+        <div className={styles.tabContent}>
+          <div className={styles.detailsForm}>
+            <div className={styles.formGroup}>
               <label>Assessment Title</label>
               <input
                 type="text"
@@ -510,7 +510,7 @@ function AssessmentEdit() {
               />
             </div>
 
-            <div className="form-group">
+            <div className={styles.formGroup}>
               <label>Description</label>
               <textarea
                 value={formData.description}
@@ -520,8 +520,8 @@ function AssessmentEdit() {
               />
             </div>
 
-            <div className="form-row">
-              <div className="form-group">
+            <div className={styles.formRow}>
+              <div className={styles.formGroup}>
                 <label>Institution</label>
                 <select
                   value={formData.institution_id}
@@ -534,7 +534,7 @@ function AssessmentEdit() {
                 </select>
               </div>
 
-              <div className="form-group">
+              <div className={styles.formGroup}>
                 <label>Topic</label>
                 <select
                   value={formData.topic_id}
@@ -548,35 +548,35 @@ function AssessmentEdit() {
               </div>
             </div>
 
-            <div className="form-actions">
+            <div className={styles.formActions}>
               <Button variant="primary" onClick={handleSaveDetails}>Save Changes</Button>
             </div>
           </div>
 
-          <div className="stats-grid">
-            <div className="stat-card">
-              <span className="stat-value">{segments.length}</span>
-              <span className="stat-label">Segments</span>
+          <div className={styles.statsGrid}>
+            <div className={styles.statCard}>
+              <span className={styles.statValue}>{segments.length}</span>
+              <span className={styles.statLabel}>Segments</span>
             </div>
-            <div className="stat-card">
-              <span className="stat-value">{formatDuration(assessment.total_duration)}</span>
-              <span className="stat-label">Total Duration</span>
+            <div className={styles.statCard}>
+              <span className={styles.statValue}>{formatDuration(assessment.total_duration)}</span>
+              <span className={styles.statLabel}>Total Duration</span>
             </div>
-            <div className="stat-card">
-              <span className="stat-value">{assessment.statistics?.total_configs || 0}</span>
-              <span className="stat-label">Configurations</span>
+            <div className={styles.statCard}>
+              <span className={styles.statValue}>{assessment.statistics?.total_configs || 0}</span>
+              <span className={styles.statLabel}>Configurations</span>
             </div>
-            <div className="stat-card">
-              <span className="stat-value">{assessment.statistics?.total_users || 0}</span>
-              <span className="stat-label">Total Users</span>
+            <div className={styles.statCard}>
+              <span className={styles.statValue}>{assessment.statistics?.total_users || 0}</span>
+              <span className={styles.statLabel}>Total Users</span>
             </div>
           </div>
         </div>
       )}
 
       {activeTab === 'segments' && (
-        <div className="tab-content">
-          <div className="segments-header">
+        <div className={styles.tabContent}>
+          <div className={styles.segmentsHeader}>
             <h3>Assessment Segments</h3>
             <Button variant="primary" onClick={handleAddSegment}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
@@ -587,19 +587,19 @@ function AssessmentEdit() {
           </div>
 
           {segments.length === 0 ? (
-            <div className="empty-segments">
+            <div className={styles.emptySegments}>
               <p>No segments added yet. Add segments to build your assessment structure.</p>
               <Button variant="primary" onClick={handleAddSegment}>Add First Segment</Button>
             </div>
           ) : (
-            <div className="segments-list">
+            <div className={styles.segmentsList}>
               {segments.map((segment, index) => (
-                <div key={segment.id} className={`segment-card ${expandedSegment === segment.id ? 'expanded' : ''}`}>
-                  <div className="segment-header" onClick={() => toggleSegmentExpand(segment.id)}>
-                    <div className="segment-order">{index + 1}</div>
-                    <div className="segment-info">
+                <div key={segment.id} className={`${styles.segmentCard} ${expandedSegment === segment.id ? styles.expanded : ''}`}>
+                  <div className={styles.segmentHeader} onClick={() => toggleSegmentExpand(segment.id)}>
+                    <div className={styles.segmentOrder}>{index + 1}</div>
+                    <div className={styles.segmentInfo}>
                       <h4>{segment.name}</h4>
-                      <div className="segment-meta">
+                      <div className={styles.segmentMeta}>
                         <span>{formatDuration(segment.segment_duration)}</span>
                         <span>•</span>
                         <span>{segment.programming_question_count || 0} coding</span>
@@ -607,9 +607,9 @@ function AssessmentEdit() {
                         <span>{segment.mcq_question_count || 0} MCQ</span>
                       </div>
                     </div>
-                    <div className="segment-actions" onClick={(e) => e.stopPropagation()}>
+                    <div className={styles.segmentActions} onClick={(e) => e.stopPropagation()}>
                       <button 
-                        className="action-btn"
+                        className={styles.actionBtn}
                         onClick={() => handleReorderSegment(segment.id, 'up')}
                         disabled={index === 0}
                         title="Move Up"
@@ -619,7 +619,7 @@ function AssessmentEdit() {
                         </svg>
                       </button>
                       <button 
-                        className="action-btn"
+                        className={styles.actionBtn}
                         onClick={() => handleReorderSegment(segment.id, 'down')}
                         disabled={index === segments.length - 1}
                         title="Move Down"
@@ -629,7 +629,7 @@ function AssessmentEdit() {
                         </svg>
                       </button>
                       <button 
-                        className="action-btn"
+                        className={styles.actionBtn}
                         onClick={() => handleEditSegment(segment)}
                         title="Edit"
                       >
@@ -639,7 +639,7 @@ function AssessmentEdit() {
                         </svg>
                       </button>
                       <button 
-                        className="action-btn delete"
+                        className={`${styles.actionBtn} ${styles.delete}`}
                         onClick={() => handleDeleteSegment(segment.id)}
                         title="Delete"
                       >
@@ -649,7 +649,7 @@ function AssessmentEdit() {
                         </svg>
                       </button>
                     </div>
-                    <div className="expand-icon">
+                    <div className={styles.expandIcon}>
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
                         <path d="M6 9l6 6 6-6"/>
                       </svg>
@@ -657,23 +657,23 @@ function AssessmentEdit() {
                   </div>
 
                   {expandedSegment === segment.id && (
-                    <div className="segment-content">
+                    <div className={styles.segmentContent}>
                       {segment.description && (
-                        <p className="segment-description">{segment.description}</p>
+                        <p className={styles.segmentDescription}>{segment.description}</p>
                       )}
                       
-                      <div className="segment-settings">
-                        <span className={`setting-badge ${segment.allow_back_navigation ? 'enabled' : 'disabled'}`}>
+                      <div className={styles.segmentSettings}>
+                        <span className={`${styles.settingBadge} ${segment.allow_back_navigation ? styles.enabled : styles.disabled}`}>
                           {segment.allow_back_navigation ? '✓' : '✗'} Back Navigation
                         </span>
-                        <span className={`setting-badge ${segment.is_locked ? 'enabled' : 'disabled'}`}>
+                        <span className={`${styles.settingBadge} ${segment.is_locked ? styles.enabled : styles.disabled}`}>
                           {segment.is_locked ? '✓' : '✗'} Locked After Complete
                         </span>
                       </div>
 
                       {/* Programming Questions Section */}
-                      <div className="questions-section">
-                        <div className="questions-header">
+                      <div className={styles.questionsSection}>
+                        <div className={styles.questionsHeader}>
                           <h5>Programming Questions ({segment.programming_questions?.length || 0})</h5>
                           <Button 
                             variant={isQuestionSectionActive(segment.id, 'PROGRAMMING') ? 'primary' : 'outline'} 
@@ -685,16 +685,16 @@ function AssessmentEdit() {
                         </div>
                         
                         {segment.programming_questions?.length > 0 && (
-                          <div className="questions-list">
+                          <div className={styles.questionsList}>
                             {segment.programming_questions.map((q, qi) => (
-                              <div key={q.id} className="question-item">
-                                <span className="question-order">{qi + 1}</span>
-                                <span className="question-id">#{q.programming_question_id}</span>
-                                <span className="question-title">{q.name}</span>
-                                <span className="question-difficulty">{q.difficulty || q.level_name}</span>
-                                <span className="question-marks">{q.weightage_override || q.default_weightage || 1} pts</span>
+                              <div key={q.id} className={styles.questionItem}>
+                                <span className={styles.questionOrder}>{qi + 1}</span>
+                                <span className={styles.questionId}>#{q.programming_question_id}</span>
+                                <span className={styles.questionTitle}>{q.name}</span>
+                                <span className={styles.questionDifficulty}>{q.difficulty || q.level_name}</span>
+                                <span className={styles.questionMarks}>{q.weightage_override || q.default_weightage || 1} pts</span>
                                 <button 
-                                  className="remove-btn"
+                                  className={styles.removeBtn}
                                   onClick={() => handleRemoveQuestion(segment.id, q.programming_question_id, 'PROGRAMMING')}
                                 >
                                   ×
@@ -706,10 +706,10 @@ function AssessmentEdit() {
 
                         {/* Inline Question Selection for Programming */}
                         {isQuestionSectionActive(segment.id, 'PROGRAMMING') && (
-                          <div className="inline-question-selector">
-                            <div className="selector-filters">
-                              <div className="filter-row">
-                                <div className="filter-item">
+                          <div className={styles.inlineQuestionSelector}>
+                            <div className={styles.selectorFilters}>
+                              <div className={styles.filterRow}>
+                                <div className={styles.filterItem}>
                                   <label>Question Bank</label>
                                   <select 
                                     value={selectedQuestionBank} 
@@ -723,7 +723,7 @@ function AssessmentEdit() {
                                     ))}
                                   </select>
                                 </div>
-                                <div className="filter-item">
+                                <div className={styles.filterItem}>
                                   <label>Level</label>
                                   <select 
                                     value={questionFilters.level} 
@@ -735,7 +735,7 @@ function AssessmentEdit() {
                                     ))}
                                   </select>
                                 </div>
-                                <div className="filter-item search">
+                                <div className={`${styles.filterItem} ${styles.search}`}>
                                   <label>Search</label>
                                   <input
                                     type="text"
@@ -748,15 +748,15 @@ function AssessmentEdit() {
                             </div>
 
                             {!selectedQuestionBank ? (
-                              <div className="selector-empty">Select a question bank to view questions</div>
+                              <div className={styles.selectorEmpty}>Select a question bank to view questions</div>
                             ) : loadingQuestions ? (
-                              <div className="selector-loading"><div className="spinner"></div> Loading...</div>
+                              <div className={styles.selectorLoading}><div className={styles.spinner}></div> Loading...</div>
                             ) : availableQuestions.length === 0 ? (
-                              <div className="selector-empty">No programming questions found</div>
+                              <div className={styles.selectorEmpty}>No programming questions found</div>
                             ) : (
                               <>
-                                <div className="questions-table-container">
-                                  <table className="questions-table">
+                                <div className={styles.questionsTableContainer}>
+                                  <table className={styles.questionsTable}>
                                     <thead>
                                       <tr>
                                         <th style={{width: '40px'}}></th>
@@ -771,7 +771,7 @@ function AssessmentEdit() {
                                       {availableQuestions.map(q => (
                                         <tr 
                                           key={q.id} 
-                                          className={selectedQuestions.includes(q.id) ? 'selected' : ''}
+                                          className={selectedQuestions.includes(q.id) ? styles.selected : ''}
                                           onClick={() => toggleQuestionSelection(q.id)}
                                         >
                                           <td>
@@ -783,19 +783,19 @@ function AssessmentEdit() {
                                             />
                                           </td>
                                           <td><code>#{q.id}</code></td>
-                                          <td className="title-cell">
-                                            <span className="q-title">{q.name}</span>
+                                          <td className={styles.titleCell}>
+                                            <span className={styles.qTitle}>{q.name}</span>
                                           </td>
                                           <td>
                                             <span className={`level-badge ${(q.level_name || 'easy').toLowerCase()}`}>
                                               {q.level_name || 'Easy'}
                                             </span>
                                           </td>
-                                          <td className="tags-cell">
+                                          <td className={styles.tagsCell}>
                                             {q.tags?.slice(0, 3).map((tag, i) => (
-                                              <span key={i} className="tag">{tag.name || tag}</span>
+                                              <span key={i} className={styles.tag}>{tag.name || tag}</span>
                                             ))}
-                                            {q.tags?.length > 3 && <span className="tag more">+{q.tags.length - 3}</span>}
+                                            {q.tags?.length > 3 && <span className={`${styles.tag} ${styles.more}`}>+{q.tags.length - 3}</span>}
                                           </td>
                                           <td>{q.weightage || 1}</td>
                                         </tr>
@@ -803,8 +803,8 @@ function AssessmentEdit() {
                                     </tbody>
                                   </table>
                                 </div>
-                                <div className="selector-actions">
-                                  <span className="selection-count">{selectedQuestions.length} selected</span>
+                                <div className={styles.selectorActions}>
+                                  <span className={styles.selectionCount}>{selectedQuestions.length} selected</span>
                                   <Button 
                                     variant="primary" 
                                     size="small"
@@ -820,13 +820,13 @@ function AssessmentEdit() {
                         )}
 
                         {!isQuestionSectionActive(segment.id, 'PROGRAMMING') && segment.programming_questions?.length === 0 && (
-                          <p className="no-questions">No programming questions added</p>
+                          <p className={styles.noQuestions}>No programming questions added</p>
                         )}
                       </div>
 
                       {/* MCQ Questions Section */}
-                      <div className="questions-section">
-                        <div className="questions-header">
+                      <div className={styles.questionsSection}>
+                        <div className={styles.questionsHeader}>
                           <h5>MCQ Questions ({segment.mcq_questions?.length || 0})</h5>
                           <Button 
                             variant={isQuestionSectionActive(segment.id, 'MCQ') ? 'primary' : 'outline'} 
@@ -838,16 +838,16 @@ function AssessmentEdit() {
                         </div>
                         
                         {segment.mcq_questions?.length > 0 && (
-                          <div className="questions-list">
+                          <div className={styles.questionsList}>
                             {segment.mcq_questions.map((q, qi) => (
-                              <div key={q.id} className="question-item">
-                                <span className="question-order">{qi + 1}</span>
-                                <span className="question-id">#{q.mcq_question_id}</span>
-                                <span className="question-title">{q.name?.substring(0, 60)}...</span>
-                                <span className="question-difficulty">{q.difficulty || q.level_name}</span>
-                                <span className="question-marks">{q.weightage_override || q.default_weightage || 1} pts</span>
+                              <div key={q.id} className={styles.questionItem}>
+                                <span className={styles.questionOrder}>{qi + 1}</span>
+                                <span className={styles.questionId}>#{q.mcq_question_id}</span>
+                                <span className={styles.questionTitle}>{q.name?.substring(0, 60)}...</span>
+                                <span className={styles.questionDifficulty}>{q.difficulty || q.level_name}</span>
+                                <span className={styles.questionMarks}>{q.weightage_override || q.default_weightage || 1} pts</span>
                                 <button 
-                                  className="remove-btn"
+                                  className={styles.removeBtn}
                                   onClick={() => handleRemoveQuestion(segment.id, q.mcq_question_id, 'MCQ')}
                                 >
                                   ×
@@ -859,10 +859,10 @@ function AssessmentEdit() {
 
                         {/* Inline Question Selection for MCQ */}
                         {isQuestionSectionActive(segment.id, 'MCQ') && (
-                          <div className="inline-question-selector">
-                            <div className="selector-filters">
-                              <div className="filter-row">
-                                <div className="filter-item">
+                          <div className={styles.inlineQuestionSelector}>
+                            <div className={styles.selectorFilters}>
+                              <div className={styles.filterRow}>
+                                <div className={styles.filterItem}>
                                   <label>Question Bank</label>
                                   <select 
                                     value={selectedQuestionBank} 
@@ -876,7 +876,7 @@ function AssessmentEdit() {
                                     ))}
                                   </select>
                                 </div>
-                                <div className="filter-item">
+                                <div className={styles.filterItem}>
                                   <label>Level</label>
                                   <select 
                                     value={questionFilters.level} 
@@ -888,7 +888,7 @@ function AssessmentEdit() {
                                     ))}
                                   </select>
                                 </div>
-                                <div className="filter-item search">
+                                <div className={`${styles.filterItem} ${styles.search}`}>
                                   <label>Search</label>
                                   <input
                                     type="text"
@@ -901,15 +901,15 @@ function AssessmentEdit() {
                             </div>
 
                             {!selectedQuestionBank ? (
-                              <div className="selector-empty">Select a question bank to view questions</div>
+                              <div className={styles.selectorEmpty}>Select a question bank to view questions</div>
                             ) : loadingQuestions ? (
-                              <div className="selector-loading"><div className="spinner"></div> Loading...</div>
+                              <div className={styles.selectorLoading}><div className={styles.spinner}></div> Loading...</div>
                             ) : availableQuestions.length === 0 ? (
-                              <div className="selector-empty">No MCQ questions found</div>
+                              <div className={styles.selectorEmpty}>No MCQ questions found</div>
                             ) : (
                               <>
-                                <div className="questions-table-container">
-                                  <table className="questions-table">
+                                <div className={styles.questionsTableContainer}>
+                                  <table className={styles.questionsTable}>
                                     <thead>
                                       <tr>
                                         <th style={{width: '40px'}}></th>
@@ -936,20 +936,20 @@ function AssessmentEdit() {
                                             />
                                           </td>
                                           <td><code>#{q.id}</code></td>
-                                          <td className="title-cell">
-                                            <span className="q-title">{q.title || q.question_text?.substring(0, 80)}</span>
-                                            {q.description && <span className="q-desc">{q.description?.substring(0, 80)}...</span>}
+                                          <td className={styles.titleCell}>
+                                            <span className={styles.qTitle}>{q.title || q.question_text?.substring(0, 80)}</span>
+                                            {q.description && <span className={styles.qDesc}>{q.description?.substring(0, 80)}...</span>}
                                           </td>
                                           <td>
                                             <span className={`level-badge ${(q.level_name || 'easy').toLowerCase()}`}>
                                               {q.level_name || 'Easy'}
                                             </span>
                                           </td>
-                                          <td className="tags-cell">
+                                          <td className={styles.tagsCell}>
                                             {q.tags?.slice(0, 3).map((tag, i) => (
-                                              <span key={i} className="tag">{tag.name || tag}</span>
+                                              <span key={i} className={styles.tag}>{tag.name || tag}</span>
                                             ))}
-                                            {q.tags?.length > 3 && <span className="tag more">+{q.tags.length - 3}</span>}
+                                            {q.tags?.length > 3 && <span className={`${styles.tag} ${styles.more}`}>+{q.tags.length - 3}</span>}
                                           </td>
                                           <td>{q.weightage || 1}</td>
                                         </tr>
@@ -957,8 +957,8 @@ function AssessmentEdit() {
                                     </tbody>
                                   </table>
                                 </div>
-                                <div className="selector-actions">
-                                  <span className="selection-count">{selectedQuestions.length} selected</span>
+                                <div className={styles.selectorActions}>
+                                  <span className={styles.selectionCount}>{selectedQuestions.length} selected</span>
                                   <Button 
                                     variant="primary" 
                                     size="small"
@@ -974,7 +974,7 @@ function AssessmentEdit() {
                         )}
 
                         {!isQuestionSectionActive(segment.id, 'MCQ') && segment.mcq_questions?.length === 0 && (
-                          <p className="no-questions">No MCQ questions added</p>
+                          <p className={styles.noQuestions}>No MCQ questions added</p>
                         )}
                       </div>
                     </div>
@@ -988,16 +988,16 @@ function AssessmentEdit() {
 
       {/* Segment Modal */}
       {showSegmentModal && (
-        <div className="modal-overlay" onClick={() => setShowSegmentModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
+        <div className={styles.modalOverlay} onClick={() => setShowSegmentModal(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
               <h2>{editingSegment ? 'Edit Segment' : 'Add Segment'}</h2>
-              <button className="close-btn" onClick={() => setShowSegmentModal(false)}>×</button>
+              <button className={styles.closeBtn} onClick={() => setShowSegmentModal(false)}>×</button>
             </div>
             
-            <div className="modal-body">
-              <div className="form-group">
-                <label>Segment Name <span className="required">*</span></label>
+            <div className={styles.modalBody}>
+              <div className={styles.formGroup}>
+                <label>Segment Name <span className={styles.required}>*</span></label>
                 <input
                   type="text"
                   value={segmentForm.name}
@@ -1006,7 +1006,7 @@ function AssessmentEdit() {
                 />
               </div>
 
-              <div className="form-group">
+              <div className={styles.formGroup}>
                 <label>Description</label>
                 <textarea
                   value={segmentForm.description}
@@ -1016,7 +1016,7 @@ function AssessmentEdit() {
                 />
               </div>
 
-              <div className="form-group">
+              <div className={styles.formGroup}>
                 <label>Duration (minutes)</label>
                 <input
                   type="number"
@@ -1026,7 +1026,7 @@ function AssessmentEdit() {
                 />
               </div>
 
-              <div className="form-group checkbox-group">
+              <div className={`${styles.formGroup} ${styles.checkboxGroup}`}>
                 <label>
                   <input
                     type="checkbox"
@@ -1035,10 +1035,10 @@ function AssessmentEdit() {
                   />
                   Allow Back Navigation
                 </label>
-                <span className="help-text">Users can go back to previous questions</span>
+                <span className={styles.helpText}>Users can go back to previous questions</span>
               </div>
 
-              <div className="form-group checkbox-group">
+              <div className={`${styles.formGroup} ${styles.checkboxGroup}`}>
                 <label>
                   <input
                     type="checkbox"
@@ -1047,11 +1047,11 @@ function AssessmentEdit() {
                   />
                   Lock After Completion
                 </label>
-                <span className="help-text">Once completed, users cannot return to this segment</span>
+                <span className={styles.helpText}>Once completed, users cannot return to this segment</span>
               </div>
             </div>
 
-            <div className="modal-footer">
+            <div className={styles.modalFooter}>
               <Button variant="secondary" onClick={() => setShowSegmentModal(false)}>Cancel</Button>
               <Button variant="primary" onClick={handleSaveSegment}>
                 {editingSegment ? 'Update Segment' : 'Add Segment'}
@@ -1066,4 +1066,7 @@ function AssessmentEdit() {
 }
 
 export default AssessmentEdit
+
+
+
 

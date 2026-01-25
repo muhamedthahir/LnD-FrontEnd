@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useApi } from '../../../../contexts/ApiContext'
 import { toast } from 'react-toastify'
 import Button from '../../../../components/Button/Button'
-import './AssessmentCreate.css'
+import styles from './AssessmentCreate.module.css'
 
 function AssessmentCreate() {
   const navigate = useNavigate()
@@ -88,10 +88,10 @@ function AssessmentCreate() {
   }
 
   return (
-    <div className="assessment-create-page">
-      <div className="page-header">
-        <div className="header-left">
-          <button className="back-btn" onClick={() => navigate('/admin/assessments/management')}>
+    <div className={styles.assessmentCreatePage}>
+      <div className={styles.pageHeader}>
+        <div className={styles.headerLeft}>
+          <button className={styles.backBtn} onClick={() => navigate('/admin/assessments/management')}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
               <path d="M19 12H5M12 19l-7-7 7-7"/>
             </svg>
@@ -103,28 +103,28 @@ function AssessmentCreate() {
         </div>
       </div>
 
-      <div className="create-content">
-        <div className="form-card">
-          <div className="form-section">
+      <div className={styles.createContent}>
+        <div className={styles.formCard}>
+          <div className={styles.formSection}>
             <h3>Basic Information</h3>
-            <p className="section-desc">Enter the basic details for your assessment</p>
+            <p className={styles.sectionDesc}>Enter the basic details for your assessment</p>
 
-            <div className="form-group">
+            <div className={styles.formGroup}>
               <label htmlFor="title">
-                Assessment Title <span className="required">*</span>
+                Assessment Title <span className={styles.required}>*</span>
               </label>
               <input
                 type="text"
                 id="title"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className={errors.title ? 'error' : ''}
+                className={errors.title ? styles.error : ''}
                 placeholder="Enter a descriptive title for your assessment"
               />
-              {errors.title && <span className="error-text">{errors.title}</span>}
+              {errors.title && <span className={styles.errorText}>{errors.title}</span>}
             </div>
 
-            <div className="form-group">
+            <div className={styles.formGroup}>
               <label htmlFor="description">Description</label>
               <textarea
                 id="description"
@@ -136,12 +136,12 @@ function AssessmentCreate() {
             </div>
           </div>
 
-          <div className="form-section">
+          <div className={styles.formSection}>
             <h3>Classification</h3>
-            <p className="section-desc">Categorize your assessment for better organization</p>
+            <p className={styles.sectionDesc}>Categorize your assessment for better organization</p>
 
-            <div className="form-row">
-              <div className="form-group">
+            <div className={styles.formRow}>
+              <div className={styles.formGroup}>
                 <label htmlFor="institution">Institution</label>
                 <select
                   id="institution"
@@ -153,10 +153,10 @@ function AssessmentCreate() {
                     <option key={inst.id} value={inst.id}>{inst.name}</option>
                   ))}
                 </select>
-                <span className="help-text">Associate this assessment with an institution</span>
+                <span className={styles.helpText}>Associate this assessment with an institution</span>
               </div>
 
-              <div className="form-group">
+              <div className={styles.formGroup}>
                 <label htmlFor="topic">Topic</label>
                 <select
                   id="topic"
@@ -168,19 +168,19 @@ function AssessmentCreate() {
                     <option key={topic.id} value={topic.id}>{topic.name}</option>
                   ))}
                 </select>
-                <span className="help-text">Categorize by topic for easy filtering</span>
+                <span className={styles.helpText}>Categorize by topic for easy filtering</span>
               </div>
             </div>
           </div>
 
-          <div className="form-section info-section">
-            <div className="info-icon">
+          <div className={`${styles.formSection} ${styles.infoSection}`}>
+            <div className={styles.infoIcon}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="24" height="24">
                 <circle cx="12" cy="12" r="10"/>
                 <path d="M12 16v-4M12 8h.01"/>
               </svg>
             </div>
-            <div className="info-content">
+            <div className={styles.infoContent}>
               <h4>What's Next?</h4>
               <p>After creating the assessment, you'll be able to:</p>
               <ul>
@@ -193,11 +193,11 @@ function AssessmentCreate() {
           </div>
         </div>
 
-        <div className="action-bar">
+        <div className={styles.actionBar}>
           <Button variant="secondary" onClick={() => navigate('/admin/assessments/management')} disabled={saving}>
             Cancel
           </Button>
-          <div className="action-group">
+          <div className={styles.actionGroup}>
             <Button variant="outline" onClick={() => handleSave(false)} disabled={saving}>
               {saving ? 'Saving...' : 'Save as Draft'}
             </Button>
