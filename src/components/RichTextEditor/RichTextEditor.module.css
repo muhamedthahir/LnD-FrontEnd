@@ -1,0 +1,209 @@
+.editor {
+  border: var(--border-sm) solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--bg-input);
+}
+
+.editor.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--bg-secondary);
+  border-bottom: var(--border-sm) solid var(--border-color);
+}
+
+.toolbarGroup {
+  display: flex;
+  gap: 2px;
+  padding-right: var(--spacing-xs);
+  border-right: 1px solid var(--border-color);
+}
+
+.toolbarGroup:last-child {
+  border-right: none;
+  padding-right: 0;
+}
+
+.toolbarBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.toolbarBtn:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.toolbarBtn:active {
+  background: var(--accent-subtle);
+  color: var(--accent-primary);
+}
+
+.toolbarBtn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.toolbarBtn .textBtn {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.content {
+  padding: var(--spacing-md);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  outline: none;
+  overflow-y: auto;
+  max-height: 500px;
+}
+
+.content:empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.content:focus {
+  background: var(--bg-card);
+}
+
+/* Content Styles */
+.content h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0.5em 0;
+}
+
+.content h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0.5em 0;
+}
+
+.content h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0.5em 0;
+}
+
+.content p {
+  margin: 0.5em 0;
+}
+
+.content ul,
+.content ol {
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+}
+
+.content li {
+  margin: 0.25em 0;
+}
+
+.content blockquote {
+  margin: 0.5em 0;
+  padding: 0.5em 1em;
+  border-left: 3px solid var(--accent-primary);
+  background: var(--bg-secondary);
+  font-style: italic;
+}
+
+.content pre {
+  margin: 0.5em 0;
+  padding: 1em;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  overflow-x: auto;
+}
+
+.content code {
+  padding: 0.2em 0.4em;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-xs);
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+.content a {
+  color: var(--accent-primary);
+  text-decoration: underline;
+}
+
+.content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-sm);
+  margin: 0.5em 0;
+}
+
+/* Simple mode - hide some toolbar groups */
+.editor.simple .toolbar {
+  padding: var(--spacing-xs);
+}
+
+.editor.simple .toolbarBtn {
+  width: 26px;
+  height: 26px;
+}
+
+.editor.simple .toolbarBtn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Scrollbar */
+.content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.content::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+.content::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+.content::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .toolbar {
+    gap: 2px;
+    padding: var(--spacing-xs);
+  }
+
+  .toolbarGroup {
+    padding-right: var(--spacing-xs);
+  }
+
+  .toolbarBtn {
+    width: 26px;
+    height: 26px;
+  }
+}
+

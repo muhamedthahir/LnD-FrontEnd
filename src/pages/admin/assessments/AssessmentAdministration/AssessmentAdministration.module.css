@@ -1,4 +1,4 @@
-.groups-page {
+.groupsPage {
   padding: var(--spacing-lg);
   height: calc(100vh - 3.5rem);
   display: flex;
@@ -6,25 +6,25 @@
   overflow: hidden;
 }
 
-.groups-header {
+.groupsHeader {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: var(--spacing-xl);
 }
 
-.groups-header h1 {
+.groupsHeader h1 {
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--text-primary);
   margin-bottom: var(--spacing-xs);
 }
 
-.groups-header p {
+.groupsHeader p {
   color: var(--text-secondary);
 }
 
-.groups-table-card {
+.groupsTableCard {
   background: var(--bg-card);
   border: var(--border-sm) solid var(--border-color);
   border-radius: var(--radius-lg);
@@ -35,7 +35,7 @@
   overflow: hidden;
 }
 
-.table-container {
+.tableContainer {
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -43,7 +43,7 @@
   padding: var(--spacing-lg);
 }
 
-.empty-state {
+.emptyState {
   display: flex;
   align-items: center;
   justify-content: center;

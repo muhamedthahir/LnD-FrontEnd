@@ -5,7 +5,7 @@ import PasswordSetup from '../../components/PasswordSetup/PasswordSetup'
 import { useApi } from '../../contexts/ApiContext'
 import { useMasterData } from '../../hooks/useMasterData'
 import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES } from '../../constants/constants'
-import './Login.css'
+import styles from './Login.module.css'
 
 function Login() {
   const { apiBaseUrl, setTokens } = useApi()
@@ -159,25 +159,25 @@ function Login() {
   }
 
   return (
-    <div className="login-page">
+    <div className={styles.loginPage}>
       {/* Loading Overlay */}
       {isLoading && (
-        <div className="login-loading-overlay">
-          <div className="loading-spinner-container">
-            <div className="loading-spinner"></div>
+        <div className={styles.loginLoadingOverlay}>
+          <div className={styles.loadingSpinnerContainer}>
+            <div className={styles.loadingSpinner}></div>
           </div>
         </div>
       )}
       
       {/* Animated background */}
-      <div className={`login-background ${isLoading ? 'blurred' : ''}`}>
-        <div className="grid-pattern"></div>
-        <div className="glow-orb glow-orb-1"></div>
-        <div className="glow-orb glow-orb-2"></div>
-        <div className="glow-orb glow-orb-3"></div>
-        <div className="code-rain">
+      <div className={`${styles.loginBackground} ${isLoading ? styles.blurred : ''}`}>
+        <div className={styles.gridPattern}></div>
+        <div className={`${styles.glowOrb} ${styles.glowOrb1}`}></div>
+        <div className={`${styles.glowOrb} ${styles.glowOrb2}`}></div>
+        <div className={`${styles.glowOrb} ${styles.glowOrb3}`}></div>
+        <div className={styles.codeRain}>
           {[...Array(20)].map((_, i) => (
-            <div key={i} className="code-line" style={{ 
+            <div key={i} className={styles.codeLine} style={{ 
               '--delay': `${i * 0.3}s`,
               '--duration': `${3 + Math.random() * 4}s`,
               left: `${i * 5}%`
@@ -188,61 +188,61 @@ function Login() {
         </div>
       </div>
 
-      <div className="login-container">
+      <div className={styles.loginContainer}>
         {/* Left side - Branding */}
-        <div className="login-branding">
-          <div className="brand-content">
-            <div className="logo-wrapper">
-              <div className="logo-icon">
+        <div className={styles.loginBranding}>
+          <div className={styles.brandContent}>
+            <div className={styles.logoWrapper}>
+              <div className={styles.logoIcon}>
                 <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <rect x="4" y="8" width="32" height="24" rx="2" stroke="currentColor" strokeWidth="2"/>
                   <path d="M12 18L16 22L12 26" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   <line x1="20" y1="26" x2="28" y2="26" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                 </svg>
               </div>
-              <h1 className="brand-name">
-                <span className="brand-code">&lt;</span>
+              <h1 className={styles.brandName}>
+                <span className={styles.brandCode}>&lt;</span>
                 Success Meets
-                <span className="brand-code">/&gt;</span>
+                <span className={styles.brandCode}>/&gt;</span>
               </h1>
             </div>
-            <p className="brand-tagline">Master Your Code. Prove Your Skills.</p>
+            <p className={styles.brandTagline}>Master Your Code. Prove Your Skills.</p>
             
-            <div className="features-list">
-              <div className="feature-item">
-                <div className="feature-icon">
+            <div className={styles.featuresList}>
+              <div className={styles.featureItem}>
+                <div className={styles.featureIcon}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M9 12l2 2 4-4"/>
                     <circle cx="12" cy="12" r="10"/>
                   </svg>
                 </div>
-                <div className="feature-text">
+                <div className={styles.featureText}>
                   <h3>Real-time Assessment</h3>
                   <p>Code and get instant feedback</p>
                 </div>
               </div>
               
-              <div className="feature-item">
-                <div className="feature-icon">
+              <div className={styles.featureItem}>
+                <div className={styles.featureIcon}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <rect x="3" y="3" width="18" height="18" rx="2"/>
                     <path d="M3 9h18"/>
                     <path d="M9 21V9"/>
                   </svg>
                 </div>
-                <div className="feature-text">
+                <div className={styles.featureText}>
                   <h3>Track Progress</h3>
                   <p>Monitor your learning journey</p>
                 </div>
               </div>
               
-              <div className="feature-item">
-                <div className="feature-icon">
+              <div className={styles.featureItem}>
+                <div className={styles.featureIcon}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                   </svg>
                 </div>
-                <div className="feature-text">
+                <div className={styles.featureText}>
                   <h3>Skill Certification</h3>
                   <p>Earn badges and certificates</p>
                 </div>
@@ -250,41 +250,41 @@ function Login() {
             </div>
           </div>
           
-          <div className="terminal-decoration">
-            <div className="terminal-header">
-              <span className="terminal-dot red"></span>
-              <span className="terminal-dot yellow"></span>
-              <span className="terminal-dot green"></span>
+          <div className={styles.terminalDecoration}>
+            <div className={styles.terminalHeader}>
+              <span className={`${styles.terminalDot} ${styles.red}`}></span>
+              <span className={`${styles.terminalDot} ${styles.yellow}`}></span>
+              <span className={`${styles.terminalDot} ${styles.green}`}></span>
             </div>
-            <div className="terminal-body">
-              <div className="terminal-line">
-                <span className="prompt">$</span>
-                <span className="command">npm run assess</span>
+            <div className={styles.terminalBody}>
+              <div className={styles.terminalLine}>
+                <span className={styles.prompt}>$</span>
+                <span className={styles.command}>npm run assess</span>
               </div>
-              <div className="terminal-line output">
-                <span className="success">✓</span> Loading challenges...
+              <div className={`${styles.terminalLine} ${styles.output}`}>
+                <span className={styles.success}>✓</span> Loading challenges...
               </div>
-              <div className="terminal-line output">
-                <span className="success">✓</span> Environment ready
+              <div className={`${styles.terminalLine} ${styles.output}`}>
+                <span className={styles.success}>✓</span> Environment ready
               </div>
-              <div className="terminal-line">
-                <span className="prompt">$</span>
-                <span className="cursor">_</span>
+              <div className={styles.terminalLine}>
+                <span className={styles.prompt}>$</span>
+                <span className={styles.cursor}>_</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Right side - Login Form */}
-        <div className="login-form-section">
-          <div className="form-wrapper">
-            <div className="form-header">
+        <div className={styles.loginFormSection}>
+          <div className={styles.formWrapper}>
+            <div className={styles.formHeader}>
               <h2>Welcome Back</h2>
               <p>Sign in to continue your learning journey</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="login-form">
-              <div className={`form-group login-cred ${errors.email ? 'has-error' : ''}`}>
+            <form onSubmit={handleSubmit} className={styles.loginForm}>
+              <div className={`${styles.formGroup} ${styles.loginCred} ${errors.email ? styles.hasError : ''}`}>
                 <label htmlFor="email">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
@@ -301,10 +301,10 @@ function Login() {
                   placeholder="student@university.edu"
                   autoComplete="email"
                 />
-                {errors.email && <span className="error-message">{errors.email}</span>}
+                {errors.email && <span className={styles.errorMessage}>{errors.email}</span>}
               </div>
 
-              <div className={`form-group login-cred ${errors.password ? 'has-error' : ''}`}>
+              <div className={`${styles.formGroup} ${styles.loginCred} ${errors.password ? styles.hasError : ''}`}>
                 <label htmlFor="password">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
@@ -312,7 +312,7 @@ function Login() {
                   </svg>
                   Password
                 </label>
-                <div className="password-input-wrapper">
+                <div className={styles.passwordInputWrapper}>
                   <input
                     type={showPassword ? 'text' : 'password'}
                     id="password"
@@ -324,7 +324,7 @@ function Login() {
                   />
                   <button
                     type="button"
-                    className="password-toggle"
+                    className={styles.passwordToggle}
                     onClick={() => setShowPassword(!showPassword)}
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
@@ -341,32 +341,32 @@ function Login() {
                     )}
                   </button>
                 </div>
-                {errors.password && <span className="error-message">{errors.password}</span>}
+                {errors.password && <span className={styles.errorMessage}>{errors.password}</span>}
               </div>
 
               {errors.submit && (
-                <div className="error-message" style={{ marginTop: '10px', textAlign: 'center' }}>
+                <div className={styles.errorMessage} style={{ marginTop: '10px', textAlign: 'center' }}>
                   {errors.submit}
                 </div>
               )}
 
-              <div className="form-options">
-                <label className="remember-me">
+              <div className={styles.formOptions}>
+                <label className={styles.rememberMe}>
                   <input 
                     type="checkbox" 
                     name="rememberMe"
                     checked={formData.rememberMe}
                     onChange={(e) => setFormData(prev => ({ ...prev, rememberMe: e.target.checked }))}
                   />
-                  <span className="checkmark"></span>
+                  <span className={styles.checkmark}></span>
                   Remember me
                 </label>
-                <a href="#" className="forgot-password">Forgot password?</a>
+                <a href="#" className={styles.forgotPassword}>Forgot password?</a>
               </div>
 
               <button 
                 type="submit" 
-                className="submit-btn"
+                className={styles.submitBtn}
                 disabled={isLoading}
               >
                     Sign In
@@ -377,7 +377,7 @@ function Login() {
               </button>
             </form>
 
-            <p className="signup-prompt">
+            <p className={styles.signupPrompt}>
               Don't have an account? <a href="#">Contact Admin</a>
             </p>
           </div>

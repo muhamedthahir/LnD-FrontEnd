@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import './VideoPlayer.css'
+import styles from './VideoPlayer.module.css'
 
 /**
  * VideoPlayer component for displaying video content
@@ -144,8 +144,8 @@ function VideoPlayer({
 
   if (!url) {
     return (
-      <div className={`video-player-container ${compact ? 'compact' : ''}`}>
-        <div className="video-placeholder">
+      <div className={`${styles.container} ${compact ? styles.compact : ''}`}>
+        <div className={styles.placeholder}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <polygon points="5 3 19 12 5 21 5 3"/>
           </svg>
@@ -157,24 +157,24 @@ function VideoPlayer({
 
   if (error) {
     return (
-      <div className={`video-player-container ${compact ? 'compact' : ''}`}>
-        <div className="video-error">
+      <div className={`${styles.container} ${compact ? styles.compact : ''}`}>
+        <div className={styles.error}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="12" cy="12" r="10"/>
             <line x1="15" y1="9" x2="9" y2="15"/>
             <line x1="9" y1="9" x2="15" y2="15"/>
           </svg>
           <span>Failed to load video</span>
-          {fileName && <p className="file-name">{fileName}</p>}
+          {fileName && <p className={styles.fileName}>{fileName}</p>}
         </div>
       </div>
     )
   }
 
   return (
-    <div className={`video-player-container ${compact ? 'compact' : ''}`}>
+    <div className={`${styles.container} ${compact ? styles.compact : ''}`}>
       {loading && (
-        <div className="video-loading">
+        <div className={styles.loading}>
           <div className="spinner"></div>
           <span>Loading video...</span>
         </div>
@@ -182,7 +182,7 @@ function VideoPlayer({
       
       {isEmbedded ? (
         <iframe
-          className="video-iframe"
+          className={styles.videoIframe}
           src={getEmbedUrl(url)}
           title={fileName || 'Video'}
           frameBorder="0"
@@ -194,7 +194,7 @@ function VideoPlayer({
       ) : (
         <video
           ref={videoRef}
-          className="video-element"
+          className={styles.videoElement}
           src={url}
           controls={controls}
           autoPlay={autoPlay}
@@ -208,28 +208,28 @@ function VideoPlayer({
       
       {/* Progress tracking info */}
       {!isEmbedded && !loading && !compact && (
-        <div className="video-progress-info">
-          <div className="video-progress-bar">
+        <div className={styles.progressInfo}>
+          <div className={styles.progressBar}>
             <div 
-              className="video-progress-fill" 
+              className={styles.progressFill} 
               style={{ width: `${progressPercent}%` }}
             />
             {thresholdValue < 100 && (
               <div 
-                className="video-threshold-marker" 
+                className={styles.thresholdMarker} 
                 style={{ left: `${thresholdValue}%` }}
                 title={`Completion threshold: ${thresholdValue}%`}
               />
             )}
           </div>
-          <div className="video-progress-details">
-            <span className="video-time">
+          <div className={styles.progressDetails}>
+            <span className={styles.time}>
               {formatTime(currentTime)} / {formatTime(duration)}
             </span>
-            <span className={`video-progress-percent ${isComplete ? 'complete' : ''}`}>
+            <span className={`${styles.progressPercent} ${isComplete ? styles.complete : ''}`}>
               {isComplete ? (
                 <>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="check-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={styles.checkIcon}>
                     <polyline points="20 6 9 17 4 12"/>
                   </svg>
                   Complete
@@ -243,8 +243,8 @@ function VideoPlayer({
       )}
       
       {fileName && !loading && (
-        <div className="video-info">
-          <span className="file-name" title={fileName}>{fileName}</span>
+        <div className={styles.info}>
+          <span className={styles.fileName} title={fileName}>{fileName}</span>
         </div>
       )}
     </div>

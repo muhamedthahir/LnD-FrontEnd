@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from 'react'
 import CodeEditor from './CodeEditor'
-import './CodeEditorLayout.css'
+import styles from './CodeEditorLayout.module.css'
 
 function CodeEditorLayout() {
   const [leftPanelWidth, setLeftPanelWidth] = useState(40) // percentage
@@ -67,29 +67,29 @@ Output: [0,1]</code></pre>
 
   const getDifficultyClass = (difficulty) => {
     switch (difficulty?.toLowerCase()) {
-      case 'easy': return 'difficulty-easy'
-      case 'medium': return 'difficulty-medium'
-      case 'hard': return 'difficulty-hard'
+      case 'easy': return styles.difficultyEasy
+      case 'medium': return styles.difficultyMedium
+      case 'hard': return styles.difficultyHard
       default: return ''
     }
   }
 
   return (
-    <div className="code-editor-layout" ref={containerRef}>
+    <div className={styles.codeEditorLayout} ref={containerRef}>
       {/* Left Panel - Question/Description */}
       <div 
-        className="question-panel"
+        className={styles.questionPanel}
         style={{ width: `${leftPanelWidth}%` }}
       >
-        <div className="question-header">
-          <h1 className="question-title">{questionData.title}</h1>
-          <span className={`difficulty-badge ${getDifficultyClass(questionData.difficulty)}`}>
+        <div className={styles.questionHeader}>
+          <h1 className={styles.questionTitle}>{questionData.title}</h1>
+          <span className={`${styles.difficultyBadge} ${getDifficultyClass(questionData.difficulty)}`}>
             {questionData.difficulty}
           </span>
         </div>
-        <div className="question-content">
+        <div className={styles.questionContent}>
           <div 
-            className="question-description"
+            className={styles.questionDescription}
             dangerouslySetInnerHTML={{ __html: questionData.description }}
           />
         </div>
@@ -97,10 +97,10 @@ Output: [0,1]</code></pre>
 
       {/* Resizer */}
       <div 
-        className="vertical-resizer"
+        className={styles.verticalResizer}
         onMouseDown={handleMouseDown}
       >
-        <div className="resizer-handle">
+        <div className={styles.resizerHandle}>
           <span></span>
           <span></span>
           <span></span>
@@ -109,7 +109,7 @@ Output: [0,1]</code></pre>
 
       {/* Right Panel - Code Editor */}
       <div 
-        className="editor-panel"
+        className={styles.editorPanel}
         style={{ width: `${100 - leftPanelWidth}%` }}
       >
         <CodeEditor />

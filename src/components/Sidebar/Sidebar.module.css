@@ -277,3 +277,70 @@
   }
 }
 
+@media (max-width: 600px) {
+  .sidebar {
+    width: 5px; /* Small visible area for hover detection */
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(0);
+    transition: width var(--transition-normal);
+    overflow: hidden;
+  }
+  
+  /* Show sidebar when open (via click) */
+  .sidebar.open {
+    width: 12rem;
+    z-index: 1000;
+  }
+  
+  /* Show sidebar on hover */
+  .sidebar:hover {
+    width: 12rem;
+    z-index: 1000;
+  }
+  
+  /* Ensure all content is visible when sidebar is open or hovered */
+  .sidebar.open .navItem,
+  .sidebar:hover .navItem {
+    justify-content: flex-start;
+    padding: 0.5rem 0.75rem;
+    margin: 0 0.5rem;
+  }
+  
+  .sidebar.open .navItem svg,
+  .sidebar:hover .navItem svg {
+    display: flex !important;
+    width: var(--icon-md) !important;
+    height: var(--icon-md) !important;
+    flex-shrink: 0;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
+  .sidebar.open .navItem span,
+  .sidebar:hover .navItem span {
+    display: block !important;
+    opacity: 1 !important;
+    width: auto !important;
+    overflow: visible !important;
+    visibility: visible !important;
+  }
+  
+  .sidebar.open .header h2,
+  .sidebar:hover .header h2 {
+    display: block !important;
+    opacity: 1 !important;
+    width: auto !important;
+    visibility: visible !important;
+  }
+  
+  .sidebar.open .sectionLabel,
+  .sidebar:hover .sectionLabel {
+    display: block !important;
+    opacity: 1 !important;
+    height: auto !important;
+    padding: 0.25rem 0.75rem 0.25rem 1.25rem !important;
+    visibility: visible !important;
+  }
+}
+

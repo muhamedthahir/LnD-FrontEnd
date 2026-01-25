@@ -1,0 +1,272 @@
+.container {
+  width: 100%;
+  background: var(--bg-tertiary, #1a1a2e);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.container.compact {
+  max-width: 320px;
+  padding: 12px;
+}
+
+.player {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.container.compact .player {
+  gap: 8px;
+}
+
+.playBtn {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  border-radius: 50%;
+  border: none;
+  background: var(--primary, #6366f1);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.container.compact .playBtn {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+}
+
+.playBtn:hover:not(:disabled) {
+  background: var(--primary-hover, #5558e8);
+  transform: scale(1.05);
+}
+
+.playBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.playBtn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.container.compact .playBtn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.btnSpinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.progressSection {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.fileName {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary, #fff);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.container.compact .fileName {
+  font-size: 11px;
+}
+
+.progressRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.time {
+  font-size: 11px;
+  color: var(--text-secondary, #888);
+  min-width: 35px;
+  font-family: monospace;
+}
+
+.container.compact .time {
+  font-size: 10px;
+  min-width: 30px;
+}
+
+.progressSlider {
+  flex: 1;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--border-color, #333);
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.progressSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  background: var(--primary, #6366f1);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.progressSlider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.progressSlider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  background: var(--primary, #6366f1);
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+}
+
+.volumeControl {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.volumeControl svg {
+  width: 18px;
+  height: 18px;
+  color: var(--text-secondary, #888);
+}
+
+.volumeSlider {
+  width: 60px;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--border-color, #333);
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.volumeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px;
+  height: 10px;
+  background: var(--text-secondary, #888);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.volumeSlider::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  background: var(--text-secondary, #888);
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+}
+
+/* Progress wrapper for threshold marker */
+.progressWrapper {
+  flex: 1;
+  position: relative;
+}
+
+.progressWrapper .progressSlider {
+  width: 100%;
+}
+
+.thresholdMarker {
+  position: absolute;
+  top: 50%;
+  width: 3px;
+  height: 14px;
+  background: var(--success, #10b981);
+  border-radius: 2px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+/* Completion badge */
+.completeBadge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: var(--success, #10b981);
+  border-radius: 50%;
+  color: white;
+}
+
+.completeBadge svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Progress info */
+.progressInfo {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-color, #333);
+  text-align: right;
+}
+
+.progressPercent {
+  font-size: 12px;
+  color: var(--text-secondary, #888);
+}
+
+.progressPercent.complete {
+  color: var(--success, #10b981);
+  font-weight: 600;
+}
+
+.placeholder,
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px;
+  color: var(--text-secondary, #888);
+}
+
+.placeholder svg,
+.error svg {
+  width: 32px;
+  height: 32px;
+  opacity: 0.5;
+}
+
+.error {
+  color: var(--danger, #ef4444);
+}
+
+.fileNameText {
+  font-size: 12px;
+  color: var(--text-secondary, #888);
+  margin-top: 4px;
+}
+

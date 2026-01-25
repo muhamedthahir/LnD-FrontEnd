@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useOutletContext, useNavigate } from 'react-router-dom'
 import { useApi } from '../../contexts/ApiContext'
-import './PersonalDetails.css'
+import styles from './PersonalDetails.module.css'
 
 function PersonalDetails() {
   const { user } = useOutletContext()
@@ -100,17 +100,17 @@ function PersonalDetails() {
 
   if (loading) {
     return (
-      <div className="personal-details-loading">
-        <div className="spinner"></div>
+      <div className={styles.personalDetailsLoading}>
+        <div className={styles.spinner}></div>
         <p>Loading...</p>
       </div>
     )
   }
 
   return (
-    <div className="personal-details">
-      <header className="personal-details-header">
-        <button className="back-btn" onClick={() => navigate(-1)}>
+    <div className={styles.personalDetails}>
+      <header className={styles.personalDetailsHeader}>
+        <button className={styles.backBtn} onClick={() => navigate(-1)}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M19 12H5M12 19l-7-7 7-7"/>
           </svg>
@@ -121,7 +121,7 @@ function PersonalDetails() {
       </header>
 
       {message.text && (
-        <div className={`message-banner ${message.type}`}>
+        <div className={`${styles.messageBanner} ${styles[message.type]}`}>
           {message.type === 'success' ? (
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
@@ -138,9 +138,9 @@ function PersonalDetails() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="personal-details-form">
+      <form onSubmit={handleSubmit} className={styles.personalDetailsForm}>
         {/* Basic Information */}
-        <section className="form-section">
+        <section className={styles.formSection}>
           <h2>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -148,8 +148,8 @@ function PersonalDetails() {
             </svg>
             Basic Information
           </h2>
-          <div className="form-grid">
-            <div className="form-group">
+          <div className={styles.formGrid}>
+            <div className={styles.formGroup}>
               <label htmlFor="mobile_number">Mobile Number *</label>
               <input
                 type="tel"
@@ -160,7 +160,7 @@ function PersonalDetails() {
                 placeholder="+1 234 567 8900"
               />
             </div>
-            <div className="form-group">
+            <div className={styles.formGroup}>
               <label htmlFor="alternate_mobile">Alternate Mobile</label>
               <input
                 type="tel"
@@ -171,7 +171,7 @@ function PersonalDetails() {
                 placeholder="+1 234 567 8900"
               />
             </div>
-            <div className="form-group">
+            <div className={styles.formGroup}>
               <label htmlFor="gender">Gender *</label>
               <select
                 id="gender"
@@ -186,7 +186,7 @@ function PersonalDetails() {
                 <option value="prefer_not_to_say">Prefer not to say</option>
               </select>
             </div>
-            <div className="form-group">
+            <div className={styles.formGroup}>
               <label htmlFor="date_of_birth">Date of Birth</label>
               <input
                 type="date"
@@ -200,7 +200,7 @@ function PersonalDetails() {
         </section>
 
         {/* Address Information */}
-        <section className="form-section">
+        <section className={styles.formSection}>
           <h2>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
@@ -208,8 +208,8 @@ function PersonalDetails() {
             </svg>
             Address Information
           </h2>
-          <div className="form-grid">
-            <div className="form-group full-width">
+          <div className={styles.formGrid}>
+            <div className={`${styles.formGroup} ${styles.fullWidth}`}>
               <label htmlFor="address_line1">Address Line 1</label>
               <input
                 type="text"
@@ -220,7 +220,7 @@ function PersonalDetails() {
                 placeholder="Street address, P.O. box"
               />
             </div>
-            <div className="form-group full-width">
+            <div className={`${styles.formGroup} ${styles.fullWidth}`}>
               <label htmlFor="address_line2">Address Line 2</label>
               <input
                 type="text"
@@ -231,7 +231,7 @@ function PersonalDetails() {
                 placeholder="Apartment, suite, unit, building, floor"
               />
             </div>
-            <div className="form-group">
+            <div className={styles.formGroup}>
               <label htmlFor="city">City *</label>
               <input
                 type="text"
@@ -242,7 +242,7 @@ function PersonalDetails() {
                 placeholder="City"
               />
             </div>
-            <div className="form-group">
+            <div className={styles.formGroup}>
               <label htmlFor="state">State *</label>
               <input
                 type="text"
@@ -253,7 +253,7 @@ function PersonalDetails() {
                 placeholder="State / Province"
               />
             </div>
-            <div className="form-group">
+            <div className={styles.formGroup}>
               <label htmlFor="country">Country *</label>
               <input
                 type="text"
@@ -264,7 +264,7 @@ function PersonalDetails() {
                 placeholder="Country"
               />
             </div>
-            <div className="form-group">
+            <div className={styles.formGroup}>
               <label htmlFor="postal_code">Postal Code</label>
               <input
                 type="text"
@@ -279,7 +279,7 @@ function PersonalDetails() {
         </section>
 
         {/* Social Links */}
-        <section className="form-section">
+        <section className={styles.formSection}>
           <h2>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
@@ -287,8 +287,8 @@ function PersonalDetails() {
             </svg>
             Social & Professional Links
           </h2>
-          <div className="form-grid">
-            <div className="form-group">
+          <div className={styles.formGrid}>
+            <div className={styles.formGroup}>
               <label htmlFor="linkedin_url">LinkedIn URL</label>
               <input
                 type="url"
@@ -299,7 +299,7 @@ function PersonalDetails() {
                 placeholder="https://linkedin.com/in/username"
               />
             </div>
-            <div className="form-group">
+            <div className={styles.formGroup}>
               <label htmlFor="github_url">GitHub URL</label>
               <input
                 type="url"
@@ -310,7 +310,7 @@ function PersonalDetails() {
                 placeholder="https://github.com/username"
               />
             </div>
-            <div className="form-group full-width">
+            <div className={`${styles.formGroup} ${styles.fullWidth}`}>
               <label htmlFor="portfolio_url">Portfolio URL</label>
               <input
                 type="url"
@@ -325,7 +325,7 @@ function PersonalDetails() {
         </section>
 
         {/* Bio */}
-        <section className="form-section">
+        <section className={styles.formSection}>
           <h2>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -335,7 +335,7 @@ function PersonalDetails() {
             </svg>
             About You
           </h2>
-          <div className="form-group full-width">
+          <div className={`${styles.formGroup} ${styles.fullWidth}`}>
             <label htmlFor="bio">Bio</label>
             <textarea
               id="bio"
@@ -349,15 +349,15 @@ function PersonalDetails() {
         </section>
 
         {/* Emergency Contact */}
-        <section className="form-section">
+        <section className={styles.formSection}>
           <h2>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
             </svg>
             Emergency Contact
           </h2>
-          <div className="form-grid">
-            <div className="form-group">
+          <div className={styles.formGrid}>
+            <div className={styles.formGroup}>
               <label htmlFor="emergency_contact_name">Contact Name</label>
               <input
                 type="text"
@@ -368,7 +368,7 @@ function PersonalDetails() {
                 placeholder="Full name"
               />
             </div>
-            <div className="form-group">
+            <div className={styles.formGroup}>
               <label htmlFor="emergency_contact_phone">Contact Phone</label>
               <input
                 type="tel"
@@ -383,14 +383,14 @@ function PersonalDetails() {
         </section>
 
         {/* Submit Button */}
-        <div className="form-actions">
-          <button type="button" className="btn-secondary" onClick={() => navigate(-1)}>
+        <div className={styles.formActions}>
+          <button type="button" className={styles.btnSecondary} onClick={() => navigate(-1)}>
             Cancel
           </button>
-          <button type="submit" className="btn-primary" disabled={saving}>
+          <button type="submit" className={styles.btnPrimary} disabled={saving}>
             {saving ? (
               <>
-                <span className="btn-spinner"></span>
+                <span className={styles.btnSpinner}></span>
                 Saving...
               </>
             ) : (

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import './AudioPlayer.css'
+import styles from './AudioPlayer.module.css'
 
 /**
  * AudioPlayer component for displaying audio content
@@ -134,8 +134,8 @@ function AudioPlayer({
 
   if (!url) {
     return (
-      <div className={`audio-player-container ${compact ? 'compact' : ''}`}>
-        <div className="audio-placeholder">
+      <div className={`${styles.container} ${compact ? styles.compact : ''}`}>
+        <div className={styles.placeholder}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M9 18V5l12-2v13"/>
             <circle cx="6" cy="18" r="3"/>
@@ -149,22 +149,22 @@ function AudioPlayer({
 
   if (error) {
     return (
-      <div className={`audio-player-container ${compact ? 'compact' : ''}`}>
-        <div className="audio-error">
+      <div className={`${styles.container} ${compact ? styles.compact : ''}`}>
+        <div className={styles.error}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="12" cy="12" r="10"/>
             <line x1="15" y1="9" x2="9" y2="15"/>
             <line x1="9" y1="9" x2="15" y2="15"/>
           </svg>
           <span>Failed to load audio</span>
-          {fileName && <p className="file-name">{fileName}</p>}
+          {fileName && <p className={styles.fileNameText}>{fileName}</p>}
         </div>
       </div>
     )
   }
 
   return (
-    <div className={`audio-player-container ${compact ? 'compact' : ''}`}>
+    <div className={`${styles.container} ${compact ? styles.compact : ''}`}>
       <audio 
         ref={audioRef} 
         src={url} 
@@ -172,16 +172,16 @@ function AudioPlayer({
         autoPlay={autoPlay}
       />
       
-      <div className="audio-player">
+      <div className={styles.player}>
         {/* Play/Pause Button */}
         <button 
-          className="play-btn" 
+          className={styles.playBtn} 
           onClick={togglePlay}
           disabled={loading}
           aria-label={isPlaying ? 'Pause' : 'Play'}
         >
           {loading ? (
-            <div className="btn-spinner"></div>
+            <div className={styles.btnSpinner}></div>
           ) : isPlaying ? (
             <svg viewBox="0 0 24 24" fill="currentColor">
               <rect x="6" y="4" width="4" height="16"/>
@@ -195,17 +195,17 @@ function AudioPlayer({
         </button>
 
         {/* Progress Section */}
-        <div className="audio-progress-section">
+        <div className={styles.progressSection}>
           {fileName && (
-            <div className="audio-file-name" title={fileName}>{fileName}</div>
+            <div className={styles.fileName} title={fileName}>{fileName}</div>
           )}
           
-          <div className="progress-row">
-            <span className="time">{formatTime(currentTime)}</span>
-            <div className="audio-progress-wrapper">
+          <div className={styles.progressRow}>
+            <span className={styles.time}>{formatTime(currentTime)}</span>
+            <div className={styles.progressWrapper}>
               <input
                 type="range"
-                className="progress-slider"
+                className={styles.progressSlider}
                 min="0"
                 max={duration || 0}
                 value={currentTime}
@@ -214,19 +214,19 @@ function AudioPlayer({
               />
               {thresholdValue < 100 && (
                 <div 
-                  className="audio-threshold-marker" 
+                  className={styles.thresholdMarker} 
                   style={{ left: `${thresholdValue}%` }}
                   title={`Completion threshold: ${thresholdValue}%`}
                 />
               )}
             </div>
-            <span className="time">{formatTime(duration)}</span>
+            <span className={styles.time}>{formatTime(duration)}</span>
           </div>
         </div>
 
         {/* Completion Status */}
         {isComplete && (
-          <div className="audio-complete-badge" title="Completed">
+          <div className={styles.completeBadge} title="Completed">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <polyline points="20 6 9 17 4 12"/>
             </svg>
@@ -235,7 +235,7 @@ function AudioPlayer({
 
         {/* Volume Control */}
         {!compact && (
-          <div className="volume-control">
+          <div className={styles.volumeControl}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
               <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
@@ -243,7 +243,7 @@ function AudioPlayer({
             </svg>
             <input
               type="range"
-              className="volume-slider"
+              className={styles.volumeSlider}
               min="0"
               max="1"
               step="0.1"
@@ -256,8 +256,8 @@ function AudioPlayer({
       
       {/* Progress percentage display */}
       {!compact && (
-        <div className="audio-progress-info">
-          <span className={`audio-progress-percent ${isComplete ? 'complete' : ''}`}>
+        <div className={styles.progressInfo}>
+          <span className={`${styles.progressPercent} ${isComplete ? styles.complete : ''}`}>
             {isComplete ? 'Completed' : `${progressPercent}% listened`}
           </span>
         </div>

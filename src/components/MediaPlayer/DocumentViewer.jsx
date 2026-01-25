@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { Document, Page, pdfjs } from 'react-pdf'
 import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
-import './DocumentViewer.css'
+import styles from './DocumentViewer.module.css'
 
 // Set up PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
@@ -59,7 +59,7 @@ function DocumentViewer({
     
     if (ext === 'pdf') {
       return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="file-icon pdf">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className={`${styles.fileIcon} ${styles.pdf}`}>
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
           <polyline points="14 2 14 8 20 8"/>
           <text x="12" y="16" fontSize="6" fill="currentColor" textAnchor="middle" fontWeight="bold">PDF</text>
@@ -69,7 +69,7 @@ function DocumentViewer({
     
     if (['doc', 'docx'].includes(ext)) {
       return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="file-icon doc">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className={`${styles.fileIcon} ${styles.doc}`}>
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
           <polyline points="14 2 14 8 20 8"/>
           <line x1="8" y1="13" x2="16" y2="13"/>
@@ -80,7 +80,7 @@ function DocumentViewer({
     
     if (['ppt', 'pptx'].includes(ext)) {
       return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="file-icon ppt">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className={`${styles.fileIcon} ${styles.ppt}`}>
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
           <polyline points="14 2 14 8 20 8"/>
           <rect x="8" y="12" width="8" height="6" rx="1"/>
@@ -90,7 +90,7 @@ function DocumentViewer({
     
     if (['xls', 'xlsx'].includes(ext)) {
       return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="file-icon xls">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className={`${styles.fileIcon} ${styles.xls}`}>
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
           <polyline points="14 2 14 8 20 8"/>
           <line x1="8" y1="12" x2="16" y2="12"/>
@@ -102,7 +102,7 @@ function DocumentViewer({
 
     if (isImage(name)) {
       return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="file-icon img">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className={`${styles.fileIcon} ${styles.img}`}>
           <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
           <circle cx="8.5" cy="8.5" r="1.5"/>
           <polyline points="21 15 16 10 5 21"/>
@@ -111,7 +111,7 @@ function DocumentViewer({
     }
     
     return (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="file-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className={styles.fileIcon}>
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
         <polyline points="14 2 14 8 20 8"/>
       </svg>
@@ -232,8 +232,8 @@ function DocumentViewer({
   // Handle multiple files - list view (compact or download only)
   if (files && files.length > 0 && (compact || !showViewer)) {
     return (
-      <div className={`document-viewer-container ${compact ? 'compact' : ''}`}>
-        <div className="documents-list">
+      <div className={`${styles.container} ${compact ? styles.compact : ''}`}>
+        <div className={styles.documentsList}>
           {files.map((file, index) => {
             const fileUrl = file.url || file.presignedUrl || file
             const name = file.fileName || file.name || `Document ${index + 1}`
@@ -245,14 +245,14 @@ function DocumentViewer({
                 href={fileUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="document-item"
+                className={styles.documentItem}
               >
                 {getFileIcon(name)}
-                <div className="document-info">
-                  <span className="document-name" title={name}>{name}</span>
-                  <span className="document-type">{ext.toUpperCase()}</span>
+                <div className={styles.documentInfo}>
+                  <span className={styles.documentName} title={name}>{name}</span>
+                  <span className={styles.documentType}>{ext.toUpperCase()}</span>
                 </div>
-                <svg className="download-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg className={styles.downloadIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                   <polyline points="7 10 12 15 17 10"/>
                   <line x1="12" y1="15" x2="12" y2="3"/>
@@ -268,8 +268,8 @@ function DocumentViewer({
   // No documents
   if (documents.length === 0) {
     return (
-      <div className={`document-viewer-container ${compact ? 'compact' : ''}`}>
-        <div className="document-placeholder">
+      <div className={`${styles.container} ${compact ? styles.compact : ''}`}>
+        <div className={styles.placeholder}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
             <polyline points="14 2 14 8 20 8"/>
@@ -285,14 +285,14 @@ function DocumentViewer({
     const renderDocumentContent = () => {
       if (error) {
         return (
-          <div className="document-error">
+          <div className={styles.error}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10"/>
               <line x1="15" y1="9" x2="9" y2="15"/>
               <line x1="9" y1="9" x2="15" y2="15"/>
             </svg>
             <span>Failed to load document</span>
-            <a href={currentDoc.uri} target="_blank" rel="noopener noreferrer" className="download-link">
+            <a href={currentDoc.uri} target="_blank" rel="noopener noreferrer" className={styles.downloadLink}>
               Download instead
             </a>
           </div>
@@ -302,32 +302,32 @@ function DocumentViewer({
       // PDF Viewer
       if (isPDF(currentDoc.fileName)) {
         return (
-          <div className="pdf-viewer">
-            <div className="pdf-controls">
-              <div className="pdf-controls-left">
-                <button onClick={goToPrevPage} disabled={pageNumber <= 1} className="pdf-btn">
+          <div className={styles.pdfViewer}>
+            <div className={styles.pdfControls}>
+              <div className={styles.controlsLeft}>
+                <button onClick={goToPrevPage} disabled={pageNumber <= 1} className={styles.pdfBtn}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polyline points="15 18 9 12 15 6"/>
                   </svg>
                 </button>
-                <span className="page-info">
+                <span className={styles.pageInfo}>
                   Page {pageNumber} of {numPages || '...'}
                 </span>
-                <button onClick={goToNextPage} disabled={pageNumber >= (numPages || 1)} className="pdf-btn">
+                <button onClick={goToNextPage} disabled={pageNumber >= (numPages || 1)} className={styles.pdfBtn}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polyline points="9 18 15 12 9 6"/>
                   </svg>
                 </button>
-                <div className="zoom-controls">
-                  <button onClick={zoomOut} className="pdf-btn">
+                <div className={styles.zoomControls}>
+                  <button onClick={zoomOut} className={styles.pdfBtn}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <circle cx="11" cy="11" r="8"/>
                       <line x1="21" y1="21" x2="16.65" y2="16.65"/>
                       <line x1="8" y1="11" x2="14" y2="11"/>
                     </svg>
                   </button>
-                  <span className="zoom-level">{Math.round(scale * 100)}%</span>
-                  <button onClick={zoomIn} className="pdf-btn">
+                  <span className={styles.zoomLevel}>{Math.round(scale * 100)}%</span>
+                  <button onClick={zoomIn} className={styles.pdfBtn}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <circle cx="11" cy="11" r="8"/>
                       <line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -339,10 +339,10 @@ function DocumentViewer({
                 
                 {/* Progress indicator */}
                 {numPages > 1 && (
-                  <div className="pdf-progress-indicator">
-                    <div className="pdf-progress-bar">
+                  <div className={styles.progressIndicator}>
+                    <div className={styles.progressBar}>
                       <div 
-                        className="pdf-progress-fill" 
+                        className={styles.progressFill} 
                         style={{ width: `${Math.round((maxPageReached / numPages) * 100)}%` }}
                       />
                     </div>
@@ -352,9 +352,9 @@ function DocumentViewer({
               
               {/* Mark as Complete button at top right for PDF */}
               {showMarkComplete && (
-                <div className="pdf-complete-header">
+                <div className={styles.completeHeader}>
                   {isComplete ? (
-                    <div className="pdf-completed-badge-small">
+                    <div className={styles.completedBadgeSmall}>
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <polyline points="20 6 9 17 4 12"/>
                       </svg>
@@ -362,7 +362,7 @@ function DocumentViewer({
                     </div>
                   ) : (
                     <button 
-                      className="btn-mark-complete-header"
+                      className={styles.btnMarkCompleteHeader}
                       onClick={handleMarkComplete}
                       title="Mark as done"
                     >
@@ -375,13 +375,13 @@ function DocumentViewer({
                 </div>
               )}
             </div>
-            <div className="pdf-document-wrapper">
+            <div className={styles.pdfDocumentWrapper}>
               <Document
                 file={currentDoc.uri}
                 onLoadSuccess={onDocumentLoadSuccess}
                 onLoadError={handleError}
                 loading={
-                  <div className="document-loading">
+                  <div className={styles.loading}>
                     <div className="spinner"></div>
                     <span>Loading PDF...</span>
                   </div>
@@ -402,12 +402,12 @@ function DocumentViewer({
       // DOCX Viewer
       if (isDOCX(currentDoc.fileName)) {
         return (
-          <div className="docx-viewer">
+          <div className={styles.docxViewer}>
             {/* Mark as Complete button at top right for DOCX */}
             {showMarkComplete && (
-              <div className="doc-header-controls">
+              <div className={styles.headerControls}>
                 {isComplete ? (
-                  <div className="doc-completed-badge-small">
+                  <div className={styles.completedBadgeSmall}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <polyline points="20 6 9 17 4 12"/>
                     </svg>
@@ -415,7 +415,7 @@ function DocumentViewer({
                   </div>
                 ) : (
                   <button 
-                    className="btn-mark-complete-header"
+                    className={styles.btnMarkCompleteHeader}
                     onClick={handleMarkComplete}
                     title="Mark as done"
                   >
@@ -427,7 +427,7 @@ function DocumentViewer({
                 )}
               </div>
             )}
-            <div ref={docxContainerRef} className="docx-container" />
+            <div ref={docxContainerRef} className={styles.docxContainer} />
           </div>
         )
       }
@@ -435,12 +435,12 @@ function DocumentViewer({
       // Image Viewer
       if (isImage(currentDoc.fileName)) {
         return (
-          <div className="image-viewer">
+          <div className={styles.imageViewer}>
             {/* Mark as Complete button at top right for Images */}
             {showMarkComplete && (
-              <div className="doc-header-controls">
+              <div className={styles.headerControls}>
                 {isComplete ? (
-                  <div className="doc-completed-badge-small">
+                  <div className={styles.completedBadgeSmall}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <polyline points="20 6 9 17 4 12"/>
                     </svg>
@@ -448,7 +448,7 @@ function DocumentViewer({
                   </div>
                 ) : (
                   <button 
-                    className="btn-mark-complete-header"
+                    className={styles.btnMarkCompleteHeader}
                     onClick={handleMarkComplete}
                     title="Mark as done"
                   >
@@ -477,12 +477,12 @@ function DocumentViewer({
 
       // Unsupported - show download card
       return (
-        <div className="unsupported-file">
+        <div className={styles.unsupportedFile}>
           {/* Mark as Complete button at top right for unsupported files */}
           {showMarkComplete && (
-            <div className="doc-header-controls unsupported-header">
+            <div className={`${styles.headerControls} ${styles.unsupportedHeader}`}>
               {isComplete ? (
-                <div className="doc-completed-badge-small">
+                <div className={styles.completedBadgeSmall}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polyline points="20 6 9 17 4 12"/>
                   </svg>
@@ -490,7 +490,7 @@ function DocumentViewer({
                 </div>
               ) : (
                 <button 
-                  className="btn-mark-complete-header"
+                  className={styles.btnMarkCompleteHeader}
                   onClick={handleMarkComplete}
                   title="Mark as done"
                 >
@@ -502,12 +502,12 @@ function DocumentViewer({
               )}
             </div>
           )}
-          <div className="unsupported-content">
+          <div className={styles.unsupportedContent}>
             {getFileIcon(currentDoc.fileName)}
-            <span className="unsupported-message">
+            <span className={styles.unsupportedMessage}>
               Preview not available for {getExtension(currentDoc.fileName).toUpperCase()} files
             </span>
-            <a href={currentDoc.uri} target="_blank" rel="noopener noreferrer" className="download-btn">
+            <a href={currentDoc.uri} target="_blank" rel="noopener noreferrer" className={styles.downloadBtn}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                 <polyline points="7 10 12 15 17 10"/>
@@ -521,14 +521,14 @@ function DocumentViewer({
     }
 
     return (
-      <div className="document-viewer-container viewer-mode">
+      <div className={`${styles.container} ${styles.viewerMode}`}>
         {/* Document tabs for multiple documents */}
         {documents.length > 1 && (
-          <div className="document-tabs">
+          <div className={styles.tabs}>
             {documents.map((doc, index) => (
               <button
                 key={index}
-                className={`document-tab ${activeDocIndex === index ? 'active' : ''}`}
+                className={`${styles.tab} ${activeDocIndex === index ? styles.active : ''}`}
                 onClick={() => {
                   setActiveDocIndex(index)
                   setLoading(true)
@@ -537,16 +537,16 @@ function DocumentViewer({
                 }}
               >
                 {getFileIcon(doc.fileName)}
-                <span className="tab-name" title={doc.fileName}>{doc.fileName}</span>
+                <span className={styles.tabName} title={doc.fileName}>{doc.fileName}</span>
               </button>
             ))}
           </div>
         )}
 
         {/* Document viewer */}
-        <div className="doc-viewer-wrapper">
+        <div className={styles.viewerWrapper}>
           {loading && !isPDF(currentDoc?.fileName) && (
-            <div className="document-loading">
+            <div className={styles.loading}>
               <div className="spinner"></div>
               <span>Loading document...</span>
             </div>
@@ -556,10 +556,10 @@ function DocumentViewer({
         </div>
 
         {/* Document footer */}
-        <div className="document-footer">
-          <span className="file-name" title={currentDoc.fileName}>{currentDoc.fileName}</span>
-          <a href={currentDoc.uri} target="_blank" rel="noopener noreferrer" className="open-link">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="external-icon">
+        <div className={styles.footer}>
+          <span className={styles.fileName} title={currentDoc.fileName}>{currentDoc.fileName}</span>
+          <a href={currentDoc.uri} target="_blank" rel="noopener noreferrer" className={styles.openLink}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={styles.externalIcon}>
               <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
               <polyline points="15 3 21 3 21 9"/>
               <line x1="10" y1="14" x2="21" y2="3"/>
@@ -573,19 +573,19 @@ function DocumentViewer({
 
   // Compact view or download card for single file
   return (
-    <div className={`document-viewer-container ${compact ? 'compact' : ''}`}>
+    <div className={`${styles.container} ${compact ? styles.compact : ''}`}>
       <a 
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className="document-card"
+        className={styles.documentCard}
       >
         {getFileIcon(fileName)}
-        <div className="document-info">
-          <span className="document-name" title={fileName}>{fileName || 'Document'}</span>
-          <span className="document-type">{getExtension(fileName).toUpperCase() || 'FILE'}</span>
+        <div className={styles.documentInfo}>
+          <span className={styles.documentName} title={fileName}>{fileName || 'Document'}</span>
+          <span className={styles.documentType}>{getExtension(fileName).toUpperCase() || 'FILE'}</span>
         </div>
-        <svg className="download-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg className={styles.downloadIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
           <polyline points="7 10 12 15 17 10"/>
           <line x1="12" y1="15" x2="12" y2="3"/>
@@ -619,7 +619,7 @@ function TextFileViewer({ url, onLoad, onError }) {
 
   if (loading) {
     return (
-      <div className="document-loading">
+      <div className={styles.loading}>
         <div className="spinner"></div>
         <span>Loading text file...</span>
       </div>
@@ -627,7 +627,7 @@ function TextFileViewer({ url, onLoad, onError }) {
   }
 
   return (
-    <div className="text-viewer">
+    <div className={styles.textViewer}>
       <pre>{content}</pre>
     </div>
   )

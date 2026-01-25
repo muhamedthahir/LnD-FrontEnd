@@ -1,10 +1,10 @@
-.personal-details {
+.personalDetails {
   padding: var(--spacing-lg);
   max-width: 900px;
   margin: 0 auto;
 }
 
-.personal-details-loading {
+.personalDetailsLoading {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -14,11 +14,11 @@
   color: var(--text-secondary);
 }
 
-.personal-details-header {
+.personalDetailsHeader {
   margin-bottom: var(--spacing-xl);
 }
 
-.personal-details-header .back-btn {
+.personalDetailsHeader .backBtn {
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-xs);
@@ -32,29 +32,29 @@
   transition: color var(--transition-fast);
 }
 
-.personal-details-header .back-btn:hover {
+.personalDetailsHeader .backBtn:hover {
   color: var(--accent-primary);
 }
 
-.personal-details-header .back-btn svg {
+.personalDetailsHeader .backBtn svg {
   width: 1rem;
   height: 1rem;
 }
 
-.personal-details-header h1 {
+.personalDetailsHeader h1 {
   font-size: 1.75rem;
   font-weight: 700;
   color: var(--text-primary);
   margin-bottom: var(--spacing-xs);
 }
 
-.personal-details-header p {
+.personalDetailsHeader p {
   color: var(--text-secondary);
   font-size: 0.9375rem;
 }
 
 /* Message Banner */
-.message-banner {
+.messageBanner {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
@@ -65,39 +65,39 @@
   font-weight: 500;
 }
 
-.message-banner svg {
+.messageBanner svg {
   width: 1.25rem;
   height: 1.25rem;
   flex-shrink: 0;
 }
 
-.message-banner.success {
+.success {
   background: rgba(72, 187, 120, 0.15);
   border: 1px solid rgba(72, 187, 120, 0.3);
   color: #48bb78;
 }
 
-.message-banner.error {
+.error {
   background: rgba(229, 62, 62, 0.15);
   border: 1px solid rgba(229, 62, 62, 0.3);
   color: #e53e3e;
 }
 
 /* Form Sections */
-.personal-details-form {
+.personalDetailsForm {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xl);
 }
 
-.form-section {
+.formSection {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
 }
 
-.form-section h2 {
+.formSection h2 {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
@@ -109,30 +109,30 @@
   border-bottom: 1px solid var(--border-color);
 }
 
-.form-section h2 svg {
+.formSection h2 svg {
   width: 1.25rem;
   height: 1.25rem;
   color: var(--accent-primary);
 }
 
 /* Form Grid */
-.form-grid {
+.formGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--spacing-md);
 }
 
-.form-group {
+.formGroup {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xs);
 }
 
-.form-group.full-width {
+.formGroup.fullWidth {
   grid-column: span 2;
 }
 
-.form-group label {
+.formGroup label {
   font-size: 0.8125rem;
   font-weight: 600;
   color: var(--text-secondary);
@@ -140,9 +140,9 @@
   letter-spacing: 0.025em;
 }
 
-.form-group input,
-.form-group select,
-.form-group textarea {
+.formGroup input,
+.formGroup select,
+.formGroup textarea {
   padding: var(--spacing-sm) var(--spacing-md);
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
@@ -152,20 +152,20 @@
   transition: all var(--transition-fast);
 }
 
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
+.formGroup input:focus,
+.formGroup select:focus,
+.formGroup textarea:focus {
   outline: none;
   border-color: var(--accent-primary);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
-.form-group input::placeholder,
-.form-group textarea::placeholder {
+.formGroup input::placeholder,
+.formGroup textarea::placeholder {
   color: var(--text-muted);
 }
 
-.form-group select {
+.formGroup select {
   cursor: pointer;
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
@@ -175,21 +175,21 @@
   padding-right: 2.5rem;
 }
 
-.form-group textarea {
+.formGroup textarea {
   resize: vertical;
   min-height: 100px;
 }
 
 /* Form Actions */
-.form-actions {
+.formActions {
   display: flex;
   justify-content: flex-end;
   gap: var(--spacing-md);
   padding-top: var(--spacing-md);
 }
 
-.btn-primary,
-.btn-secondary {
+.btnPrimary,
+.btnSecondary {
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-sm);
@@ -201,39 +201,39 @@
   transition: all var(--transition-fast);
 }
 
-.btn-primary {
+.btnPrimary {
   background: var(--accent-primary);
   border: none;
   color: white;
 }
 
-.btn-primary:hover:not(:disabled) {
+.btnPrimary:hover:not(:disabled) {
   background: var(--accent-hover);
   transform: translateY(-1px);
 }
 
-.btn-primary:disabled {
+.btnPrimary:disabled {
   opacity: 0.7;
   cursor: not-allowed;
 }
 
-.btn-primary svg {
+.btnPrimary svg {
   width: 1rem;
   height: 1rem;
 }
 
-.btn-secondary {
+.btnSecondary {
   background: transparent;
   border: 1px solid var(--border-color);
   color: var(--text-secondary);
 }
 
-.btn-secondary:hover {
+.btnSecondary:hover {
   border-color: var(--text-secondary);
   color: var(--text-primary);
 }
 
-.btn-spinner {
+.btnSpinner {
   width: 1rem;
   height: 1rem;
   border: 2px solid rgba(255, 255, 255, 0.3);
@@ -250,24 +250,24 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-  .personal-details {
+  .personalDetails {
     padding: var(--spacing-md);
   }
 
-  .form-grid {
+  .formGrid {
     grid-template-columns: 1fr;
   }
 
-  .form-group.full-width {
+  .formGroup.fullWidth {
     grid-column: span 1;
   }
 
-  .form-actions {
+  .formActions {
     flex-direction: column-reverse;
   }
 
-  .btn-primary,
-  .btn-secondary {
+  .btnPrimary,
+  .btnSecondary {
     width: 100%;
     justify-content: center;
   }

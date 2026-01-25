@@ -15,6 +15,7 @@ function Layout() {
     const saved = localStorage.getItem('sidebarCollapsed')
     return saved ? JSON.parse(saved) : false
   })
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false) // For small screens
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -23,8 +24,30 @@ function Layout() {
   }, [isSidebarCollapsed])
 
   const toggleSidebar = () => {
-    setIsSidebarCollapsed(!isSidebarCollapsed)
+    // On small screens, toggle open state instead of collapsed state
+    if (window.innerWidth <= 600) {
+      setIsSidebarOpen(!isSidebarOpen)
+    } else {
+      setIsSidebarCollapsed(!isSidebarCollapsed)
+    }
   }
+  
+  // Close sidebar when clicking outside on small screens
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (window.innerWidth <= 600 && isSidebarOpen) {
+        const sidebar = document.querySelector('[class*="sidebar"]')
+        if (sidebar && !sidebar.contains(event.target) && !event.target.closest('[class*="sidebarToggleBtn"]')) {
+          setIsSidebarOpen(false)
+        }
+      }
+    }
+    
+    if (isSidebarOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isSidebarOpen])
 
   useEffect(() => {
     if (apiBaseUrl) {
@@ -159,7 +182,11 @@ function Layout() {
 
   return (
     <div className={styles.layout}>
-      <Sidebar user={user} isCollapsed={isSidebarCollapsed} />
+      <Sidebar 
+        user={user} 
+        isCollapsed={isSidebarCollapsed} 
+        isOpen={isSidebarOpen}
+      />
       <Header 
         user={user} 
         logout={logout} 

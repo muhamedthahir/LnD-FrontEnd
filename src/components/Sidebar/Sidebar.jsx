@@ -3,7 +3,7 @@ import { useTheme } from '../../contexts/ThemeContext'
 import ThemeToggle from '../ThemeToggle/ThemeToggle'
 import styles from './Sidebar.module.css'
 
-function Sidebar({ user, isCollapsed }) {
+function Sidebar({ user, isCollapsed, isOpen = false }) {
   const location = useLocation()
   const { theme } = useTheme()
   
@@ -20,7 +20,7 @@ function Sidebar({ user, isCollapsed }) {
   const isPrimaryAdmin = user?.role === 'primary_admin'
 
   return (
-    <aside className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ''}`}>
+    <aside className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ''} ${isOpen ? styles.open : ''}`}>
       <div className={styles.header}>
         <h2>Menu</h2>
         <div className={styles.headerActions}>

@@ -2,7 +2,7 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import Editor from '@monaco-editor/react'
 import { useApi } from '../../contexts/ApiContext'
 import { CODE_SNIPPETS, LANGUAGE_KEY_MAP } from '../../constants/constants'
-import './CodeEditor.css'
+import styles from './CodeEditor.module.css'
 
 function CodeEditor({ 
   questionId,
@@ -627,14 +627,14 @@ function CodeEditor({
   const hasTestCases = testCases.length > 0
 
   return (
-    <div className="code-editor-container" ref={containerRef}>
+    <div className={styles.codeEditorContainer} ref={containerRef}>
       {/* Code Editor Section */}
       <div 
-        className="code-section"
+        className={styles.codeSection}
         style={{ height: `${editorHeight}%` }}
       >
-        <div className="code-header">
-          <div className="language-selector">
+        <div className={styles.codeHeader}>
+          <div className={styles.languageSelector}>
             <select 
               value={language} 
               onChange={(e) => handleLanguageChange(e.target.value)}
@@ -646,19 +646,19 @@ function CodeEditor({
               ))}
             </select>
           </div>
-          <div className="code-actions">
+          <div className={styles.codeActions}>
             {useInteractiveMode && isRunning && isInteractive ? (
-              <button className="btn-stop-header" onClick={handleStopExecution}>
+              <button className={styles.btnStopHeader} onClick={handleStopExecution}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <rect x="6" y="6" width="12" height="12"/>
                 </svg>
                 Stop
               </button>
             ) : (
-              <button className="btn-run" onClick={handleRunCode} disabled={isRunning}>
+              <button className={styles.btnRun} onClick={handleRunCode} disabled={isRunning}>
                 {isRunning ? (
                   <>
-                    <svg className="spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <svg className={styles.spinner} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <circle cx="12" cy="12" r="10" strokeDasharray="32" strokeDashoffset="12"/>
                     </svg>
                     Running...
@@ -675,7 +675,7 @@ function CodeEditor({
             )}
             {hasTestCases && (
               <button 
-                className="btn-run-tests" 
+                className={styles.btnRunTests} 
                 onClick={handleRunWithTestCases} 
                 disabled={isRunning}
               >
@@ -685,10 +685,10 @@ function CodeEditor({
                 Run Tests
               </button>
             )}
-            <button className="btn-submit" onClick={handleSubmit} disabled={isSubmitting}>
+            <button className={styles.btnSubmit} onClick={handleSubmit} disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
-                  <svg className="spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg className={styles.spinner} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <circle cx="12" cy="12" r="10" strokeDasharray="32" strokeDashoffset="12"/>
                   </svg>
                   Submitting...
@@ -704,7 +704,7 @@ function CodeEditor({
             </button>
           </div>
         </div>
-        <div className="code-area">
+        <div className={styles.codeArea}>
           <Editor
             height="100%"
             language={language === 'cpp' ? 'cpp' : language}
@@ -730,7 +730,7 @@ function CodeEditor({
               bracketPairColorization: { enabled: true },
             }}
             loading={
-              <div className="editor-loading">
+              <div className={styles.editorLoading}>
                 <span>Loading Editor...</span>
               </div>
             }
@@ -740,10 +740,10 @@ function CodeEditor({
 
       {/* Horizontal Resizer */}
       <div 
-        className="horizontal-resizer"
+        className={styles.horizontalResizer}
         onMouseDown={handleMouseDown}
       >
-        <div className="resizer-handle-horizontal">
+        <div className={styles.resizerHandleHorizontal}>
           <span></span>
           <span></span>
           <span></span>
@@ -752,54 +752,54 @@ function CodeEditor({
 
       {/* Input/Output/TestCases Section */}
       <div 
-        className="output-section"
+        className={styles.outputSection}
         style={{ height: `${100 - editorHeight}%` }}
       >
-        <div className="output-header">
-          <div className="output-tabs">
+        <div className={styles.outputHeader}>
+          <div className={styles.outputTabs}>
             <button 
-              className={`tab-btn ${activeTab === 'custom' ? 'active' : ''}`}
+              className={`${styles.tabBtn} ${activeTab === 'custom' ? styles.active : ''}`}
               onClick={() => setActiveTab('custom')}
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14">
                 <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
               </svg>
               Custom Testcase
-              {userInput.trim() && <span className="input-indicator"></span>}
+              {userInput.trim() && <span className={styles.inputIndicator}></span>}
             </button>
             {hasTestCases && (
               <button 
-                className={`tab-btn ${activeTab === 'testcases' ? 'active' : ''}`}
+                className={`${styles.tabBtn} ${activeTab === 'testcases' ? styles.active : ''}`}
                 onClick={() => setActiveTab('testcases')}
               >
                 Test Cases ({visibleTestCases.length})
               </button>
             )}
             <button 
-              className={`tab-btn ${activeTab === 'history' ? 'active' : ''}`}
+              className={`${styles.tabBtn} ${activeTab === 'history' ? styles.active : ''}`}
               onClick={() => setActiveTab('history')}
             >
               History {submissionHistory.length > 0 && `(${submissionHistory.length})`}
             </button>
           </div>
-          <button className="btn-clear" onClick={handleClearOutput}>
+          <button className={styles.btnClear} onClick={handleClearOutput}>
             Clear
           </button>
         </div>
         
         {activeTab === 'custom' ? (
-          <div className="custom-testcase-content">
-            <div className="custom-testcase-grid">
+          <div className={styles.customTestcaseContent}>
+            <div className={styles.customTestcaseGrid}>
               {/* Input Section */}
-              <div className="custom-input-section">
-                <label className="section-label">
+              <div className={styles.customInputSection}>
+                <label className={styles.sectionLabel}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14">
                     <path d="M4 12h16M4 12l4-4M4 12l4 4"/>
                   </svg>
                   Input
                 </label>
                 <textarea
-                  className="custom-input-area"
+                  className={styles.customInputArea}
                   value={userInput}
                   onChange={(e) => setUserInput(e.target.value)}
                   placeholder="Enter your input here (one value per line for multiple inputs)..."
@@ -809,14 +809,14 @@ function CodeEditor({
               </div>
               
               {/* Output Section */}
-              <div className="custom-output-section">
-                <label className="section-label">
+              <div className={styles.customOutputSection}>
+                <label className={styles.sectionLabel}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14">
                     <path d="M20 12h-16M20 12l-4 4M20 12l-4-4"/>
                   </svg>
                   Output
                 </label>
-                <pre ref={outputRef} className="custom-output-area">
+                <pre ref={outputRef} className={styles.customOutputArea}>
                   {output || '// Run your code to see output here'}
                 </pre>
               </div>
@@ -824,56 +824,56 @@ function CodeEditor({
             
             {/* Interactive Input Area - only shown when interactive mode is enabled */}
             {useInteractiveMode && isInteractive && isRunning && (
-              <div className="interactive-input-area">
-                <form onSubmit={handleInteractiveInputSubmit} className="interactive-input-form">
+              <div className={styles.interactiveInputArea}>
+                <form onSubmit={handleInteractiveInputSubmit} className={styles.interactiveInputForm}>
                   <input
                     type="text"
                     value={interactiveInput}
                     onChange={(e) => setInteractiveInput(e.target.value)}
                     placeholder="Type input and press Enter..."
-                    className="interactive-input"
+                    className={styles.interactiveInput}
                     autoFocus
                   />
-                  <button type="submit" className="btn-send-input">
+                  <button type="submit" className={styles.btnSendInput}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
                       <line x1="22" y1="2" x2="11" y2="13"/>
                       <polygon points="22 2 15 22 11 13 2 9 22 2"/>
                     </svg>
                   </button>
-                  <button type="button" className="btn-stop" onClick={handleStopExecution}>
+                  <button type="button" className={styles.btnStop} onClick={handleStopExecution}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
                       <rect x="6" y="6" width="12" height="12"/>
                     </svg>
                     Stop
                   </button>
                 </form>
-                <div className="interactive-hint">
+                <div className={styles.interactiveHint}>
                   Press Enter to send input • Click Stop to terminate
                 </div>
               </div>
             )}
           </div>
         ) : activeTab === 'testcases' ? (
-          <div className="testcases-content">
+          <div className={styles.testcasesContent}>
             {visibleTestCases.length === 0 ? (
-              <div className="no-testcases">
+              <div className={styles.noTestcases}>
                 <p>No visible test cases available</p>
               </div>
             ) : (
-              <div className="testcase-list">
+              <div className={styles.testcaseList}>
                 {visibleTestCases.map((tc, index) => {
                   const result = testResults.find(r => r.id === tc.id)
                   return (
                     <div 
                       key={tc.id || index} 
-                      className={`testcase-item ${result?.status || ''}`}
+                      className={`${styles.testcaseItem} ${result?.status ? styles[result.status] : ''}`}
                     >
-                      <div className="testcase-header">
-                        <span className="testcase-name">
+                      <div className={styles.testcaseHeader}>
+                        <span className={styles.testcaseName}>
                           {tc.name || `Test Case ${index + 1}`}
                         </span>
                         {result && (
-                          <span className={`testcase-status ${result.status}`}>
+                          <span className={`${styles.testcaseStatus} ${result.status === 'passed' ? styles.testcaseStatusPassed : result.status === 'failed' ? styles.testcaseStatusFailed : styles.testcaseStatusError}`}>
                             {result.status === 'passed' && (
                               <>
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -904,20 +904,20 @@ function CodeEditor({
                           </span>
                         )}
                       </div>
-                      <div className="testcase-body">
-                        <div className="testcase-io">
-                          <div className="io-section">
+                      <div className={styles.testcaseBody}>
+                        <div className={styles.testcaseIo}>
+                          <div className={styles.ioSection}>
                             <label>Input:</label>
                             <pre>{tc.input || '(no input)'}</pre>
                           </div>
-                          <div className="io-section">
+                          <div className={styles.ioSection}>
                             <label>Expected Output:</label>
                             <pre>{tc.expected_result || '(no output)'}</pre>
                           </div>
                           {result && result.actualOutput !== null && (
-                            <div className="io-section">
+                            <div className={styles.ioSection}>
                               <label>Your Output:</label>
-                              <pre className={result.status === 'passed' ? 'correct' : 'incorrect'}>
+                              <pre className={result.status === 'passed' ? styles.correct : styles.incorrect}>
                                 {result.actualOutput || '(no output)'}
                               </pre>
                             </div>
@@ -931,14 +931,14 @@ function CodeEditor({
             )}
           </div>
         ) : (
-          <div className="history-content">
+          <div className={styles.historyContent}>
             {loadingHistory ? (
-              <div className="history-loading">
-                <div className="spinner-small"></div>
+              <div className={styles.historyLoading}>
+                <div className={styles.spinnerSmall}></div>
                 <span>Loading submission history...</span>
               </div>
             ) : submissionHistory.length === 0 ? (
-              <div className="no-history">
+              <div className={styles.noHistory}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <circle cx="12" cy="12" r="10"/>
                   <polyline points="12 6 12 12 16 14"/>
@@ -947,24 +947,24 @@ function CodeEditor({
                 <span>Your submission history will appear here</span>
               </div>
             ) : (
-              <div className="history-list">
+              <div className={styles.historyList}>
                 {submissionHistory.map((submission, index) => {
                   const isSuccessful = submission.test_cases_passed === submission.test_cases_total && submission.test_cases_total > 0
                   return (
                     <div 
                       key={submission.id || index} 
-                      className={`history-item ${isSuccessful ? 'successful' : 'failed'}`}
+                      className={`${styles.historyItem} ${isSuccessful ? styles.successful : styles.failed}`}
                     >
-                      <div className="history-item-header">
-                        <div className="history-item-info">
-                          <span className="history-attempt">
+                      <div className={styles.historyItemHeader}>
+                        <div className={styles.historyItemInfo}>
+                          <span className={styles.historyAttempt}>
                             Attempt #{submission.attempt_number || submissionHistory.length - index}
                           </span>
-                          <span className="history-time">
+                          <span className={styles.historyTime}>
                             {formatDate(submission.submitted_at)}
                           </span>
                         </div>
-                        <div className={`history-status ${isSuccessful ? 'success' : 'fail'}`}>
+                        <div className={`${styles.historyStatus} ${isSuccessful ? styles.success : styles.fail}`}>
                           {isSuccessful ? (
                             <>
                               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -983,26 +983,26 @@ function CodeEditor({
                           )}
                         </div>
                       </div>
-                      <div className="history-item-details">
-                        <div className="history-detail">
-                          <span className="detail-label">Language:</span>
-                          <span className="detail-value">{submission.language_used || 'N/A'}</span>
+                      <div className={styles.historyItemDetails}>
+                        <div className={styles.historyDetail}>
+                          <span className={styles.detailLabel}>Language:</span>
+                          <span className={styles.detailValue}>{submission.language_used || 'N/A'}</span>
                         </div>
-                        <div className="history-detail">
-                          <span className="detail-label">Test Cases:</span>
-                          <span className={`detail-value ${isSuccessful ? 'text-success' : 'text-error'}`}>
+                        <div className={styles.historyDetail}>
+                          <span className={styles.detailLabel}>Test Cases:</span>
+                          <span className={`${styles.detailValue} ${isSuccessful ? styles.textSuccess : styles.textError}`}>
                             {submission.test_cases_passed || 0}/{submission.test_cases_total || 0} passed
                           </span>
                         </div>
                         {submission.score !== undefined && (
-                          <div className="history-detail">
-                            <span className="detail-label">Score:</span>
-                            <span className="detail-value">{submission.score}%</span>
+                          <div className={styles.historyDetail}>
+                            <span className={styles.detailLabel}>Score:</span>
+                            <span className={styles.detailValue}>{submission.score}%</span>
                           </div>
                         )}
                       </div>
                       <button 
-                        className="btn-use-code"
+                        className={styles.btnUseCode}
                         onClick={() => handleUseHistoryCode(submission)}
                       >
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

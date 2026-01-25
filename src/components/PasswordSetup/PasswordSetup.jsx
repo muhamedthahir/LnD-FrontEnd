@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { toast } from 'react-toastify'
 import { useApi } from '../../contexts/ApiContext'
 import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES } from '../../constants/constants'
-import './PasswordSetup.css'
+import styles from './PasswordSetup.module.css'
 
 function PasswordSetup({ userId, otp, onComplete }) {
   const { apiBaseUrl } = useApi()
@@ -80,13 +80,13 @@ function PasswordSetup({ userId, otp, onComplete }) {
   }
 
   return (
-    <div className="password-setup-overlay">
-      <div className="password-setup-modal">
+    <div className={styles.overlay}>
+      <div className={styles.modal}>
         <h2>Set Your Password</h2>
         <p>OTP verified! Please create a new password for your account.</p>
         
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
+          <div className={styles.formGroup}>
             <label>New Password *</label>
             <input
               type="password"
@@ -94,12 +94,12 @@ function PasswordSetup({ userId, otp, onComplete }) {
               value={formData.newPassword}
               onChange={handleChange}
               placeholder="Minimum 6 characters"
-              className={errors.newPassword ? 'error' : ''}
+              className={errors.newPassword ? styles.error : ''}
             />
-            {errors.newPassword && <span className="error-text">{errors.newPassword}</span>}
+            {errors.newPassword && <span className={styles.errorText}>{errors.newPassword}</span>}
           </div>
 
-          <div className="form-group">
+          <div className={styles.formGroup}>
             <label>Confirm Password *</label>
             <input
               type="password"
@@ -107,13 +107,13 @@ function PasswordSetup({ userId, otp, onComplete }) {
               value={formData.confirmPassword}
               onChange={handleChange}
               placeholder="Re-enter your password"
-              className={errors.confirmPassword ? 'error' : ''}
+              className={errors.confirmPassword ? styles.error : ''}
             />
-            {errors.confirmPassword && <span className="error-text">{errors.confirmPassword}</span>}
+            {errors.confirmPassword && <span className={styles.errorText}>{errors.confirmPassword}</span>}
           </div>
 
-          <div className="form-actions">
-            <button type="submit" className="btn-primary" disabled={loading}>
+          <div className={styles.formActions}>
+            <button type="submit" className={styles.btnPrimary} disabled={loading}>
               {loading ? 'Setting Password...' : 'Set Password'}
             </button>
           </div>

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useApi } from '../../../../contexts/ApiContext'
 import { toast } from 'react-toastify'
 import Button from '../../../../components/Button/Button'
-import './AssessmentConfigurations.css'
+import styles from './AssessmentConfigurations.module.css'
 
 function AssessmentConfigurations() {
   const { id } = useParams()
@@ -110,9 +110,9 @@ function AssessmentConfigurations() {
 
   if (loading) {
     return (
-      <div className="configurations-page">
-        <div className="loading-state">
-          <div className="spinner"></div>
+      <div className={styles.configurationsPage}>
+        <div className={styles.loadingState}>
+          <div className={styles.spinner}></div>
           <p>Loading configurations...</p>
         </div>
       </div>
@@ -120,16 +120,16 @@ function AssessmentConfigurations() {
   }
 
   return (
-    <div className="configurations-page">
-      <div className="page-header">
-        <div className="header-left">
-          <button className="back-btn" onClick={() => navigate(`/admin/assessments/${id}/edit`)}>
+    <div className={styles.configurationsPage}>
+      <div className={styles.pageHeader}>
+        <div className={styles.headerLeft}>
+          <button className={styles.backBtn} onClick={() => navigate(`/admin/assessments/${id}/edit`)}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
               <path d="M19 12H5M12 19l-7-7 7-7"/>
             </svg>
           </button>
           <div>
-            <span className="breadcrumb">{assessment?.title}</span>
+            <span className={styles.breadcrumb}>{assessment?.title}</span>
             <h1>Configurations</h1>
           </div>
         </div>
@@ -142,8 +142,8 @@ function AssessmentConfigurations() {
       </div>
 
       {configurations.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-icon">
+        <div className={styles.emptyState}>
+          <div className={styles.emptyIcon}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <circle cx="12" cy="12" r="3"/>
               <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
@@ -156,40 +156,40 @@ function AssessmentConfigurations() {
           </Button>
         </div>
       ) : (
-        <div className="configs-grid">
+        <div className={styles.configsGrid}>
           {configurations.map(config => (
-            <div key={config.id} className="config-card">
-              <div className="config-header">
+            <div key={config.id} className={styles.configCard}>
+              <div className={styles.configHeader}>
                 <div>
-                  <span className="config-id">{config.unique_id}</span>
+                  <span className={styles.configId}>{config.unique_id}</span>
                   <h3>{config.display_name}</h3>
                   {config.target_audience && (
-                    <p className="config-audience">{config.target_audience}</p>
+                    <p className={styles.configAudience}>{config.target_audience}</p>
                   )}
                 </div>
-                <span className={`status-badge ${getStatusBadgeClass(config.status)}`}>
+                <span className={`${styles.statusBadge} ${styles[getStatusBadgeClass(config.status)]}`}>
                   {config.status}
                 </span>
               </div>
 
-              <div className="config-details">
-                <div className="detail-row">
-                  <span className="detail-label">Users</span>
-                  <span className="detail-value">{config.user_count || 0}</span>
+              <div className={styles.configDetails}>
+                <div className={styles.detailRow}>
+                  <span className={styles.detailLabel}>Users</span>
+                  <span className={styles.detailValue}>{config.user_count || 0}</span>
                 </div>
-                <div className="detail-row">
-                  <span className="detail-label">Start</span>
-                  <span className="detail-value">{formatDateTime(config.start_date_time)}</span>
+                <div className={styles.detailRow}>
+                  <span className={styles.detailLabel}>Start</span>
+                  <span className={styles.detailValue}>{formatDateTime(config.start_date_time)}</span>
                 </div>
-                <div className="detail-row">
-                  <span className="detail-label">End</span>
-                  <span className="detail-value">{formatDateTime(config.end_date_time)}</span>
+                <div className={styles.detailRow}>
+                  <span className={styles.detailLabel}>End</span>
+                  <span className={styles.detailValue}>{formatDateTime(config.end_date_time)}</span>
                 </div>
               </div>
 
-              <div className="config-actions">
+              <div className={styles.configActions}>
                 <button 
-                  className="action-btn" 
+                  className={styles.actionBtn} 
                   onClick={() => navigate(`/admin/assessments/${id}/configurations/create?edit=${config.id}`)} 
                   title="Edit"
                 >
@@ -199,7 +199,7 @@ function AssessmentConfigurations() {
                   </svg>
                 </button>
                 <button 
-                  className="action-btn" 
+                  className={styles.actionBtn} 
                   onClick={() => navigate(`/admin/assessments/administrators/${config.id}/users`)}
                   title="Manage Users"
                 >
@@ -212,7 +212,7 @@ function AssessmentConfigurations() {
                 </button>
                 {config.status === 'DRAFT' && (
                   <button 
-                    className="action-btn activate"
+                    className={`${styles.actionBtn} ${styles.activate}`}
                     onClick={() => handleStatusChange(config.id, 'ACTIVE')}
                     title="Activate"
                   >
@@ -223,7 +223,7 @@ function AssessmentConfigurations() {
                 )}
                 {config.status === 'ACTIVE' && (
                   <button 
-                    className="action-btn pause"
+                    className={`${styles.actionBtn} ${styles.pause}`}
                     onClick={() => handleStatusChange(config.id, 'PAUSED')}
                     title="Pause"
                   >
@@ -234,7 +234,7 @@ function AssessmentConfigurations() {
                   </button>
                 )}
                 <button 
-                  className="action-btn delete"
+                  className={`${styles.actionBtn} ${styles.delete}`}
                   onClick={() => handleDeleteConfig(config.id)}
                   title="Delete"
                 >

@@ -1,0 +1,712 @@
+.container {
+  width: 100%;
+  background: var(--bg-tertiary, #1a1a2e);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.container.compact {
+  max-width: 320px;
+}
+
+.container.viewerMode {
+  display: flex;
+  flex-direction: column;
+  min-height: 500px;
+  max-height: 80vh;
+}
+
+/* Document tabs for multiple documents */
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 8px 12px;
+  background: var(--bg-secondary, #16162a);
+  border-bottom: 1px solid var(--border-color, #333);
+  overflow-x: auto;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: transparent;
+  border: 1px solid var(--border-color, #333);
+  border-radius: 6px;
+  color: var(--text-secondary, #888);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  background: var(--bg-primary, #1e1e3f);
+  color: var(--text-primary, #fff);
+}
+
+.tab.active {
+  background: var(--primary, #6366f1);
+  border-color: var(--primary, #6366f1);
+  color: #fff;
+}
+
+.tab .fileIcon {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+}
+
+.tab .tabName {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+}
+
+/* Document viewer wrapper */
+.viewerWrapper {
+  flex: 1;
+  position: relative;
+  overflow: auto;
+  background: #f5f5f5;
+  min-height: 400px;
+}
+
+/* Documents list */
+.documentsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+}
+
+.documentItem,
+.documentCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--bg-secondary, #16162a);
+  border-radius: 6px;
+  text-decoration: none;
+  color: var(--text-primary, #fff);
+  transition: all 0.2s ease;
+  border: 1px solid var(--border-color, #333);
+}
+
+.documentItem:hover,
+.documentCard:hover {
+  background: var(--bg-primary, #1e1e3f);
+  border-color: var(--primary, #6366f1);
+}
+
+.container.compact .documentItem,
+.container.compact .documentCard {
+  padding: 10px;
+  gap: 10px;
+}
+
+.fileIcon {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  padding: 8px;
+  background: var(--bg-tertiary, #1a1a2e);
+  border-radius: 6px;
+  color: var(--text-secondary, #888);
+}
+
+.container.compact .fileIcon {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  padding: 6px;
+}
+
+.fileIcon.pdf { color: #ef4444; }
+.fileIcon.doc { color: #3b82f6; }
+.fileIcon.ppt { color: #f97316; }
+.fileIcon.xls { color: #22c55e; }
+.fileIcon.txt { color: #8b5cf6; }
+.fileIcon.img { color: #14b8a6; }
+
+.documentInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.documentName {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary, #fff);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.container.compact .documentName {
+  font-size: 12px;
+}
+
+.documentType {
+  font-size: 11px;
+  color: var(--text-secondary, #888);
+}
+
+.downloadIcon {
+  width: 20px;
+  height: 20px;
+  color: var(--text-secondary, #888);
+  transition: color 0.2s ease;
+}
+
+.documentItem:hover .downloadIcon,
+.documentCard:hover .downloadIcon {
+  color: var(--primary, #6366f1);
+}
+
+.placeholder,
+.error,
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px 32px;
+  color: var(--text-secondary, #888);
+  position: absolute;
+  inset: 0;
+  background: var(--bg-tertiary, #1a1a2e);
+}
+
+.placeholder svg,
+.error svg {
+  width: 48px;
+  height: 48px;
+  opacity: 0.5;
+}
+
+.unsupportedContent svg {
+  width: 48px;
+  height: 48px;
+  opacity: 0.5;
+}
+
+.error {
+  color: var(--danger, #ef4444);
+}
+
+.unsupportedContent .fileIcon {
+  width: 64px;
+  height: 64px;
+  padding: 12px;
+}
+
+.unsupportedMessage {
+  font-size: 14px;
+  text-align: center;
+}
+
+.downloadBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--primary, #6366f1);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 8px;
+}
+
+.downloadBtn:hover {
+  background: var(--primary-dark, #4f46e5);
+}
+
+.downloadBtn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.loading .spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border-color, #333);
+  border-top-color: var(--primary, #6366f1);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.downloadLink,
+.openLink {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--primary, #6366f1);
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  background: rgba(99, 102, 241, 0.1);
+  transition: all 0.2s ease;
+}
+
+.downloadLink:hover,
+.openLink:hover {
+  background: rgba(99, 102, 241, 0.2);
+}
+
+.externalIcon {
+  width: 14px;
+  height: 14px;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--bg-secondary, #16162a);
+  border-top: 1px solid var(--border-color, #333);
+}
+
+.footer .fileName {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary, #fff);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 60%;
+}
+
+/* PDF Viewer Styles */
+.pdfViewer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #525659;
+}
+
+.pdfControls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: var(--bg-secondary, #16162a);
+  border-bottom: 1px solid var(--border-color, #333);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  flex-wrap: wrap;
+}
+
+.pdfBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--bg-tertiary, #1a1a2e);
+  border: 1px solid var(--border-color, #333);
+  border-radius: 6px;
+  color: var(--text-primary, #fff);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pdfBtn:hover:not(:disabled) {
+  background: var(--primary, #6366f1);
+  border-color: var(--primary, #6366f1);
+}
+
+.pdfBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pdfBtn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.pageInfo {
+  font-size: 13px;
+  color: var(--text-primary, #fff);
+  min-width: 100px;
+  text-align: center;
+}
+
+.zoomControls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 16px;
+  padding-left: 16px;
+  border-left: 1px solid var(--border-color, #333);
+}
+
+.zoomLevel {
+  font-size: 12px;
+  color: var(--text-secondary, #888);
+  min-width: 45px;
+  text-align: center;
+}
+
+.pdfDocumentWrapper {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+.pdfDocumentWrapper :global(.react-pdf__Document) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pdfDocumentWrapper :global(.react-pdf__Page) {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  margin-bottom: 20px;
+  background: #fff;
+}
+
+.pdfDocumentWrapper :global(.react-pdf__Page canvas) {
+  max-width: 100%;
+  height: auto !important;
+}
+
+/* DOCX Viewer Styles */
+.docxViewer {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background: #fff;
+}
+
+.docxContainer {
+  padding: 20px;
+  min-height: 100%;
+}
+
+.docxContainer :global(.docx-wrapper) {
+  max-width: 800px;
+  margin: 0 auto;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 40px 60px;
+}
+
+/* Image Viewer */
+.imageViewer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 20px;
+  background: #1a1a2e;
+}
+
+.imageViewer img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Text Viewer */
+.textViewer {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background: #1e1e2e;
+  padding: 20px;
+}
+
+.textViewer pre {
+  margin: 0;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #e0e0e0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* PDF Progress Indicator */
+.progressIndicator {
+  margin-left: auto;
+  padding-left: 12px;
+}
+
+.progressBar {
+  width: 80px;
+  height: 4px;
+  background: var(--bg-tertiary, #333);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--primary, #6366f1);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* PDF Controls Layout */
+.controlsLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+/* PDF Complete Header - Top Right */
+.completeHeader {
+  margin-left: auto;
+}
+
+/* Document Header Controls - Top Right for all document types */
+.headerControls {
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 16px;
+  background: var(--bg-secondary, #16162a);
+  border-bottom: 1px solid var(--border-color, #333);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.headerControls.unsupportedHeader {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  background: transparent;
+  border-bottom: none;
+}
+
+/* Mark Complete Button in Header */
+.btnMarkCompleteHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--success, #10b981);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnMarkCompleteHeader:hover {
+  background: var(--success-hover, #059669);
+  transform: translateY(-1px);
+}
+
+.btnMarkCompleteHeader svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Small Completed Badges for Header */
+.completedBadgeSmall {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--success, #10b981);
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.completedBadgeSmall svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Document Complete Section (for non-PDF documents) */
+.completeSection {
+  padding: 16px;
+  background: var(--bg-secondary, #222);
+  border-top: 1px solid var(--border-color, #333);
+  display: flex;
+  justify-content: center;
+  margin-top: auto;
+}
+
+.btnMarkCompleteDoc {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--success, #10b981);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnMarkCompleteDoc:hover {
+  background: var(--success-hover, #059669);
+  transform: translateY(-1px);
+}
+
+.btnMarkCompleteDoc svg {
+  width: 18px;
+  height: 18px;
+}
+
+.completedBadge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--success, #10b981);
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.completedBadge svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Update DOCX viewer to support mark complete */
+.docxViewer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.docxViewer .headerControls {
+  flex-shrink: 0;
+}
+
+.docxViewer .docxContainer {
+  flex: 1;
+  overflow: auto;
+}
+
+/* Update Image viewer to support mark complete */
+.imageViewer {
+  display: flex;
+  flex-direction: column;
+  min-height: 400px;
+  height: 100%;
+}
+
+.imageViewer .headerControls {
+  flex-shrink: 0;
+  background: var(--bg-secondary, #16162a);
+}
+
+.imageViewer img {
+  flex: 1;
+  object-fit: contain;
+  max-height: 60vh;
+  padding: 20px;
+}
+
+/* Update unsupported file to support mark complete */
+.unsupportedFile {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  min-height: 300px;
+}
+
+.unsupportedContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: 12px;
+  padding: 48px 32px;
+  color: var(--text-secondary, #888);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .container.viewerMode {
+    min-height: 400px;
+  }
+  
+  .viewerWrapper {
+    min-height: 300px;
+  }
+  
+  .tabs {
+    flex-wrap: nowrap;
+    padding: 6px 8px;
+  }
+  
+  .tab {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+  
+  .tab .tabName {
+    max-width: 80px;
+  }
+  
+  .pdfControls {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .zoomControls {
+    margin-left: 0;
+    padding-left: 0;
+    border-left: none;
+    margin-top: 8px;
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .progressIndicator {
+    margin-left: 0;
+    padding-left: 0;
+    width: 100%;
+    margin-top: 8px;
+  }
+  
+  .progressBar {
+    width: 100%;
+  }
+  
+  .docxContainer :global(.docx-wrapper) {
+    padding: 20px;
+  }
+}
+

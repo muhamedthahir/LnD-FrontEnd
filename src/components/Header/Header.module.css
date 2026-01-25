@@ -101,6 +101,24 @@
   height: 1rem;
 }
 
+.menuIcon {
+  display: none;
+}
+
+.arrowIcon {
+  display: block;
+}
+
+@media (max-width: 600px) {
+  .menuIcon {
+    display: block;
+  }
+
+  .arrowIcon {
+    display: none;
+  }
+}
+
 .right {
   display: flex;
   align-items: center;
@@ -312,6 +330,7 @@
 @media (max-width: 768px) {
   .header {
     padding: 0 var(--spacing-md);
+    left: 4rem !important; /* Always align with collapsed sidebar on mobile */
   }
 
   .userName {
@@ -344,6 +363,29 @@
   .progressText {
     min-width: 2.5rem;
     font-size: 0.6875rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .header {
+    left: 0 !important; /* No sidebar on small screens */
+    padding: 0 var(--spacing-md);
+  }
+
+  .sidebarToggleBtn {
+    display: flex; /* Show menu icon on small screens */
+    width: 2.5rem;
+    height: 2.5rem;
+    background: var(--accent-primary);
+    color: var(--bg-primary);
+  }
+
+  .sidebarToggleBtn:hover {
+    background: var(--accent-secondary);
+  }
+
+  .courseProgress {
+    max-width: 200px;
   }
 }
 

@@ -44,3 +44,9 @@
   }
 }
 
+@media (max-width: 600px) {
+  .main {
+    margin-left: 0; /* No sidebar margin on very small screens */
+  }
+}
+
