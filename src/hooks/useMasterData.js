@@ -44,9 +44,27 @@ export function useMasterData() {
     }
   }, [dispatch, apiBaseUrl, accessToken, masterData.questionBanksLoaded])
 
-  // Load institutions
+  // Load institutions (only for admin users)
   const loadInstitutions = useCallback(async (force = false, signal = null) => {
     if (!apiBaseUrl) return
+    
+    // Check if user is admin before fetching institutions
+    try {
+      const userStr = localStorage.getItem('user')
+      if (userStr) {
+        const user = JSON.parse(userStr)
+        const isAdmin = user?.role === 'primary_admin' || user?.role === 'college_admin'
+        
+        if (!isAdmin) {
+          // User is not admin, skip fetching institutions
+          return
+        }
+      }
+    } catch (error) {
+      console.error('Error checking user role:', error)
+      // If we can't check role, skip fetching to avoid 403 errors
+      return
+    }
     
     if (!masterData.institutionsLoaded || force) {
       await dispatch(fetchInstitutions({ apiBaseUrl, accessToken, signal }))
@@ -57,12 +75,32 @@ export function useMasterData() {
   const loadAllData = useCallback(async () => {
     if (!apiBaseUrl) return
     
-    // Load all master data in parallel
-    await Promise.all([
+    // Check if user is admin before fetching institutions
+    let shouldFetchInstitutions = false
+    try {
+      const userStr = localStorage.getItem('user')
+      if (userStr) {
+        const user = JSON.parse(userStr)
+        shouldFetchInstitutions = user?.role === 'primary_admin' || user?.role === 'college_admin'
+      }
+    } catch (error) {
+      console.error('Error checking user role:', error)
+      // If we can't check role, don't fetch institutions
+      shouldFetchInstitutions = false
+    }
+    
+    // Load master data and question banks in parallel
+    const promises = [
       dispatch(fetchMasterData({ apiBaseUrl, accessToken })),
-      dispatch(fetchQuestionBanks({ apiBaseUrl, accessToken })),
-      dispatch(fetchInstitutions({ apiBaseUrl, accessToken }))
-    ])
+      dispatch(fetchQuestionBanks({ apiBaseUrl, accessToken }))
+    ]
+    
+    // Only fetch institutions if user is admin
+    if (shouldFetchInstitutions) {
+      promises.push(dispatch(fetchInstitutions({ apiBaseUrl, accessToken })))
+    }
+    
+    await Promise.all(promises)
   }, [dispatch, apiBaseUrl, accessToken])
 
   // Clear all data (call on logout)

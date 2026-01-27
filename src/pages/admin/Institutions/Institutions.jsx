@@ -324,7 +324,7 @@ function Institutions() {
         <div className="table-container">
           {/* Filters Section - Scrollable, will hide when scrolling up */}
           <div className="filters-section">
-            <div className="filters">
+            <div className="filters institutions-filters">
               <div className="filter-group">
                 <label>Search</label>
                 <input

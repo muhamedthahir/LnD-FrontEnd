@@ -14,7 +14,13 @@ function QuestionForm() {
   const { id } = useParams()
   const [searchParams] = useSearchParams()
   const isEditing = Boolean(id)
+  const returnTo = searchParams.get('returnTo')
   const { apiBaseUrl, accessToken } = useApi()
+  
+  // Helper function to get back navigation path
+  const getBackPath = () => {
+    return returnTo ? decodeURIComponent(returnTo) : '/admin/questions/list'
+  }
   
   const [step, setStep] = useState(1) // 1: type selection, 2: question details, 3: options/programming
   const [loading, setLoading] = useState(false)
@@ -165,12 +171,12 @@ function QuestionForm() {
         setStep(2) // Skip type selection when editing
       } else {
         toast.error('Failed to fetch question')
-        navigate('/admin/questions/list')
+        navigate(getBackPath())
       }
     } catch (error) {
       console.error('Error fetching question:', error)
       toast.error('Failed to fetch question')
-      navigate('/admin/questions/list')
+      navigate(getBackPath())
     } finally {
       setLoading(false)
     }
@@ -419,7 +425,7 @@ function QuestionForm() {
         toast.success(`Successfully created ${data.created} question(s)`)
         // Navigate back to questions list after successful upload
         setTimeout(() => {
-          navigate('/admin/questions/list')
+          navigate(getBackPath())
         }, 2000)
       } else {
         setBulkUploadResult({
@@ -502,11 +508,11 @@ function QuestionForm() {
         const data = await response.json()
         toast.success(isEditing ? 'Question updated successfully' : 'Question created successfully')
         
-        // Navigate to question detail or test case page
-        if (isProgramming() && data.programmingQuestion) {
+        // Navigate to question detail or back to return path
+        if (isProgramming() && data.programmingQuestion && !returnTo) {
           navigate(`/admin/questions/list/${data.question.id}`)
         } else {
-          navigate('/admin/questions/list')
+          navigate(getBackPath())
         }
       } else {
         const data = await response.json()
@@ -532,11 +538,11 @@ function QuestionForm() {
     <div className="question-form-page">
       <div className="page-header">
         <div>
-          <button className="back-btn" onClick={() => navigate('/admin/questions/list')}>
+          <button className="back-btn" onClick={() => navigate(getBackPath())}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <polyline points="15 18 9 12 15 6"/>
             </svg>
-            Back to Questions
+            {returnTo ? 'Back to Assessment' : 'Back to Questions'}
           </button>
           <h1>{isEditing ? 'Edit Question' : 'Create Question'}</h1>
         </div>
@@ -1166,7 +1172,7 @@ function QuestionForm() {
               <button 
                 type="button" 
                 className="btn-secondary"
-                onClick={() => navigate('/admin/questions/list')}
+                onClick={() => navigate(getBackPath())}
               >
                 Cancel
               </button>

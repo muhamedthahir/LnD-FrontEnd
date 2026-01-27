@@ -1,59 +1,86 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useApi } from '../../../../contexts/ApiContext'
 import { toast } from 'react-toastify'
 import Button from '../../../../components/Button/Button'
-import styles from './AssessmentConfigurations.module.css'
+import styles from './ConfigurationsList.module.css'
 
-function AssessmentConfigurations() {
-  const { id } = useParams()
+function ConfigurationsList() {
   const navigate = useNavigate()
   const { apiBaseUrl, accessToken } = useApi()
   
-  const [assessment, setAssessment] = useState(null)
   const [configurations, setConfigurations] = useState([])
   const [loading, setLoading] = useState(true)
+  const [assessments, setAssessments] = useState({}) // Map of assessment_id to assessment data
 
   const getAuthHeader = () => ({
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
   })
 
-  const fetchData = useCallback(async () => {
-    if (!apiBaseUrl || !id) return
+  const fetchAllConfigurations = useCallback(async () => {
+    if (!apiBaseUrl) return
     
     try {
       setLoading(true)
       
-      // Fetch assessment
-      const assessmentRes = await fetch(`${apiBaseUrl}/api/assessment/assessments/${id}`, {
+      // Fetch all assessments first
+      const assessmentsRes = await fetch(`${apiBaseUrl}/api/assessment/assessments`, {
         headers: getAuthHeader()
       })
-      if (assessmentRes.ok) {
-        const data = await assessmentRes.json()
-        setAssessment(data)
-      }
-      
-      // Fetch configurations
-      const configsRes = await fetch(`${apiBaseUrl}/api/assessment/assessments/${id}/administrators`, {
-        headers: getAuthHeader()
-      })
-      if (configsRes.ok) {
-        const data = await configsRes.json()
-        setConfigurations(data || [])
+      if (assessmentsRes.ok) {
+        const assessmentsData = await assessmentsRes.json()
+        const assessmentsMap = {}
+        if (Array.isArray(assessmentsData)) {
+          assessmentsData.forEach(assessment => {
+            assessmentsMap[assessment.id] = assessment
+          })
+        } else if (assessmentsData.assessments) {
+          assessmentsData.assessments.forEach(assessment => {
+            assessmentsMap[assessment.id] = assessment
+          })
+        }
+        setAssessments(assessmentsMap)
+        
+        // Fetch configurations for each assessment
+        const allConfigs = []
+        const assessmentIds = Object.keys(assessmentsMap)
+        
+        for (const assessmentId of assessmentIds) {
+          try {
+            const configsRes = await fetch(`${apiBaseUrl}/api/assessment/assessments/${assessmentId}/administrators`, {
+              headers: getAuthHeader()
+            })
+            if (configsRes.ok) {
+              const configsData = await configsRes.json()
+              const configs = Array.isArray(configsData) ? configsData : []
+              // Add assessment info to each config
+              configs.forEach(config => {
+                allConfigs.push({
+                  ...config,
+                  assessment_id: assessmentId,
+                  assessment_title: assessmentsMap[assessmentId]?.title || 'Unknown Assessment'
+                })
+              })
+            }
+          } catch (error) {
+            console.error(`Error fetching configs for assessment ${assessmentId}:`, error)
+          }
+        }
+        
+        setConfigurations(allConfigs)
       }
     } catch (error) {
-      console.error('Error fetching data:', error)
-      toast.error('Failed to fetch data')
+      console.error('Error fetching configurations:', error)
+      toast.error('Failed to fetch configurations')
     } finally {
       setLoading(false)
     }
-  }, [apiBaseUrl, id, accessToken])
+  }, [apiBaseUrl, accessToken])
 
   useEffect(() => {
-    fetchData()
-  }, [fetchData])
-
+    fetchAllConfigurations()
+  }, [fetchAllConfigurations])
 
   const handleDeleteConfig = async (configId) => {
     if (!window.confirm('Are you sure you want to delete this configuration?')) return
@@ -67,7 +94,7 @@ function AssessmentConfigurations() {
       if (!response.ok) throw new Error('Failed to delete')
 
       toast.success('Configuration deleted!')
-      fetchData()
+      fetchAllConfigurations()
     } catch (error) {
       console.error('Error deleting config:', error)
       toast.error('Failed to delete configuration')
@@ -106,22 +133,11 @@ function AssessmentConfigurations() {
     <div className={styles.configurationsPage}>
       <div className={styles.pageHeader}>
         <div className={styles.headerLeft}>
-          <button className={styles.backBtn} onClick={() => navigate(`/admin/assessments/${id}/edit`)}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
-              <path d="M19 12H5M12 19l-7-7 7-7"/>
-            </svg>
-          </button>
           <div>
-            <span className={styles.breadcrumb}>{assessment?.title}</span>
             <h1>Configurations</h1>
+            <p>Manage all assessment configurations</p>
           </div>
         </div>
-        <Button variant="primary" onClick={() => navigate(`/admin/assessments/${id}/configurations/create`)}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
-            <path d="M12 5v14M5 12h14"/>
-          </svg>
-          Add Configuration
-        </Button>
       </div>
 
       {configurations.length === 0 ? (
@@ -133,9 +149,9 @@ function AssessmentConfigurations() {
             </svg>
           </div>
           <h3>No Configurations</h3>
-          <p>Create configurations to define how this assessment is administered.</p>
-          <Button variant="primary" onClick={() => navigate(`/admin/assessments/${id}/configurations/create`)}>
-            Create Configuration
+          <p>Create configurations for your assessments to define how they are administered.</p>
+          <Button variant="primary" onClick={() => navigate('/admin/assessments/management')}>
+            Go to Assessments
           </Button>
         </div>
       ) : (
@@ -146,6 +162,7 @@ function AssessmentConfigurations() {
                 <div>
                   <span className={styles.configId}>{config.unique_id}</span>
                   <h3>{config.display_name}</h3>
+                  <p className={styles.assessmentName}>{config.assessment_title}</p>
                   {config.target_audience && (
                     <p className={styles.configAudience}>{config.target_audience}</p>
                   )}
@@ -173,7 +190,7 @@ function AssessmentConfigurations() {
               <div className={styles.configActions}>
                 <button 
                   className={styles.actionBtn} 
-                  onClick={() => navigate(`/admin/assessments/${id}/configurations/create?edit=${config.id}`)} 
+                  onClick={() => navigate(`/admin/assessments/${config.assessment_id}/configurations/create?edit=${config.id}`)} 
                   title="Edit"
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
@@ -191,6 +208,16 @@ function AssessmentConfigurations() {
                     <circle cx="9" cy="7" r="4"/>
                     <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
                     <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                  </svg>
+                </button>
+                <button 
+                  className={styles.actionBtn} 
+                  onClick={() => navigate(`/admin/assessments/${config.assessment_id}/edit`)}
+                  title="View Assessment"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
                   </svg>
                 </button>
                 <button 
@@ -212,4 +239,5 @@ function AssessmentConfigurations() {
   )
 }
 
-export default AssessmentConfigurations
+export default ConfigurationsList
+

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApi } from '../../../contexts/ApiContext'
+import { toast } from 'react-toastify'
 import Button from '../../../components/Button/Button'
 import './Assessments.css'
 
@@ -10,7 +11,7 @@ function Assessments() {
   
   const [assessments, setAssessments] = useState([])
   const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState('all')
+  const [filter, setFilter] = useState('active')
 
   const getAuthHeader = () => ({
     'Content-Type': 'application/json',
@@ -22,13 +23,24 @@ function Assessments() {
     
     try {
       setLoading(true)
-      const response = await fetch(`${apiBaseUrl}/api/assessment/user/assessments`, {
+      const response = await fetch(`${apiBaseUrl}/api/assessment/my-assessments`, {
         headers: getAuthHeader()
       })
 
       if (response.ok) {
         const data = await response.json()
-        setAssessments(data || [])
+        // Handle both paginated response and direct array
+        const assessmentsList = data.assessments || (Array.isArray(data) ? data : [])
+        // Ensure user_mapping_id is set (it might be 'id' in the response)
+        const normalizedAssessments = assessmentsList.map(assessment => ({
+          ...assessment,
+          user_mapping_id: assessment.user_mapping_id || assessment.id
+        }))
+        console.log('Fetched assessments:', normalizedAssessments.length, normalizedAssessments)
+        setAssessments(normalizedAssessments)
+      } else {
+        const errorData = await response.json().catch(() => ({}))
+        console.error('Error fetching assessments:', errorData)
       }
     } catch (error) {
       console.error('Error fetching assessments:', error)
@@ -43,14 +55,15 @@ function Assessments() {
 
   const getStatusConfig = (status) => {
     const configs = {
-      NOT_STARTED: { label: 'Not Started', color: 'pending', canStart: true },
-      IN_PROGRESS: { label: 'In Progress', color: 'active', canStart: true },
+      INVITED: { label: 'Active', color: 'active', canStart: true },
+      NOT_STARTED: { label: 'Active', color: 'active', canStart: true },
+      IN_PROGRESS: { label: 'Active', color: 'active', canStart: true },
       COMPLETED: { label: 'Completed', color: 'completed', canStart: false },
-      SUBMITTED: { label: 'Submitted', color: 'completed', canStart: false },
+      SUBMITTED: { label: 'Completed', color: 'completed', canStart: false },
       EXPIRED: { label: 'Expired', color: 'expired', canStart: false },
-      PAUSED: { label: 'Paused', color: 'paused', canStart: true }
+      PAUSED: { label: 'Active', color: 'active', canStart: true }
     }
-    return configs[status] || { label: status, color: '', canStart: false }
+    return configs[status] || { label: 'Active', color: 'active', canStart: true }
   }
 
   const formatDateTime = (dateStr) => {
@@ -73,22 +86,34 @@ function Assessments() {
   }
 
   const handleStartAssessment = (assessment) => {
+    const mappingId = assessment.user_mapping_id || assessment.id
+    if (!mappingId) {
+      console.error('No mapping ID found for assessment:', assessment)
+      toast.error('Invalid assessment data')
+      return
+    }
+    
     if (assessment.status === 'IN_PROGRESS') {
-      navigate(`/user/assessments/${assessment.user_mapping_id}/take`)
+      navigate(`/user/assessments/${mappingId}/take`)
     } else {
-      navigate(`/user/assessments/${assessment.user_mapping_id}/start`)
+      navigate(`/user/assessments/${mappingId}/start`)
     }
   }
 
   const handleViewResults = (assessment) => {
-    navigate(`/user/assessments/${assessment.user_mapping_id}/results`)
+    const mappingId = assessment.user_mapping_id || assessment.id
+    if (!mappingId) {
+      console.error('No mapping ID found for assessment:', assessment)
+      toast.error('Invalid assessment data')
+      return
+    }
+    navigate(`/user/assessments/${mappingId}/results`)
   }
 
   const filteredAssessments = assessments.filter(a => {
-    if (filter === 'all') return true
-    if (filter === 'active') return ['NOT_STARTED', 'IN_PROGRESS', 'PAUSED'].includes(a.status)
+    if (filter === 'active') return ['INVITED', 'NOT_STARTED', 'IN_PROGRESS', 'PAUSED'].includes(a.status)
     if (filter === 'completed') return ['COMPLETED', 'SUBMITTED'].includes(a.status)
-    return true
+    return false
   })
 
   if (loading) {
@@ -111,22 +136,16 @@ function Assessments() {
         </div>
         <div className="filter-tabs">
           <button 
-            className={`filter-tab ${filter === 'all' ? 'active' : ''}`}
-            onClick={() => setFilter('all')}
-          >
-            All ({assessments.length})
-          </button>
-          <button 
             className={`filter-tab ${filter === 'active' ? 'active' : ''}`}
             onClick={() => setFilter('active')}
           >
-            Active
+            Active ({assessments.filter(a => ['INVITED', 'NOT_STARTED', 'IN_PROGRESS', 'PAUSED'].includes(a.status)).length})
           </button>
           <button 
             className={`filter-tab ${filter === 'completed' ? 'active' : ''}`}
             onClick={() => setFilter('completed')}
           >
-            Completed
+            Completed ({assessments.filter(a => ['COMPLETED', 'SUBMITTED'].includes(a.status)).length})
           </button>
         </div>
       </div>
@@ -138,12 +157,12 @@ function Assessments() {
             <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
           </svg>
           <h3>
-            {filter === 'all' ? 'No assessments available' : `No ${filter} assessments`}
+            {`No ${filter} assessments`}
           </h3>
           <p>
-            {filter === 'all' 
-              ? 'Assessments will appear here once they are assigned to you.'
-              : 'Check other tabs for more assessments.'}
+            {filter === 'active'
+              ? 'No active assessments available. Assessments will appear here once they are assigned and activated.'
+              : 'No completed assessments yet.'}
           </p>
         </div>
       ) : (
@@ -233,10 +252,10 @@ function Assessments() {
                     <Button 
                       variant="primary" 
                       onClick={() => handleStartAssessment(assessment)}
-                      disabled={!assessment.can_access}
                     >
                       {assessment.status === 'IN_PROGRESS' ? 'Continue' : 
-                       assessment.status === 'PAUSED' ? 'Resume' : 'Start Assessment'}
+                       assessment.status === 'PAUSED' ? 'Resume' : 
+                       assessment.status === 'INVITED' ? 'Start Assessment' : 'Start Assessment'}
                     </Button>
                   )}
                   {['COMPLETED', 'SUBMITTED'].includes(assessment.status) && (
@@ -246,11 +265,6 @@ function Assessments() {
                     >
                       View Results
                     </Button>
-                  )}
-                  {!assessment.can_access && statusConfig.canStart && (
-                    <p className="access-warning">
-                      {assessment.access_message || 'This assessment is not currently available'}
-                    </p>
                   )}
                 </div>
               </div>

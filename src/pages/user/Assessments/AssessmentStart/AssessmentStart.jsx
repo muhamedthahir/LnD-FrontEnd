@@ -72,7 +72,7 @@ function AssessmentStart() {
 
     try {
       setStarting(true)
-      const response = await fetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/start`, {
+      const response = await fetch(`${apiBaseUrl}/api/assessment/take/${mappingId}/start`, {
         method: 'POST',
         headers: getAuthHeader(),
         body: JSON.stringify({ 

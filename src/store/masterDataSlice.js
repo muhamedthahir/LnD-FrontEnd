@@ -323,7 +323,14 @@ const masterDataSlice = createSlice({
       })
       .addCase(fetchInstitutions.rejected, (state, action) => {
         state.institutionsLoading = false
-        state.institutionsError = action.payload
+        // Don't set error for 403/Forbidden - user just doesn't have permission
+        if (action.payload && !action.payload.includes('403') && !action.payload.includes('Forbidden')) {
+          state.institutionsError = action.payload
+        } else {
+          // For 403 errors, just mark as loaded with empty array
+          state.institutions = []
+          state.institutionsLoaded = true
+        }
       })
   }
 })

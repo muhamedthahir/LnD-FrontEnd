@@ -224,8 +224,15 @@
   margin-bottom: var(--spacing-lg);
   margin-top: var(--spacing-lg);
 }
-
+.filters.institutions-filters {
+  display: flex;
+  align-items:center;
+  gap: var(--spacing-md);
+}
 .institutions-btn-clear-filters {
+  margin-left: auto;
+  display: flex;
+  align-items:center;
   background: var(--accent-primary);
   color: var(--bg-primary);
 }

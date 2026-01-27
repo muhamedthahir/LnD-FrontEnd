@@ -50,7 +50,11 @@ function AssessmentTake() {
         headers: getAuthHeader()
       })
 
-      if (!response.ok) throw new Error('Failed to fetch assessment')
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Failed to fetch assessment' }))
+        console.error('Error response:', errorData)
+        throw new Error(errorData.error || 'Failed to fetch assessment')
+      }
 
       const data = await response.json()
       setAssessmentData(data)

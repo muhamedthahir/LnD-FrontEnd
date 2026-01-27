@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useApi } from '../../../../contexts/ApiContext'
+import { API_ENDPOINTS } from '../../../../constants/constants'
 import { toast } from 'react-toastify'
 import Button from '../../../../components/Button/Button'
 import './AssessmentUserMapping.css'
@@ -13,19 +14,27 @@ function AssessmentUserMapping() {
   const [configData, setConfigData] = useState(null)
   const [userMappings, setUserMappings] = useState([])
   const [loading, setLoading] = useState(true)
-  const [showAddModal, setShowAddModal] = useState(false)
-  const [showBulkModal, setShowBulkModal] = useState(false)
   
-  // For adding users
+  // User addition state - similar to course administration
+  const [candidateType, setCandidateType] = useState('group')
+  const [colleges, setColleges] = useState([])
+  const [selectedCollege, setSelectedCollege] = useState('')
+  const [availableGroups, setAvailableGroups] = useState([])
+  const [groupSearch, setGroupSearch] = useState('')
+  const [selectedGroups, setSelectedGroups] = useState([])
+  const [groupDegree, setGroupDegree] = useState('')
+  const [groupDepartment, setGroupDepartment] = useState('')
+  const [groupYear, setGroupYear] = useState('')
+  
+  // Individual user selection
   const [availableUsers, setAvailableUsers] = useState([])
-  const [selectedUsers, setSelectedUsers] = useState([])
   const [userSearch, setUserSearch] = useState('')
-  
-  // Bulk upload
-  const [bulkEmails, setBulkEmails] = useState('')
+  const [selectedUsers, setSelectedUsers] = useState([])
   
   // Filters
   const [statusFilter, setStatusFilter] = useState('all')
+  const [showAddSection, setShowAddSection] = useState(false)
+  const [addingUsers, setAddingUsers] = useState(false)
 
   const getAuthHeader = () => ({
     'Content-Type': 'application/json',
@@ -48,12 +57,20 @@ function AssessmentUserMapping() {
       }
 
       // Fetch user mappings
-      const mappingsRes = await fetch(`${apiBaseUrl}/api/assessment/administrators/${adminId}/users`, {
+      const mappingsRes = await fetch(`${apiBaseUrl}/api/assessment/administrators/${adminId}/users?page=1&pageSize=1000`, {
         headers: getAuthHeader()
       })
       if (mappingsRes.ok) {
         const data = await mappingsRes.json()
-        setUserMappings(data.mappings || [])
+        // Handle both direct mappings array and paginated response
+        const mappings = data.mappings || (Array.isArray(data) ? data : [])
+        console.log('Fetched user mappings:', mappings.length, 'users', mappings)
+        setUserMappings(mappings)
+      } else {
+        const errorData = await mappingsRes.json().catch(() => ({}))
+        console.error('Error fetching mappings:', errorData)
+        toast.error(`Failed to load user mappings: ${errorData.error || 'Unknown error'}`)
+        setUserMappings([])
       }
     } catch (error) {
       console.error('Error fetching data:', error)
@@ -65,79 +82,237 @@ function AssessmentUserMapping() {
 
   useEffect(() => {
     fetchData()
+    fetchColleges()
   }, [fetchData])
 
-  const fetchAvailableUsers = async () => {
+  useEffect(() => {
+    if (selectedCollege && candidateType === 'group') {
+      fetchGroupsForCollege()
+    }
+  }, [selectedCollege, candidateType, groupDegree, groupDepartment, groupYear])
+
+  useEffect(() => {
+    if (selectedCollege && candidateType === 'individual') {
+      fetchUsersForCollege()
+    }
+  }, [selectedCollege, candidateType])
+
+  const fetchColleges = async () => {
     try {
-      const response = await fetch(`${apiBaseUrl}/api/users?page=1&limit=100`, {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.INSTITUTIONS.ALL}`, {
         headers: getAuthHeader()
       })
       if (response.ok) {
         const data = await response.json()
+        setColleges((data.institutions || []).map(inst => typeof inst === 'string' ? inst : inst.name))
+      }
+    } catch (error) {
+      console.error('Error fetching colleges:', error)
+    }
+  }
+
+  const fetchGroupsForCollege = async () => {
+    try {
+      const params = new URLSearchParams({
+        college: selectedCollege,
+        ...(groupDegree && { degree: groupDegree }),
+        ...(groupDepartment && { department: groupDepartment }),
+        ...(groupYear && { year: groupYear })
+      })
+
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.GROUPS.LIST}?${params}`, {
+        headers: getAuthHeader()
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        setAvailableGroups(data.groups || [])
+      }
+    } catch (error) {
+      console.error('Error fetching groups:', error)
+    }
+  }
+
+  const fetchUsersForCollege = async () => {
+    try {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.USERS.LIST}?college=${encodeURIComponent(selectedCollege)}&limit=1000`, {
+        headers: getAuthHeader()
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        const students = (data.users || []).filter(u => u.role === 'student')
         // Filter out already added users
         const existingUserIds = userMappings.map(m => m.user_id)
-        const filtered = (data.users || data || []).filter(u => !existingUserIds.includes(u.id))
-        setAvailableUsers(filtered)
+        setAvailableUsers(students.filter(u => !existingUserIds.includes(u.id)))
       }
     } catch (error) {
       console.error('Error fetching users:', error)
     }
   }
 
-  const handleAddUsers = async () => {
-    if (selectedUsers.length === 0) {
-      toast.warning('Please select at least one user')
+  const handleAddGroup = (groupId) => {
+    if (!selectedGroups.includes(groupId)) {
+      setSelectedGroups(prev => [...prev, groupId])
+      setGroupSearch('')
+    }
+  }
+
+  const handleRemoveGroup = (groupId) => {
+    setSelectedGroups(prev => prev.filter(id => id !== groupId))
+  }
+
+  const handleAddUser = (user) => {
+    if (!selectedUsers.find(u => u.id === user.id)) {
+      setSelectedUsers(prev => [...prev, user])
+      setUserSearch('')
+    }
+  }
+
+  const handleRemoveUser = (userId) => {
+    setSelectedUsers(prev => prev.filter(u => u.id !== userId))
+  }
+
+  const handleInviteUsers = async () => {
+    let userIdsToInvite = []
+
+    if (candidateType === 'group') {
+      if (selectedGroups.length === 0) {
+        toast.warning('Please select at least one group')
+        return
+      }
+
+      // Fetch all members from selected groups
+      setAddingUsers(true)
+      try {
+        for (const groupId of selectedGroups) {
+          const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.GROUPS.GET(groupId)}`, {
+            headers: getAuthHeader()
+          })
+          
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}))
+            console.error(`Error fetching group ${groupId}:`, errorData)
+            toast.error(`Error fetching group ${groupId}: ${errorData.error || 'Failed to fetch group'}`)
+            continue
+          }
+          
+          const data = await response.json()
+          console.log(`Group ${groupId} data:`, data)
+          
+          const members = data.members || []
+          console.log(`Group ${groupId} members:`, members)
+          
+          if (members.length === 0) {
+            toast.warning(`Group ${groupId} has no members`)
+            continue
+          }
+          
+          const memberIds = members.map(m => {
+            const id = m.id || m.user_id
+            if (!id) {
+              console.warn('Member without ID:', m)
+            }
+            return id
+          }).filter(id => id !== undefined && id !== null)
+          
+          console.log(`Group ${groupId} member IDs:`, memberIds)
+          userIdsToInvite.push(...memberIds)
+        }
+        
+        // Remove duplicates
+        userIdsToInvite = [...new Set(userIdsToInvite)]
+        console.log('Total unique user IDs to invite:', userIdsToInvite.length, userIdsToInvite)
+        
+        if (userIdsToInvite.length === 0) {
+          toast.error('No valid user IDs found in selected groups')
+          setAddingUsers(false)
+          return
+        }
+      } catch (error) {
+        console.error('Error fetching group members:', error)
+        toast.error(`Error fetching group members: ${error.message}`)
+        setAddingUsers(false)
+        return
+      }
+    } else {
+      if (selectedUsers.length === 0) {
+        toast.warning('Please select at least one user')
+        return
+      }
+      userIdsToInvite = selectedUsers.map(u => u.id)
+    }
+
+    if (userIdsToInvite.length === 0) {
+      toast.warning('No users to invite')
+      setAddingUsers(false)
       return
     }
 
     try {
-      const response = await fetch(`${apiBaseUrl}/api/assessment/administrators/${adminId}/users`, {
+      console.log('Inviting users:', {
+        administrator_id: parseInt(adminId),
+        user_ids: userIdsToInvite,
+        count: userIdsToInvite.length
+      })
+      
+      const response = await fetch(`${apiBaseUrl}/api/assessment/administrators/invite`, {
         method: 'POST',
         headers: getAuthHeader(),
-        body: JSON.stringify({ user_ids: selectedUsers })
+        body: JSON.stringify({ 
+          administrator_id: parseInt(adminId),
+          user_ids: userIdsToInvite 
+        })
       })
 
-      if (!response.ok) throw new Error('Failed to add users')
+      const responseData = await response.json()
+      console.log('Invite API response:', responseData)
 
-      toast.success(`${selectedUsers.length} user(s) added successfully!`)
-      setShowAddModal(false)
+      if (!response.ok) {
+        const errorMessage = responseData.error || responseData.message || 'Failed to add users'
+        toast.error(`Error: ${errorMessage}`)
+        console.error('API Error:', responseData)
+        return
+      }
+
+      // Show success message with details
+      const successCount = responseData.result?.success?.length || 0
+      const failedCount = responseData.result?.failed?.length || 0
+      
+      console.log(`Invite results: ${successCount} success, ${failedCount} failed`)
+      
+      if (successCount === 0 && failedCount > 0) {
+        toast.error(`Failed to add users. All ${failedCount} attempts failed.`)
+        console.error('Failed user details:', responseData.result?.failed)
+      } else if (failedCount > 0) {
+        toast.warning(`${successCount} user(s) added successfully, ${failedCount} failed`)
+        console.warn('Failed user details:', responseData.result?.failed)
+      } else {
+        toast.success(`${successCount} user(s) added successfully!`)
+      }
+
+      // Reset form
+      setShowAddSection(false)
+      setSelectedGroups([])
       setSelectedUsers([])
-      fetchData()
+      setSelectedCollege('')
+      setGroupSearch('')
+      setUserSearch('')
+      
+      // Wait a bit for backend to process, then refresh data
+      setTimeout(() => {
+        console.log('Refreshing user mappings...')
+        fetchData()
+      }, 1000)
     } catch (error) {
       console.error('Error adding users:', error)
-      toast.error('Failed to add users')
+      toast.error(`Failed to add users: ${error.message || 'Unknown error'}`)
+    } finally {
+      setAddingUsers(false)
     }
   }
 
-  const handleBulkAdd = async () => {
-    const emails = bulkEmails.split('\n').map(e => e.trim()).filter(e => e)
-    
-    if (emails.length === 0) {
-      toast.warning('Please enter at least one email')
-      return
-    }
-
-    try {
-      const response = await fetch(`${apiBaseUrl}/api/assessment/administrators/${adminId}/users/bulk`, {
-        method: 'POST',
-        headers: getAuthHeader(),
-        body: JSON.stringify({ emails })
-      })
-
-      if (!response.ok) throw new Error('Failed to add users')
-
-      const data = await response.json()
-      toast.success(`Added: ${data.added}, Skipped: ${data.skipped}, Not found: ${data.not_found}`)
-      setShowBulkModal(false)
-      setBulkEmails('')
-      fetchData()
-    } catch (error) {
-      console.error('Error bulk adding:', error)
-      toast.error('Failed to bulk add users')
-    }
-  }
-
-  const handleRemoveUser = async (mappingId) => {
+  const handleRemoveUserMapping = async (mappingId) => {
     if (!window.confirm('Remove this user from the assessment?')) return
 
     try {
@@ -218,11 +393,19 @@ function AssessmentUserMapping() {
     return true
   })
 
-  const filteredAvailableUsers = availableUsers.filter(u => {
-    const search = userSearch.toLowerCase()
-    return u.email?.toLowerCase().includes(search) || 
-           u.name?.toLowerCase().includes(search)
-  })
+  const filteredGroups = useMemo(() => {
+    return availableGroups.filter(group => 
+      group.name.toLowerCase().includes(groupSearch.toLowerCase())
+    )
+  }, [availableGroups, groupSearch])
+
+  const filteredAvailableUsers = useMemo(() => {
+    return availableUsers.filter(user => 
+      (user.email && user.email.toLowerCase().includes(userSearch.toLowerCase())) ||
+      (user.name && user.name.toLowerCase().includes(userSearch.toLowerCase())) ||
+      (user.username && user.username.toLowerCase().includes(userSearch.toLowerCase()))
+    )
+  }, [availableUsers, userSearch])
 
   if (loading) {
     return (
@@ -250,17 +433,270 @@ function AssessmentUserMapping() {
           </div>
         </div>
         <div className="header-actions">
-          <Button variant="outline" onClick={() => { fetchAvailableUsers(); setShowAddModal(true); }}>
-            Add Users
-          </Button>
-          <Button variant="outline" onClick={() => setShowBulkModal(true)}>
-            Bulk Import
+          <Button variant="outline" onClick={() => setShowAddSection(!showAddSection)}>
+            {showAddSection ? 'Cancel' : 'Add Users'}
           </Button>
           <Button variant="primary" onClick={handleSendAllInvitations}>
             Send All Invitations
           </Button>
         </div>
       </div>
+
+      {/* Add Users Section - Similar to course administration */}
+      {showAddSection && (
+        <div className="add-users-section">
+          <div className="section-header">
+            <h2>Add Users to Assessment</h2>
+          </div>
+          
+          <div className="form-section">
+            <div className="form-group">
+              <label>Add Users By</label>
+              <div className="toggle-selector">
+                <button
+                  type="button"
+                  className={`toggle-option ${candidateType === 'group' ? 'active' : ''}`}
+                  onClick={() => {
+                    setCandidateType('group')
+                    setSelectedGroups([])
+                    setSelectedUsers([])
+                  }}
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                  </svg>
+                  <span>Group</span>
+                </button>
+                <button
+                  type="button"
+                  className={`toggle-option ${candidateType === 'individual' ? 'active' : ''}`}
+                  onClick={() => {
+                    setCandidateType('individual')
+                    setSelectedGroups([])
+                    setSelectedUsers([])
+                  }}
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                  </svg>
+                  <span>Individual Users</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>College {candidateType === 'group' && <span className="required">*</span>}</label>
+              <select
+                value={selectedCollege}
+                onChange={(e) => {
+                  setSelectedCollege(e.target.value)
+                  setSelectedGroups([])
+                  setSelectedUsers([])
+                }}
+              >
+                <option value="">Select College</option>
+                {colleges.map(college => (
+                  <option key={college} value={college}>{college}</option>
+                ))}
+              </select>
+            </div>
+
+            {candidateType === 'group' ? (
+              <>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Degree (Optional)</label>
+                    <input
+                      type="text"
+                      value={groupDegree}
+                      onChange={(e) => {
+                        setGroupDegree(e.target.value)
+                        setSelectedGroups([])
+                      }}
+                      placeholder="Enter degree"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Department (Optional)</label>
+                    <input
+                      type="text"
+                      value={groupDepartment}
+                      onChange={(e) => {
+                        setGroupDepartment(e.target.value)
+                        setSelectedGroups([])
+                      }}
+                      placeholder="Enter department"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Year (Optional)</label>
+                    <input
+                      type="text"
+                      value={groupYear}
+                      onChange={(e) => {
+                        setGroupYear(e.target.value)
+                        setSelectedGroups([])
+                      }}
+                      placeholder="Enter year"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>Available Groups for {selectedCollege || 'Selected College'}</label>
+                  <input
+                    type="text"
+                    value={groupSearch}
+                    onChange={(e) => setGroupSearch(e.target.value)}
+                    placeholder="Filter groups..."
+                    className="search-input"
+                  />
+                </div>
+
+                <div className="available-groups-section">
+                  {!selectedCollege ? (
+                    <div className="no-groups-message">
+                      Please select a college first
+                    </div>
+                  ) : availableGroups.length === 0 ? (
+                    <div className="no-groups-message">
+                      No groups available for this institution. Create groups first.
+                    </div>
+                  ) : (
+                    <div className="groups-list">
+                      {filteredGroups.map(group => {
+                        const isSelected = selectedGroups.includes(group.id)
+                        return (
+                          <div 
+                            key={group.id} 
+                            className={`group-item ${isSelected ? 'selected' : ''}`}
+                            onClick={() => isSelected ? handleRemoveGroup(group.id) : handleAddGroup(group.id)}
+                          >
+                            <div className="group-checkbox">
+                              {isSelected ? (
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                              ) : null}
+                            </div>
+                            <div className="group-info">
+                              <span className="group-name">{group.name}</span>
+                              <span className="group-meta">
+                                {group.degree && `${group.degree} • `}
+                                {group.department && `${group.department} • `}
+                                {group.passout_year && `Year ${group.passout_year}`}
+                                {!group.degree && !group.department && !group.passout_year && 'No additional info'}
+                              </span>
+                            </div>
+                            <span className="group-member-count">
+                              {group.member_count || 0} members
+                            </span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {selectedGroups.length > 0 && (
+                  <div className="selected-items">
+                    <label>Selected Groups ({selectedGroups.length}):</label>
+                    <div className="selected-tags">
+                      {selectedGroups.map(groupId => {
+                        const group = availableGroups.find(g => g.id === groupId)
+                        return group ? (
+                          <span key={groupId} className="selected-tag">
+                            {group.name}
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveGroup(groupId)}
+                              className="remove-tag"
+                            >
+                              ×
+                            </button>
+                          </span>
+                        ) : null
+                      })}
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                <div className="form-group">
+                  <label>User Email ID or Username</label>
+                  <input
+                    type="text"
+                    value={userSearch}
+                    onChange={(e) => setUserSearch(e.target.value)}
+                    placeholder="Search by email or username..."
+                    className="search-input"
+                  />
+                  {userSearch && filteredAvailableUsers.length > 0 && (
+                    <div className="suggestions-dropdown">
+                      {filteredAvailableUsers.map(user => (
+                        <div
+                          key={user.id}
+                          className="suggestion-item"
+                          onClick={() => handleAddUser(user)}
+                        >
+                          {user.name} ({user.email})
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {selectedUsers.length > 0 && (
+                  <div className="selected-items">
+                    <label>Selected Users:</label>
+                    <div className="selected-tags">
+                      {selectedUsers.map(user => (
+                        <span key={user.id} className="selected-tag">
+                          {user.name} ({user.email})
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveUser(user.id)}
+                            className="remove-tag"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
+            <div className="form-actions">
+              <Button variant="secondary" onClick={() => {
+                setShowAddSection(false)
+                setSelectedGroups([])
+                setSelectedUsers([])
+                setSelectedCollege('')
+                setGroupSearch('')
+                setUserSearch('')
+              }}>
+                Cancel
+              </Button>
+              <Button 
+                variant="primary" 
+                onClick={handleInviteUsers}
+                disabled={addingUsers || (candidateType === 'group' ? selectedGroups.length === 0 : selectedUsers.length === 0)}
+              >
+                {addingUsers ? 'Adding...' : 'Add Users'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="stats-bar">
         <div className="stat">
@@ -294,7 +730,7 @@ function AssessmentUserMapping() {
         <div className="empty-state">
           <h3>No users found</h3>
           <p>Add users to this assessment configuration.</p>
-          <Button variant="primary" onClick={() => { fetchAvailableUsers(); setShowAddModal(true); }}>
+          <Button variant="primary" onClick={() => setShowAddSection(true)}>
             Add Users
           </Button>
         </div>
@@ -368,7 +804,7 @@ function AssessmentUserMapping() {
                       )}
                       <button 
                         className="action-btn delete"
-                        onClick={() => handleRemoveUser(mapping.id)}
+                        onClick={() => handleRemoveUserMapping(mapping.id)}
                         title="Remove User"
                       >
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
@@ -384,87 +820,8 @@ function AssessmentUserMapping() {
           </table>
         </div>
       )}
-
-      {/* Add Users Modal */}
-      {showAddModal && (
-        <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Add Users</h2>
-              <button className="close-btn" onClick={() => setShowAddModal(false)}>×</button>
-            </div>
-            <div className="modal-body">
-              <div className="search-box">
-                <input
-                  type="text"
-                  value={userSearch}
-                  onChange={(e) => setUserSearch(e.target.value)}
-                  placeholder="Search by name or email..."
-                />
-              </div>
-              <div className="users-list">
-                {filteredAvailableUsers.length === 0 ? (
-                  <p className="no-results">No users found</p>
-                ) : (
-                  filteredAvailableUsers.map(user => (
-                    <label key={user.id} className={`user-item ${selectedUsers.includes(user.id) ? 'selected' : ''}`}>
-                      <input
-                        type="checkbox"
-                        checked={selectedUsers.includes(user.id)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedUsers(prev => [...prev, user.id])
-                          } else {
-                            setSelectedUsers(prev => prev.filter(id => id !== user.id))
-                          }
-                        }}
-                      />
-                      <div className="user-avatar">{user.name?.charAt(0) || user.email?.charAt(0)}</div>
-                      <div className="user-details">
-                        <span className="name">{user.name || 'No Name'}</span>
-                        <span className="email">{user.email}</span>
-                      </div>
-                    </label>
-                  ))
-                )}
-              </div>
-            </div>
-            <div className="modal-footer">
-              <span className="selected-count">{selectedUsers.length} selected</span>
-              <Button variant="secondary" onClick={() => setShowAddModal(false)}>Cancel</Button>
-              <Button variant="primary" onClick={handleAddUsers}>Add Selected</Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Bulk Import Modal */}
-      {showBulkModal && (
-        <div className="modal-overlay" onClick={() => setShowBulkModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Bulk Import Users</h2>
-              <button className="close-btn" onClick={() => setShowBulkModal(false)}>×</button>
-            </div>
-            <div className="modal-body">
-              <p className="instruction">Enter email addresses, one per line:</p>
-              <textarea
-                value={bulkEmails}
-                onChange={(e) => setBulkEmails(e.target.value)}
-                placeholder="user1@example.com&#10;user2@example.com&#10;user3@example.com"
-                rows="10"
-              />
-            </div>
-            <div className="modal-footer">
-              <Button variant="secondary" onClick={() => setShowBulkModal(false)}>Cancel</Button>
-              <Button variant="primary" onClick={handleBulkAdd}>Import Users</Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
 
 export default AssessmentUserMapping
-

@@ -12,12 +12,10 @@ function AssessmentCreate() {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    institution_id: '',
-    topic_id: ''
+    institution_id: ''
   })
   const [errors, setErrors] = useState({})
   const [institutions, setInstitutions] = useState([])
-  const [topics, setTopics] = useState([])
   const [saving, setSaving] = useState(false)
 
   const getAuthHeader = () => ({
@@ -28,18 +26,11 @@ function AssessmentCreate() {
   useEffect(() => {
     const fetchDropdownData = async () => {
       try {
-        const [instRes, topicRes] = await Promise.all([
-          fetch(`${apiBaseUrl}/api/institutions`, { headers: getAuthHeader() }),
-          fetch(`${apiBaseUrl}/api/topics`, { headers: getAuthHeader() })
-        ])
+        const instRes = await fetch(`${apiBaseUrl}/api/institutions`, { headers: getAuthHeader() })
 
         if (instRes.ok) {
           const data = await instRes.json()
           setInstitutions(data.institutions || data || [])
-        }
-        if (topicRes.ok) {
-          const data = await topicRes.json()
-          setTopics(data.topics || data || [])
         }
       } catch (error) {
         console.error('Error fetching dropdown data:', error)
@@ -154,21 +145,6 @@ function AssessmentCreate() {
                   ))}
                 </select>
                 <span className={styles.helpText}>Associate this assessment with an institution</span>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label htmlFor="topic">Topic</label>
-                <select
-                  id="topic"
-                  value={formData.topic_id}
-                  onChange={(e) => setFormData({ ...formData, topic_id: e.target.value })}
-                >
-                  <option value="">Select Topic (Optional)</option>
-                  {topics.map(topic => (
-                    <option key={topic.id} value={topic.id}>{topic.name}</option>
-                  ))}
-                </select>
-                <span className={styles.helpText}>Categorize by topic for easy filtering</span>
               </div>
             </div>
           </div>

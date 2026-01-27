@@ -337,10 +337,16 @@
     display: none;
   }
 
+  .userMenuContainer {
+    position: relative;
+  }
+
   .menuDropdown {
-    right: var(--spacing-md);
-    left: var(--spacing-md);
-    min-width: auto;
+    right: 0;
+    left: auto;
+    min-width: 16rem;
+    max-width: calc(100vw - var(--spacing-md) * 2);
+    transform-origin: top right;
   }
 
   .sidebarToggleBtn {
