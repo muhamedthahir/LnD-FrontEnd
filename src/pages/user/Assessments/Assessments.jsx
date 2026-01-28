@@ -85,6 +85,43 @@ function Assessments() {
     return `${minutes} min`
   }
 
+  // Helper function to open assessment in secure popup
+  const openAssessmentInPopup = (mappingId, isResume = false) => {
+    const screenWidth = window.screen.availWidth || window.screen.width
+    const screenHeight = window.screen.availHeight || window.screen.height
+    
+    const windowFeatures = [
+      `width=${screenWidth}`,
+      `height=${screenHeight}`,
+      'top=0',
+      'left=0',
+      'menubar=no',
+      'toolbar=no',
+      'location=no',
+      'directories=no',
+      'status=no',
+      'personalbar=no',
+      'scrollbars=yes',
+      'resizable=no',
+      'copyhistory=no',
+      'popup=yes'
+    ].join(',')
+    
+    // Use secure route without sidebar/header for proctored assessments
+    const assessmentUrl = `${window.location.origin}/secure/assessment/${mappingId}/take`
+    console.log('Opening assessment in popup:', assessmentUrl)
+    
+    const assessmentWindow = window.open(assessmentUrl, 'assessment_window', windowFeatures)
+    
+    if (assessmentWindow) {
+      assessmentWindow.focus()
+      toast.success(isResume ? 'Assessment resumed in secure window' : 'Assessment opened in secure window')
+    } else {
+      toast.warning('Popup was blocked by browser. Opening in current window...')
+      navigate(`/user/assessments/${mappingId}/take`)
+    }
+  }
+
   const handleStartAssessment = (assessment) => {
     const mappingId = assessment.user_mapping_id || assessment.id
     if (!mappingId) {
@@ -94,8 +131,10 @@ function Assessments() {
     }
     
     if (assessment.status === 'IN_PROGRESS') {
-      navigate(`/user/assessments/${mappingId}/take`)
+      // Always open in secure popup for resume
+      openAssessmentInPopup(mappingId, true)
     } else {
+      // Go to start page first (which will then open popup after agreement)
       navigate(`/user/assessments/${mappingId}/start`)
     }
   }
