@@ -476,7 +476,7 @@ function CodeEditor({
         
         if (response.ok && result.run) {
           actualOutput = (result.run.stdout || '').trim()
-          const expectedOutput = (testCase.expected_result || '').trim()
+          const expectedOutput = (testCase.expected_result || testCase.expected_output || '').trim()
           passed = actualOutput === expectedOutput
         } else {
           actualOutput = result.error || result.run?.stderr || 'Execution failed'
@@ -541,7 +541,7 @@ function CodeEditor({
             
             if (response.ok && result.run) {
               const actualOutput = (result.run.stdout || '').trim()
-              const expectedOutput = (testCase.expected_result || '').trim()
+              const expectedOutput = (testCase.expected_result || testCase.expected_output || '').trim()
               if (actualOutput === expectedOutput) {
                 testCasesPassed++
               }
@@ -569,8 +569,27 @@ function CodeEditor({
         })
         
         if (result) {
-          // Don't show pass/fail status in assessment mode
-          if (assessmentMode) {
+          // In assessment mode, show test case results from server
+          if (assessmentMode && result.testCasesTotal !== undefined) {
+            let outputMsg = `> Code submitted successfully\n`
+            outputMsg += `> Test cases: ${result.testCasesPassed}/${result.testCasesTotal} passed\n`
+            if (result.hiddenTotal > 0) {
+              outputMsg += `> (includes ${result.hiddenPassed}/${result.hiddenTotal} hidden test cases)\n`
+            }
+            setOutput(prev => prev + outputMsg)
+            
+            // Update test results display with server response
+            if (result.results && result.results.length > 0) {
+              setTestResults(result.results.map((r, i) => ({
+                id: i,
+                input: r.input,
+                expected_result: r.expected_output,
+                status: r.passed ? 'passed' : 'failed',
+                actualOutput: r.actual_output
+              })))
+              setActiveTab('testcases')
+            }
+          } else if (assessmentMode) {
             setOutput(prev => prev + `> Code submitted successfully\n`)
           } else {
             const statusMsg = result.result?.successful ? '✓ All test cases passed!' : `✗ ${testCasesPassed}/${testCasesTotal} test cases passed`
@@ -938,7 +957,7 @@ function CodeEditor({
                           </div>
                           <div className={styles.ioSection}>
                             <label>Expected Output:</label>
-                            <pre>{tc.expected_result || '(no output)'}</pre>
+                            <pre>{tc.expected_result || tc.expected_output || '(no output)'}</pre>
                           </div>
                           {result && result.actualOutput !== null && (
                             <div className={styles.ioSection}>

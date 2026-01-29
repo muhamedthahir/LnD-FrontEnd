@@ -979,11 +979,25 @@ function AssessmentTake() {
                           })
                           
                           if (response.ok) {
-                            toast.success('Code submitted successfully')
-                            return { success: true }
+                            const data = await response.json()
+                            const visiblePassed = data.test_cases_passed - (data.hidden_passed || 0)
+                            const visibleTotal = data.test_cases_total - (data.hidden_total || 0)
+                            toast.success(`Code submitted! ${data.test_cases_passed}/${data.test_cases_total} test cases passed`)
+                            return { 
+                              success: true, 
+                              testCasesPassed: data.test_cases_passed,
+                              testCasesTotal: data.test_cases_total,
+                              score: data.score,
+                              results: data.results,
+                              hiddenPassed: data.hidden_passed,
+                              hiddenTotal: data.hidden_total
+                            }
+                          } else {
+                            toast.error('Failed to submit code')
                           }
                         } catch (error) {
                           console.error('Code submission error:', error)
+                          toast.error('Code submission error')
                         }
                         return { success: false }
                       }}
