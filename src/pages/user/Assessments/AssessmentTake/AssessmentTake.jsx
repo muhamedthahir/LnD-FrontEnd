@@ -28,10 +28,15 @@ function AssessmentTake() {
   // Timer state
   const [timeRemaining, setTimeRemaining] = useState(0)
   const [segmentTimeRemaining, setSegmentTimeRemaining] = useState(0)
+  const [totalTimeWorked, setTotalTimeWorked] = useState(0)
   const timerRef = useRef(null)
+  const progressSaveRef = useRef(null)
+  
+  // Progress save interval in seconds (configurable - default 60 seconds)
+  const PROGRESS_SAVE_INTERVAL = 60
   
   // UI state
-  const [showQuestionNav, setShowQuestionNav] = useState(true)
+  const [showQuestionNav, setShowQuestionNav] = useState(false)
   const [showSubmitModal, setShowSubmitModal] = useState(false)
   const [showSegmentEndModal, setShowSegmentEndModal] = useState(false)
   const [isFullScreen, setIsFullScreen] = useState(false)
@@ -72,13 +77,24 @@ function AssessmentTake() {
       setAssessmentData(data)
       setQuestions(data.questions || [])
       setTimeRemaining(data.time_remaining || data.total_duration)
-      setSegmentTimeRemaining(data.current_segment?.time_remaining || data.segments?.[0]?.segment_duration || 0)
+      setSegmentTimeRemaining(data.segment_time_remaining || data.current_segment?.time_remaining || data.segments?.[0]?.segment_duration || 0)
       setCurrentSegmentIndex(data.current_segment_index || 0)
       setCurrentQuestionIndex(data.current_question_index || 0)
+      setTotalTimeWorked(data.total_time_worked || 0)
+      
+      // Restore tab switch count from server (for resume scenarios)
+      if (data.tab_switch_count > 0) {
+        setTabSwitchCount(data.tab_switch_count)
+      }
       
       // Restore saved answers
       if (data.saved_answers) {
         setAnswers(data.saved_answers)
+      }
+      
+      // Show resume notification if resuming
+      if (data.resume_count > 0) {
+        toast.info(`Resuming assessment (Resume #${data.resume_count}). Time remaining: ${formatTime(data.time_remaining)}`)
       }
 
       // Enter fullscreen if required
@@ -98,6 +114,8 @@ function AssessmentTake() {
     fetchAssessmentData()
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
+      if (progressSaveRef.current) clearInterval(progressSaveRef.current)
+      if (countdownTimerRef.current) clearInterval(countdownTimerRef.current)
     }
   }, [fetchAssessmentData])
 
@@ -178,19 +196,10 @@ function AssessmentTake() {
       // Check if limit exceeded or if limit is 0 (no tab switch allowed)
       if (maxAllowed >= 0 && (maxAllowed === 0 || newCount > maxAllowed)) {
         setIsTabLimitExceeded(true)
-        setTabSwitchCountdown(5)
-        
-        // Start countdown timer
-        countdownTimerRef.current = setInterval(() => {
-          setTabSwitchCountdown(prev => {
-            if (prev <= 1) {
-              clearInterval(countdownTimerRef.current)
-              handleAutoSubmit()
-              return 0
-            }
-            return prev - 1
-          })
-        }, 1000)
+        // Don't restart countdown if already running
+        if (!countdownTimerRef.current) {
+          startExceededCountdown()
+        }
       } else if (maxAllowed >= 0) {
         setIsTabLimitExceeded(false)
       }
@@ -203,7 +212,7 @@ function AssessmentTake() {
         document.documentElement.requestFullscreen().catch(() => {})
       }
       
-      // If limit not exceeded, allow closing the modal
+      // Only clear countdown if limit NOT exceeded
       if (!isTabLimitExceeded && countdownTimerRef.current) {
         clearInterval(countdownTimerRef.current)
         countdownTimerRef.current = null
@@ -216,9 +225,6 @@ function AssessmentTake() {
     return () => {
       window.removeEventListener('blur', handleWindowBlur)
       window.removeEventListener('focus', handleWindowFocus)
-      if (countdownTimerRef.current) {
-        clearInterval(countdownTimerRef.current)
-      }
     }
   }, [isSecureWindow, tabSwitchCount, assessmentData, pendingFullscreenExit, isTabLimitExceeded])
 
@@ -234,6 +240,9 @@ function AssessmentTake() {
         }
         return prev - 1
       })
+
+      // Increment total time worked
+      setTotalTimeWorked(prev => prev + 1)
 
       if (assessmentData.timing_mode !== 'OVERALL') {
         setSegmentTimeRemaining(prev => {
@@ -269,24 +278,15 @@ function AssessmentTake() {
         // Check if limit exceeded or if limit is 0 (no tab switch allowed)
         if (maxAllowed >= 0 && (maxAllowed === 0 || newCount > maxAllowed)) {
           setIsTabLimitExceeded(true)
-          setTabSwitchCountdown(5)
-          
-          // Start countdown timer
-          countdownTimerRef.current = setInterval(() => {
-            setTabSwitchCountdown(prev => {
-              if (prev <= 1) {
-                clearInterval(countdownTimerRef.current)
-                handleAutoSubmit()
-                return 0
-              }
-              return prev - 1
-            })
-          }, 1000)
+          // Don't restart countdown if already running
+          if (!countdownTimerRef.current) {
+            startExceededCountdown()
+          }
         } else {
           setIsTabLimitExceeded(false)
         }
       } else {
-        // User returned to tab - clear countdown if not exceeded
+        // User returned to tab - only clear countdown if limit NOT exceeded
         if (!isTabLimitExceeded && countdownTimerRef.current) {
           clearInterval(countdownTimerRef.current)
           countdownTimerRef.current = null
@@ -297,9 +297,6 @@ function AssessmentTake() {
     document.addEventListener('visibilitychange', handleVisibilityChange)
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange)
-      if (countdownTimerRef.current) {
-        clearInterval(countdownTimerRef.current)
-      }
     }
   }, [assessmentData, tabSwitchCount, isTabLimitExceeded])
 
@@ -418,9 +415,89 @@ function AssessmentTake() {
     }
   }
 
+  // Save progress to server (called periodically)
+  const saveProgress = useCallback(async () => {
+    if (!apiBaseUrl || !mappingId || !assessmentData) return
+    
+    try {
+      await fetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/save-progress`, {
+        method: 'POST',
+        headers: getAuthHeader(),
+        body: JSON.stringify({
+          current_segment_index: currentSegmentIndex,
+          current_question_index: currentQuestionIndex,
+          time_remaining: timeRemaining,
+          segment_time_remaining: segmentTimeRemaining,
+          total_time_worked: totalTimeWorked
+        })
+      })
+    } catch (error) {
+      console.error('Failed to save progress:', error)
+    }
+  }, [apiBaseUrl, mappingId, assessmentData, currentSegmentIndex, currentQuestionIndex, timeRemaining, segmentTimeRemaining, totalTimeWorked])
+
+  // Auto-save progress at regular intervals
+  useEffect(() => {
+    if (!assessmentData) return
+    
+    // Save progress every PROGRESS_SAVE_INTERVAL seconds
+    progressSaveRef.current = setInterval(() => {
+      saveProgress()
+    }, PROGRESS_SAVE_INTERVAL * 1000)
+    
+    // Also save on page unload
+    const handleBeforeUnload = () => {
+      saveProgress()
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    
+    return () => {
+      if (progressSaveRef.current) {
+        clearInterval(progressSaveRef.current)
+      }
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+    }
+  }, [assessmentData, saveProgress])
+
   const handleAutoSubmit = async () => {
     toast.info('Time is up! Auto-submitting your assessment...')
     await submitAssessment(true)
+  }
+
+  // Start countdown when tab switch limit is exceeded
+  const startExceededCountdown = () => {
+    // Clear any existing countdown
+    if (countdownTimerRef.current) {
+      clearInterval(countdownTimerRef.current)
+    }
+    
+    setTabSwitchCountdown(5)
+    
+    // Use a more robust approach - store the end time and calculate remaining
+    const endTime = Date.now() + 5000
+    
+    countdownTimerRef.current = setInterval(() => {
+      const remaining = Math.ceil((endTime - Date.now()) / 1000)
+      
+      if (remaining <= 0) {
+        clearInterval(countdownTimerRef.current)
+        countdownTimerRef.current = null
+        setTabSwitchCountdown(0)
+        
+        // Auto-submit and close popup
+        submitAssessment(true).then(() => {
+          // Close the popup window after submission
+          if (isSecureWindow) {
+            toast.success('Assessment submitted. Closing window...')
+            setTimeout(() => {
+              window.close()
+            }, 1500)
+          }
+        })
+      } else {
+        setTabSwitchCountdown(remaining)
+      }
+    }, 100) // Check more frequently for smoother countdown
   }
 
   const handleSegmentTimeout = () => {
@@ -769,44 +846,110 @@ function AssessmentTake() {
                 </div>
               ) : (currentQuestion.type === 'PROGRAMMING' || currentQuestion.question_type === 'PROGRAMMING') ? (
                 <div className={styles.programmingQuestion}>
-                  {/* Problem Statement */}
-                  <div className={styles.problemSection}>
-                    <div className={styles.questionText} dangerouslySetInnerHTML={{ 
-                      __html: currentQuestion.problem_statement || currentQuestion.name || currentQuestion.description || 'Question not available' 
-                    }} />
-                    
-                    {currentQuestion.examples && currentQuestion.examples.length > 0 && (
-                      <div className={styles.examplesSection}>
-                        <h4>Examples:</h4>
-                        {currentQuestion.examples.map((example, idx) => (
-                          <div key={idx} className={styles.exampleItem}>
-                            <div className={styles.exampleIo}>
-                              <div>
-                                <span className={styles.ioLabel}>Input:</span>
-                                <pre>{example.input}</pre>
-                              </div>
-                              <div>
-                                <span className={styles.ioLabel}>Output:</span>
-                                <pre>{example.output}</pre>
-                              </div>
+                  {/* Problem Statement Panel */}
+                  <div className={styles.problemPanel}>
+                    <div className={styles.problemContent}>
+                      {/* Problem Description */}
+                      <div className={styles.problemDescription}>
+                        <h4 className={styles.sectionTitle}>Description</h4>
+                        <div className={styles.descriptionContent} dangerouslySetInnerHTML={{ 
+                          __html: currentQuestion.problem_statement || currentQuestion.description || currentQuestion.name || 'Question not available' 
+                        }} />
+                      </div>
+                      
+                      {/* Input/Output Format if available */}
+                      {(currentQuestion.input_format || currentQuestion.output_format) && (
+                        <div className={styles.formatSection}>
+                          {currentQuestion.input_format && (
+                            <div className={styles.formatBlock}>
+                              <h4 className={styles.sectionTitle}>Input Format</h4>
+                              <div className={styles.formatContent} dangerouslySetInnerHTML={{ __html: currentQuestion.input_format }} />
                             </div>
-                            {example.explanation && (
-                              <div className={styles.exampleExplanation}>
-                                <span className={styles.ioLabel}>Explanation:</span>
-                                <p>{example.explanation}</p>
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                          )}
+                          {currentQuestion.output_format && (
+                            <div className={styles.formatBlock}>
+                              <h4 className={styles.sectionTitle}>Output Format</h4>
+                              <div className={styles.formatContent} dangerouslySetInnerHTML={{ __html: currentQuestion.output_format }} />
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Constraints */}
+                      {currentQuestion.constraints && (
+                        <div className={styles.constraintsSection}>
+                          <h4 className={styles.sectionTitle}>Constraints</h4>
+                          <div className={styles.constraintsContent} dangerouslySetInnerHTML={{ __html: currentQuestion.constraints }} />
+                        </div>
+                      )}
                     
-                    {currentQuestion.constraints && (
-                      <div className={styles.constraintsSection}>
-                        <h4>Constraints:</h4>
-                        <div dangerouslySetInnerHTML={{ __html: currentQuestion.constraints }} />
-                      </div>
-                    )}
+                      {/* Examples */}
+                      {currentQuestion.examples && currentQuestion.examples.length > 0 && (
+                        <div className={styles.examplesSection}>
+                          <h4 className={styles.sectionTitle}>Examples</h4>
+                          {currentQuestion.examples.map((example, idx) => (
+                            <div key={idx} className={styles.exampleItem}>
+                              <div className={styles.exampleHeader}>Example {idx + 1}</div>
+                              <div className={styles.exampleIo}>
+                                <div className={styles.ioBlock}>
+                                  <span className={styles.ioLabel}>Input:</span>
+                                  <pre className={styles.ioContent}>{example.input}</pre>
+                                </div>
+                                <div className={styles.ioBlock}>
+                                  <span className={styles.ioLabel}>Output:</span>
+                                  <pre className={styles.ioContent}>{example.output}</pre>
+                                </div>
+                              </div>
+                              {example.explanation && (
+                                <div className={styles.exampleExplanation}>
+                                  <span className={styles.ioLabel}>Explanation:</span>
+                                  <p>{example.explanation}</p>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Sample Test Cases (non-hidden) */}
+                      {(() => {
+                        const visibleTestCases = (currentQuestion.test_cases || []).filter(tc => !tc.is_hidden);
+                        if (visibleTestCases.length === 0) return null;
+                        return (
+                          <div className={styles.testCasesSection}>
+                            <h4 className={styles.sectionTitle}>Sample Test Cases</h4>
+                            <div className={styles.testCasesList}>
+                              {visibleTestCases.map((testCase, idx) => (
+                                <div key={testCase.id || idx} className={styles.testCaseItem}>
+                                  <div className={styles.testCaseHeader}>
+                                    <span className={styles.testCaseNumber}>Test Case {idx + 1}</span>
+                                    {testCase.description && <span className={styles.testCaseDesc}>{testCase.description}</span>}
+                                  </div>
+                                  <div className={styles.testCaseIo}>
+                                    <div className={styles.ioBlock}>
+                                      <span className={styles.ioLabel}>Input:</span>
+                                      <pre className={styles.ioContent}>{testCase.input || testCase.input_data}</pre>
+                                    </div>
+                                    <div className={styles.ioBlock}>
+                                      <span className={styles.ioLabel}>Expected Output:</span>
+                                      <pre className={styles.ioContent}>{testCase.expected_output || testCase.output}</pre>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                            <p className={styles.hiddenTestsNote}>
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="12" y1="16" x2="12" y2="12"/>
+                                <line x1="12" y1="8" x2="12.01" y2="8"/>
+                              </svg>
+                              Additional hidden test cases will be used to evaluate your solution.
+                            </p>
+                          </div>
+                        );
+                      })()}
+                    </div>
                   </div>
 
                   {/* Code Editor Section */}
