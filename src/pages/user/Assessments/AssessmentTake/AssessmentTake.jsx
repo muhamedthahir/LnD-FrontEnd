@@ -32,8 +32,8 @@ function AssessmentTake() {
   const timerRef = useRef(null)
   const progressSaveRef = useRef(null)
   
-  // Progress save interval in seconds (configurable - default 60 seconds)
-  const PROGRESS_SAVE_INTERVAL = 60
+  // Progress save interval in seconds (configurable - default 10 seconds)
+  const PROGRESS_SAVE_INTERVAL = 10
   
   // UI state
   const [showQuestionNav, setShowQuestionNav] = useState(false)
