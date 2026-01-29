@@ -1,5 +1,5 @@
 import { Outlet } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApi } from '../../contexts/ApiContext'
 import { API_ENDPOINTS } from '../../constants/constants'
@@ -10,18 +10,14 @@ import styles from './SecureLayout.module.css'
  * No sidebar, no header navigation - just the content
  */
 function SecureLayout() {
-  const { apiBaseUrl, accessToken, refreshToken, clearTokens } = useApi()
+  const { apiBaseUrl, accessToken, refreshToken, clearTokens, isLoading: apiLoading } = useApi()
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
 
-  useEffect(() => {
-    checkAuth()
-  }, [apiBaseUrl, accessToken])
-
-  const checkAuth = async () => {
-    if (!apiBaseUrl) {
-      setLoading(true)
+  const checkAuth = useCallback(async () => {
+    // Wait for API context to finish loading
+    if (apiLoading || !apiBaseUrl) {
       return
     }
 
@@ -29,15 +25,27 @@ function SecureLayout() {
       const token = accessToken || localStorage.getItem('accessToken')
       
       if (!token) {
+        // Try to get user from localStorage as fallback
+        const storedUser = localStorage.getItem('user')
+        if (storedUser) {
+          try {
+            setUser(JSON.parse(storedUser))
+            setLoading(false)
+            return
+          } catch (e) {
+            // Invalid stored user
+          }
+        }
+        
         clearTokens()
         localStorage.removeItem('user')
         setUser(null)
         setLoading(false)
-        // In secure mode, just show an error instead of redirecting
         return
       }
 
-      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.ME}`, {
+      // Use the correct auth check endpoint
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.AUTH.CHECK}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -45,7 +53,8 @@ function SecureLayout() {
       })
 
       if (response.ok) {
-        const userData = await response.json()
+        const data = await response.json()
+        const userData = data.user || data
         setUser(userData)
         localStorage.setItem('user', JSON.stringify(userData))
         setLoading(false)
@@ -54,7 +63,7 @@ function SecureLayout() {
         const storedRefreshToken = refreshToken || localStorage.getItem('refreshToken')
         if (storedRefreshToken) {
           try {
-            const refreshResponse = await fetch(`${apiBaseUrl}${API_ENDPOINTS.REFRESH_TOKEN}`, {
+            const refreshResponse = await fetch(`${apiBaseUrl}${API_ENDPOINTS.AUTH.REFRESH}`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json'
@@ -77,6 +86,18 @@ function SecureLayout() {
           }
         }
 
+        // As a last resort, try using stored user data
+        const storedUser = localStorage.getItem('user')
+        if (storedUser) {
+          try {
+            setUser(JSON.parse(storedUser))
+            setLoading(false)
+            return
+          } catch (e) {
+            // Invalid stored user
+          }
+        }
+
         clearTokens()
         localStorage.removeItem('user')
         setUser(null)
@@ -84,12 +105,29 @@ function SecureLayout() {
       }
     } catch (error) {
       console.error('Auth check failed:', error)
+      
+      // Even on network error, try to use stored user data for popup windows
+      const storedUser = localStorage.getItem('user')
+      if (storedUser) {
+        try {
+          setUser(JSON.parse(storedUser))
+          setLoading(false)
+          return
+        } catch (e) {
+          // Invalid stored user
+        }
+      }
+      
       clearTokens()
       localStorage.removeItem('user')
       setUser(null)
       setLoading(false)
     }
-  }
+  }, [apiBaseUrl, accessToken, refreshToken, clearTokens, apiLoading])
+
+  useEffect(() => {
+    checkAuth()
+  }, [checkAuth])
 
   if (loading) {
     return (
@@ -122,4 +160,5 @@ function SecureLayout() {
 }
 
 export default SecureLayout
+
 

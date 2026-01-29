@@ -5,6 +5,24 @@ import { toast } from 'react-toastify'
 import Button from '../../../../components/Button/Button'
 import './ConfigurationCreate.css'
 
+// Helper function to format datetime for datetime-local input (YYYY-MM-DDTHH:mm)
+const formatDateTimeForInput = (dateStr) => {
+  if (!dateStr) return ''
+  try {
+    const date = new Date(dateStr)
+    if (isNaN(date.getTime())) return ''
+    // Format as YYYY-MM-DDTHH:mm (required for datetime-local input)
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    const hours = String(date.getHours()).padStart(2, '0')
+    const minutes = String(date.getMinutes()).padStart(2, '0')
+    return `${year}-${month}-${day}T${hours}:${minutes}`
+  } catch {
+    return ''
+  }
+}
+
 function ConfigurationCreate() {
   const { id: assessmentId } = useParams()
   const [searchParams] = useSearchParams()
@@ -286,8 +304,8 @@ function ConfigurationCreate() {
               timing: {
                 total_time: timingConfig.total_time ?? 0,
                 timing_mode: timingConfig.timing_mode || 'SEGMENT_WISE',
-                start_date_time: timingConfig.start_date_time || '',
-                end_date_time: timingConfig.end_date_time || '',
+                start_date_time: formatDateTimeForInput(timingConfig.start_date_time),
+                end_date_time: formatDateTimeForInput(timingConfig.end_date_time),
                 allow_early_segment_submit: timingConfig.allow_early_segment_submit !== false,
                 carry_forward_time: timingConfig.carry_forward_time || false,
                 auto_submit_on_timeout: timingConfig.auto_submit_on_timeout !== false,
@@ -313,10 +331,10 @@ function ConfigurationCreate() {
                 negative_mark_percentage: scoringConfig.negative_mark_percentage || 0,
                 show_score_at_end: scoringConfig.show_score_at_end || false,
                 show_score_mode: scoringConfig.show_score_mode || showScoreMode,
-                show_score_scheduled_time: scoringConfig.show_score_scheduled_time || null,
+                show_score_scheduled_time: formatDateTimeForInput(scoringConfig.show_score_scheduled_time),
                 show_correct_answers_after: scoringConfig.show_correct_answers_after || false,
                 show_answers_mode: scoringConfig.show_answers_mode || showAnswersMode,
-                show_answers_scheduled_time: scoringConfig.show_answers_scheduled_time || null,
+                show_answers_scheduled_time: formatDateTimeForInput(scoringConfig.show_answers_scheduled_time),
                 show_feedback_or_rating: scoringConfig.show_feedback_or_rating !== false
               },
               question: {
@@ -895,28 +913,12 @@ function ConfigurationCreate() {
                     <label>Score Publishing Date & Time</label>
                     <input
                       type="datetime-local"
-                      value={formData.scoring.show_score_scheduled_time 
-                        ? (() => {
-                            try {
-                              const date = new Date(formData.scoring.show_score_scheduled_time)
-                              if (isNaN(date.getTime())) return ''
-                              // Convert to local datetime-local format (YYYY-MM-DDTHH:mm)
-                              const year = date.getFullYear()
-                              const month = String(date.getMonth() + 1).padStart(2, '0')
-                              const day = String(date.getDate()).padStart(2, '0')
-                              const hours = String(date.getHours()).padStart(2, '0')
-                              const minutes = String(date.getMinutes()).padStart(2, '0')
-                              return `${year}-${month}-${day}T${hours}:${minutes}`
-                            } catch {
-                              return ''
-                            }
-                          })()
-                        : ''}
+                      value={formData.scoring.show_score_scheduled_time || ''}
                       onChange={(e) => setFormData({ 
                         ...formData, 
                         scoring: { 
                           ...formData.scoring, 
-                          show_score_scheduled_time: e.target.value ? new Date(e.target.value).toISOString() : null
+                          show_score_scheduled_time: e.target.value || null
                         } 
                       })}
                       min={new Date().toISOString().slice(0, 16)}
@@ -989,28 +991,12 @@ function ConfigurationCreate() {
                     <label>Answers Publishing Date & Time</label>
                     <input
                       type="datetime-local"
-                      value={formData.scoring.show_answers_scheduled_time 
-                        ? (() => {
-                            try {
-                              const date = new Date(formData.scoring.show_answers_scheduled_time)
-                              if (isNaN(date.getTime())) return ''
-                              // Convert to local datetime-local format (YYYY-MM-DDTHH:mm)
-                              const year = date.getFullYear()
-                              const month = String(date.getMonth() + 1).padStart(2, '0')
-                              const day = String(date.getDate()).padStart(2, '0')
-                              const hours = String(date.getHours()).padStart(2, '0')
-                              const minutes = String(date.getMinutes()).padStart(2, '0')
-                              return `${year}-${month}-${day}T${hours}:${minutes}`
-                            } catch {
-                              return ''
-                            }
-                          })()
-                        : ''}
+                      value={formData.scoring.show_answers_scheduled_time || ''}
                       onChange={(e) => setFormData({ 
                         ...formData, 
                         scoring: { 
                           ...formData.scoring, 
-                          show_answers_scheduled_time: e.target.value ? new Date(e.target.value).toISOString() : null
+                          show_answers_scheduled_time: e.target.value || null
                         } 
                       })}
                       min={new Date().toISOString().slice(0, 16)}
