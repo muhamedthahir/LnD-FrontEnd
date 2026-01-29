@@ -420,6 +420,12 @@ function AssessmentTake() {
     if (!apiBaseUrl || !mappingId || !assessmentData) return
     
     try {
+      // Get current segment info for segment_id and time_spent calculation
+      const currentSegment = assessmentData?.segments?.[currentSegmentIndex]
+      const segmentId = currentSegment?.id || null
+      const segmentDuration = currentSegment?.segment_duration || 0
+      const timeSpent = segmentDuration - segmentTimeRemaining // Calculate time spent in current segment
+
       await fetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/save-progress`, {
         method: 'POST',
         headers: getAuthHeader(),
@@ -428,7 +434,9 @@ function AssessmentTake() {
           current_question_index: currentQuestionIndex,
           time_remaining: timeRemaining,
           segment_time_remaining: segmentTimeRemaining,
-          total_time_worked: totalTimeWorked
+          total_time_worked: totalTimeWorked,
+          segment_id: segmentId,
+          time_spent: timeSpent > 0 ? timeSpent : 0
         })
       })
     } catch (error) {
