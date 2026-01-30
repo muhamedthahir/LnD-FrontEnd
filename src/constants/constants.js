@@ -62,6 +62,7 @@ export const API_ENDPOINTS = {
     DELETE: (id) => `/api/administrations/${id}`,
     DRAFT: '/api/administrations/draft',
     ENROLLED_USERS: (id) => `/api/administrations/${id}/enrolled-users`,
+    OVERALL_REPORT: (id) => `/api/administrations/${id}/overall-report`,
     USER_PROGRESS: (id, userId) => `/api/administrations/${id}/users/${userId}/progress`,
     UPDATE_ALL_PROGRESS: (id) => `/api/administrations/${id}/update-progress`,
     PROGRESS_HISTORY: (id) => `/api/administrations/${id}/progress-history`,
