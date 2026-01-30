@@ -87,10 +87,59 @@ function AssessmentStart() {
 
       const data = await response.json()
       
-      // Navigate to assessment taking page
-      navigate(`/user/assessments/${mappingId}/take`, {
-        state: { attemptId: data.attempt_id }
-      })
+      // Always open assessment in a secure popup window
+      const screenWidth = window.screen.availWidth || window.screen.width
+      const screenHeight = window.screen.availHeight || window.screen.height
+      
+      // Create a popup window that covers the full screen with maximum restrictions
+      const windowFeatures = [
+        // Dimensions - cover entire available screen
+        `width=${screenWidth}`,
+        `height=${screenHeight}`,
+        
+        // Position - top-left corner
+        'top=0',
+        'left=0',
+        
+        // Hide all browser chrome/UI elements
+        'menubar=no',           // Browser menu (File, Edit, View...)
+        'toolbar=no',           // Navigation toolbar (back, forward, refresh)
+        'location=no',          // Address/URL bar
+        'directories=no',       // Bookmarks/favorites bar (deprecated but still works)
+        'status=no',            // Status bar at bottom
+        'personalbar=no',       // Personal/bookmarks toolbar
+        
+        // Behavior controls
+        'scrollbars=yes',       // Allow scrolling (needed for content)
+        'resizable=no',         // Prevent window resizing
+        'copyhistory=no',       // Don't copy session history
+        
+        // Modern browser features
+        'popup=yes'             // Hint browser to use minimal UI
+      ].join(',')
+      
+      // Use secure route without sidebar/header for proctored assessments
+      const assessmentUrl = `${window.location.origin}/secure/assessment/${mappingId}/take?attemptId=${data.attempt_id}`
+      
+      console.log('Opening assessment in popup:', assessmentUrl)
+      const assessmentWindow = window.open(assessmentUrl, 'assessment_window', windowFeatures)
+      
+      if (assessmentWindow) {
+        // Focus the new window
+        assessmentWindow.focus()
+        
+        // Show message and redirect back
+        toast.success('Assessment opened in secure window')
+        setTimeout(() => {
+          navigate('/user/assessments')
+        }, 1500)
+      } else {
+        // Popup blocked - fallback to regular navigation
+        toast.warning('Popup was blocked by browser. Opening in current window...')
+        navigate(`/user/assessments/${mappingId}/take`, {
+          state: { attemptId: data.attempt_id }
+        })
+      }
     } catch (error) {
       console.error('Error starting assessment:', error)
       toast.error(error.message || 'Failed to start assessment')

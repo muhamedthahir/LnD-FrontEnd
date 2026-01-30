@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { ApiProvider } from './contexts/ApiContext'
 import Layout from './components/Layout/Layout'
+import SecureLayout from './components/SecureLayout/SecureLayout'
 import Login from './pages/Login/Login'
 import Dashboard from './pages/user/Dashboard/Dashboard'
 import UserCourses from './pages/user/Courses/UserCourses/UserCourses'
@@ -59,6 +60,12 @@ function App() {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
         <Route path="/codeeditor" element={<CodeEditorLayout />} />
+        
+        {/* Secure Assessment Routes - No sidebar/header */}
+        <Route element={<SecureLayout />}>
+          <Route path="/secure/assessment/:mappingId/take" element={<AssessmentTake />} />
+        </Route>
+        
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/personal-details" element={<PersonalDetails />} />

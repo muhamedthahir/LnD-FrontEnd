@@ -375,7 +375,8 @@ function AssessmentUserMapping() {
       COMPLETED: 'completed',
       SUBMITTED: 'completed',
       EXPIRED: 'expired',
-      PAUSED: 'paused'
+      PAUSED: 'paused',
+      DISQUALIFIED: 'disqualified'
     }
     return classes[status] || ''
   }
@@ -742,6 +743,7 @@ function AssessmentUserMapping() {
                 <th>User</th>
                 <th>Status</th>
                 <th>Attempts</th>
+                <th>Progress</th>
                 <th>Score</th>
                 <th>Started At</th>
                 <th>Submitted At</th>
@@ -769,13 +771,42 @@ function AssessmentUserMapping() {
                   </td>
                   <td>{mapping.attempts_used || 0} / {mapping.max_attempts || 1}</td>
                   <td>
-                    {mapping.total_score !== undefined && mapping.total_score !== null ? (
+                    <div className="progress-report-cell">
+                      {['IN_PROGRESS', 'COMPLETED', 'SUBMITTED', 'DISQUALIFIED'].includes(mapping.status) ? (
+                        <button 
+                          className="progress-icon-btn"
+                          onClick={() => navigate(`/admin/assessments/progress/${mapping.id}`)}
+                          title="View Detailed Progress"
+                        >
+                          {mapping.status === 'DISQUALIFIED' ? (
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20" className="text-danger">
+                              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                              <line x1="12" y1="9" x2="12" y2="13"/>
+                              <line x1="12" y1="17" x2="12.01" y2="17"/>
+                            </svg>
+                          ) : mapping.status === 'IN_PROGRESS' ? (
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20" className="text-primary">
+                              <circle cx="12" cy="12" r="10"/>
+                              <polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                          ) : (
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20" className="text-success">
+                              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                              <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                          )}
+                        </button>
+                      ) : '-'}
+                    </div>
+                  </td>
+                  <td>
+                    {mapping.percentage_score !== undefined && mapping.percentage_score !== null ? (
                       <span className={mapping.passed ? 'score passed' : 'score failed'}>
-                        {Math.round(mapping.total_score)}%
+                        {Math.round(mapping.percentage_score)}%
                       </span>
                     ) : '-'}
                   </td>
-                  <td>{formatDateTime(mapping.started_at)}</td>
+                  <td>{formatDateTime(mapping.assessment_started_time)}</td>
                   <td>{formatDateTime(mapping.submitted_at)}</td>
                   <td>
                     <div className="action-buttons">

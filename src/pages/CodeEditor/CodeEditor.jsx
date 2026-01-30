@@ -11,7 +11,9 @@ function CodeEditor({
   codeTemplates = [],
   testCases = [],
   onSubmit,
-  onRunComplete
+  onRunComplete,
+  assessmentMode = false,  // Hide pass/fail status, marks, percentages
+  assessmentMappingId = null  // For assessment-specific submissions
 }) {
   const { apiBaseUrl, accessToken } = useApi()
   const [editorHeight, setEditorHeight] = useState(65) // percentage
@@ -474,7 +476,7 @@ function CodeEditor({
         
         if (response.ok && result.run) {
           actualOutput = (result.run.stdout || '').trim()
-          const expectedOutput = (testCase.expected_result || '').trim()
+          const expectedOutput = (testCase.expected_result || testCase.expected_output || '').trim()
           passed = actualOutput === expectedOutput
         } else {
           actualOutput = result.error || result.run?.stderr || 'Execution failed'
@@ -539,7 +541,7 @@ function CodeEditor({
             
             if (response.ok && result.run) {
               const actualOutput = (result.run.stdout || '').trim()
-              const expectedOutput = (testCase.expected_result || '').trim()
+              const expectedOutput = (testCase.expected_result || testCase.expected_output || '').trim()
               if (actualOutput === expectedOutput) {
                 testCasesPassed++
               }
@@ -549,7 +551,12 @@ function CodeEditor({
           }
         }
         
-        setOutput(`> Test Results: ${testCasesPassed}/${testCasesTotal} passed\n`)
+        // Don't show pass/fail count in assessment mode
+        if (assessmentMode) {
+          setOutput(`> Test cases executed\n`)
+        } else {
+          setOutput(`> Test Results: ${testCasesPassed}/${testCasesTotal} passed\n`)
+        }
       }
       
       if (onSubmit) {
@@ -562,11 +569,35 @@ function CodeEditor({
         })
         
         if (result) {
-          const statusMsg = result.result?.successful ? '✓ All test cases passed!' : `✗ ${testCasesPassed}/${testCasesTotal} test cases passed`
-          setOutput(prev => prev + `> Submission recorded\n> ${statusMsg}\n`)
-          
-          // Refresh submission history after successful submission
-          await fetchSubmissionHistory(questionId)
+          // In assessment mode, show test case results from server
+          if (assessmentMode && result.testCasesTotal !== undefined) {
+            let outputMsg = `> Code submitted successfully\n`
+            outputMsg += `> Test cases: ${result.testCasesPassed}/${result.testCasesTotal} passed\n`
+            if (result.hiddenTotal > 0) {
+              outputMsg += `> (includes ${result.hiddenPassed}/${result.hiddenTotal} hidden test cases)\n`
+            }
+            setOutput(prev => prev + outputMsg)
+            
+            // Update test results display with server response
+            if (result.results && result.results.length > 0) {
+              setTestResults(result.results.map((r, i) => ({
+                id: i,
+                input: r.input,
+                expected_result: r.expected_output,
+                status: r.passed ? 'passed' : 'failed',
+                actualOutput: r.actual_output
+              })))
+              setActiveTab('testcases')
+            }
+          } else if (assessmentMode) {
+            setOutput(prev => prev + `> Code submitted successfully\n`)
+          } else {
+            const statusMsg = result.result?.successful ? '✓ All test cases passed!' : `✗ ${testCasesPassed}/${testCasesTotal} test cases passed`
+            setOutput(prev => prev + `> Submission recorded\n> ${statusMsg}\n`)
+            
+            // Refresh submission history after successful submission
+            await fetchSubmissionHistory(questionId)
+          }
         }
       } else {
         // Default submission behavior
@@ -775,12 +806,15 @@ function CodeEditor({
                 Test Cases ({visibleTestCases.length})
               </button>
             )}
-            <button 
-              className={`${styles.tabBtn} ${activeTab === 'history' ? styles.active : ''}`}
-              onClick={() => setActiveTab('history')}
-            >
-              History {submissionHistory.length > 0 && `(${submissionHistory.length})`}
-            </button>
+            {/* Hide history tab in assessment mode */}
+            {!assessmentMode && (
+              <button 
+                className={`${styles.tabBtn} ${activeTab === 'history' ? styles.active : ''}`}
+                onClick={() => setActiveTab('history')}
+              >
+                History {submissionHistory.length > 0 && `(${submissionHistory.length})`}
+              </button>
+            )}
           </div>
           <button className={styles.btnClear} onClick={handleClearOutput}>
             Clear
@@ -866,13 +900,14 @@ function CodeEditor({
                   return (
                     <div 
                       key={tc.id || index} 
-                      className={`${styles.testcaseItem} ${result?.status ? styles[result.status] : ''}`}
+                      className={`${styles.testcaseItem} ${!assessmentMode && result?.status ? styles[result.status] : ''}`}
                     >
                       <div className={styles.testcaseHeader}>
                         <span className={styles.testcaseName}>
                           {tc.name || `Test Case ${index + 1}`}
                         </span>
-                        {result && (
+                        {/* Hide passed/failed status in assessment mode */}
+                        {!assessmentMode && result && (
                           <span className={`${styles.testcaseStatus} ${result.status === 'passed' ? styles.testcaseStatusPassed : result.status === 'failed' ? styles.testcaseStatusFailed : styles.testcaseStatusError}`}>
                             {result.status === 'passed' && (
                               <>
@@ -903,6 +938,16 @@ function CodeEditor({
                             )}
                           </span>
                         )}
+                        {/* Show simple "Executed" status in assessment mode */}
+                        {assessmentMode && result && (
+                          <span className={styles.testcaseStatusNeutral}>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <circle cx="12" cy="12" r="10"/>
+                              <polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                            Executed
+                          </span>
+                        )}
                       </div>
                       <div className={styles.testcaseBody}>
                         <div className={styles.testcaseIo}>
@@ -912,12 +957,13 @@ function CodeEditor({
                           </div>
                           <div className={styles.ioSection}>
                             <label>Expected Output:</label>
-                            <pre>{tc.expected_result || '(no output)'}</pre>
+                            <pre>{tc.expected_result || tc.expected_output || '(no output)'}</pre>
                           </div>
                           {result && result.actualOutput !== null && (
                             <div className={styles.ioSection}>
                               <label>Your Output:</label>
-                              <pre className={result.status === 'passed' ? styles.correct : styles.incorrect}>
+                              {/* Don't color-code output in assessment mode */}
+                              <pre className={assessmentMode ? '' : (result.status === 'passed' ? styles.correct : styles.incorrect)}>
                                 {result.actualOutput || '(no output)'}
                               </pre>
                             </div>
