@@ -27,6 +27,7 @@ import AssessmentConfigurations from './pages/admin/assessments/AssessmentConfig
 import ConfigurationsList from './pages/admin/assessments/ConfigurationsList/ConfigurationsList'
 import ConfigurationCreate from './pages/admin/assessments/ConfigurationCreate/ConfigurationCreate'
 import AssessmentUserMapping from './pages/admin/assessments/AssessmentUserMapping/AssessmentUserMapping'
+import AssessmentResult from './pages/admin/assessments/AssessmentResult/AssessmentResult'
 // User Assessment Pages
 import AssessmentStart from './pages/user/Assessments/AssessmentStart/AssessmentStart'
 import AssessmentTake from './pages/user/Assessments/AssessmentTake/AssessmentTake'
@@ -97,6 +98,8 @@ function App() {
           <Route path="/admin/assessments/:id/configurations/create" element={<ConfigurationCreate />} />
           <Route path="/admin/assessments/administrations" element={<AssessmentAdministration />} />
           <Route path="/admin/assessments/administrators/:adminId/users" element={<AssessmentUserMapping />} />
+          <Route path="/admin/assessments/results/:mappingId" element={<AssessmentResult />} />
+          <Route path="/admin/assessments/progress/:mappingId" element={<AssessmentResult />} />
           <Route path="/admin/groups" element={<Groups />} />
           <Route path="/admin/groups/create" element={<CreateGroup />} />
           <Route path="/admin/courses/management" element={<CoursesManagement />} />
