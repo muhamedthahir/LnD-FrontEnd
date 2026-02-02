@@ -1344,9 +1344,9 @@ function ConfigurationCreate() {
                 <Button variant="secondary" onClick={() => handleSave(false)} disabled={saving}>
                   {saving ? 'Saving...' : (editConfigId ? 'Update Configuration' : 'Save Configuration')}
                 </Button>
-                <Button variant="primary" onClick={() => handleSave(true)} disabled={saving}>
+                {!editConfigId && <Button variant="primary" onClick={() => handleSave(true)} disabled={saving}>
                   {saving ? 'Activating...' : 'Activate and Continue'}
-                </Button>
+                </Button>}
               </div>
             )}
           </div>

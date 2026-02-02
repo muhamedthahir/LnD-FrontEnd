@@ -250,7 +250,7 @@ function AssessmentResult() {
                     <div className={styles.topicDetails}>
                       <h4>{segment.segment_name}</h4>
                       <p className={styles.topicMeta}>
-                        {segment.attempted_questions || 0} questions attempted
+                        {segment.questions_attempted || 0} questions attempted
                       </p>
                     </div>
                   </div>
