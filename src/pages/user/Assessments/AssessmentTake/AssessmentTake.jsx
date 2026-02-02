@@ -405,10 +405,12 @@ function AssessmentTake() {
 
   const logProctoringEvent = async (eventType, details = {}) => {
     try {
+      let segment = assessmentData?.segments?.[currentSegmentIndex];
+
       await fetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/proctoring-log`, {
         method: 'POST',
         headers: getAuthHeader(),
-        body: JSON.stringify({ event_type: eventType, details })
+        body: JSON.stringify({ event_type: eventType, details, segment_id :  segment?.id})
       })
     } catch (error) {
       console.error('Failed to log proctoring event:', error)
