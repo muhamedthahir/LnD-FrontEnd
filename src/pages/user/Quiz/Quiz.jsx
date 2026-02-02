@@ -46,8 +46,36 @@ function Quiz() {
     // Track time when question changes
     if (started && questions.length > 0) {
       setQuestionStartTime(Date.now())
+      
+      // Mark question as attempted
+      const markAttempted = async () => {
+        const currentQuestion = questions[currentQuestionIndex]
+        if (!currentQuestion || !practiceId || !courseId || !apiBaseUrl) return
+
+        try {
+          await fetch(`${apiBaseUrl}/api/submissions/practice/attempt`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...((accessToken || localStorage.getItem('accessToken')) && { 
+                'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` 
+              })
+            },
+            body: JSON.stringify({
+              question_id: currentQuestion.id,
+              question_type: 'MCQ',
+              practice_segment_id: parseInt(practiceId),
+              course_id: parseInt(courseId)
+            })
+          })
+        } catch (error) {
+          console.error('Error marking question as attempted:', error)
+        }
+      }
+      
+      markAttempted()
     }
-  }, [currentQuestionIndex, started])
+  }, [currentQuestionIndex, started, questions, practiceId, courseId, apiBaseUrl])
 
   // Fetch previous submissions when questions are loaded
   useEffect(() => {

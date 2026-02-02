@@ -33,6 +33,36 @@ function PracticeExercise() {
     }
   }, [practiceId])
 
+  // Mark question as attempted when it changes
+  useEffect(() => {
+    const markAttempted = async () => {
+      const currentQuestion = getCurrentQuestion()
+      if (!currentQuestion || !practiceId || !courseId || !apiBaseUrl) return
+
+      try {
+        await fetch(`${apiBaseUrl}/api/submissions/practice/attempt`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+          },
+          body: JSON.stringify({
+            question_id: currentQuestion.id,
+            question_type: currentQuestionType.toUpperCase(),
+            practice_segment_id: parseInt(practiceId),
+            course_id: parseInt(courseId)
+          })
+        })
+      } catch (error) {
+        console.error('Error marking question as attempted:', error)
+      }
+    }
+
+    if (!loading && (programmingQuestions.length > 0 || mcqQuestions.length > 0)) {
+      markAttempted()
+    }
+  }, [currentQuestionIndex, currentQuestionType, loading, practiceId, courseId, apiBaseUrl, programmingQuestions, mcqQuestions])
+
   const fetchPracticeSegment = async () => {
     try {
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.PRACTICE_SEGMENTS.GET(practiceId)}`, {

@@ -442,20 +442,32 @@ function AssessmentTake() {
     } catch (error) {
       console.error('Failed to save progress:', error)
     }
-  }, [apiBaseUrl, mappingId, assessmentData, currentSegmentIndex, currentQuestionIndex, timeRemaining, segmentTimeRemaining, totalTimeWorked])
+  }, [apiBaseUrl, mappingId, assessmentData, currentSegmentIndex, currentQuestionIndex, timeRemaining, segmentTimeRemaining])
 
   // Auto-save progress at regular intervals
+  const saveProgressRef = useRef(saveProgress)
+  useEffect(() => {
+    saveProgressRef.current = saveProgress
+  }, [saveProgress])
+
+  // Trigger immediate save when navigating questions or segments
+  useEffect(() => {
+    if (assessmentData) {
+      saveProgress()
+    }
+  }, [currentQuestionIndex, currentSegmentIndex, assessmentData])
+
   useEffect(() => {
     if (!assessmentData) return
-    
+
     // Save progress every PROGRESS_SAVE_INTERVAL seconds
     progressSaveRef.current = setInterval(() => {
-      saveProgress()
+      saveProgressRef.current()
     }, PROGRESS_SAVE_INTERVAL * 1000)
     
     // Also save on page unload
     const handleBeforeUnload = () => {
-      saveProgress()
+      saveProgressRef.current()
     }
     window.addEventListener('beforeunload', handleBeforeUnload)
     
@@ -465,7 +477,7 @@ function AssessmentTake() {
       }
       window.removeEventListener('beforeunload', handleBeforeUnload)
     }
-  }, [assessmentData, saveProgress])
+  }, [assessmentData])
 
   const handleAutoSubmit = async () => {
     toast.info('Time is up! Auto-submitting your assessment...')
@@ -563,6 +575,7 @@ function AssessmentTake() {
   const handleJumpToQuestion = (index) => {
     // Always allow jumping to any question within the current segment
     if (index >= 0 && index < questions.length) {
+      console.log('jumping to question', index)
       setCurrentQuestionIndex(index)
     }
   }
