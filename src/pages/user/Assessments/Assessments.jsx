@@ -269,9 +269,9 @@ function Assessments() {
                   <span className={`status-badge ${statusConfig.color}`}>
                     {statusConfig.label}
                   </span>
-                  {assessment.attempts_used > 0 && (
+                  {assessment.total_attempts > 1 && (
                     <span className="attempts-badge">
-                      Attempt {assessment.attempts_used}/{assessment.max_attempts}
+                      Attempt {assessment.current_attempt || assessment.attempt_number || 1} of {assessment.total_attempts}
                     </span>
                   )}
                 </div>

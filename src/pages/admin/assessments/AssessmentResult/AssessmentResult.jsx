@@ -94,7 +94,33 @@ function AssessmentResult() {
     )
   }
 
-  const { mapping, segment_progress, proctoring_logs } = reportData
+  const { mapping, segment_progress, proctoring_logs, proctoring_summary } = reportData
+
+  const handleRefreshViolation = async () => {
+    if (!window.confirm('Refresh violation? This will reset the tab switch count and allow the user to continue the assessment.')) return
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/assessment/user-mappings/${mappingId}/refresh-violation`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
+        }
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        alert(`Violation refreshed! User can now continue. (Refresh count: ${data.refresh_violation_count})`)
+        fetchAssessmentResult() // Refresh data
+      } else {
+        const error = await response.json()
+        alert(error.error || 'Failed to refresh violation')
+      }
+    } catch (error) {
+      console.error('Error refreshing violation:', error)
+      alert('Failed to refresh violation')
+    }
+  }
 
   return (
     <div className={styles.progressReportPage}>
@@ -110,6 +136,21 @@ function AssessmentResult() {
           Back
         </button>
         <h1>Assessment Progress Report</h1>
+        {mapping.status === 'DISQUALIFIED' && (
+          <button 
+            className={styles.btnRefreshViolation}
+            onClick={handleRefreshViolation}
+            title="Allow user to continue by refreshing violation count"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
+              <path d="M21 2v6h-6"/>
+              <path d="M3 12a9 9 0 0 1 15-6.7L21 8"/>
+              <path d="M3 22v-6h6"/>
+              <path d="M21 12a9 9 0 0 1-15 6.7L3 16"/>
+            </svg>
+            Refresh Violation
+          </button>
+        )}
       </div>
 
       {/* Student Information */}
@@ -359,6 +400,44 @@ function AssessmentResult() {
         )}
       </div>
 
+      {/* Proctoring Summary */}
+      {proctoring_summary && (
+        <div className={`${styles.infoCard} ${styles.fullWidthCard}`}>
+          <div className={styles.cardIcon}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+          </div>
+          <div className={styles.cardContent}>
+            <h3>Proctoring Summary</h3>
+            <div className={styles.infoGridHorizontal}>
+              <div className={styles.infoItem}>
+                <label>Current Tab Switch Count</label>
+                <span className={proctoring_summary.current_tab_switch_count > 0 ? styles.warningText : ''}>
+                  {proctoring_summary.current_tab_switch_count}
+                </span>
+              </div>
+              <div className={styles.infoItem}>
+                <label>Max Allowed</label>
+                <span>{proctoring_summary.max_tab_switch_allowed === -1 ? 'Unlimited' : proctoring_summary.max_tab_switch_allowed}</span>
+              </div>
+              <div className={styles.infoItem}>
+                <label>Refresh Violation Count</label>
+                <span className={proctoring_summary.refresh_violation_count > 1 ? styles.warningText : ''}>
+                  {proctoring_summary.refresh_violation_count}
+                </span>
+              </div>
+              <div className={styles.infoItem}>
+                <label>Total Violations</label>
+                <span className={proctoring_summary.total_violations > 0 ? styles.errorText : ''}>
+                  {proctoring_summary.total_violations}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Proctoring Logs Section */}
       <div className={styles.topicsSection}>
         <h2>Proctoring Logs</h2>
@@ -370,6 +449,8 @@ function AssessmentResult() {
                   <tr>
                     <th>Timestamp</th>
                     <th>Event Type</th>
+                    <th>Segment</th>
+                    <th>Violation Cycle</th>
                     <th>Details</th>
                   </tr>
                 </thead>
@@ -382,6 +463,8 @@ function AssessmentResult() {
                           {log.event_type}
                         </span>
                       </td>
+                      <td>{log.segment_name || '-'}</td>
+                      <td>{log.violation_cycle || 1}</td>
                       <td>
                         {log.metadata ? (
                           <pre className={styles.logMetadata}>

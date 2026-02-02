@@ -348,6 +348,52 @@ function AssessmentUserMapping() {
     }
   }
 
+  const handleAllowReattempt = async (mapping) => {
+    if (!window.confirm(`Allow ${mapping.user_name || mapping.email} to reattempt this assessment? This will create a new attempt.`)) return
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/assessment/user-mappings/${mapping.id}/allow-reattempt`, {
+        method: 'POST',
+        headers: getAuthHeader()
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to allow reattempt')
+      }
+
+      const data = await response.json()
+      toast.success(`Reattempt allowed! New attempt #${data.attempt_number} created.`)
+      fetchData()
+    } catch (error) {
+      console.error('Error allowing reattempt:', error)
+      toast.error(error.message || 'Failed to allow reattempt')
+    }
+  }
+
+  const handleRefreshViolation = async (mapping) => {
+    if (!window.confirm(`Refresh violation for ${mapping.user_name || mapping.email}? This will reset their tab switch count and allow them to continue the assessment.`)) return
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/assessment/user-mappings/${mapping.id}/refresh-violation`, {
+        method: 'POST',
+        headers: getAuthHeader()
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to refresh violation')
+      }
+
+      const data = await response.json()
+      toast.success(`Violation refreshed! User can now continue (Refresh count: ${data.refresh_violation_count})`)
+      fetchData()
+    } catch (error) {
+      console.error('Error refreshing violation:', error)
+      toast.error(error.message || 'Failed to refresh violation')
+    }
+  }
+
   const handleSendAllInvitations = async () => {
     if (!window.confirm('Send invitations to all pending users?')) return
 
@@ -830,6 +876,32 @@ function AssessmentUserMapping() {
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                             <circle cx="12" cy="12" r="3"/>
+                          </svg>
+                        </button>
+                      )}
+                      {['IN_PROGRESS', 'COMPLETED', 'SUBMITTED', 'DISQUALIFIED'].includes(mapping.status) && (
+                        <button 
+                          className="action-btn reattempt"
+                          onClick={() => handleAllowReattempt(mapping)}
+                          title="Allow Reattempt"
+                        >
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
+                            <polyline points="23 4 23 10 17 10"/>
+                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                          </svg>
+                        </button>
+                      )}
+                      {mapping.status === 'DISQUALIFIED' && (
+                        <button 
+                          className="action-btn refresh-violation"
+                          onClick={() => handleRefreshViolation(mapping)}
+                          title="Refresh Violation - Allow user to continue"
+                        >
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
+                            <path d="M21 2v6h-6"/>
+                            <path d="M3 12a9 9 0 0 1 15-6.7L21 8"/>
+                            <path d="M3 22v-6h6"/>
+                            <path d="M21 12a9 9 0 0 1-15 6.7L3 16"/>
                           </svg>
                         </button>
                       )}

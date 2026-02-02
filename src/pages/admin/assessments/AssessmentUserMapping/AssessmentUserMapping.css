@@ -275,6 +275,8 @@
 
 .action-btn.invite:hover { background: rgba(0, 123, 255, 0.15); color: #007bff; }
 .action-btn.view:hover { background: rgba(108, 92, 231, 0.15); color: #6c5ce7; }
+.action-btn.reattempt:hover { background: rgba(255, 193, 7, 0.15); color: #ffc107; }
+.action-btn.refresh-violation:hover { background: rgba(0, 200, 150, 0.15); color: #00c896; }
 .action-btn.delete:hover { background: rgba(220, 53, 69, 0.15); color: #dc3545; }
 
 /* Modal */
