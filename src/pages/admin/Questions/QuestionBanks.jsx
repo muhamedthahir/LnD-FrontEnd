@@ -4,6 +4,7 @@ import { toast } from 'react-toastify'
 import { useApi } from '../../../contexts/ApiContext'
 import { API_ENDPOINTS } from '../../../constants/constants'
 import Pagination from '../../../components/Pagination/Pagination'
+import Table from '../../../components/Table/Table'
 import './Questions.css'
 
 function QuestionBanks() {
@@ -135,7 +136,7 @@ function QuestionBanks() {
               <p>Create your first question bank to organize questions</p>
             </div>
           ) : (
-            <table className="data-table">
+            <Table>
               <thead>
                 <tr>
                   <th>Name</th>
@@ -183,7 +184,7 @@ function QuestionBanks() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </Table>
           )}
         </div>
 

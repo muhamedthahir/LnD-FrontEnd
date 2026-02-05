@@ -6,6 +6,7 @@ import { useAutoLoadMasterData } from '../../../hooks/useMasterData'
 import { API_ENDPOINTS } from '../../../constants/constants'
 import Pagination from '../../../components/Pagination/Pagination'
 import Dropdown from '../../../components/Dropdown/Dropdown'
+import Table from '../../../components/Table/Table'
 import './Questions.css'
 
 function QuestionList() {
@@ -212,7 +213,7 @@ function QuestionList() {
               <p>Create your first question to get started</p>
             </div>
           ) : (
-            <table className="data-table">
+            <Table>
               <thead>
                 <tr>
                   <th>Code</th>
@@ -272,7 +273,7 @@ function QuestionList() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </Table>
           )}
         </div>
 

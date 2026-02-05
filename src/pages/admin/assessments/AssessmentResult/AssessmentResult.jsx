@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useApi } from '../../../../contexts/ApiContext'
 import { API_ENDPOINTS } from '../../../../constants/constants'
+import Table from '../../../../components/Table/Table'
 import styles from './AssessmentResult.module.css'
 
 function AssessmentResult() {
@@ -444,7 +445,7 @@ function AssessmentResult() {
         <div className={styles.logsContainer}>
           {proctoring_logs && proctoring_logs.length > 0 ? (
             <div className={styles.logsTableWrapper}>
-              <table className={styles.logsTable}>
+              <Table>
                 <thead>
                   <tr>
                     <th>Timestamp</th>
@@ -475,7 +476,7 @@ function AssessmentResult() {
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </Table>
             </div>
           ) : (
             <div className={styles.emptyLogs}>

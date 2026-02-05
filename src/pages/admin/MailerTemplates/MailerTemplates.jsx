@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { toast } from 'react-toastify'
 import Pagination from '../../../components/Pagination/Pagination'
+import Table from '../../../components/Table/Table'
 import { useApi } from '../../../contexts/ApiContext'
 import '../Users/Users.css'
 import './MailerTemplates.css'
@@ -674,7 +675,7 @@ function MailerTemplates() {
                 <p>Get started by creating your first email template.</p>
               </div>
             ) : (
-              <table className="users-table">
+              <Table>
                 <thead>
                   <tr>
                     <th>Name</th>
@@ -761,7 +762,7 @@ function MailerTemplates() {
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </Table>
             )}
           </div>
         </div>

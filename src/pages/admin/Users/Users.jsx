@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useOutletContext, Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import Pagination from '../../../components/Pagination/Pagination'
+import Table from '../../../components/Table/Table'
 import ConfirmModal from '../../../components/ConfirmModal/ConfirmModal'
 import { useApi } from '../../../contexts/ApiContext'
 import { useAutoLoadMasterData } from '../../../hooks/useMasterData'
@@ -38,7 +39,6 @@ function Users() {
   const [selectedUser, setSelectedUser] = useState(null)
   const [userToDelete, setUserToDelete] = useState(null)
   const [deleteError, setDeleteError] = useState(null)
-  const [menuOpen, setMenuOpen] = useState(null)
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -494,49 +494,7 @@ function Users() {
     return collegeAdminsCount <= 1
   }
 
-  const handleMenuEnter = (userId, e) => {
-    e.stopPropagation()
-    const button = e.currentTarget
-    setMenuOpen(userId)
-    
-    // Calculate and set position for fixed positioning with viewport detection
-    requestAnimationFrame(() => {
-      setTimeout(() => {
-        const dropdown = document.querySelector(`.menu-dropdown[data-user-id="${userId}"]`)
-        if (dropdown && button) {
-          const rect = button.getBoundingClientRect()
-          const dropdownHeight = dropdown.offsetHeight || 150
-          const viewportHeight = window.innerHeight
-          const spaceBelow = viewportHeight - rect.bottom
-          const spaceAbove = rect.top
-          const dropdownWidth = dropdown.offsetWidth || 160
-          
-          // Determine if dropdown should appear above or below
-          const shouldShowAbove = spaceBelow < dropdownHeight && spaceAbove > spaceBelow
-          
-          if (shouldShowAbove) {
-            // Position above the button
-            dropdown.style.top = 'auto'
-            dropdown.style.bottom = `${viewportHeight - rect.top + 4}px`
-            dropdown.style.left = `${rect.right - dropdownWidth}px`
-            dropdown.classList.add('menu-dropdown-above')
-          } else {
-            // Position below the button (default)
-            dropdown.style.top = `${rect.bottom + 4}px`
-            dropdown.style.bottom = 'auto'
-            dropdown.style.left = `${rect.right - dropdownWidth}px`
-            dropdown.classList.remove('menu-dropdown-above')
-          }
-        }
-      }, 10)
-    })
-  }
-
-  const handleMenuLeave = () => {
-    setMenuOpen(null)
-  }
-
-  // Removed click outside handler since we're using hover now
+  // Removed menu dropdown handlers (actions now inline)
 
   return (
     <div className="user-admin-page">
@@ -760,7 +718,7 @@ function Users() {
                 <p>Get started by creating your first user or uploading users in bulk.</p>
               </div>
             ) : (
-              <table className="users-table">
+              <Table>
                 <thead>
                   <tr>
                     <th>Name</th>
@@ -793,70 +751,42 @@ function Users() {
                       </td>
                       <td>{new Date(u.created_at).toLocaleDateString()}</td>
                       <td>
-                        <div 
-                          className="menu-container"
-                          onMouseEnter={(e) => handleMenuEnter(u.id, e)}
-                          onMouseLeave={handleMenuLeave}
+                        <button
+                          className="action-btn delete"
+                          type="button"
+                          onClick={() => handleDeleteClick(u.id)}
+                          disabled={u.role === 'primary_admin' || u.id === user?.id}
+                          title={
+                            u.role === 'primary_admin' || u.id === user?.id
+                              ? 'Cannot delete this user'
+                              : 'Delete User'
+                          }
                         >
-                          <button
-                            className="menu-button"
-                            type="button"
-                          >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <circle cx="12" cy="5" r="1"/>
-                              <circle cx="12" cy="12" r="1"/>
-                              <circle cx="12" cy="19" r="1"/>
-                            </svg>
-                          </button>
-                          {menuOpen === u.id && (
-                            <div 
-                              className="menu-dropdown" 
-                              data-user-id={u.id}
-                              onMouseEnter={(e) => e.stopPropagation()}
-                            >
-                              <button onClick={() => handleEdit(u)}>Edit Details</button>
-                              <button onClick={() => {
-                                setSelectedUser(u)
-                                setShowResetModal(true)
-                                setMenuOpen(null)
-                              }}>Reset Password</button>
-                              {/* Show Resend OTP only for pending users */}
-                              {u.status === 'pending' && (
-                                <button onClick={() => handleResendOTP(u.id)} className="resend-otp-option">
-                                  Resend OTP
-                                </button>
-                              )}
-                              {/* Don't show delete option for primary admins or current user */}
-                              {u.role !== 'primary_admin' && u.id !== user?.id && (
-                                <button onClick={() => handleDeleteClick(u.id)} className="delete-option">
-                                  Delete User
-                                </button>
-                              )}
-                            </div>
-                          )}
-                        </div>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                          </svg>
+                        </button>
                       </td>
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </Table>
             )}
           </div>
+          {!loading && totalCount > 0 && (
+            <div className="pagination-wrapper">
+              <Pagination
+                currentPage={currentPage}
+                pageSize={pageSize}
+                totalCount={totalCount}
+                itemName="users"
+                onPageChange={setCurrentPage}
+                onPageSizeChange={setPageSize}
+              />
+            </div>
+          )}
         </div>
-        
-        {/* Pagination Controls - Fixed at bottom, always visible */}
-        {!loading && totalCount > 0 && (
-          <div className="pagination-wrapper">
-            <Pagination
-              currentPage={currentPage}
-              pageSize={pageSize}
-              totalCount={totalCount}
-              itemName="users"
-              onPageChange={setCurrentPage}
-              onPageSizeChange={setPageSize}
-            />
-          </div>
-        )}
       </div>
 
       {showEditModal && selectedUser && (

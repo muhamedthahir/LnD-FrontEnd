@@ -3,6 +3,7 @@ import { useOutletContext } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import Pagination from '../../../components/Pagination/Pagination'
 import ConfirmModal from '../../../components/ConfirmModal/ConfirmModal'
+import Table from '../../../components/Table/Table'
 import { useApi } from '../../../contexts/ApiContext'
 import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES, VALIDATION_MESSAGES } from '../../../constants/constants'
 import './Groups.css'
@@ -964,7 +965,7 @@ function Groups() {
                 <p>{filters.college || filters.groupName ? 'Try adjusting your filters or create a new group.' : 'Get started by creating your first student group.'}</p>
               </div>
             ) : (
-              <table className="groups-table">
+              <Table>
                 <thead>
                   <tr>
                     <th>Name</th>
@@ -1008,24 +1009,22 @@ function Groups() {
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </Table>
             )}
           </div>
+          {!loading && groups.length > 0 && (
+            <div className="pagination-wrapper">
+              <Pagination
+                currentPage={currentPage}
+                pageSize={pageSize}
+                totalCount={groups.length}
+                itemName="groups"
+                onPageChange={setCurrentPage}
+                onPageSizeChange={setPageSize}
+              />
+            </div>
+          )}
         </div>
-
-        {/* Pagination Controls - Fixed at bottom, always visible */}
-        {!loading && groups.length > 0 && (
-          <div className="pagination-wrapper">
-            <Pagination
-              currentPage={currentPage}
-              pageSize={pageSize}
-              totalCount={groups.length}
-              itemName="groups"
-              onPageChange={setCurrentPage}
-              onPageSizeChange={setPageSize}
-            />
-          </div>
-        )}
       </div>
 
       <ConfirmModal

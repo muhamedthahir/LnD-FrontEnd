@@ -4,6 +4,7 @@ import { toast } from 'react-toastify'
 import { useApi } from '../../../../../contexts/ApiContext'
 import { API_ENDPOINTS } from '../../../../../constants/constants'
 import Button from '../../../../../components/Button/Button'
+import Table from '../../../../../components/Table/Table'
 import './AdministrationDetail.css'
 
 function AdministrationDetail() {
@@ -1238,7 +1239,7 @@ function AdministrationDetail() {
             ) : (
               <>
               <div className="enrolled-table-wrapper">
-                <table className="enrolled-table">
+                <Table>
                   <thead>
                     <tr>
                       <th>User Name</th>
@@ -1313,7 +1314,7 @@ function AdministrationDetail() {
                       </tr>
                     ))}
                   </tbody>
-                </table>
+                </Table>
               </div>
               <div className="enrolled-pagination">
                 <div className="pagination-info">

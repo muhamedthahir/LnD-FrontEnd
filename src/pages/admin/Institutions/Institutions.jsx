@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useDispatch } from 'react-redux'
 import { toast } from 'react-toastify'
 import Pagination from '../../../components/Pagination/Pagination'
+import Table from '../../../components/Table/Table'
 import { useApi } from '../../../contexts/ApiContext'
 import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES, VALIDATION_MESSAGES } from '../../../constants/constants'
 import { addInstitution, updateInstitution, invalidateInstitutions } from '../../../store/masterDataSlice'
@@ -366,7 +367,7 @@ function Institutions() {
                 <p>Get started by creating your first institution or college.</p>
               </div>
             ) : (
-              <table className="users-table">
+              <Table>
                 <thead>
                   <tr>
                     <th>Name</th>
@@ -393,24 +394,22 @@ function Institutions() {
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </Table>
             )}
           </div>
+          {!loading && totalCount > 0 && (
+            <div className="pagination-wrapper">
+              <Pagination
+                currentPage={currentPage}
+                pageSize={pageSize}
+                totalCount={totalCount}
+                itemName="institutions"
+                onPageChange={setCurrentPage}
+                onPageSizeChange={setPageSize}
+              />
+            </div>
+          )}
         </div>
-        
-        {/* Pagination Controls - Fixed at bottom, always visible */}
-        {!loading && totalCount > 0 && (
-          <div className="pagination-wrapper">
-            <Pagination
-              currentPage={currentPage}
-              pageSize={pageSize}
-              totalCount={totalCount}
-              itemName="institutions"
-              onPageChange={setCurrentPage}
-              onPageSizeChange={setPageSize}
-            />
-          </div>
-        )}
       </div>
 
       {showViewModal && selectedInstitution && (

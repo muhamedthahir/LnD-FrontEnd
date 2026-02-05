@@ -6,6 +6,7 @@ import { toast } from 'react-toastify'
 import Button from '../../../../components/Button/Button'
 import Toggle from '../../../../components/Toggle/Toggle'
 import ConfirmModal from '../../../../components/ConfirmModal/ConfirmModal'
+import Table from '../../../../components/Table/Table'
 import styles from './AssessmentEdit.module.css'
 
 function AssessmentEdit() {
@@ -1364,7 +1365,7 @@ function AssessmentEdit() {
                         {/* Combined Questions Table */}
                         {((segment.programming_questions?.length || 0) + (segment.mcq_questions?.length || 0) > 0) ? (
                           <div className={styles.questionsTableWrapper}>
-                            <table className={styles.segmentQuestionsTable}>
+                            <Table className={styles.segmentQuestionsTable}>
                               <thead>
                                 <tr>
                                   <th style={{width: '50px'}}>#</th>
@@ -1531,7 +1532,7 @@ function AssessmentEdit() {
                                   )
                                 })}
                               </tbody>
-                            </table>
+                            </Table>
                           </div>
                         ) : (
                           <p className={styles.noQuestions}>No questions added yet. Click "Add Question" to get started.</p>
@@ -1692,7 +1693,7 @@ function AssessmentEdit() {
               ) : (
                 <>
                   <div className={styles.questionsTableContainer}>
-                    <table className={styles.questionsTable}>
+                    <Table className={styles.questionsTable}>
                       <thead>
                         <tr>
                           <th style={{width: '40px'}}></th>
@@ -1743,7 +1744,7 @@ function AssessmentEdit() {
                           </tr>
                         ))}
                       </tbody>
-                    </table>
+                    </Table>
                   </div>
                   <div className={styles.modalActions}>
                     <span className={styles.selectionCount}>{selectedQuestions.length} selected</span>

@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useOutletContext, useNavigate, Link } from 'react-router-dom'
 import Button from '../../../../components/Button/Button'
 import Pagination from '../../../../components/Pagination/Pagination'
+import Table from '../../../../components/Table/Table'
 import { useApi } from '../../../../contexts/ApiContext'
 import { API_ENDPOINTS } from '../../../../constants/constants'
 import './CourseAdministrations.css'
@@ -684,7 +685,7 @@ function CourseAdministrations() {
               </div>
             ) : (
               <div className="table-wrapper">
-                <table className="groups-table">
+                <Table>
                   <thead>
                     <tr>
                       <th>ID</th>
@@ -745,20 +746,19 @@ function CourseAdministrations() {
                       </tr>
                     ))}
                   </tbody>
-                </table>
-              </div>
-            )}
-
-            {totalCount > 0 && (
-              <div className="pagination-wrapper">
-                <Pagination
-                  currentPage={currentPage}
-                  pageSize={pageSize}
-                  totalCount={totalCount}
-                  itemName="administrations"
-                  onPageChange={setCurrentPage}
-                  onPageSizeChange={setPageSize}
-                />
+                </Table>
+                {totalCount > 0 && (
+                  <div className="pagination-wrapper">
+                    <Pagination
+                      currentPage={currentPage}
+                      pageSize={pageSize}
+                      totalCount={totalCount}
+                      itemName="administrations"
+                      onPageChange={setCurrentPage}
+                      onPageSizeChange={setPageSize}
+                    />
+                  </div>
+                )}
               </div>
             )}
           </div>

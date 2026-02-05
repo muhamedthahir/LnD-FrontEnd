@@ -277,9 +277,6 @@
   margin: 0 var(--spacing-lg);
   border-top: var(--border-sm) solid var(--border-color);
   background: var(--bg-card);
-  position: sticky;
-  bottom: 0;
-  z-index: 5;
 }
 
 .pagination-wrapper > * {

@@ -4,6 +4,7 @@ import { useApi } from '../../../../contexts/ApiContext'
 import { API_ENDPOINTS } from '../../../../constants/constants'
 import { toast } from 'react-toastify'
 import Button from '../../../../components/Button/Button'
+import Table from '../../../../components/Table/Table'
 import './AssessmentUserMapping.css'
 
 function AssessmentUserMapping() {
@@ -783,7 +784,7 @@ function AssessmentUserMapping() {
         </div>
       ) : (
         <div className="users-table">
-          <table>
+          <Table>
             <thead>
               <tr>
                 <th>User</th>
@@ -920,7 +921,7 @@ function AssessmentUserMapping() {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </Table>
         </div>
       )}
     </div>

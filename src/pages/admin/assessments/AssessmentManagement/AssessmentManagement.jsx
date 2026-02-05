@@ -4,6 +4,7 @@ import { useApi } from '../../../../contexts/ApiContext'
 import { toast } from 'react-toastify'
 import Button from '../../../../components/Button/Button'
 import Pagination from '../../../../components/Pagination/Pagination'
+import Table from '../../../../components/Table/Table'
 import './AssessmentManagement.css'
 
 function AssessmentManagement() {
@@ -195,7 +196,7 @@ function AssessmentManagement() {
       ) : (
         <>
           <div className="assessments-table-container">
-            <table className="assessments-table">
+            <Table>
               <thead>
                 <tr>
                   <th>Assessment</th>
@@ -307,7 +308,7 @@ function AssessmentManagement() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </Table>
           </div>
 
           {totalCount > pageSize && (
