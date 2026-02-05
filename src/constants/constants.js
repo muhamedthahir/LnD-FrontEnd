@@ -119,6 +119,11 @@ export const API_ENDPOINTS = {
     BULK_MCQ_UPLOAD: '/api/questions/bulk-upload/mcq'
   },
 
+  // Assessments
+  ASSESSMENTS: {
+    ADMIN_REPORT: (adminId) => `/api/assessment/administrators/${adminId}/report`
+  },
+
   // Test Cases
   TEST_CASES: {
     LIST: (programmingQuestionId) => `/api/test-cases/programming-question/${programmingQuestionId}`,

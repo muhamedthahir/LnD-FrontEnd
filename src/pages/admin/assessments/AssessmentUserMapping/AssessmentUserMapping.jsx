@@ -313,6 +313,36 @@ function AssessmentUserMapping() {
     }
   }
 
+  const handleDownloadReport = async () => {
+    if (!adminId) return
+    try {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.ASSESSMENTS.ADMIN_REPORT(adminId)}`, {
+        headers: {
+          'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
+        }
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        toast.error(errorData.error || 'Failed to download report')
+        return
+      }
+
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `assessment-report-${adminId}.xlsx`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+    } catch (error) {
+      console.error('Error downloading report:', error)
+      toast.error('Failed to download report')
+    }
+  }
+
   const handleRemoveUserMapping = async (mappingId) => {
     if (!window.confirm('Remove this user from the assessment?')) return
 
@@ -483,6 +513,9 @@ function AssessmentUserMapping() {
         <div className="header-actions">
           <Button variant="outline" onClick={() => setShowAddSection(!showAddSection)}>
             {showAddSection ? 'Cancel' : 'Add Users'}
+          </Button>
+          <Button variant="secondary" onClick={handleDownloadReport}>
+            Download Report
           </Button>
           <Button variant="primary" onClick={handleSendAllInvitations}>
             Send All Invitations
