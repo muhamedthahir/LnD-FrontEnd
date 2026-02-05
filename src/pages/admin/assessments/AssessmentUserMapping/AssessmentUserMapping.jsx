@@ -5,6 +5,7 @@ import { API_ENDPOINTS } from '../../../../constants/constants'
 import { toast } from 'react-toastify'
 import Button from '../../../../components/Button/Button'
 import Table from '../../../../components/Table/Table'
+import ConfirmModal from '../../../../components/ConfirmModal/ConfirmModal'
 import './AssessmentUserMapping.css'
 
 function AssessmentUserMapping() {
@@ -36,6 +37,12 @@ function AssessmentUserMapping() {
   const [statusFilter, setStatusFilter] = useState('all')
   const [showAddSection, setShowAddSection] = useState(false)
   const [addingUsers, setAddingUsers] = useState(false)
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    type: null,
+    mapping: null
+  })
+  const [confirmLoading, setConfirmLoading] = useState(false)
 
   const getAuthHeader = () => ({
     'Content-Type': 'application/json',
@@ -379,9 +386,7 @@ function AssessmentUserMapping() {
     }
   }
 
-  const handleAllowReattempt = async (mapping) => {
-    if (!window.confirm(`Allow ${mapping.user_name || mapping.email} to reattempt this assessment? This will create a new attempt.`)) return
-
+  const allowReattempt = async (mapping) => {
     try {
       const response = await fetch(`${apiBaseUrl}/api/assessment/user-mappings/${mapping.id}/allow-reattempt`, {
         method: 'POST',
@@ -402,9 +407,7 @@ function AssessmentUserMapping() {
     }
   }
 
-  const handleRefreshViolation = async (mapping) => {
-    if (!window.confirm(`Refresh violation for ${mapping.user_name || mapping.email}? This will reset their tab switch count and allow them to continue the assessment.`)) return
-
+  const refreshViolation = async (mapping) => {
     try {
       const response = await fetch(`${apiBaseUrl}/api/assessment/user-mappings/${mapping.id}/refresh-violation`, {
         method: 'POST',
@@ -422,6 +425,30 @@ function AssessmentUserMapping() {
     } catch (error) {
       console.error('Error refreshing violation:', error)
       toast.error(error.message || 'Failed to refresh violation')
+    }
+  }
+
+  const openConfirmModal = (type, mapping) => {
+    setConfirmModal({ isOpen: true, type, mapping })
+  }
+
+  const closeConfirmModal = () => {
+    if (confirmLoading) return
+    setConfirmModal({ isOpen: false, type: null, mapping: null })
+  }
+
+  const handleConfirmAction = async () => {
+    if (!confirmModal.mapping) return
+    setConfirmLoading(true)
+    try {
+      if (confirmModal.type === 'reattempt') {
+        await allowReattempt(confirmModal.mapping)
+      } else if (confirmModal.type === 'refresh') {
+        await refreshViolation(confirmModal.mapping)
+      }
+    } finally {
+      setConfirmLoading(false)
+      closeConfirmModal()
     }
   }
 
@@ -484,6 +511,53 @@ function AssessmentUserMapping() {
       (user.username && user.username.toLowerCase().includes(userSearch.toLowerCase()))
     )
   }, [availableUsers, userSearch])
+
+  const confirmConfig = useMemo(() => {
+    const name = confirmModal.mapping?.user_name || confirmModal.mapping?.user_email || 'this user'
+    if (confirmModal.type === 'reattempt') {
+      return {
+        title: 'Allow Reattempt',
+        message: (
+          <div className="warning-message">
+            <span className="warning-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+            </span>
+            <div>
+              <div className="warning-title">Warning</div>
+              <p>Allow {name} to reattempt this assessment? This will create a new attempt.</p>
+            </div>
+          </div>
+        ),
+        confirmText: 'Proceed'
+      }
+    }
+    if (confirmModal.type === 'refresh') {
+      return {
+        title: 'Refresh Violation',
+        message: (
+          <div className="warning-message">
+            <span className="warning-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+            </span>
+            <div>
+              <div className="warning-title">Warning</div>
+              <p>Refresh violation for {name}? This will allow them to continue the assessment.</p>
+            </div>
+          </div>
+        ),
+        confirmText: 'Proceed'
+      }
+    }
+    return { title: '', message: '', confirmText: 'Proceed' }
+  }, [confirmModal.mapping, confirmModal.type])
 
   if (loading) {
     return (
@@ -916,7 +990,7 @@ function AssessmentUserMapping() {
                       {['IN_PROGRESS', 'COMPLETED', 'SUBMITTED', 'DISQUALIFIED'].includes(mapping.status) && (
                         <button 
                           className="action-btn reattempt"
-                          onClick={() => handleAllowReattempt(mapping)}
+                          onClick={() => openConfirmModal('reattempt', mapping)}
                           title="Allow Reattempt"
                         >
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
@@ -928,7 +1002,7 @@ function AssessmentUserMapping() {
                       {mapping.status === 'DISQUALIFIED' && (
                         <button 
                           className="action-btn refresh-violation"
-                          onClick={() => handleRefreshViolation(mapping)}
+                          onClick={() => openConfirmModal('refresh', mapping)}
                           title="Refresh Violation - Allow user to continue"
                         >
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
@@ -957,6 +1031,17 @@ function AssessmentUserMapping() {
           </Table>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={closeConfirmModal}
+        onConfirm={handleConfirmAction}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        confirmText={confirmConfig.confirmText}
+        cancelText="Cancel"
+        disabled={confirmLoading}
+      />
     </div>
   )
 }

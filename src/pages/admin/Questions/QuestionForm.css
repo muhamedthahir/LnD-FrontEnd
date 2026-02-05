@@ -290,7 +290,6 @@ textarea.form-input {
   background: var(--bg-card);
   border: var(--border-sm) solid var(--border-color);
   border-radius: var(--radius-lg);
-  position: sticky;
   bottom: var(--spacing-lg);
   margin-top: var(--spacing-lg);
 }

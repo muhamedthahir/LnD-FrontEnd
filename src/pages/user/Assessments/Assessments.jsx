@@ -134,8 +134,15 @@ function Assessments() {
     }
     
     if (assessment.status === 'IN_PROGRESS') {
-      // Always open in secure popup for resume
-      openAssessmentInPopup(mappingId, true)
+      // Increment resume count, then open in secure popup
+      fetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/resume`, {
+        method: 'POST',
+        headers: getAuthHeader()
+      }).catch((error) => {
+        console.error('Error updating resume count:', error)
+      }).finally(() => {
+        openAssessmentInPopup(mappingId, true)
+      })
     } else {
       // Go to start page first (which will then open popup after agreement)
       navigate(`/user/assessments/${mappingId}/start`)

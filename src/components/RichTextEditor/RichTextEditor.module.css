@@ -3,6 +3,14 @@
   border-radius: var(--radius-md);
   overflow: hidden;
   background: var(--bg-input);
+  .quill {
+    display: flex;
+    flex-direction: column;
+    min-height: 250px;
+  }
+  .ql-container {
+    flex: 1;
+  }
 }
 
 .editor.disabled {
