@@ -38,6 +38,7 @@ function ConfigurationCreate() {
   // Dropdowns
   const [categories, setCategories] = useState([])
   const [mailerTemplates, setMailerTemplates] = useState([])
+  const [questionBanks, setQuestionBanks] = useState([])
   
   // Segments with question counts
   const [segments, setSegments] = useState([])
@@ -129,15 +130,16 @@ function ConfigurationCreate() {
         setLoading(true)
         
         // Fetch assessment
+        let assessmentData = null
         const assessmentRes = await fetch(`${apiBaseUrl}/api/assessment/assessments/${assessmentId}`, {
           headers: getAuthHeader()
         })
         if (assessmentRes.ok) {
-          const data = await assessmentRes.json()
-          setAssessment(data)
+          assessmentData = await assessmentRes.json()
+          setAssessment(assessmentData)
           setFormData(prev => ({
             ...prev,
-            timing: { ...prev.timing, total_time: data.total_duration || 0 }
+            timing: { ...prev.timing, total_time: assessmentData.total_duration || 0 }
           }))
         }
 
@@ -182,7 +184,7 @@ function ConfigurationCreate() {
             const segmentQuestions = { ...prev.question.segment_questions || {} }
             for (const segment of (segmentsData.segments || segmentsData || [])) {
               if (!segmentQuestions[segment.id]) {
-                segmentQuestions[segment.id] = { total: 0, easy: 0, medium: 0, hard: 0 }
+                segmentQuestions[segment.id] = { total: 0, easy: 0, medium: 0, hard: 0, question_bank_id: '' }
               }
             }
             return {
@@ -211,8 +213,11 @@ function ConfigurationCreate() {
                       acc.easy = (acc.easy || 0) + (c.easy_count || 0)
                       acc.medium = (acc.medium || 0) + (c.medium_count || 0)
                       acc.hard = (acc.hard || 0) + (c.hard_count || 0)
+                      if (!acc.question_bank_id && c.question_bank_id) {
+                        acc.question_bank_id = c.question_bank_id
+                      }
                       return acc
-                    }, { total: 0, easy: 0, medium: 0, hard: 0 })
+                    }, { total: 0, easy: 0, medium: 0, hard: 0, question_bank_id: '' })
                     segmentQuestionsFromCriteria[segment.id] = aggregated
                   }
                 }
@@ -244,6 +249,20 @@ function ConfigurationCreate() {
         if (catRes.ok) {
           const data = await catRes.json()
           setCategories(data.categories || data || [])
+        }
+
+        // Fetch question banks (filter by assessment institution if available)
+        const institutionId = assessmentData?.institution_id || null
+        const bankParams = new URLSearchParams({ limit: '200' })
+        if (institutionId) {
+          bankParams.append('institution_id', institutionId)
+        }
+        const bankRes = await fetch(`${apiBaseUrl}/api/question-banks?${bankParams.toString()}`, {
+          headers: getAuthHeader()
+        })
+        if (bankRes.ok) {
+          const data = await bankRes.json()
+          setQuestionBanks(data.questionBanks || data || [])
         }
 
         // Fetch mailer templates
@@ -1046,7 +1065,7 @@ function ConfigurationCreate() {
                     ) : (
                       segments.map(segment => {
                         const counts = segmentQuestionCounts[segment.id] || { total: 0, easy: 0, medium: 0, hard: 0 }
-                        const segmentQ = formData.question.segment_questions?.[segment.id] || { total: 0, easy: 0, medium: 0, hard: 0 }
+                        const segmentQ = formData.question.segment_questions?.[segment.id] || { total: 0, easy: 0, medium: 0, hard: 0, question_bank_id: '' }
                         
                         return (
                           <div key={segment.id} style={{ marginBottom: '24px', padding: '16px', background: 'var(--bg-primary)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
@@ -1055,6 +1074,38 @@ function ConfigurationCreate() {
                               Available: <strong>{counts.total}</strong> total questions ({counts.easy} Easy, {counts.medium} Medium, {counts.hard} Hard)
                             </p>
                             
+                            <div className="form-row" style={{ marginBottom: '16px' }}>
+                              <div className="form-group">
+                                <label>Question Bank</label>
+                                <select
+                                  value={segmentQ.question_bank_id || ''}
+                                  onChange={(e) => {
+                                    setFormData({
+                                      ...formData,
+                                      question: {
+                                        ...formData.question,
+                                        segment_questions: {
+                                          ...formData.question.segment_questions,
+                                          [segment.id]: {
+                                            ...segmentQ,
+                                            question_bank_id: e.target.value || ''
+                                          }
+                                        }
+                                      }
+                                    })
+                                  }}
+                                >
+                                  <option value="">All Question Banks</option>
+                                  {questionBanks.map((bank) => (
+                                    <option key={bank.id} value={bank.id}>
+                                      {bank.name}
+                                    </option>
+                                  ))}
+                                </select>
+                                <span className="help-text">Choose a bank to restrict random fetch</span>
+                              </div>
+                            </div>
+
                             <div className="form-row" style={{ marginBottom: '16px' }}>
                               <div className="form-group">
                                 <label>Total Questions Needed</label>
