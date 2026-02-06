@@ -23,10 +23,11 @@ function VideoPlayer({
   const [loading, setLoading] = useState(true)
   const [duration, setDuration] = useState(0)
   const [currentTime, setCurrentTime] = useState(0)
-  const [progressPercent, setProgressPercent] = useState(initialProgress)
   const [isComplete, setIsComplete] = useState(initialProgress >= thresholdValue)
   const videoRef = useRef(null)
   const lastReportedProgressRef = useRef(0)
+  const lastReportedTimeRef = useRef(0)
+  const progressPercentRef = useRef(initialProgress)
 
   // Check if URL is an embedded video (YouTube, Vimeo, etc.)
   const isEmbedded = url && (
@@ -70,11 +71,15 @@ function VideoPlayer({
     if (total > 0 && !isNaN(total)) {
       const progress = Math.round((current / total) * 100)
       setCurrentTime(current)
-      setProgressPercent(progress)
+      progressPercentRef.current = progress
       
-      // Report progress every 5% change or every 10 seconds
-      if (Math.abs(progress - lastReportedProgressRef.current) >= 5) {
+      // Report progress every 5% change or every 5 seconds
+      const now = Date.now()
+      const shouldReportByPercent = Math.abs(progress - lastReportedProgressRef.current) >= 5
+      const shouldReportByTime = now - lastReportedTimeRef.current >= 5000
+      if (shouldReportByPercent || shouldReportByTime) {
         lastReportedProgressRef.current = progress
+        lastReportedTimeRef.current = now
         if (onProgressUpdate) {
           onProgressUpdate(current, total, progress)
         }
@@ -123,6 +128,11 @@ function VideoPlayer({
     }
   }, [handleTimeUpdate, handleLoadedMetadata, onProgressUpdate, onComplete, thresholdValue, isComplete, isEmbedded])
 
+  useEffect(() => {
+    progressPercentRef.current = initialProgress
+    lastReportedProgressRef.current = initialProgress
+  }, [initialProgress])
+
   const handleError = (e) => {
     console.error('Video error:', e, url)
     setError(true)
@@ -141,6 +151,10 @@ function VideoPlayer({
     const secs = Math.floor(seconds % 60)
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
+
+  const progressPercent = duration > 0
+    ? Math.round((currentTime / duration) * 100)
+    : Math.round(progressPercentRef.current)
 
   if (!url) {
     return (
