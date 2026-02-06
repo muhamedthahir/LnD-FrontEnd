@@ -4,6 +4,7 @@ import { ApiProvider } from './contexts/ApiContext'
 import Layout from './components/Layout/Layout'
 import SecureLayout from './components/SecureLayout/SecureLayout'
 import Login from './pages/Login/Login'
+import ResetPassword from './pages/ResetPassword/ResetPassword'
 import Dashboard from './pages/user/Dashboard/Dashboard'
 import UserCourses from './pages/user/Courses/UserCourses/UserCourses'
 import CourseOverview from './pages/user/Courses/CourseOverview/CourseOverview'
@@ -60,6 +61,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/codeeditor" element={<CodeEditorLayout />} />
         
         {/* Secure Assessment Routes - No sidebar/header */}

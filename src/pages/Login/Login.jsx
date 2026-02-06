@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import PasswordSetup from '../../components/PasswordSetup/PasswordSetup'
+import InputModal from '../../components/InputModal/InputModal'
 import { useApi } from '../../contexts/ApiContext'
 import { useMasterData } from '../../hooks/useMasterData'
 import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES } from '../../constants/constants'
@@ -21,6 +22,7 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false)
   const [requiresPasswordSetup, setRequiresPasswordSetup] = useState(false)
   const [passwordSetupData, setPasswordSetupData] = useState(null)
+  const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false)
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -138,6 +140,33 @@ function Login() {
       })
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleForgotPassword = async (email) => {
+    if (!validateEmail(email)) {
+      toast.error('Please enter a valid email address')
+      return
+    }
+
+    try {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.AUTH.FORGOT_PASSWORD}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email })
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data?.error || 'Failed to send reset email')
+      }
+
+      toast.success('If the email exists, a reset link has been sent.')
+    } catch (error) {
+      console.error('Forgot password error:', error)
+      toast.error(error.message || 'Failed to send reset email')
     }
   }
 
@@ -361,7 +390,13 @@ function Login() {
                   <span className={styles.checkmark}></span>
                   Remember me
                 </label>
-                <a href="#" className={styles.forgotPassword}>Forgot password?</a>
+                <button
+                  type="button"
+                  className={styles.forgotPassword}
+                  onClick={() => setShowForgotPasswordModal(true)}
+                >
+                  Forgot password?
+                </button>
               </div>
 
               <button 
@@ -383,6 +418,18 @@ function Login() {
           </div>
         </div>
       </div>
+      <InputModal
+        isOpen={showForgotPasswordModal}
+        onClose={() => setShowForgotPasswordModal(false)}
+        onConfirm={handleForgotPassword}
+        title="Forgot Password"
+        label="Email Address"
+        placeholder="Enter your email"
+        initialValue={formData.email}
+        confirmText="Send Reset Link"
+        cancelText="Cancel"
+        type="email"
+      />
     </div>
   )
 }
