@@ -202,7 +202,7 @@ function Login() {
               </div>
               <h1 className={styles.brandName}>
                 <span className={styles.brandCode}>&lt;</span>
-                Success Meets
+                Skillvantix
                 <span className={styles.brandCode}>/&gt;</span>
               </h1>
             </div>
