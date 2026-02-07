@@ -170,10 +170,14 @@ function LessonModal({ isOpen, onClose, onAdd, sectionId, editingLesson = null, 
           toast.error('Missing required field: Please enter a video URL')
           return
         }
+        // Normalize: extract URL if user pasted iframe HTML (e.g. from YouTube Embed)
+        let savedUrl = videoUrl.trim()
+        const iframeMatch = savedUrl.match(/<iframe[^>]+src=["']([^"']+)["']/i)
+        if (iframeMatch) savedUrl = iframeMatch[1].trim()
         content = {
           type: 'video',
           source: 'embedded',
-          url: videoUrl
+          url: savedUrl
         }
       } else {
         // When editing, existingMediaUrl is valid; otherwise require videoFile
@@ -787,13 +791,16 @@ function LessonModal({ isOpen, onClose, onAdd, sectionId, editingLesson = null, 
 
                 {videoEmbedded ? (
                   <div className={styles.formGroup}>
-                    <label>Embedded URL (YouTube/Vimeo) <span className={styles.required}>*</span></label>
+                    <label>Video URL (YouTube / Vimeo) <span className={styles.required}>*</span></label>
                     <input
                       type="url"
                       value={videoUrl}
                       onChange={(e) => setVideoUrl(e.target.value)}
-                      placeholder="https://www.youtube.com/embed/..."
+                      placeholder="https://www.youtube.com/watch?v=VIDEO_ID"
                     />
+                    <p className={styles.helpText}>
+                      Use the normal link (e.g. https://www.youtube.com/watch?v=...) or the embed link — both work.
+                    </p>
                   </div>
                 ) : (
                   <div className={styles.mediaUpload}>

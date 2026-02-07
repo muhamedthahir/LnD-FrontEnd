@@ -430,8 +430,7 @@ function CourseEdit() {
               <Button 
                 variant="primary" 
                 onClick={() => setEditMode(true)}
-                disabled={true}
-                title="Cannot edit published courses"
+                title="Edit course to make changes, then save to update"
               >
                 Edit Course
               </Button>
@@ -888,8 +887,7 @@ function CourseEdit() {
                 <Button 
                   variant="primary" 
                   onClick={() => setEditMode(true)}
-                  disabled={isPublished}
-                  title={isPublished ? "Cannot edit published courses" : "Edit course details"}
+                  title={isPublished ? "Edit course to make changes, then save to update" : "Edit course details"}
                 >
                   Edit Course
                 </Button>

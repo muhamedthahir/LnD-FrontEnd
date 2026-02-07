@@ -121,6 +121,13 @@
   box-shadow: 0 0 0 var(--spacing-xs) var(--accent-subtle);
 }
 
+.helpText {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--text-muted);
+  margin: var(--spacing-xs) 0 0;
+}
+
 .radioGroup {
   display: flex;
   flex-direction: row;

@@ -29,35 +29,60 @@ function VideoPlayer({
   const lastReportedTimeRef = useRef(0)
   const progressPercentRef = useRef(initialProgress)
 
+  // Extract clean URL if user pasted iframe HTML or messy string
+  const normalizeVideoUrl = (raw) => {
+    if (!raw || typeof raw !== 'string') return ''
+    const trimmed = raw.trim()
+    // Extract src from iframe HTML (e.g. user pasted Share > Embed from YouTube)
+    const iframeMatch = trimmed.match(/<iframe[^>]+src=["']([^"']+)["']/i)
+    if (iframeMatch) return iframeMatch[1].trim()
+    // Already a URL
+    return trimmed
+  }
+
+  const cleanUrl = normalizeVideoUrl(url)
+
   // Check if URL is an embedded video (YouTube, Vimeo, etc.)
-  const isEmbedded = url && (
-    url.includes('youtube.com') || 
-    url.includes('youtu.be') || 
-    url.includes('vimeo.com') ||
-    url.includes('dailymotion.com')
+  const isEmbedded = cleanUrl && (
+    cleanUrl.includes('youtube.com') ||
+    cleanUrl.includes('youtu.be') ||
+    cleanUrl.includes('vimeo.com') ||
+    cleanUrl.includes('dailymotion.com')
   )
 
-  // Convert YouTube URL to embed URL
+  // Convert to embeddable URL (accepts regular link or embed link)
   const getEmbedUrl = (videoUrl) => {
-    if (!videoUrl) return ''
-    
-    // YouTube
-    if (videoUrl.includes('youtube.com/watch')) {
-      const videoId = new URL(videoUrl).searchParams.get('v')
-      return `https://www.youtube.com/embed/${videoId}`
+    const u = normalizeVideoUrl(videoUrl)
+    if (!u) return ''
+
+    // YouTube - already in embed form
+    if (u.includes('youtube.com/embed/')) {
+      try {
+        const parsed = new URL(u)
+        const id = parsed.pathname.split('/embed/')[1]?.split('/')[0]?.split('?')[0]
+        if (id) return `https://www.youtube.com/embed/${id}`
+      } catch (_) {}
+      return u
     }
-    if (videoUrl.includes('youtu.be/')) {
-      const videoId = videoUrl.split('youtu.be/')[1]?.split('?')[0]
-      return `https://www.youtube.com/embed/${videoId}`
+    // YouTube watch link
+    if (u.includes('youtube.com/watch')) {
+      try {
+        const videoId = new URL(u).searchParams.get('v')
+        if (videoId) return `https://www.youtube.com/embed/${videoId}`
+      } catch (_) {}
     }
-    
+    if (u.includes('youtu.be/')) {
+      const videoId = u.split('youtu.be/')[1]?.split('?')[0]?.split('&')[0]
+      if (videoId) return `https://www.youtube.com/embed/${videoId}`
+    }
+
     // Vimeo
-    if (videoUrl.includes('vimeo.com/')) {
-      const videoId = videoUrl.split('vimeo.com/')[1]?.split('?')[0]
-      return `https://player.vimeo.com/video/${videoId}`
+    if (u.includes('vimeo.com/')) {
+      const videoId = u.split('vimeo.com/')[1]?.split('?')[0]?.split('/')[0]
+      if (videoId && !videoId.includes('<')) return `https://player.vimeo.com/video/${videoId}`
     }
-    
-    return videoUrl
+
+    return u
   }
 
   // Handle progress tracking
@@ -156,7 +181,7 @@ function VideoPlayer({
     ? Math.round((currentTime / duration) * 100)
     : Math.round(progressPercentRef.current)
 
-  if (!url) {
+  if (!cleanUrl) {
     return (
       <div className={`${styles.container} ${compact ? styles.compact : ''}`}>
         <div className={styles.placeholder}>
@@ -197,7 +222,7 @@ function VideoPlayer({
       {isEmbedded ? (
         <iframe
           className={styles.videoIframe}
-          src={getEmbedUrl(url)}
+          src={getEmbedUrl(cleanUrl)}
           title={fileName || 'Video'}
           frameBorder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -209,7 +234,7 @@ function VideoPlayer({
         <video
           ref={videoRef}
           className={styles.videoElement}
-          src={url}
+          src={cleanUrl}
           controls={controls}
           autoPlay={autoPlay}
           onLoadedData={handleLoad}
