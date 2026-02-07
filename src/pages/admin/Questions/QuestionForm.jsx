@@ -820,12 +820,12 @@ function QuestionForm() {
 
                 <div className="form-group">
                   <label>Explanation (shown after answering)</label>
-                  <RichTextEditor
+                  <textarea
                     value={formData.explanation}
-                    onChange={(value) => handleChange('explanation', value)}
+                    onChange={(e) => handleChange('explanation', e.target.value)}
                     placeholder="Explain the correct answer..."
-                    minHeight={120}
-                    simple
+                    className="form-input"
+                    rows={4}
                   />
                 </div>
 
@@ -1127,12 +1127,12 @@ function QuestionForm() {
                         )}
                       </div>
                       <div className="option-content">
-                        <RichTextEditor
+                        <textarea
                           value={option.text}
-                          onChange={(value) => updateOption(index, 'text', value)}
+                          onChange={(e) => updateOption(index, 'text', e.target.value)}
                           placeholder={`Enter option ${String.fromCharCode(65 + index)}...`}
-                          minHeight={80}
-                          simple
+                          className="form-input"
+                          rows={3}
                         />
                       </div>
                       <div className="option-explanation">

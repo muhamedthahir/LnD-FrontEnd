@@ -7,7 +7,9 @@ export const API_ENDPOINTS = {
     REFRESH: '/api/auth/refresh',
     REGISTER: '/api/auth/register',
     SET_PASSWORD: '/api/auth/set-password',
-    CHECK: '/api/auth/check'
+    CHECK: '/api/auth/check',
+    FORGOT_PASSWORD: '/api/auth/forgot-password',
+    RESET_PASSWORD: '/api/auth/reset-password'
   },
   
   // Users

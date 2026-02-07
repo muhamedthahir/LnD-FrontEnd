@@ -347,6 +347,31 @@
   background: var(--bg-secondary);
 }
 
+.warning-message {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: flex-start;
+  color: var(--text-secondary);
+}
+
+.warning-icon {
+  width: 24px;
+  height: 24px;
+  color: #f59e0b;
+  flex: 0 0 24px;
+}
+
+.warning-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.warning-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
 .selected-count {
   margin-right: auto;
   font-size: 0.875rem;

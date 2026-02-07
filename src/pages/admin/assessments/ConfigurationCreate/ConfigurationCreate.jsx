@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { useApi } from '../../../../contexts/ApiContext'
 import { toast } from 'react-toastify'
@@ -38,6 +38,9 @@ function ConfigurationCreate() {
   // Dropdowns
   const [categories, setCategories] = useState([])
   const [mailerTemplates, setMailerTemplates] = useState([])
+  const [questionBanks, setQuestionBanks] = useState([])
+  const levelMapRef = useRef({ easy: null, medium: null, hard: null })
+  const questionBankCountsRef = useRef({})
   
   // Segments with question counts
   const [segments, setSegments] = useState([])
@@ -121,6 +124,93 @@ function ConfigurationCreate() {
     'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
   })
 
+  const buildLevelMap = (levels) => {
+    const map = { easy: null, medium: null, hard: null }
+    levels.forEach(level => {
+      const key = (level.name || '').toLowerCase()
+      if (key === 'easy') map.easy = level.id
+      if (key === 'medium') map.medium = level.id
+      if (key === 'hard') map.hard = level.id
+    })
+    return map
+  }
+
+  const fetchQuestionCountsForBank = async (questionBankId, levelMap) => {
+    const key = questionBankId || 'all'
+    if (questionBankCountsRef.current[key]) {
+      return questionBankCountsRef.current[key]
+    }
+
+    const baseParams = new URLSearchParams({ limit: '1', offset: '0' })
+    if (questionBankId) {
+      baseParams.append('question_bank_id', questionBankId)
+    }
+
+    const totalRes = await fetch(`${apiBaseUrl}/api/questions?${baseParams.toString()}`, {
+      headers: getAuthHeader()
+    })
+    const totalData = totalRes.ok ? await totalRes.json() : { total: 0 }
+
+    const fetchLevelCount = async (levelId) => {
+      if (!levelId) return 0
+      const params = new URLSearchParams({
+        limit: '1',
+        offset: '0',
+        level_id: String(levelId)
+      })
+      if (questionBankId) {
+        params.append('question_bank_id', questionBankId)
+      }
+      const res = await fetch(`${apiBaseUrl}/api/questions?${params.toString()}`, {
+        headers: getAuthHeader()
+      })
+      if (!res.ok) return 0
+      const data = await res.json()
+      return data.total || 0
+    }
+
+    const [easy, medium, hard] = await Promise.all([
+      fetchLevelCount(levelMap.easy),
+      fetchLevelCount(levelMap.medium),
+      fetchLevelCount(levelMap.hard)
+    ])
+
+    const counts = {
+      total: totalData.total || 0,
+      easy,
+      medium,
+      hard
+    }
+    questionBankCountsRef.current[key] = counts
+    return counts
+  }
+
+  const handleQuestionBankChange = async (segmentId, questionBankId, segmentQ) => {
+    setFormData({
+      ...formData,
+      question: {
+        ...formData.question,
+        segment_questions: {
+          ...formData.question.segment_questions,
+          [segmentId]: {
+            ...segmentQ,
+            question_bank_id: questionBankId || ''
+          }
+        }
+      }
+    })
+
+    try {
+      const counts = await fetchQuestionCountsForBank(questionBankId || '', levelMapRef.current)
+      setSegmentQuestionCounts(prev => ({
+        ...prev,
+        [segmentId]: counts
+      }))
+    } catch (error) {
+      console.error(`Error fetching counts for segment ${segmentId}:`, error)
+    }
+  }
+
   useEffect(() => {
     const fetchData = async () => {
       if (!apiBaseUrl || !assessmentId) return
@@ -129,16 +219,28 @@ function ConfigurationCreate() {
         setLoading(true)
         
         // Fetch assessment
+        let assessmentData = null
         const assessmentRes = await fetch(`${apiBaseUrl}/api/assessment/assessments/${assessmentId}`, {
           headers: getAuthHeader()
         })
         if (assessmentRes.ok) {
-          const data = await assessmentRes.json()
-          setAssessment(data)
+          assessmentData = await assessmentRes.json()
+          setAssessment(assessmentData)
           setFormData(prev => ({
             ...prev,
-            timing: { ...prev.timing, total_time: data.total_duration || 0 }
+            timing: { ...prev.timing, total_time: assessmentData.total_duration || 0 }
           }))
+        }
+
+        // Fetch levels (for question counts by difficulty)
+        let levelMap = levelMapRef.current
+        const levelsRes = await fetch(`${apiBaseUrl}/api/master-data/levels`, {
+          headers: getAuthHeader()
+        })
+        if (levelsRes.ok) {
+          const data = await levelsRes.json()
+          levelMap = buildLevelMap(data.levels || data || [])
+          levelMapRef.current = levelMap
         }
 
         // Fetch segments
@@ -149,27 +251,13 @@ function ConfigurationCreate() {
           const segmentsData = await segmentsRes.json()
           setSegments(segmentsData.segments || segmentsData || [])
           
-          // Fetch question counts for each segment by difficulty
+          // Fetch question counts for each segment by difficulty (based on question bank)
           const counts = {}
           for (const segment of (segmentsData.segments || segmentsData || [])) {
             try {
-              // Fetch programming questions with difficulty
-              const progRes = await fetch(`${apiBaseUrl}/api/assessment/segments/${segment.id}`, {
-                headers: getAuthHeader()
-              })
-              if (progRes.ok) {
-                const segmentData = await progRes.json()
-                const progQuestions = segmentData.programming_questions || []
-                const mcqQuestions = segmentData.mcq_questions || []
-                
-                // Count by difficulty
-                const easy = [...progQuestions, ...mcqQuestions].filter(q => q.level_name === 'Easy' || q.level_name === 'easy').length
-                const medium = [...progQuestions, ...mcqQuestions].filter(q => q.level_name === 'Medium' || q.level_name === 'medium').length
-                const hard = [...progQuestions, ...mcqQuestions].filter(q => q.level_name === 'Hard' || q.level_name === 'hard').length
-                const total = progQuestions.length + mcqQuestions.length
-                
-                counts[segment.id] = { total, easy, medium, hard }
-              }
+              const segmentQ = formData.question.segment_questions?.[segment.id]
+              const countsForBank = await fetchQuestionCountsForBank(segmentQ?.question_bank_id || '', levelMap)
+              counts[segment.id] = countsForBank
             } catch (error) {
               console.error(`Error fetching question counts for segment ${segment.id}:`, error)
               counts[segment.id] = { total: 0, easy: 0, medium: 0, hard: 0 }
@@ -182,7 +270,7 @@ function ConfigurationCreate() {
             const segmentQuestions = { ...prev.question.segment_questions || {} }
             for (const segment of (segmentsData.segments || segmentsData || [])) {
               if (!segmentQuestions[segment.id]) {
-                segmentQuestions[segment.id] = { total: 0, easy: 0, medium: 0, hard: 0 }
+                segmentQuestions[segment.id] = { total: 0, easy: 0, medium: 0, hard: 0, question_bank_id: '' }
               }
             }
             return {
@@ -211,8 +299,11 @@ function ConfigurationCreate() {
                       acc.easy = (acc.easy || 0) + (c.easy_count || 0)
                       acc.medium = (acc.medium || 0) + (c.medium_count || 0)
                       acc.hard = (acc.hard || 0) + (c.hard_count || 0)
+                      if (!acc.question_bank_id && c.question_bank_id) {
+                        acc.question_bank_id = c.question_bank_id
+                      }
                       return acc
-                    }, { total: 0, easy: 0, medium: 0, hard: 0 })
+                    }, { total: 0, easy: 0, medium: 0, hard: 0, question_bank_id: '' })
                     segmentQuestionsFromCriteria[segment.id] = aggregated
                   }
                 }
@@ -233,6 +324,24 @@ function ConfigurationCreate() {
                   }
                 }
               }))
+
+              const updatedCounts = {}
+              for (const segment of (segmentsData.segments || segmentsData || [])) {
+                const segmentQ = segmentQuestionsFromCriteria[segment.id]
+                if (segmentQ) {
+                  try {
+                    updatedCounts[segment.id] = await fetchQuestionCountsForBank(segmentQ.question_bank_id || '', levelMap)
+                  } catch (error) {
+                    console.error(`Error fetching bank counts for segment ${segment.id}:`, error)
+                  }
+                }
+              }
+              if (Object.keys(updatedCounts).length > 0) {
+                setSegmentQuestionCounts(prev => ({
+                  ...prev,
+                  ...updatedCounts
+                }))
+              }
             }
           }
         }
@@ -244,6 +353,20 @@ function ConfigurationCreate() {
         if (catRes.ok) {
           const data = await catRes.json()
           setCategories(data.categories || data || [])
+        }
+
+        // Fetch question banks (filter by assessment institution if available)
+        const institutionId = assessmentData?.institution_id || null
+        const bankParams = new URLSearchParams({ limit: '200' })
+        if (institutionId) {
+          bankParams.append('institution_id', institutionId)
+        }
+        const bankRes = await fetch(`${apiBaseUrl}/api/question-banks?${bankParams.toString()}`, {
+          headers: getAuthHeader()
+        })
+        if (bankRes.ok) {
+          const data = await bankRes.json()
+          setQuestionBanks(data.questionBanks || data || [])
         }
 
         // Fetch mailer templates
@@ -1046,7 +1169,7 @@ function ConfigurationCreate() {
                     ) : (
                       segments.map(segment => {
                         const counts = segmentQuestionCounts[segment.id] || { total: 0, easy: 0, medium: 0, hard: 0 }
-                        const segmentQ = formData.question.segment_questions?.[segment.id] || { total: 0, easy: 0, medium: 0, hard: 0 }
+                        const segmentQ = formData.question.segment_questions?.[segment.id] || { total: 0, easy: 0, medium: 0, hard: 0, question_bank_id: '' }
                         
                         return (
                           <div key={segment.id} style={{ marginBottom: '24px', padding: '16px', background: 'var(--bg-primary)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
@@ -1055,6 +1178,24 @@ function ConfigurationCreate() {
                               Available: <strong>{counts.total}</strong> total questions ({counts.easy} Easy, {counts.medium} Medium, {counts.hard} Hard)
                             </p>
                             
+                            <div className="form-row" style={{ marginBottom: '16px' }}>
+                              <div className="form-group">
+                                <label>Question Bank</label>
+                                <select
+                                  value={segmentQ.question_bank_id || ''}
+                                  onChange={(e) => handleQuestionBankChange(segment.id, e.target.value, segmentQ)}
+                                >
+                                  <option value="">All Question Banks</option>
+                                  {questionBanks.map((bank) => (
+                                    <option key={bank.id} value={bank.id}>
+                                      {bank.name}
+                                    </option>
+                                  ))}
+                                </select>
+                                <span className="help-text">Choose a bank to restrict random fetch</span>
+                              </div>
+                            </div>
+
                             <div className="form-row" style={{ marginBottom: '16px' }}>
                               <div className="form-group">
                                 <label>Total Questions Needed</label>
