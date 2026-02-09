@@ -18,6 +18,8 @@ function Sidebar({ user, isCollapsed, isOpen = false }) {
 
   const isAdmin = user?.role === 'primary_admin' || user?.role === 'college_admin' || user?.role === 'skillvantix_admin'
   const isPrimaryAdmin = user?.role === 'primary_admin'
+  // Same UI as primary admin (except Edit published course is disabled in CourseEdit)
+  const isFullAdmin = isPrimaryAdmin || user?.role === 'skillvantix_admin'
 
   return (
     <aside className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ''} ${isOpen ? styles.open : ''}`}>
@@ -51,7 +53,7 @@ function Sidebar({ user, isCollapsed, isOpen = false }) {
           <div className={styles.navSection}>
             <div className={styles.sectionLabel}>User Administration</div>
             
-            {isPrimaryAdmin && (
+            {isFullAdmin && (
               <Link 
                 to="/admin/institutions" 
                 className={`${styles.navItem} ${isActive('/admin') && location.pathname.includes('institutions') ? styles.active : ''}`}
@@ -97,7 +99,7 @@ function Sidebar({ user, isCollapsed, isOpen = false }) {
               <span>Groups</span>
             </Link>
 
-            {isPrimaryAdmin && (
+            {isFullAdmin && (
               <Link 
                 to="/admin/mailer-templates" 
                 className={`${styles.navItem} ${isActive('/admin') && location.pathname.includes('mailer-templates') ? styles.active : ''}`}
@@ -193,7 +195,7 @@ function Sidebar({ user, isCollapsed, isOpen = false }) {
         <div className={styles.navSection}>
           <div className={styles.sectionLabel}>Assessment</div>
           
-          {!isPrimaryAdmin && (
+          {!isFullAdmin && (
             <Link 
               to="/assessments" 
               className={`${styles.navItem} ${isActive('/assessments') ? styles.active : ''}`}

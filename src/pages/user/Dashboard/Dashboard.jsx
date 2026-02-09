@@ -58,7 +58,7 @@ function Dashboard() {
   const isPrimaryAdmin = user?.role === 'primary_admin'
   const isCollegeAdmin = user?.role === 'college_admin'
   const isSkillvantixAdmin = user?.role === 'skillvantix_admin'
-  const isAdmin = isPrimaryAdmin || isCollegeAdmin
+  const isAdmin = isPrimaryAdmin || isCollegeAdmin || isSkillvantixAdmin
 
   useEffect(() => {
     checkProfileCompletion()

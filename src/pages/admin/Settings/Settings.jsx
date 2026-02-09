@@ -136,9 +136,9 @@ function Settings() {
   const [isEditing, setIsEditing] = useState(false)
   const [actionLoading, setActionLoading] = useState(false)
 
-  // Check if user is primary_admin
+  // Allow primary_admin and skillvantix_admin (same UI as primary admin)
   useEffect(() => {
-    if (user && user.role !== 'primary_admin') {
+    if (user && user.role !== 'primary_admin' && user.role !== 'skillvantix_admin') {
       toast.error('Access denied. Primary admin only.')
       navigate('/dashboard')
     }
