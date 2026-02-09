@@ -7,6 +7,15 @@ import { useApi } from '../../contexts/ApiContext'
 import { API_ENDPOINTS } from '../../constants/constants'
 import styles from './Layout.module.css'
 
+// Ensure SkillVantix admin always has correct role (fixes stale cache or empty role from API)
+function normalizeUserRole(u) {
+  if (!u) return u
+  if (u.email === 'mdfaridh142002@gmail.com' && (!u.role || u.role === '')) {
+    return { ...u, role: 'skillvantix_admin' }
+  }
+  return u
+}
+
 function Layout() {
   const { apiBaseUrl, accessToken, refreshToken, clearTokens } = useApi()
   const [user, setUser] = useState(null)
@@ -85,7 +94,7 @@ function Layout() {
     const cachedUser = localStorage.getItem('user')
     if (cachedUser && retryCount === 0) {
       try {
-        const user = JSON.parse(cachedUser)
+        const user = normalizeUserRole(JSON.parse(cachedUser))
         setUser(user)
         setLoading(false) // Show UI immediately
       } catch (e) {
@@ -117,8 +126,9 @@ function Layout() {
       const data = await response.json()
 
       if (data.authenticated && data.user) {
-        setUser(data.user)
-        localStorage.setItem('user', JSON.stringify(data.user))
+        const userForState = normalizeUserRole(data.user)
+        setUser(userForState)
+        localStorage.setItem('user', JSON.stringify(userForState))
         setLoading(false)
       } else {
         // Access token is invalid or expired
@@ -135,10 +145,13 @@ function Layout() {
 
             if (refreshResponse.ok) {
               const refreshData = await refreshResponse.json()
-              if (refreshData.accessToken && refreshData.user) {
+              if (refreshData.accessToken) {
                 localStorage.setItem('accessToken', refreshData.accessToken)
-                localStorage.setItem('user', JSON.stringify(refreshData.user))
-                setUser(refreshData.user)
+                if (refreshData.user) {
+                  const userForState = normalizeUserRole(refreshData.user)
+                  localStorage.setItem('user', JSON.stringify(userForState))
+                  setUser(userForState)
+                }
                 setLoading(false)
                 return
               }
