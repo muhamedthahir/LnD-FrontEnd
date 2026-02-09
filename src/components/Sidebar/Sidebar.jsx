@@ -16,10 +16,12 @@ function Sidebar({ user, isCollapsed, isOpen = false }) {
     return false
   }
 
-  const isAdmin = user?.role === 'primary_admin' || user?.role === 'college_admin' || user?.role === 'skillvantix_admin'
+  const adminRoles = ['primary_admin', 'college_admin', 'skillvantix_admin']
+  const fullAdminRoles = ['primary_admin', 'skillvantix_admin']
+  const isAdmin = adminRoles.includes(user?.role)
   const isPrimaryAdmin = user?.role === 'primary_admin'
-  // Same UI as primary admin (except Edit published course is disabled in CourseEdit)
-  const isFullAdmin = isPrimaryAdmin || user?.role === 'skillvantix_admin'
+  // Same UI as primary admin (Institutions, Mailer Templates, etc.) — only Edit published course is disabled for skillvantix in CourseEdit
+  const isFullAdmin = fullAdminRoles.includes(user?.role)
 
   return (
     <aside className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ''} ${isOpen ? styles.open : ''}`}>
