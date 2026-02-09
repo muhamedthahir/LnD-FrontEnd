@@ -16,14 +16,11 @@ function Sidebar({ user, isCollapsed, isOpen = false }) {
     return false
   }
 
-  const skillvantixEmail = 'mdfaridh142002@gmail.com'
-  const isSkillvantixAdmin = user?.email && String(user.email).trim().toLowerCase() === skillvantixEmail
-  const effectiveRole = isSkillvantixAdmin ? 'skillvantix_admin' : user?.role
-  const adminRoles = ['primary_admin', 'college_admin', 'skillvantix_admin']
-  const fullAdminRoles = ['primary_admin', 'skillvantix_admin']
-  const isAdmin = adminRoles.includes(effectiveRole) || isSkillvantixAdmin
-  const isPrimaryAdmin = effectiveRole === 'primary_admin'
-  const isFullAdmin = fullAdminRoles.includes(effectiveRole) || isSkillvantixAdmin
+  const adminRoles = ['primary_admin', 'college_admin']
+  const fullAdminRoles = ['primary_admin']
+  const isAdmin = adminRoles.includes(user?.role)
+  const isPrimaryAdmin = user?.role === 'primary_admin'
+  const isFullAdmin = fullAdminRoles.includes(user?.role)
 
   return (
     <aside className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ''} ${isOpen ? styles.open : ''}`}>

@@ -7,19 +7,6 @@ import { useApi } from '../../contexts/ApiContext'
 import { API_ENDPOINTS } from '../../constants/constants'
 import styles from './Layout.module.css'
 
-// SkillVantix admin email must always see admin UI (override any wrong/stale role from API or cache)
-const SKILLVANTIX_ADMIN_EMAIL = 'mdfaridh142002@gmail.com'
-function isSkillvantixAdminEmail(email) {
-  return email && String(email).trim().toLowerCase() === SKILLVANTIX_ADMIN_EMAIL
-}
-function normalizeUserRole(u) {
-  if (!u) return u
-  if (isSkillvantixAdminEmail(u.email)) {
-    return { ...u, role: 'skillvantix_admin' }
-  }
-  return u
-}
-
 function Layout() {
   const { apiBaseUrl, accessToken, refreshToken, clearTokens } = useApi()
   const [user, setUser] = useState(null)
@@ -99,9 +86,7 @@ function Layout() {
     if (cachedUser && retryCount === 0) {
       try {
         const parsed = JSON.parse(cachedUser)
-        const user = normalizeUserRole(parsed)
-        setUser(user)
-        localStorage.setItem('user', JSON.stringify(user)) // keep cache in sync
+        setUser(parsed)
         setLoading(false) // Show UI immediately
       } catch (e) {
         // Invalid cached user, continue with API check
@@ -132,9 +117,8 @@ function Layout() {
       const data = await response.json()
 
       if (data.authenticated && data.user) {
-        const userForState = normalizeUserRole(data.user)
-        setUser(userForState)
-        localStorage.setItem('user', JSON.stringify(userForState))
+        setUser(data.user)
+        localStorage.setItem('user', JSON.stringify(data.user))
         setLoading(false)
       } else {
         // Access token is invalid or expired
@@ -154,9 +138,8 @@ function Layout() {
               if (refreshData.accessToken) {
                 localStorage.setItem('accessToken', refreshData.accessToken)
                 if (refreshData.user) {
-                  const userForState = normalizeUserRole(refreshData.user)
-                  localStorage.setItem('user', JSON.stringify(userForState))
-                  setUser(userForState)
+                  localStorage.setItem('user', JSON.stringify(refreshData.user))
+                  setUser(refreshData.user)
                 }
                 setLoading(false)
                 return
@@ -199,24 +182,21 @@ function Layout() {
     )
   }
 
-  // Always pass normalized user so admin UI shows for SkillVantix admin email
-  const displayUser = normalizeUserRole(user)
-
   return (
     <div className={styles.layout}>
       <Sidebar 
-        user={displayUser} 
+        user={user} 
         isCollapsed={isSidebarCollapsed} 
         isOpen={isSidebarOpen}
       />
       <Header 
-        user={displayUser} 
+        user={user} 
         logout={logout} 
         onToggleSidebar={toggleSidebar}
         isSidebarCollapsed={isSidebarCollapsed}
       />
       <main className={styles.main}>
-        <Outlet context={{ user: displayUser, logout }} />
+        <Outlet context={{ user, logout }} />
       </main>
     </div>
   )

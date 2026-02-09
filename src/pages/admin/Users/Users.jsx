@@ -741,8 +741,7 @@ function Users() {
                       <td>
                         <span className={`role-badge role-${u.role}`}>
                           {u.role === 'college_admin' ? 'College Admin' : 
-                           u.role === 'primary_admin' ? 'Primary Admin' : 
-                           u.role === 'skillvantix_admin' ? 'SkillVantix Admin' : 'Student'}
+                           u.role === 'primary_admin' ? 'Primary Admin' : 'Student'}
                         </span>
                       </td>
                       <td>

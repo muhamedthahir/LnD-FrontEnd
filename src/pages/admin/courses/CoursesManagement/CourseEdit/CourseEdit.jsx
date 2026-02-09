@@ -412,7 +412,7 @@ function CourseEdit() {
   }
 
   const isPublished = course?.status === 'published'
-  const canEditPublishedCourse = user?.role === 'primary_admin' // Only primary admins can edit published courses; skillvantix_admin cannot
+  const canEditPublishedCourse = user?.role === 'primary_admin'
   const isEditable = !isPublished ? true : (canEditPublishedCourse && editMode)
   const isViewOnly = isPublished && !editMode // View-only mode for published courses
 

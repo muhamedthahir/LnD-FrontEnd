@@ -179,7 +179,6 @@ function UserDetail() {
     const roleMap = {
       'primary_admin': 'Primary Admin',
       'college_admin': 'College Admin',
-      'skillvantix_admin': 'SkillVantix Admin',
       'student': 'Student'
     }
     return roleMap[role] || role
