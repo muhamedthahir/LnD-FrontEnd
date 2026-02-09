@@ -573,6 +573,18 @@
   background: rgba(139, 92, 246, 0.1);
 }
 
+.segmentTypeBadgeVideo {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.segmentTypeBadgeAudio {
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.segmentTypeBadgeDocument {
+  background: rgba(245, 158, 11, 0.1);
+}
+
 .segmentDetails h5 {
   font-size: 0.8125rem;
   font-weight: 600;

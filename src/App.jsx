@@ -1,4 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { ApiProvider } from './contexts/ApiContext'
 import Layout from './components/Layout/Layout'
@@ -57,7 +59,19 @@ import './App.css'
 function App() {
   return (
     <ApiProvider>
-      <ThemeProvider> 
+      <ThemeProvider>
+      <ToastContainer
+        position="top-right"
+        autoClose={4000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        className="toast-theme"
+      />
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />

@@ -4,5 +4,65 @@
   flex-direction: column;
 }
 
+/* Toast overrides – blue-based theme, slightly blue background */
+.toast-theme.Toastify__toast-container {
+  z-index: 9999;
+}
 
+.toast-theme .Toastify__toast {
+  background: var(--toast-bg) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--shadow-md) !important;
+  border-radius: var(--radius-md) !important;
+}
+
+.toast-theme .Toastify__toast--default,
+.toast-theme .Toastify__toast--info {
+  border-left: 4px solid var(--accent-primary);
+}
+
+.toast-theme .Toastify__toast--success {
+  border-left: 4px solid var(--success);
+  background: var(--toast-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Error: blue accent instead of red (no red tick) */
+.toast-theme .Toastify__toast--error {
+  border-left: 4px solid var(--accent-primary);
+  background: var(--toast-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+.toast-theme .Toastify__toast--error svg,
+.toast-theme .Toastify__toast--error [class*="icon"] {
+  fill: var(--accent-primary) !important;
+  color: var(--accent-primary) !important;
+}
+
+.toast-theme .Toastify__toast--warning {
+  border-left: 4px solid var(--warning);
+  background: var(--toast-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+.toast-theme .Toastify__progress-bar {
+  background: linear-gradient(to right, var(--accent-primary), var(--accent-secondary)) !important;
+}
+
+.toast-theme .Toastify__toast--error .Toastify__progress-bar,
+.toast-theme .Toastify__toast--warning .Toastify__progress-bar {
+  background: linear-gradient(to right, var(--accent-primary), var(--accent-secondary)) !important;
+}
+
+.toast-theme .Toastify__close-button {
+  color: var(--accent-primary) !important;
+  opacity: 0.9;
+}
+
+.toast-theme .Toastify__close-button:hover {
+  color: var(--accent-secondary) !important;
+  opacity: 1;
+}
   

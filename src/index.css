@@ -30,6 +30,9 @@
   --success: #38a169;
   --warning: #d69e2e;
   
+  /* Toast – slightly blue background */
+  --toast-bg: #f0f4f9;
+  
   /* Shadows */
   --shadow-sm: 0 2px 8px rgba(30, 58, 95, 0.1);
   --shadow-md: 0 4px 20px rgba(30, 58, 95, 0.15);
@@ -68,6 +71,9 @@
   
   --success: #00d4aa;
   --warning: #ffd93d;
+  
+  /* Toast – slightly blue/teal tint */
+  --toast-bg: #0f1620;
   
   /* Shadows */
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);

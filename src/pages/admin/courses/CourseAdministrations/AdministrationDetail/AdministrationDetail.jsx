@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
+import * as XLSX from 'xlsx'
 import { useApi } from '../../../../../contexts/ApiContext'
 import { API_ENDPOINTS } from '../../../../../constants/constants'
 import Button from '../../../../../components/Button/Button'
@@ -445,15 +446,6 @@ function AdministrationDetail() {
     }
   }
 
-  const escapeCsvCell = (val) => {
-    if (val == null) return ''
-    const s = String(val)
-    if (s.includes(',') || s.includes('"') || s.includes('\n')) {
-      return '"' + s.replace(/"/g, '""') + '"'
-    }
-    return s
-  }
-
   const handleDownloadReport = async () => {
     setDownloadingReport(true)
     try {
@@ -470,13 +462,13 @@ function AdministrationDetail() {
       const { meta, rows } = await response.json()
       const { segmentHeaders = [], questionHeaders = [] } = meta || {}
 
-      const baseHeaders = ['Rank', 'Name', 'Email ID', 'Status', 'College', 'Group', 'Degree', 'Department', 'Class', 'Section', 'Total Segments', 'In Progress Segments', 'Completed Segments', 'Completion %']
+      const baseHeaders = ['Rank', 'Name', 'Email ID', 'Status', 'College', 'Group', 'Degree', 'Department', 'Class', 'Section', 'Total Segments', 'In Progress Segments', 'Completed Segments', 'Overall Completion %']
       const segmentCols = segmentHeaders.map(s => `Segment: ${s.name} %`)
       const questionCols = questionHeaders.map(q => `Q: ${q.segmentName} - ${q.questionName} %`)
       const headers = [...baseHeaders, ...segmentCols, ...questionCols]
-      const headerRow = headers.map(escapeCsvCell).join(',')
 
-      const dataRows = (rows || []).map(r => {
+      const sheetData = [headers]
+      for (const r of rows || []) {
         const base = [
           r.rank,
           r.name,
@@ -498,15 +490,18 @@ function AdministrationDetail() {
           const key = `${q.segmentId}_${q.questionId}`
           return (r.questionPcts && r.questionPcts[key] != null) ? r.questionPcts[key] : ''
         })
-        return [...base, ...segVals, ...qVals].map(escapeCsvCell).join(',')
-      })
+        sheetData.push([...base, ...segVals, ...qVals])
+      }
 
-      const csv = [headerRow, ...dataRows].join('\n')
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+      const worksheet = XLSX.utils.aoa_to_sheet(sheetData)
+      const workbook = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Progress Report')
+      const xlsxBuffer = XLSX.write(workbook, { type: 'array', bookType: 'xlsx' })
+      const blob = new Blob([xlsxBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = `administration-${id}-overall-report-${new Date().toISOString().slice(0, 10)}.csv`
+      link.download = `administration-${id}-overall-report-${new Date().toISOString().slice(0, 10)}.xlsx`
       link.click()
       URL.revokeObjectURL(url)
       toast.success('Report downloaded successfully')
@@ -1244,7 +1239,7 @@ function AdministrationDetail() {
                     <tr>
                       <th>User Name</th>
                       <th>Email</th>
-                      <th>Progress</th>
+                      <th>Overall Completion %</th>
                       <th>Status</th>
                       <th>Started At</th>
                       <th>Last Visited</th>

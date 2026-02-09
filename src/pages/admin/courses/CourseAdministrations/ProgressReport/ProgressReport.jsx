@@ -79,6 +79,27 @@ function ProgressReport() {
     return '#9ca3af'
   }
 
+  // Lesson types (video, audio, document, text) for display in report
+  const getLessonTypeLabel = (segmentType) => {
+    if (!segmentType) return 'Lesson'
+    const t = String(segmentType).toLowerCase()
+    if (t === 'lesson_video') return 'Video'
+    if (t === 'lesson_audio') return 'Audio'
+    if (t === 'lesson_document') return 'Document'
+    if (t === 'lesson_text') return 'Text'
+    if (t === 'reference_videos' || t === 'articles') return segmentType.replace(/_/g, ' ')
+    return segmentType.replace(/_/g, ' ')
+  }
+
+  const getLessonTypeBadgeClass = (segmentType) => {
+    if (!segmentType) return styles.segmentTypeBadgeLesson
+    const t = String(segmentType).toLowerCase()
+    if (t === 'lesson_video') return styles.segmentTypeBadgeVideo
+    if (t === 'lesson_audio') return styles.segmentTypeBadgeAudio
+    if (t === 'lesson_document') return styles.segmentTypeBadgeDocument
+    return styles.segmentTypeBadgeLesson
+  }
+
   if (loading) {
     return (
       <div className={styles.progressReportPage}>
@@ -326,13 +347,23 @@ function ProgressReport() {
                                 onClick={() => isExpandable && toggleSegment(`${segment.type_category}-${segment.id}`)}
                               >
                                 <div className={styles.segmentInfo}>
-                                  <span className={`${styles.segmentTypeBadge} ${segment.type_category === 'lesson' ? styles.segmentTypeBadgeLesson : styles.segmentTypeBadgePractice}`}>
-                                    {segment.type_category === 'lesson' ? '📖' : '💻'}
+                                  <span className={`${styles.segmentTypeBadge} ${segment.type_category === 'lesson' ? getLessonTypeBadgeClass(segment.segment_type) : styles.segmentTypeBadgePractice}`}>
+                                    {segment.type_category === 'lesson'
+                                      ? (segment.segment_type === 'lesson_video'
+                                        ? '🎬'
+                                        : segment.segment_type === 'lesson_audio'
+                                        ? '🎵'
+                                        : segment.segment_type === 'lesson_document'
+                                        ? '📄'
+                                        : '📖')
+                                      : '💻'}
                                   </span>
                                   <div className={styles.segmentDetails}>
                                     <h5>{segment.title || segment.name}</h5>
                                     <p className={styles.segmentMeta}>
-                                      {segment.type_category === 'lesson' ? 'Lesson' : 'Practice'}
+                                      {segment.type_category === 'lesson'
+                                        ? getLessonTypeLabel(segment.segment_type)
+                                        : 'Practice'}
                                     </p>
                                   </div>
                                 </div>

@@ -67,6 +67,7 @@ function CreateInstitution() {
       
       if (response.ok) {
         toast.success(SUCCESS_MESSAGES.INSTITUTION_CREATED)
+        console.log(response)
         navigate('/admin/institutions')
       } else {
         const data = await response.json()
