@@ -16,7 +16,7 @@ function Sidebar({ user, isCollapsed, isOpen = false }) {
     return false
   }
 
-  const isAdmin = user?.role === 'primary_admin' || user?.role === 'college_admin'
+  const isAdmin = user?.role === 'primary_admin' || user?.role === 'college_admin' || user?.role === 'skillvantix_admin'
   const isPrimaryAdmin = user?.role === 'primary_admin'
 
   return (

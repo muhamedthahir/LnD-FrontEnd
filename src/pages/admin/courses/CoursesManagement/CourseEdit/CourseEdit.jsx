@@ -412,7 +412,8 @@ function CourseEdit() {
   }
 
   const isPublished = course?.status === 'published'
-  const isEditable = !isPublished || editMode
+  const canEditPublishedCourse = user?.role === 'primary_admin' // Only primary admins can edit published courses; skillvantix_admin cannot
+  const isEditable = !isPublished ? true : (canEditPublishedCourse && editMode)
   const isViewOnly = isPublished && !editMode // View-only mode for published courses
 
   return (
@@ -427,13 +428,23 @@ function CourseEdit() {
           <h1>{course?.name || 'Course'}</h1>
           <div className="header-actions">
             {isPublished && !editMode ? (
-              <Button 
-                variant="primary" 
-                onClick={() => setEditMode(true)}
-                title="Edit course to make changes, then save to update"
-              >
-                Edit Course
-              </Button>
+              canEditPublishedCourse ? (
+                <Button 
+                  variant="primary" 
+                  onClick={() => setEditMode(true)}
+                  title="Edit course to make changes, then save to update"
+                >
+                  Edit Course
+                </Button>
+              ) : (
+                <Button 
+                  variant="primary" 
+                  disabled
+                  title="Only primary admins can edit published courses"
+                >
+                  Edit Course
+                </Button>
+              )
             ) : isPublished ? (
               <>
                 <Button 
@@ -884,13 +895,19 @@ function CourseEdit() {
           <div className="details-tab">
             {!editMode ? (
               <div className="course-details-view">
-                <Button 
-                  variant="primary" 
-                  onClick={() => setEditMode(true)}
-                  title={isPublished ? "Edit course to make changes, then save to update" : "Edit course details"}
-                >
-                  Edit Course
-                </Button>
+                {(isPublished && !canEditPublishedCourse) ? (
+                  <Button variant="primary" disabled title="Only primary admins can edit published courses">
+                    Edit Course
+                  </Button>
+                ) : (
+                  <Button 
+                    variant="primary" 
+                    onClick={() => setEditMode(true)}
+                    title={isPublished ? "Edit course to make changes, then save to update" : "Edit course details"}
+                  >
+                    Edit Course
+                  </Button>
+                )}
                 <div className="details-content">
                   <div className="detail-item">
                     <label>Course Name</label>

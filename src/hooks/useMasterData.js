@@ -53,7 +53,7 @@ export function useMasterData() {
       const userStr = localStorage.getItem('user')
       if (userStr) {
         const user = JSON.parse(userStr)
-        const isAdmin = user?.role === 'primary_admin' || user?.role === 'college_admin'
+        const isAdmin = user?.role === 'primary_admin' || user?.role === 'college_admin' || user?.role === 'skillvantix_admin'
         
         if (!isAdmin) {
           // User is not admin, skip fetching institutions
@@ -81,7 +81,7 @@ export function useMasterData() {
       const userStr = localStorage.getItem('user')
       if (userStr) {
         const user = JSON.parse(userStr)
-        shouldFetchInstitutions = user?.role === 'primary_admin' || user?.role === 'college_admin'
+        shouldFetchInstitutions = user?.role === 'primary_admin' || user?.role === 'college_admin' || user?.role === 'skillvantix_admin'
       }
     } catch (error) {
       console.error('Error checking user role:', error)

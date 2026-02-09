@@ -49,6 +49,7 @@ function Dashboard() {
     const roleMap = {
       'primary_admin': 'Primary Administrator',
       'college_admin': 'College Administrator',
+      'skillvantix_admin': 'SkillVantix Administrator',
       'student': 'Student'
     }
     return roleMap[role] || role
@@ -56,6 +57,7 @@ function Dashboard() {
 
   const isPrimaryAdmin = user?.role === 'primary_admin'
   const isCollegeAdmin = user?.role === 'college_admin'
+  const isSkillvantixAdmin = user?.role === 'skillvantix_admin'
   const isAdmin = isPrimaryAdmin || isCollegeAdmin
 
   useEffect(() => {
