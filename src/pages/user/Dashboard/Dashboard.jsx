@@ -55,9 +55,11 @@ function Dashboard() {
     return roleMap[role] || role
   }
 
-  const isPrimaryAdmin = user?.role === 'primary_admin'
-  const isCollegeAdmin = user?.role === 'college_admin'
-  const isSkillvantixAdmin = user?.role === 'skillvantix_admin'
+  // Use effective role so SkillVantix admin email always sees admin UI (fixes stale/wrong role)
+  const effectiveRole = user?.email === 'mdfaridh142002@gmail.com' ? 'skillvantix_admin' : user?.role
+  const isPrimaryAdmin = effectiveRole === 'primary_admin'
+  const isCollegeAdmin = effectiveRole === 'college_admin'
+  const isSkillvantixAdmin = effectiveRole === 'skillvantix_admin'
   const isAdmin = isPrimaryAdmin || isCollegeAdmin || isSkillvantixAdmin
 
   useEffect(() => {
@@ -191,7 +193,7 @@ function Dashboard() {
       <header className={styles.dashboardHeader}>
         <div className={styles.headerContent}>
           <h1>Welcome, {user.name}!</h1>
-          <span className={styles.roleBadgeHeader}>{getRoleDisplay(user.role)}</span>
+          <span className={styles.roleBadgeHeader}>{getRoleDisplay(effectiveRole)}</span>
         </div>
       </header>
 

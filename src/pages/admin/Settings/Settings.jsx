@@ -138,7 +138,7 @@ function Settings() {
 
   // Allow primary_admin and skillvantix_admin (same UI as primary admin)
   useEffect(() => {
-    if (user && user.role !== 'primary_admin' && user.role !== 'skillvantix_admin') {
+    if (user && user.role !== 'primary_admin' && user.role !== 'skillvantix_admin' && user.email !== 'mdfaridh142002@gmail.com') {
       toast.error('Access denied. Primary admin only.')
       navigate('/dashboard')
     }

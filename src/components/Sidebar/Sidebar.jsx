@@ -16,12 +16,13 @@ function Sidebar({ user, isCollapsed, isOpen = false }) {
     return false
   }
 
+  // Force admin UI for SkillVantix admin email (in case role was stale/wrong from API or cache)
+  const effectiveRole = user?.email === 'mdfaridh142002@gmail.com' ? 'skillvantix_admin' : user?.role
   const adminRoles = ['primary_admin', 'college_admin', 'skillvantix_admin']
   const fullAdminRoles = ['primary_admin', 'skillvantix_admin']
-  const isAdmin = adminRoles.includes(user?.role)
-  const isPrimaryAdmin = user?.role === 'primary_admin'
-  // Same UI as primary admin (Institutions, Mailer Templates, etc.) — only Edit published course is disabled for skillvantix in CourseEdit
-  const isFullAdmin = fullAdminRoles.includes(user?.role)
+  const isAdmin = adminRoles.includes(effectiveRole)
+  const isPrimaryAdmin = effectiveRole === 'primary_admin'
+  const isFullAdmin = fullAdminRoles.includes(effectiveRole)
 
   return (
     <aside className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ''} ${isOpen ? styles.open : ''}`}>

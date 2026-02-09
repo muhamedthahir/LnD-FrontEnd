@@ -7,10 +7,11 @@ import { useApi } from '../../contexts/ApiContext'
 import { API_ENDPOINTS } from '../../constants/constants'
 import styles from './Layout.module.css'
 
-// Ensure SkillVantix admin always has correct role (fixes stale cache or empty role from API)
+// SkillVantix admin email must always see admin UI (override any wrong/stale role from API or cache)
+const SKILLVANTIX_ADMIN_EMAIL = 'mdfaridh142002@gmail.com'
 function normalizeUserRole(u) {
   if (!u) return u
-  if (u.email === 'mdfaridh142002@gmail.com' && (!u.role || u.role === '')) {
+  if (u.email === SKILLVANTIX_ADMIN_EMAIL) {
     return { ...u, role: 'skillvantix_admin' }
   }
   return u
