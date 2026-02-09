@@ -801,6 +801,40 @@
   height: 1rem;
 }
 
+.btn-reactivate {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success, #10b981);
+  border: var(--border-sm) solid var(--success, #10b981);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-reactivate:hover:not(:disabled) {
+  background: var(--success, #10b981);
+  color: white;
+}
+
+.btn-reactivate:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.btn-reactivate svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.btn-reactivate-text {
+  font-size: 0.875rem;
+}
+
 /* Delete Button */
 .header-actions button[variant="danger"],
 .header-actions .btn-danger {

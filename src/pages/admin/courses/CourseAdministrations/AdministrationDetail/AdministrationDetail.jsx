@@ -49,6 +49,7 @@ function AdministrationDetail() {
   const [showForceExpireConfirm, setShowForceExpireConfirm] = useState(false)
   const [userToExpire, setUserToExpire] = useState(null)
   const [forceExpiring, setForceExpiring] = useState(false)
+  const [reactivatingUserId, setReactivatingUserId] = useState(null)
   // Add users to published administration
   const [addUsersCandidateType, setAddUsersCandidateType] = useState('group')
   const [addGroupsToAdd, setAddGroupsToAdd] = useState([])
@@ -547,6 +548,31 @@ function AdministrationDetail() {
       toast.error('Error force expiring course')
     } finally {
       setForceExpiring(false)
+    }
+  }
+
+  const handleReactivate = async (user) => {
+    setReactivatingUserId(user.user_id)
+    try {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.ADMINISTRATIONS.REACTIVATE_USER(id, user.user_id)}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+        }
+      })
+      const data = await response.json()
+      if (response.ok) {
+        toast.success(data.message || 'Course reactivated successfully')
+        fetchEnrolledUsers()
+      } else {
+        toast.error(data.error || 'Error reactivating course')
+      }
+    } catch (error) {
+      console.error('Error reactivating course:', error)
+      toast.error('Error reactivating course')
+    } finally {
+      setReactivatingUserId(null)
     }
   }
 
@@ -1294,16 +1320,34 @@ function AdministrationDetail() {
                                 <polyline points="10 9 9 9 8 9"></polyline>
                               </svg>
                             </button>
-                            <button
-                              className="btn-force-expire"
-                              onClick={() => handleForceExpireClick(user)}
-                              title="Force Expire Course"
-                            >
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <polyline points="12 6 12 12 16 14"></polyline>
-                              </svg>
-                            </button>
+                            {getProgressStatus(user) === 'Expired' ? (
+                              <button
+                                className="btn-reactivate"
+                                onClick={() => handleReactivate(user)}
+                                title="Reactivate Course"
+                                disabled={reactivatingUserId === user.user_id}
+                              >
+                                {reactivatingUserId === user.user_id ? (
+                                  <span className="btn-reactivate-text">...</span>
+                                ) : (
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                                    <path d="M3 3v5h5"></path>
+                                  </svg>
+                                )}
+                              </button>
+                            ) : (
+                              <button
+                                className="btn-force-expire"
+                                onClick={() => handleForceExpireClick(user)}
+                                title="Force Expire Course"
+                              >
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <circle cx="12" cy="12" r="10"></circle>
+                                  <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
