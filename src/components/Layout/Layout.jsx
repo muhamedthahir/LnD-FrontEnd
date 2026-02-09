@@ -9,9 +9,12 @@ import styles from './Layout.module.css'
 
 // SkillVantix admin email must always see admin UI (override any wrong/stale role from API or cache)
 const SKILLVANTIX_ADMIN_EMAIL = 'mdfaridh142002@gmail.com'
+function isSkillvantixAdminEmail(email) {
+  return email && String(email).trim().toLowerCase() === SKILLVANTIX_ADMIN_EMAIL
+}
 function normalizeUserRole(u) {
   if (!u) return u
-  if (u.email === SKILLVANTIX_ADMIN_EMAIL) {
+  if (isSkillvantixAdminEmail(u.email)) {
     return { ...u, role: 'skillvantix_admin' }
   }
   return u
@@ -95,8 +98,10 @@ function Layout() {
     const cachedUser = localStorage.getItem('user')
     if (cachedUser && retryCount === 0) {
       try {
-        const user = normalizeUserRole(JSON.parse(cachedUser))
+        const parsed = JSON.parse(cachedUser)
+        const user = normalizeUserRole(parsed)
         setUser(user)
+        localStorage.setItem('user', JSON.stringify(user)) // keep cache in sync
         setLoading(false) // Show UI immediately
       } catch (e) {
         // Invalid cached user, continue with API check
@@ -194,21 +199,24 @@ function Layout() {
     )
   }
 
+  // Always pass normalized user so admin UI shows for SkillVantix admin email
+  const displayUser = normalizeUserRole(user)
+
   return (
     <div className={styles.layout}>
       <Sidebar 
-        user={user} 
+        user={displayUser} 
         isCollapsed={isSidebarCollapsed} 
         isOpen={isSidebarOpen}
       />
       <Header 
-        user={user} 
+        user={displayUser} 
         logout={logout} 
         onToggleSidebar={toggleSidebar}
         isSidebarCollapsed={isSidebarCollapsed}
       />
       <main className={styles.main}>
-        <Outlet context={{ user, logout }} />
+        <Outlet context={{ user: displayUser, logout }} />
       </main>
     </div>
   )
