@@ -73,6 +73,7 @@ function ConfigurationCreate() {
       full_screen_mandatory: false,
       webcam_required: false,
       max_tab_switch_allowed: 5,
+      allow_segment_switch: true,
       deduct_marks_on_tab_switch: false,
       marks_deducted_per_tab_switch: 0,
       deduct_marks_on_screen_switch: false,
@@ -439,6 +440,7 @@ function ConfigurationCreate() {
                 full_screen_mandatory: proctoringConfig.full_screen_mandatory || false,
                 webcam_required: proctoringConfig.webcam_required || false,
                 max_tab_switch_allowed: proctoringConfig.max_tab_switch_allowed ?? (proctoringConfig.max_tab_switch_allowed === -1 ? -1 : 5),
+                allow_segment_switch: proctoringConfig.allow_segment_switch ?? true,
                 deduct_marks_on_tab_switch: proctoringConfig.deduct_marks_on_tab_switch || false,
                 marks_deducted_per_tab_switch: proctoringConfig.marks_deducted_per_tab_switch || 0,
                 deduct_marks_on_screen_switch: proctoringConfig.deduct_marks_on_screen_switch || false,
@@ -849,6 +851,15 @@ function ConfigurationCreate() {
                   />
                   <span className="toggle-label">Webcam Required</span>
                   <span className="toggle-desc">Users must enable webcam access</span>
+                </label>
+                <label className="toggle-item">
+                  <input
+                    type="checkbox"
+                    checked={formData.proctoring.allow_segment_switch}
+                    onChange={(e) => setFormData({ ...formData, proctoring: { ...formData.proctoring, allow_segment_switch: e.target.checked } })}
+                  />
+                  <span className="toggle-label">Enable Inter-Segment Navigation</span>
+                  <span className="toggle-desc">Allow users to switch between segments during the assessment</span>
                 </label>
                 <label className="toggle-item">
                   <input

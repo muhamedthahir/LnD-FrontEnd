@@ -24,7 +24,6 @@ function AssessmentEdit() {
   
   // Assessment-level settings
   const [enableSectionWiseTimer, setEnableSectionWiseTimer] = useState(false)
-  const [disableInterSegmentNavigation, setDisableInterSegmentNavigation] = useState(false)
   
   // Question selection modal
   const [showQuestionModal, setShowQuestionModal] = useState(false)
@@ -1194,14 +1193,6 @@ function AssessmentEdit() {
                 label="Enable Section Wise Timer"
               />
               <span className={styles.settingHelp}>When enabled, each segment can have its own duration</span>
-            </div>
-            <div className={styles.settingItem}>
-              <Toggle
-                checked={disableInterSegmentNavigation}
-                onChange={setDisableInterSegmentNavigation}
-                label="Disable Inter-Segment Navigation"
-              />
-              <span className={styles.settingHelp}>Prevent users from navigating between segments during exam</span>
             </div>
           </div>
 

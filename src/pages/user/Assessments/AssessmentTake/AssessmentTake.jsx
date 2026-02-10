@@ -51,6 +51,7 @@ function AssessmentTake() {
   const [tabSwitchCountdown, setTabSwitchCountdown] = useState(5)
   const [isTabLimitExceeded, setIsTabLimitExceeded] = useState(false)
   const countdownTimerRef = useRef(null)
+  const exitingRef = useRef(false)
 
   const getAuthHeader = () => ({
     'Content-Type': 'application/json',
@@ -139,6 +140,7 @@ function AssessmentTake() {
 
     // Prevent window close with beforeunload
     const handleBeforeUnload = (e) => {
+      if (exitingRef.current) return
       e.preventDefault()
       e.returnValue = 'You have an assessment in progress. Are you sure you want to leave?'
       return e.returnValue
@@ -146,6 +148,7 @@ function AssessmentTake() {
 
     // Block Alt+F4 and other close shortcuts
     const handleKeyDown = (e) => {
+      if (exitingRef.current) return
       // Block Alt+F4
       if (e.altKey && e.key === 'F4') {
         e.preventDefault()
@@ -469,6 +472,7 @@ function AssessmentTake() {
     
     // Also save on page unload
     const handleBeforeUnload = () => {
+      if (exitingRef.current) return
       saveProgressRef.current()
     }
     window.addEventListener('beforeunload', handleBeforeUnload)
@@ -637,6 +641,7 @@ function AssessmentTake() {
   const submitAssessment = async (isAutoSubmit = false) => {
     try {
       setSubmitting(true)
+      exitingRef.current = true
       const response = await fetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/submit`, {
         method: 'POST',
         headers: getAuthHeader(),
@@ -680,6 +685,7 @@ function AssessmentTake() {
     } catch (error) {
       console.error('Error submitting:', error)
       toast.error('Failed to submit assessment')
+      exitingRef.current = false
     } finally {
       setSubmitting(false)
       setShowSubmitModal(false)
