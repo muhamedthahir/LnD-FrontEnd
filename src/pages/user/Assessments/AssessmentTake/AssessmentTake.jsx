@@ -624,7 +624,7 @@ function AssessmentTake() {
         setCurrentSegmentIndex(targetIndex)
         setQuestions(data.questions || [])
         setCurrentQuestionIndex(0)
-        setSegmentTimeRemaining(data.segment_duration || 0)
+        setSegmentTimeRemaining(data.segment_time_remaining ?? data.segment_duration ?? 0)
         setAnswers(prev => ({ ...prev, ...data.saved_answers }))
         toast.success(`Switched to ${assessmentData.segments[targetIndex]?.name || 'segment'}`)
       } else {
