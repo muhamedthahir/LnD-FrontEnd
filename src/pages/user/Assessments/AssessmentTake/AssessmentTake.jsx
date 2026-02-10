@@ -570,7 +570,37 @@ function AssessmentTake() {
     }
   }
 
-  const handleNext = () => {
+  const saveCurrentProgress = async () => {
+    if (!assessmentData || !currentQuestion) return
+    await saveProgressRef.current?.()
+
+    const qType = currentQuestion.question_type || currentQuestion.type
+    if (qType === 'MCQ') {
+      const currentAnswer = answers[currentQuestion.id]
+      const hasSelection = Array.isArray(currentAnswer)
+        ? currentAnswer.length > 0
+        : currentAnswer !== undefined && currentAnswer !== null && currentAnswer !== ''
+
+      if (hasSelection) {
+        try {
+          await fetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/save-answer`, {
+            method: 'POST',
+            headers: getAuthHeader(),
+            body: JSON.stringify({
+              question_id: currentQuestion.id,
+              question_type: 'MCQ',
+              answer: currentAnswer
+            })
+          })
+        } catch (error) {
+          console.error('Failed to save MCQ answer on navigation:', error)
+        }
+      }
+    }
+  }
+
+  const handleNext = async () => {
+    await saveCurrentProgress()
     if (canGoNext) {
       setCurrentQuestionIndex(prev => prev + 1)
     } else if (isLastQuestion) {
@@ -578,10 +608,11 @@ function AssessmentTake() {
     }
   }
 
-  const handleJumpToQuestion = (index) => {
+  const handleJumpToQuestion = async (index) => {
     // Always allow jumping to any question within the current segment
     if (index >= 0 && index < questions.length) {
       console.log('jumping to question', index)
+      await saveCurrentProgress()
       setCurrentQuestionIndex(index)
     }
   }
