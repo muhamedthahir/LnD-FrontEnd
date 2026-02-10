@@ -195,7 +195,8 @@ function ConfigurationCreate() {
           ...formData.question.segment_questions,
           [segmentId]: {
             ...segmentQ,
-            question_bank_id: questionBankId || ''
+            question_bank_id: questionBankId || '',
+            question_type: segmentQ?.question_type || 'MCQ'
           }
         }
       }
@@ -271,7 +272,7 @@ function ConfigurationCreate() {
             const segmentQuestions = { ...prev.question.segment_questions || {} }
             for (const segment of (segmentsData.segments || segmentsData || [])) {
               if (!segmentQuestions[segment.id]) {
-                segmentQuestions[segment.id] = { total: 0, easy: 0, medium: 0, hard: 0, question_bank_id: '' }
+                segmentQuestions[segment.id] = { total: 0, easy: 0, medium: 0, hard: 0, question_bank_id: '', question_type: 'MCQ' }
               }
             }
             return {
@@ -300,11 +301,14 @@ function ConfigurationCreate() {
                       acc.easy = (acc.easy || 0) + (c.easy_count || 0)
                       acc.medium = (acc.medium || 0) + (c.medium_count || 0)
                       acc.hard = (acc.hard || 0) + (c.hard_count || 0)
+                      if (!acc.question_type && c.question_type) {
+                        acc.question_type = c.question_type
+                      }
                       if (!acc.question_bank_id && c.question_bank_id) {
                         acc.question_bank_id = c.question_bank_id
                       }
                       return acc
-                    }, { total: 0, easy: 0, medium: 0, hard: 0, question_bank_id: '' })
+                    }, { total: 0, easy: 0, medium: 0, hard: 0, question_bank_id: '', question_type: 'MCQ' })
                     segmentQuestionsFromCriteria[segment.id] = aggregated
                   }
                 }
@@ -1204,6 +1208,32 @@ function ConfigurationCreate() {
                                   ))}
                                 </select>
                                 <span className="help-text">Choose a bank to restrict random fetch</span>
+                              </div>
+                              <div className="form-group">
+                                <label>Question Type</label>
+                                <select
+                                  value={segmentQ.question_type || 'MCQ'}
+                                  onChange={(e) => {
+                                    const questionType = e.target.value
+                                    setFormData({ 
+                                      ...formData, 
+                                      question: { 
+                                        ...formData.question,
+                                        segment_questions: {
+                                          ...formData.question.segment_questions,
+                                          [segment.id]: {
+                                            ...segmentQ,
+                                            question_type: questionType
+                                          }
+                                        }
+                                      } 
+                                    })
+                                  }}
+                                >
+                                  <option value="MCQ">MCQ / Multiselect</option>
+                                  <option value="PROGRAMMING">Programming</option>
+                                </select>
+                                <span className="help-text">Select which question type to fetch randomly</span>
                               </div>
                             </div>
 
