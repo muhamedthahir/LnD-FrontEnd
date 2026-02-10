@@ -90,7 +90,7 @@ function AssessmentTake() {
       
       // Restore saved answers
       if (data.saved_answers) {
-        setAnswers(data.saved_answers)
+        setAnswers(data.saved_answers || '')
       }
       
       // Show resume notification if resuming
