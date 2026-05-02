@@ -1,14 +1,17 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { useApi } from '../../../../contexts/ApiContext'
 import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES, VALIDATION_MESSAGES } from '../../../../constants/constants'
+import ThemedSelect from '../../../../components/ThemedSelect/ThemedSelect'
 import './CreateUser.css'
 
 function CreateUser() {
   const navigate = useNavigate()
   const { apiBaseUrl, accessToken } = useApi()
   const [institutions, setInstitutions] = useState([])
+  const [catalogDepartments, setCatalogDepartments] = useState([])
+  const [catalogDegrees, setCatalogDegrees] = useState([])
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -22,9 +25,43 @@ function CreateUser() {
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
 
+  const collegeOptions = useMemo(
+    () => [
+      { value: '', label: 'Select College' },
+      ...institutions.map((inst) => ({ value: inst, label: inst }))
+    ],
+    [institutions]
+  )
+
   useEffect(() => {
+    if (!apiBaseUrl) return
     fetchInstitutions()
-  }, [])
+    fetchCatalog()
+  }, [apiBaseUrl, accessToken])
+
+  const fetchCatalog = async () => {
+    try {
+      const token = accessToken || localStorage.getItem('accessToken')
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` })
+      }
+      const [dRes, gRes] = await Promise.all([
+        fetch(`${apiBaseUrl}${API_ENDPOINTS.MASTER_DATA.DEPARTMENTS}`, { headers }),
+        fetch(`${apiBaseUrl}${API_ENDPOINTS.MASTER_DATA.DEGREES}`, { headers })
+      ])
+      if (dRes.ok) {
+        const data = await dRes.json()
+        setCatalogDepartments(data.departments || [])
+      }
+      if (gRes.ok) {
+        const data = await gRes.json()
+        setCatalogDegrees(data.degrees || [])
+      }
+    } catch (error) {
+      console.error('Error fetching department/degree catalog:', error)
+    }
+  }
 
   const fetchInstitutions = async () => {
     try {
@@ -166,29 +203,27 @@ function CreateUser() {
 
             <div className="form-group">
               <label>Role <span className="required">*</span></label>
-              <select
+              <ThemedSelect
                 name="role"
                 value={formData.role}
                 onChange={handleChange}
-              >
-                <option value="student">Student</option>
-                <option value="college_admin">College Admin</option>
-              </select>
+                className="user-styled-select"
+                options={[
+                  { value: 'student', label: 'Student' },
+                  { value: 'college_admin', label: 'College Admin' }
+                ]}
+              />
             </div>
 
             <div className="form-group">
               <label>College/Institution <span className="required">*</span></label>
-              <select
+              <ThemedSelect
                 name="college_name"
                 value={formData.college_name}
                 onChange={handleChange}
-                className={errors.college_name ? 'error' : ''}
-              >
-                <option value="">Select College</option>
-                {institutions.map((inst, index) => (
-                  <option key={index} value={inst}>{inst}</option>
-                ))}
-              </select>
+                className={`user-styled-select${errors.college_name ? ' error' : ''}`}
+                options={collegeOptions}
+              />
               {errors.college_name && <span className="error-text">{errors.college_name}</span>}
             </div>
           </div>
@@ -212,13 +247,15 @@ function CreateUser() {
 
               <div className="form-group">
                 <label>Department <span className="required">*</span></label>
-                <input
-                  type="text"
+                <ThemedSelect
                   name="department"
                   value={formData.department}
                   onChange={handleChange}
-                  className={errors.department ? 'error' : ''}
-                  placeholder="Enter department"
+                  className={`user-styled-select${errors.department ? ' error' : ''}`}
+                  options={[
+                    { value: '', label: 'Select Department' },
+                    ...catalogDepartments.map((d) => ({ value: d.name, label: d.name }))
+                  ]}
                 />
                 {errors.department && <span className="error-text">{errors.department}</span>}
               </div>
@@ -236,12 +273,15 @@ function CreateUser() {
 
               <div className="form-group">
                 <label>Degree</label>
-                <input
-                  type="text"
+                <ThemedSelect
                   name="degree"
                   value={formData.degree}
                   onChange={handleChange}
-                  placeholder="Enter degree"
+                  className="user-styled-select"
+                  options={[
+                    { value: '', label: 'Select Degree (optional)' },
+                    ...catalogDegrees.map((d) => ({ value: d.name, label: d.name }))
+                  ]}
                 />
               </div>
             </div>

@@ -141,6 +141,8 @@ export const API_ENDPOINTS = {
   // Master Data
   MASTER_DATA: {
     ALL: '/api/master-data/all',
+    DEPARTMENTS: '/api/master-data/departments',
+    DEGREES: '/api/master-data/degrees',
     LEVELS: '/api/master-data/levels',
     STATUSES: '/api/master-data/statuses',
     QUESTION_TYPES: '/api/master-data/question-types',
@@ -493,6 +495,7 @@ export const VALIDATION_MESSAGES = {
   INSTITUTION_ADMIN_NAME_REQUIRED: 'Admin name is required',
   INSTITUTION_ADMIN_EMAIL_REQUIRED: 'Admin email is required',
   INSTITUTION_ADMIN_EMAIL_INVALID: 'Invalid email format',
+  INSTITUTION_ALTERNATE_EMAIL_INVALID: 'Invalid alternate email format',
   
   // Group
   GROUP_NAME_REQUIRED: 'Group name is required',

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useOutletContext, Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import Pagination from '../../../components/Pagination/Pagination'
@@ -7,6 +7,7 @@ import ConfirmModal from '../../../components/ConfirmModal/ConfirmModal'
 import { useApi } from '../../../contexts/ApiContext'
 import { useAutoLoadMasterData } from '../../../hooks/useMasterData'
 import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES, VALIDATION_MESSAGES } from '../../../constants/constants'
+import ThemedSelect from '../../../components/ThemedSelect/ThemedSelect'
 import './Users.css'
 
 function Users() {
@@ -59,11 +60,41 @@ function Users() {
   const [bulkUploadLoading, setBulkUploadLoading] = useState(false)
   const [bulkUploadResult, setBulkUploadResult] = useState(null)
   const fileInputRef = useRef(null)
+  const [catalogDepartments, setCatalogDepartments] = useState([])
+  const [catalogDegrees, setCatalogDegrees] = useState([])
 
   // Load institutions from Redux if not loaded
   useEffect(() => {
     loadInstitutions()
   }, [loadInstitutions])
+
+  useEffect(() => {
+    if (!apiBaseUrl) return
+    const loadCatalog = async () => {
+      const token = accessToken || localStorage.getItem('accessToken')
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` })
+      }
+      try {
+        const [dRes, gRes] = await Promise.all([
+          fetch(`${apiBaseUrl}${API_ENDPOINTS.MASTER_DATA.DEPARTMENTS}`, { headers }),
+          fetch(`${apiBaseUrl}${API_ENDPOINTS.MASTER_DATA.DEGREES}`, { headers })
+        ])
+        if (dRes.ok) {
+          const data = await dRes.json()
+          setCatalogDepartments(data.departments || [])
+        }
+        if (gRes.ok) {
+          const data = await gRes.json()
+          setCatalogDegrees(data.degrees || [])
+        }
+      } catch (e) {
+        console.error('Failed to load department/degree catalog:', e)
+      }
+    }
+    loadCatalog()
+  }, [apiBaseUrl, accessToken])
 
   // Fetch users when filters change
   useEffect(() => {
@@ -494,6 +525,22 @@ function Users() {
     return collegeAdminsCount <= 1
   }
 
+  const filterCollegeOptions = useMemo(
+    () => [
+      { value: '', label: 'All Colleges' },
+      ...colleges.map((c) => ({ value: c, label: c }))
+    ],
+    [colleges]
+  )
+
+  const bulkCollegeOptions = useMemo(
+    () => [
+      { value: '', label: 'Select College' },
+      ...institutions.map((inst) => ({ value: inst.name, label: inst.name }))
+    ],
+    [institutions]
+  )
+
   // Removed menu dropdown handlers (actions now inline)
 
   return (
@@ -551,14 +598,16 @@ function Users() {
             <div className="form-row">
               <div className="form-group">
                 <label>Role *</label>
-                <select
+                <ThemedSelect
                   name="role"
                   value={formData.role}
                   onChange={handleChange}
-                >
-                  <option value="student">Student</option>
-                  <option value="college_admin">College Admin</option>
-                </select>
+                  className="user-styled-select"
+                  options={[
+                    { value: 'student', label: 'Student' },
+                    { value: 'college_admin', label: 'College Admin' }
+                  ]}
+                />
               </div>
 
               <div style={{ padding: 'var(--spacing-md)', background: 'var(--accent-subtle)', borderRadius: 'var(--radius-md)', marginBottom: 'var(--spacing-lg)', gridColumn: '1 / -1' }}>
@@ -571,19 +620,19 @@ function Users() {
             <div className="form-row">
               <div className="form-group">
                 <label>College Name *</label>
-                <select
+                <ThemedSelect
                   name="college_name"
                   value={formData.college_name}
                   onChange={handleChange}
-                  className={errors.college_name ? 'error' : ''}
-                >
-                  <option value="">Select College</option>
-                  {institutions.map((institution) => (
-                    <option key={institution.id} value={institution.name}>
-                      {institution.name}
-                    </option>
-                  ))}
-                </select>
+                  className={`user-styled-select${errors.college_name ? ' error' : ''}`}
+                  options={[
+                    { value: '', label: 'Select College' },
+                    ...institutions.map((institution) => ({
+                      value: institution.name,
+                      label: institution.name
+                    }))
+                  ]}
+                />
                 {errors.college_name && <span className="error-text">{errors.college_name}</span>}
                 {institutions.length === 0 && (
                   <small style={{ color: 'var(--text-secondary)', marginTop: '4px', display: 'block' }}>
@@ -594,56 +643,64 @@ function Users() {
             </div>
 
             {formData.role === 'student' && (
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Roll Number *</label>
-                  <input
-                    type="text"
-                    name="roll_number"
-                    value={formData.roll_number}
-                    onChange={handleChange}
-                    className={errors.roll_number ? 'error' : ''}
-                  />
-                  {errors.roll_number && <span className="error-text">{errors.roll_number}</span>}
+              <>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Roll Number *</label>
+                    <input
+                      type="text"
+                      name="roll_number"
+                      value={formData.roll_number}
+                      onChange={handleChange}
+                      className={errors.roll_number ? 'error' : ''}
+                    />
+                    {errors.roll_number && <span className="error-text">{errors.roll_number}</span>}
+                  </div>
+
+                  <div className="form-group">
+                    <label>Department *</label>
+                    <ThemedSelect
+                      name="department"
+                      value={formData.department}
+                      onChange={handleChange}
+                      className={`user-styled-select${errors.department ? ' error' : ''}`}
+                      options={[
+                        { value: '', label: 'Select Department' },
+                        ...catalogDepartments.map((d) => ({ value: d.name, label: d.name }))
+                      ]}
+                    />
+                    {errors.department && <span className="error-text">{errors.department}</span>}
+                  </div>
+
+                  <div className="form-group">
+                    <label>Section</label>
+                    <input
+                      type="text"
+                      name="section"
+                      value={formData.section}
+                      onChange={handleChange}
+                      placeholder="Default: 1"
+                    />
+                  </div>
                 </div>
 
-                <div className="form-group">
-                  <label>Department *</label>
-                  <input
-                    type="text"
-                    name="department"
-                    value={formData.department}
-                    onChange={handleChange}
-                    className={errors.department ? 'error' : ''}
-                  />
-                  {errors.department && <span className="error-text">{errors.department}</span>}
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Degree</label>
+                    <ThemedSelect
+                      name="degree"
+                      value={formData.degree}
+                      onChange={handleChange}
+                      className="user-styled-select"
+                      options={[
+                        { value: '', label: 'Select Degree (optional)' },
+                        ...catalogDegrees.map((d) => ({ value: d.name, label: d.name }))
+                      ]}
+                    />
+                  </div>
                 </div>
-
-                <div className="form-group">
-                  <label>Section</label>
-                  <input
-                    type="text"
-                    name="section"
-                    value={formData.section}
-                    onChange={handleChange}
-                    placeholder="Default: 1"
-                  />
-                </div>
-              </div>
+              </>
             )}
-
-            <div className="form-row">
-              <div className="form-group">
-                <label>Degree</label>
-                <input
-                  type="text"
-                  name="degree"
-                  value={formData.degree}
-                  onChange={handleChange}
-                  placeholder="e.g., B.Tech, M.Tech"
-                />
-              </div>
-            </div>
 
             <div className="form-actions">
               <button type="submit" className="btn-primary">Create User</button>
@@ -659,37 +716,33 @@ function Users() {
         {/* Scrollable Container - Contains filters and table */}
         <div className="table-container">
           {/* Filters Section - Scrollable, will hide when scrolling up */}
-          <div className="filters-section">
-            <div className="filters">
-              <div className="filter-group">
+          <div className="filters-section users-filters-section">
+            <div className="filters users-filters">
+              <div className="filter-group users-filter-group">
                 <label>Search</label>
                 <input
                   type="text"
                   placeholder="Search users..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="search-input"
+                  className="search-input users-search-input"
                 />
               </div>
-              <div className="filter-group">
+              <div className="filter-group users-filter-group">
                 <label>College</label>
-                <select
+                <ThemedSelect
+                  name="college_filter"
                   value={selectedCollege}
                   onChange={(e) => setSelectedCollege(e.target.value)}
-                  className="filter-select"
-                >
-                  <option value="">All Colleges</option>
-                  {colleges.map((college) => (
-                    <option key={college} value={college}>
-                      {college}
-                    </option>
-                  ))}
-                </select>
+                  size="compact"
+                  className="filter-select users-filter-select user-styled-select"
+                  options={filterCollegeOptions}
+                />
               </div>
               {selectedCollege && (
                 <button 
                   onClick={() => setSelectedCollege('')}
-                  className="btn-clear-filters"
+                  className="btn-clear-filters users-btn-clear-filters"
                   title="Clear college filter"
                 >
                   <svg viewBox="64 64 896 896" focusable="false" width="1em" height="1em" fill="currentColor" aria-hidden="true">
@@ -832,27 +885,30 @@ function Users() {
                     </div>
 
                     <div className="form-group">
-                      <label>Degree</label>
-                      <input
-                        type="text"
-                        name="degree"
-                        value={editData.degree}
+                      <label>Department</label>
+                      <ThemedSelect
+                        name="department"
+                        value={editData.department || ''}
                         onChange={handleEditChange}
+                        className="user-styled-select"
+                        options={[
+                          { value: '', label: 'Select Department' },
+                          ...(editData.department &&
+                          !catalogDepartments.some((d) => d.name === editData.department)
+                            ? [
+                                {
+                                  value: editData.department,
+                                  label: `${editData.department} (current)`
+                                }
+                              ]
+                            : []),
+                          ...catalogDepartments.map((d) => ({ value: d.name, label: d.name }))
+                        ]}
                       />
                     </div>
                   </div>
 
                   <div className="form-row">
-                    <div className="form-group">
-                      <label>Department</label>
-                      <input
-                        type="text"
-                        name="department"
-                        value={editData.department}
-                        onChange={handleEditChange}
-                      />
-                    </div>
-
                     <div className="form-group">
                       <label>Section</label>
                       <input
@@ -862,17 +918,47 @@ function Users() {
                         onChange={handleEditChange}
                       />
                     </div>
+
+                    <div className="form-group">
+                      <label>Degree</label>
+                      <ThemedSelect
+                        name="degree"
+                        value={editData.degree || ''}
+                        onChange={handleEditChange}
+                        className="user-styled-select"
+                        options={[
+                          { value: '', label: 'Select Degree (optional)' },
+                          ...(editData.degree &&
+                          !catalogDegrees.some((d) => d.name === editData.degree)
+                            ? [
+                                {
+                                  value: editData.degree,
+                                  label: `${editData.degree} (current)`
+                                }
+                              ]
+                            : []),
+                          ...catalogDegrees.map((d) => ({ value: d.name, label: d.name }))
+                        ]}
+                      />
+                    </div>
                   </div>
                 </>
               )}
 
               <div className="form-group">
-                <label>College Name</label>
-                <input
-                  type="text"
+                <label>College</label>
+                <ThemedSelect
+                  className="user-styled-select"
+                  name="college_readonly"
                   value={selectedUser.college_name || ''}
+                  onChange={() => {}}
                   disabled
-                  className="readonly-input"
+                  aria-label="College (read only)"
+                  options={
+                    selectedUser.college_name
+                      ? [{ value: selectedUser.college_name, label: selectedUser.college_name }]
+                      : [{ value: '', label: 'Not assigned' }]
+                  }
                 />
               </div>
 
@@ -957,16 +1043,15 @@ function Users() {
 
               <div className="form-group">
                 <label>College *</label>
-                <select
+                <ThemedSelect
+                  name="bulk_college"
                   value={bulkUploadData.college_name}
-                  onChange={(e) => setBulkUploadData(prev => ({ ...prev, college_name: e.target.value }))}
-                  required
-                >
-                  <option value="">Select College</option>
-                  {institutions.map(institution => (
-                    <option key={institution.id} value={institution.name}>{institution.name}</option>
-                  ))}
-                </select>
+                  onChange={(e) =>
+                    setBulkUploadData((prev) => ({ ...prev, college_name: e.target.value }))
+                  }
+                  className="user-styled-select"
+                  options={bulkCollegeOptions}
+                />
                 {institutions.length === 0 && (
                   <small style={{ color: 'var(--text-secondary)', marginTop: '4px', display: 'block' }}>
                     No institutions available. Please create an institution first.

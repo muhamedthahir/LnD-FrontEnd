@@ -1,17 +1,25 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
 import { toast } from 'react-toastify'
 import { useApi } from '../../../../contexts/ApiContext'
 import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES, VALIDATION_MESSAGES } from '../../../../constants/constants'
+import { invalidateInstitutions } from '../../../../store/masterDataSlice'
 import './CreateInstitution.css'
 
 function CreateInstitution() {
   const navigate = useNavigate()
+  const dispatch = useDispatch()
   const { apiBaseUrl, accessToken } = useApi()
   const [formData, setFormData] = useState({
     name: '',
     admin_name: '',
-    admin_email: ''
+    admin_email: '',
+    address: '',
+    spoc_contact_number: '',
+    alternate_contact: '',
+    alternate_email: '',
+    status: 'active'
   })
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
@@ -32,7 +40,7 @@ function CreateInstitution() {
 
   const validateForm = () => {
     const newErrors = {}
-    
+
     if (!formData.name || !formData.name.trim()) {
       newErrors.name = VALIDATION_MESSAGES.INSTITUTION_NAME_REQUIRED
     }
@@ -44,30 +52,48 @@ function CreateInstitution() {
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.admin_email)) {
       newErrors.admin_email = VALIDATION_MESSAGES.INSTITUTION_ADMIN_EMAIL_INVALID
     }
-    
+    if (formData.alternate_email?.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.alternate_email.trim())) {
+      newErrors.alternate_email = VALIDATION_MESSAGES.INSTITUTION_ALTERNATE_EMAIL_INVALID
+    }
+
     setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
+    if (Object.keys(newErrors).length) {
+      Object.values(newErrors).forEach((msg) => toast.error(msg))
+      return false
+    }
+    return true
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
+
     if (!validateForm()) return
-    
+
     setLoading(true)
     try {
+      const body = {
+        name: formData.name.trim(),
+        admin_name: formData.admin_name.trim(),
+        admin_email: formData.admin_email.trim(),
+        address: formData.address.trim() || null,
+        spoc_contact_number: formData.spoc_contact_number.trim() || null,
+        alternate_contact: formData.alternate_contact.trim() || null,
+        alternate_email: formData.alternate_email.trim() || null,
+        status: formData.status === 'inactive' ? 'inactive' : 'active'
+      }
+
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.INSTITUTIONS.CREATE}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(body)
       })
-      
+
       if (response.ok) {
         toast.success(SUCCESS_MESSAGES.INSTITUTION_CREATED)
-        console.log(response)
+        dispatch(invalidateInstitutions())
         navigate('/admin/institutions')
       } else {
         const data = await response.json()
@@ -84,7 +110,7 @@ function CreateInstitution() {
   return (
     <div className="create-page">
       <div className="create-page-header">
-        <button 
+        <button
           className="btn-back"
           onClick={() => navigate('/admin/institutions')}
         >
@@ -100,7 +126,7 @@ function CreateInstitution() {
         <form onSubmit={handleSubmit} className="create-form">
           <div className="form-section">
             <h2>Institution Details</h2>
-            
+
             <div className="form-group">
               <label>Institution Name <span className="required">*</span></label>
               <input
@@ -113,11 +139,66 @@ function CreateInstitution() {
               />
               {errors.name && <span className="error-text">{errors.name}</span>}
             </div>
+
+            <div className="form-group">
+              <label>Status</label>
+              <select name="status" value={formData.status} onChange={handleChange}>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>Address</label>
+              <textarea
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                rows={3}
+                placeholder="Optional"
+              />
+            </div>
+
+            <div className="form-row-two">
+              <div className="form-group">
+                <label>SPOC contact number</label>
+                <input
+                  type="text"
+                  name="spoc_contact_number"
+                  value={formData.spoc_contact_number}
+                  onChange={handleChange}
+                  placeholder="Optional"
+                />
+              </div>
+              <div className="form-group">
+                <label>Alternate contact</label>
+                <input
+                  type="text"
+                  name="alternate_contact"
+                  value={formData.alternate_contact}
+                  onChange={handleChange}
+                  placeholder="Optional"
+                />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>Alternate email</label>
+              <input
+                type="email"
+                name="alternate_email"
+                value={formData.alternate_email}
+                onChange={handleChange}
+                className={errors.alternate_email ? 'error' : ''}
+                placeholder="Optional"
+              />
+              {errors.alternate_email && <span className="error-text">{errors.alternate_email}</span>}
+            </div>
           </div>
 
           <div className="form-section">
             <h2>College Admin Details</h2>
-            
+
             <div className="form-group">
               <label>College Admin Name <span className="required">*</span></label>
               <input
@@ -146,21 +227,21 @@ function CreateInstitution() {
 
             <div className="info-box">
               <p>
-                ℹ️ An OTP will be sent to the admin's email. If the user already exists, they will be promoted to college_admin role.
+                An OTP will be sent to the admin&apos;s email. If the user already exists, they will be promoted to college_admin role.
               </p>
             </div>
           </div>
 
           <div className="form-actions">
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="btn-primary"
               disabled={loading}
             >
               {loading ? 'Creating...' : 'Create Institution'}
             </button>
-            <button 
-              type="button" 
+            <button
+              type="button"
               className="btn-secondary"
               onClick={() => navigate('/admin/institutions')}
               disabled={loading}
@@ -175,4 +256,3 @@ function CreateInstitution() {
 }
 
 export default CreateInstitution
-

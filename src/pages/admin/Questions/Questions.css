@@ -257,8 +257,8 @@
   color: #ef4444;
 }
 
-/* Actions */
-.actions-cell {
+/* Actions (scoped — unscoped .actions-cell breaks other admin tables that reuse the class, e.g. Mailer Templates) */
+.questions-page .actions-cell {
   display: flex;
   gap: var(--spacing-xs);
   justify-content: flex-start;

@@ -3,7 +3,69 @@ import { useParams, useNavigate, useOutletContext } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { useApi } from '../../../../contexts/ApiContext'
 import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES } from '../../../../constants/constants'
+import ThemedSelect from '../../../../components/ThemedSelect/ThemedSelect'
 import './UserDetail.css'
+
+const PERSONAL_DETAIL_VALUE_KEYS = [
+  'mobile_number',
+  'alternate_mobile',
+  'gender',
+  'date_of_birth',
+  'address_line1',
+  'address_line2',
+  'city',
+  'state',
+  'country',
+  'postal_code',
+  'linkedin_url',
+  'github_url',
+  'portfolio_url',
+  'bio',
+  'emergency_contact_name',
+  'emergency_contact_phone'
+]
+
+function hasAnyPersonalDetail(details) {
+  if (!details || typeof details !== 'object') return false
+  return PERSONAL_DETAIL_VALUE_KEYS.some((key) => {
+    const raw = details[key]
+    if (raw == null) return false
+    if (typeof raw === 'string') return raw.trim() !== ''
+    return true
+  })
+}
+
+function ReadonlyPlaceholderField({ label, multiline = false, fullWidth = false }) {
+  const id = `personal-ph-${label.replace(/[^a-zA-Z0-9]+/g, '-').toLowerCase()}`
+  const itemClass = fullWidth || multiline ? 'detail-item full-width' : 'detail-item'
+
+  return (
+    <div className={itemClass}>
+      <label className="detail-label" htmlFor={id}>{label}</label>
+      {multiline ? (
+        <textarea
+          id={id}
+          className="user-detail-personal-placeholder"
+          readOnly
+          rows={4}
+          placeholder={label}
+          defaultValue=""
+          tabIndex={-1}
+        />
+      ) : (
+        <input
+          id={id}
+          type="text"
+          className="user-detail-personal-placeholder"
+          readOnly
+          placeholder={label}
+          defaultValue=""
+          tabIndex={-1}
+        />
+      )}
+    </div>
+  )
+}
 
 function UserDetail() {
   const { id } = useParams()
@@ -14,6 +76,8 @@ function UserDetail() {
   const [user, setUser] = useState(null)
   const [userDetails, setUserDetails] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [catalogDepartments, setCatalogDepartments] = useState([])
+  const [catalogDegrees, setCatalogDegrees] = useState([])
   const [showEditModal, setShowEditModal] = useState(false)
   const [showResetModal, setShowResetModal] = useState(false)
   const [editData, setEditData] = useState({})
@@ -23,6 +87,34 @@ function UserDetail() {
   useEffect(() => {
     fetchUserData()
   }, [id])
+
+  useEffect(() => {
+    if (!apiBaseUrl) return
+    const loadCatalog = async () => {
+      const token = accessToken || localStorage.getItem('accessToken')
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` })
+      }
+      try {
+        const [dRes, gRes] = await Promise.all([
+          fetch(`${apiBaseUrl}${API_ENDPOINTS.MASTER_DATA.DEPARTMENTS}`, { headers }),
+          fetch(`${apiBaseUrl}${API_ENDPOINTS.MASTER_DATA.DEGREES}`, { headers })
+        ])
+        if (dRes.ok) {
+          const data = await dRes.json()
+          setCatalogDepartments(data.departments || [])
+        }
+        if (gRes.ok) {
+          const data = await gRes.json()
+          setCatalogDegrees(data.degrees || [])
+        }
+      } catch (e) {
+        console.error('Failed to load department/degree catalog:', e)
+      }
+    }
+    loadCatalog()
+  }, [apiBaseUrl, accessToken])
 
   const fetchUserData = async () => {
     try {
@@ -199,6 +291,8 @@ function UserDetail() {
     return gender.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
   }
 
+  const personalDetailsEmpty = !hasAnyPersonalDetail(userDetails)
+
   if (loading) {
     return (
       <div className="user-detail-page">
@@ -215,8 +309,13 @@ function UserDetail() {
       <div className="user-detail-page">
         <div className="user-detail-error">
           <p>User not found</p>
-          <button className="btn-primary" onClick={() => navigate('/admin/users')}>
-            Back to Users
+          <button type="button" className="user-detail-back-nav" onClick={() => navigate('/admin/users')}>
+            <span className="user-detail-back-nav__inner">
+              <svg className="user-detail-back-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+              </svg>
+              <span className="user-detail-back-nav__label">Back</span>
+            </span>
           </button>
         </div>
       </div>
@@ -226,11 +325,13 @@ function UserDetail() {
   return (
     <div className="user-detail-page">
       <header className="user-detail-header">
-        <button className="back-btn" onClick={() => navigate('/admin/users')}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M19 12H5M12 19l-7-7 7-7"/>
-          </svg>
-          Back to Users
+        <button type="button" className="user-detail-back-nav" onClick={() => navigate('/admin/users')}>
+          <span className="user-detail-back-nav__inner">
+            <svg className="user-detail-back-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            <span className="user-detail-back-nav__label">Back</span>
+          </span>
         </button>
         <div className="header-content">
           <div className="user-identity">
@@ -350,7 +451,7 @@ function UserDetail() {
           </section>
 
           {/* Personal Details (from user_details table) */}
-          {userDetails && (
+          {!personalDetailsEmpty && userDetails && (
             <>
               <section className="detail-card">
                 <h2>
@@ -491,17 +592,82 @@ function UserDetail() {
             </>
           )}
 
-          {!userDetails && (
-            <section className="detail-card empty-details">
-              <div className="empty-state-small">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <line x1="12" y1="8" x2="12" y2="12"/>
-                  <line x1="12" y1="16" x2="12.01" y2="16"/>
-                </svg>
-                <p>Personal details not yet filled by user</p>
-              </div>
-            </section>
+          {personalDetailsEmpty && (
+            <>
+              <section className="detail-card">
+                <h2>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                  </svg>
+                  Contact Information
+                </h2>
+                <div className="detail-grid">
+                  <ReadonlyPlaceholderField label="Mobile Number" />
+                  <ReadonlyPlaceholderField label="Alternate Mobile" />
+                  <ReadonlyPlaceholderField label="Gender" />
+                  <ReadonlyPlaceholderField label="Date of Birth" />
+                </div>
+              </section>
+
+              <section className="detail-card">
+                <h2>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                  </svg>
+                  Address
+                </h2>
+                <div className="detail-grid">
+                  <ReadonlyPlaceholderField label="Address Line 1" fullWidth />
+                  <ReadonlyPlaceholderField label="Address Line 2" fullWidth />
+                  <ReadonlyPlaceholderField label="City" />
+                  <ReadonlyPlaceholderField label="State" />
+                  <ReadonlyPlaceholderField label="Country" />
+                  <ReadonlyPlaceholderField label="Postal Code" />
+                </div>
+              </section>
+
+              <section className="detail-card">
+                <h2>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                  </svg>
+                  Social Links
+                </h2>
+                <div className="detail-grid">
+                  <ReadonlyPlaceholderField label="LinkedIn" />
+                  <ReadonlyPlaceholderField label="GitHub" />
+                  <ReadonlyPlaceholderField label="Portfolio" fullWidth />
+                </div>
+              </section>
+
+              <section className="detail-card full-width">
+                <h2>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                  </svg>
+                  Bio
+                </h2>
+                <ReadonlyPlaceholderField label="Bio" multiline />
+              </section>
+
+              <section className="detail-card">
+                <h2>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/>
+                  </svg>
+                  Emergency Contact
+                </h2>
+                <div className="detail-grid">
+                  <ReadonlyPlaceholderField label="Contact Name" />
+                  <ReadonlyPlaceholderField label="Contact Phone" />
+                </div>
+              </section>
+            </>
           )}
         </div>
       </main>
@@ -548,26 +714,30 @@ function UserDetail() {
                       />
                     </div>
                     <div className="form-group">
-                      <label>Degree</label>
-                      <input
-                        type="text"
-                        name="degree"
-                        value={editData.degree}
+                      <label>Department</label>
+                      <ThemedSelect
+                        name="department"
+                        value={editData.department || ''}
                         onChange={handleEditChange}
+                        className="user-styled-select"
+                        options={[
+                          { value: '', label: 'Select Department' },
+                          ...(editData.department &&
+                          !catalogDepartments.some((d) => d.name === editData.department)
+                            ? [
+                                {
+                                  value: editData.department,
+                                  label: `${editData.department} (current)`
+                                }
+                              ]
+                            : []),
+                          ...catalogDepartments.map((d) => ({ value: d.name, label: d.name }))
+                        ]}
                       />
                     </div>
                   </div>
 
                   <div className="form-row">
-                    <div className="form-group">
-                      <label>Department</label>
-                      <input
-                        type="text"
-                        name="department"
-                        value={editData.department}
-                        onChange={handleEditChange}
-                      />
-                    </div>
                     <div className="form-group">
                       <label>Section</label>
                       <input
@@ -577,17 +747,46 @@ function UserDetail() {
                         onChange={handleEditChange}
                       />
                     </div>
+                    <div className="form-group">
+                      <label>Degree</label>
+                      <ThemedSelect
+                        name="degree"
+                        value={editData.degree || ''}
+                        onChange={handleEditChange}
+                        className="user-styled-select"
+                        options={[
+                          { value: '', label: 'Select Degree (optional)' },
+                          ...(editData.degree &&
+                          !catalogDegrees.some((d) => d.name === editData.degree)
+                            ? [
+                                {
+                                  value: editData.degree,
+                                  label: `${editData.degree} (current)`
+                                }
+                              ]
+                            : []),
+                          ...catalogDegrees.map((d) => ({ value: d.name, label: d.name }))
+                        ]}
+                      />
+                    </div>
                   </div>
                 </>
               )}
 
               <div className="form-group">
-                <label>College Name</label>
-                <input
-                  type="text"
+                <label>College</label>
+                <ThemedSelect
+                  className="user-styled-select"
+                  name="college_readonly"
                   value={user.college_name || ''}
+                  onChange={() => {}}
                   disabled
-                  className="readonly-input"
+                  aria-label="College (read only)"
+                  options={
+                    user.college_name
+                      ? [{ value: user.college_name, label: user.college_name }]
+                      : [{ value: '', label: 'Not assigned' }]
+                  }
                 />
               </div>
 

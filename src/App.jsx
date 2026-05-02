@@ -39,7 +39,9 @@ import Groups from './pages/admin/Groups/Groups'
 import CreateGroup from './pages/admin/Groups/CreateGroup/CreateGroup'
 import Institutions from './pages/admin/Institutions/Institutions'
 import CreateInstitution from './pages/admin/Institutions/CreateInstitution/CreateInstitution'
+import InstitutionDetail from './pages/admin/Institutions/InstitutionDetail/InstitutionDetail'
 import MailerTemplates from './pages/admin/MailerTemplates/MailerTemplates'
+import MailerTemplateDetail from './pages/admin/MailerTemplates/MailerTemplateDetail'
 import Settings from './pages/admin/Settings/Settings'
 import CreateAdministration from './pages/admin/courses/CourseAdministrations/CreateAdministration/CreateAdministration'
 import AdministrationDetail from './pages/admin/courses/CourseAdministrations/AdministrationDetail/AdministrationDetail'
@@ -100,6 +102,9 @@ function App() {
           <Route path="/user/assessments/:mappingId/results" element={<AssessmentResults />} />
           <Route path="/admin/institutions" element={<Institutions />} />
           <Route path="/admin/institutions/create" element={<CreateInstitution />} />
+          <Route path="/admin/institutions/:id" element={<InstitutionDetail />} />
+          <Route path="/admin/mailer-templates/:id/edit" element={<MailerTemplateDetail />} />
+          <Route path="/admin/mailer-templates/:id" element={<MailerTemplateDetail />} />
           <Route path="/admin/mailer-templates" element={<MailerTemplates />} />
           <Route path="/admin/settings" element={<Settings />} />
           <Route path="/admin/users" element={<Users />} />

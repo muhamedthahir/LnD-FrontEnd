@@ -244,4 +244,69 @@ input:-webkit-autofill:focus {
   transition: background-color 5000s ease-in-out 0s;
 }
 
+/* Native <select> only — avoids double chrome when `user-styled-select` is passed to custom ThemedSelect wrapper */
+select.user-styled-select {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.625rem 2.75rem 0.625rem 0.875rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  font-family: var(--font-display), system-ui, -apple-system, sans-serif;
+  line-height: 1.35;
+  color: var(--text-primary);
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(30, 58, 95, 0.06);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5 8l5 5 5-5' stroke='%231e3a5f' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.65rem center;
+  background-size: 1.125rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+[data-theme="dark"] select.user-styled-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5 8l5 5 5-5' stroke='%2300d4aa' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+select.user-styled-select:hover {
+  border-color: var(--accent-primary);
+  background-color: var(--bg-primary);
+}
+
+select.user-styled-select:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--accent-subtle), 0 1px 2px rgba(30, 58, 95, 0.08);
+}
+
+[data-theme="dark"] select.user-styled-select:focus {
+  box-shadow: 0 0 0 3px var(--accent-subtle), 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+select.user-styled-select:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  background-color: var(--bg-secondary);
+}
+
+select.user-styled-select.error {
+  border-color: var(--error);
+}
+
+select.user-styled-select.error:focus {
+  box-shadow: 0 0 0 3px var(--error-glow);
+}
+
+select.user-styled-select option {
+  font-weight: 500;
+  padding: 0.5rem;
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+}
+
 

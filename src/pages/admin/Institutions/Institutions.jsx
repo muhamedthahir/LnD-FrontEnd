@@ -1,16 +1,18 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { toast } from 'react-toastify'
 import Pagination from '../../../components/Pagination/Pagination'
 import Table from '../../../components/Table/Table'
 import { useApi } from '../../../contexts/ApiContext'
 import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES, VALIDATION_MESSAGES } from '../../../constants/constants'
-import { addInstitution, updateInstitution, invalidateInstitutions } from '../../../store/masterDataSlice'
+import { invalidateInstitutions } from '../../../store/masterDataSlice'
 import '../Users/Users.css'
 import './Institutions.css'
 
 function Institutions() {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const { apiBaseUrl, accessToken } = useApi()
   const [institutions, setInstitutions] = useState([])
   const [loading, setLoading] = useState(true)
@@ -18,26 +20,26 @@ function Institutions() {
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [totalCount, setTotalCount] = useState(0)
-  
-  // Prevent duplicate API calls and track mount status
+
   const fetchingRef = useRef(false)
   const abortControllerRef = useRef(null)
   const isMountedRef = useRef(true)
   const [showForm, setShowForm] = useState(false)
-  const [showViewModal, setShowViewModal] = useState(false)
-  const [showEditModal, setShowEditModal] = useState(false)
-  const [selectedInstitution, setSelectedInstitution] = useState(null)
   const [formData, setFormData] = useState({
     name: '',
     admin_name: '',
-    admin_email: ''
+    admin_email: '',
+    address: '',
+    spoc_contact_number: '',
+    alternate_contact: '',
+    alternate_email: '',
+    status: 'active'
   })
   const [errors, setErrors] = useState({})
 
   const fetchInstitutions = useCallback(async (signal) => {
-    // Prevent duplicate calls
     if (fetchingRef.current || !apiBaseUrl) return
-    
+
     fetchingRef.current = true
     try {
       setLoading(true)
@@ -45,7 +47,7 @@ function Institutions() {
       if (search) url.searchParams.append('search', search)
       url.searchParams.append('limit', pageSize.toString())
       url.searchParams.append('offset', ((currentPage - 1) * pageSize).toString())
-      
+
       const response = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',
@@ -53,10 +55,9 @@ function Institutions() {
         },
         signal
       })
-      
-      // Only update state if component is still mounted
+
       if (!isMountedRef.current) return
-      
+
       if (response.ok) {
         const data = await response.json()
         setInstitutions(data.institutions || [])
@@ -77,17 +78,14 @@ function Institutions() {
     }
   }, [apiBaseUrl, accessToken, search, currentPage, pageSize])
 
-  // Fetch institutions when dependencies change
   useEffect(() => {
     isMountedRef.current = true
-    
-    // Create a new AbortController for this effect instance
+
     const controller = new AbortController()
     abortControllerRef.current = controller
-    
+
     fetchInstitutions(controller.signal)
-    
-    // Cleanup on unmount
+
     return () => {
       isMountedRef.current = false
       controller.abort()
@@ -110,7 +108,7 @@ function Institutions() {
 
   const validateForm = () => {
     const newErrors = {}
-    
+
     if (!formData.name || !formData.name.trim()) {
       newErrors.name = VALIDATION_MESSAGES.INSTITUTION_NAME_REQUIRED
       toast.error(VALIDATION_MESSAGES.INSTITUTION_NAME_REQUIRED)
@@ -126,40 +124,56 @@ function Institutions() {
       newErrors.admin_email = VALIDATION_MESSAGES.INSTITUTION_ADMIN_EMAIL_INVALID
       toast.error(VALIDATION_MESSAGES.INSTITUTION_ADMIN_EMAIL_INVALID)
     }
-    
+    if (formData.alternate_email?.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.alternate_email.trim())) {
+      newErrors.alternate_email = VALIDATION_MESSAGES.INSTITUTION_ALTERNATE_EMAIL_INVALID
+      toast.error(VALIDATION_MESSAGES.INSTITUTION_ALTERNATE_EMAIL_INVALID)
+    }
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
+
     if (!validateForm()) return
-    
+
     try {
-      const url = selectedInstitution 
-        ? `${apiBaseUrl}${API_ENDPOINTS.INSTITUTIONS.UPDATE(selectedInstitution.id)}`
-        : `${apiBaseUrl}${API_ENDPOINTS.INSTITUTIONS.CREATE}`
-      
-      const method = selectedInstitution ? 'PUT' : 'POST'
-      
-      const response = await fetch(url, {
-        method,
+      const body = {
+        name: formData.name.trim(),
+        admin_name: formData.admin_name.trim(),
+        admin_email: formData.admin_email.trim(),
+        address: formData.address.trim() || null,
+        spoc_contact_number: formData.spoc_contact_number.trim() || null,
+        alternate_contact: formData.alternate_contact.trim() || null,
+        alternate_email: formData.alternate_email.trim() || null,
+        status: formData.status === 'inactive' ? 'inactive' : 'active'
+      }
+
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.INSTITUTIONS.CREATE}`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(body)
       })
-      
+
       if (response.ok) {
         setShowForm(false)
-        setShowEditModal(false)
-        setFormData({ name: '', admin_name: '', admin_email: '' })
-        setSelectedInstitution(null)
+        setFormData({
+          name: '',
+          admin_name: '',
+          admin_email: '',
+          address: '',
+          spoc_contact_number: '',
+          alternate_contact: '',
+          alternate_email: '',
+          status: 'active'
+        })
         setErrors({})
-        toast.success(selectedInstitution ? SUCCESS_MESSAGES.INSTITUTION_UPDATED : SUCCESS_MESSAGES.INSTITUTION_CREATED)
-        // Refresh the list with current abort controller
+        toast.success(SUCCESS_MESSAGES.INSTITUTION_CREATED)
+        dispatch(invalidateInstitutions())
         if (abortControllerRef.current) {
           fetchInstitutions(abortControllerRef.current.signal)
         }
@@ -173,65 +187,16 @@ function Institutions() {
     }
   }
 
-  const handleView = async (institution) => {
-    try {
-      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.INSTITUTIONS.GET(institution.id)}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
-        }
-      })
-      
-      if (response.ok) {
-        const data = await response.json()
-        setSelectedInstitution({
-          ...institution,
-          admins: data.admins || []
-        })
-        setShowViewModal(true)
-      } else {
-        toast.error(ERROR_MESSAGES.INSTITUTION_FETCH_FAILED)
-      }
-    } catch (error) {
-      console.error('Error fetching institution details:', error)
-      toast.error(ERROR_MESSAGES.INSTITUTION_FETCH_FAILED)
-    }
-  }
-
-  const handleEdit = async (institution) => {
-    try {
-      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.INSTITUTIONS.GET(institution.id)}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
-        }
-      })
-      
-      if (response.ok) {
-        const data = await response.json()
-        const institutionData = data.institution
-        const admins = data.admins || []
-        
-        // Get the first admin (primary admin created with institution)
-        const primaryAdmin = admins[0] || {}
-        
-        setSelectedInstitution(institutionData)
-        setFormData({
-          name: institutionData.name || '',
-          admin_name: primaryAdmin.name || '',
-          admin_email: primaryAdmin.email || ''
-        })
-        setShowEditModal(true)
-        setShowViewModal(false)
-      } else {
-        toast.error(ERROR_MESSAGES.INSTITUTION_FETCH_FAILED)
-      }
-    } catch (error) {
-      console.error('Error fetching institution details:', error)
-      toast.error(ERROR_MESSAGES.INSTITUTION_FETCH_FAILED)
-    }
-  }
-
+  const resetCreateForm = () => ({
+    name: '',
+    admin_name: '',
+    admin_email: '',
+    address: '',
+    spoc_contact_number: '',
+    alternate_contact: '',
+    alternate_email: '',
+    status: 'active'
+  })
 
   return (
     <div className="user-admin-page">
@@ -240,12 +205,11 @@ function Institutions() {
           <h1>Institutions Management</h1>
           <p>Create and manage colleges/institutions</p>
         </div>
-        <button 
+        <button
           className="btn-primary"
           onClick={() => {
             setShowForm(!showForm)
-            setSelectedInstitution(null)
-            setFormData({ name: '', admin_name: '', admin_email: '' })
+            setFormData(resetCreateForm())
             setErrors({})
           }}
         >
@@ -269,6 +233,65 @@ function Institutions() {
                   placeholder="e.g., Maharishi University"
                 />
                 {errors.name && <span className="error-text">{errors.name}</span>}
+              </div>
+              <div className="form-group">
+                <label>Status</label>
+                <select name="status" value={formData.status} onChange={handleChange}>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                <label>Address</label>
+                <textarea
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  rows={2}
+                  placeholder="Optional"
+                  style={{ width: '100%', minHeight: '4rem', resize: 'vertical' }}
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>SPOC contact number</label>
+                <input
+                  type="text"
+                  name="spoc_contact_number"
+                  value={formData.spoc_contact_number}
+                  onChange={handleChange}
+                  placeholder="Optional"
+                />
+              </div>
+              <div className="form-group">
+                <label>Alternate contact</label>
+                <input
+                  type="text"
+                  name="alternate_contact"
+                  value={formData.alternate_contact}
+                  onChange={handleChange}
+                  placeholder="Optional"
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>Alternate email</label>
+                <input
+                  type="email"
+                  name="alternate_email"
+                  value={formData.alternate_email}
+                  onChange={handleChange}
+                  className={errors.alternate_email ? 'error' : ''}
+                  placeholder="Optional"
+                />
+                {errors.alternate_email && <span className="error-text">{errors.alternate_email}</span>}
               </div>
             </div>
 
@@ -302,7 +325,7 @@ function Institutions() {
 
             <div style={{ padding: 'var(--spacing-md)', background: 'var(--accent-subtle)', borderRadius: 'var(--radius-md)', marginBottom: 'var(--spacing-lg)', gridColumn: '1 / -1' }}>
               <p style={{ margin: 0, fontSize: 'var(--font-size-sm)', color: 'var(--accent-primary)' }}>
-                ℹ️ An OTP will be sent to the admin's email. If the user already exists, they will be promoted to college_admin role.
+                An OTP will be sent to the admin&apos;s email. If the user already exists, they will be promoted to college_admin role.
               </p>
             </div>
 
@@ -310,7 +333,7 @@ function Institutions() {
               <button type="submit" className="btn-primary">Create Institution</button>
               <button type="button" className="btn-secondary" onClick={() => {
                 setShowForm(false)
-                setFormData({ name: '', admin_name: '', admin_email: '' })
+                setFormData(resetCreateForm())
                 setErrors({})
               }}>
                 Cancel
@@ -321,9 +344,7 @@ function Institutions() {
       )}
 
       <div className="users-table-card">
-        {/* Scrollable Container - Contains filters and table */}
         <div className="table-container">
-          {/* Filters Section - Scrollable, will hide when scrolling up */}
           <div className="filters-section">
             <div className="filters institutions-filters">
               <div className="filter-group">
@@ -337,7 +358,7 @@ function Institutions() {
                 />
               </div>
               {search && (
-                <button 
+                <button
                   onClick={() => setSearch('')}
                   className="btn-clear-filters institutions-btn-clear-filters"
                   title="Clear search"
@@ -350,7 +371,6 @@ function Institutions() {
             </div>
           </div>
 
-          {/* Nested Box for Table Content */}
           <div className="table-inner-box">
             {loading ? (
               <div className="loading">Loading institutions...</div>
@@ -371,6 +391,7 @@ function Institutions() {
                 <thead>
                   <tr>
                     <th>Name</th>
+                    <th>Status</th>
                     <th>Created</th>
                     <th className="actions-header">Actions</th>
                   </tr>
@@ -379,13 +400,19 @@ function Institutions() {
                   {institutions.map((institution) => (
                     <tr key={institution.id}>
                       <td>{institution.name}</td>
+                      <td>
+                        <span className={`institution-status-badge ${institution.status === 'inactive' ? 'inactive' : 'active'}`}>
+                          {institution.status === 'inactive' ? 'Inactive' : 'Active'}
+                        </span>
+                      </td>
                       <td>{new Date(institution.created_at).toLocaleDateString()}</td>
                       <td className="actions-cell">
                         <div className="action-buttons">
-                          <button 
+                          <button
                             className="btn-edit"
-                            onClick={() => handleView(institution)}
-                            title="View Institution"
+                            type="button"
+                            onClick={() => navigate(`/admin/institutions/${institution.id}`)}
+                            title="View institution"
                           >
                             View
                           </button>
@@ -411,146 +438,8 @@ function Institutions() {
           )}
         </div>
       </div>
-
-      {showViewModal && selectedInstitution && (
-        <div className="modal-overlay" onClick={() => {
-          setShowViewModal(false)
-          setSelectedInstitution(null)
-        }}>
-          <div className="modal-content institution-view-modal" onClick={(e) => e.stopPropagation()}>
-            <h2>Institution Details</h2>
-            
-            <div className="institution-view-section">
-              <h3>Institution Information</h3>
-              <div className="view-field">
-                <label>Name:</label>
-                <div className="view-value">{selectedInstitution.name}</div>
-              </div>
-              <div className="view-field">
-                <label>Created:</label>
-                <div className="view-value">{new Date(selectedInstitution.created_at).toLocaleString()}</div>
-              </div>
-            </div>
-
-            <div className="institution-view-section">
-              <h3>College Admins</h3>
-              {selectedInstitution.admins && selectedInstitution.admins.length > 0 ? (
-                <div className="admins-list">
-                  {selectedInstitution.admins.map((admin, index) => (
-                    <div key={admin.id} className="admin-item">
-                      <div className="admin-info">
-                        <div className="admin-name">{admin.name}</div>
-                        <div className="admin-email">{admin.email}</div>
-                        {index === 0 && <span className="primary-admin-badge">Primary Admin</span>}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="no-admins">No admins assigned</p>
-              )}
-            </div>
-
-            <div className="form-actions">
-              <button 
-                type="button" 
-                className="btn-primary"
-                onClick={() => handleEdit(selectedInstitution)}
-              >
-                Edit
-              </button>
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={() => {
-                  setShowViewModal(false)
-                  setSelectedInstitution(null)
-                }}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showEditModal && selectedInstitution && (
-        <div className="modal-overlay" onClick={() => {
-          setShowEditModal(false)
-          setSelectedInstitution(null)
-          setFormData({ name: '', admin_name: '', admin_email: '' })
-          setErrors({})
-        }}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h2>Edit Institution</h2>
-            <form onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label>Institution Name *</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className={errors.name ? 'error' : ''}
-                  required
-                />
-                {errors.name && <span className="error-text">{errors.name}</span>}
-              </div>
-
-              <div className="form-group">
-                <label>College Admin Name *</label>
-                <input
-                  type="text"
-                  name="admin_name"
-                  value={formData.admin_name}
-                  onChange={handleChange}
-                  className={errors.admin_name ? 'error' : ''}
-                  required
-                />
-                {errors.admin_name && <span className="error-text">{errors.admin_name}</span>}
-              </div>
-
-              <div className="form-group">
-                <label>College Admin Email *</label>
-                <input
-                  type="email"
-                  name="admin_email"
-                  value={formData.admin_email}
-                  onChange={handleChange}
-                  className={errors.admin_email ? 'error' : ''}
-                  required
-                />
-                {errors.admin_email && <span className="error-text">{errors.admin_email}</span>}
-              </div>
-
-              <div style={{ padding: 'var(--spacing-md)', background: 'var(--accent-subtle)', borderRadius: 'var(--radius-md)', marginBottom: 'var(--spacing-lg)' }}>
-                <p style={{ margin: 0, fontSize: 'var(--font-size-sm)', color: 'var(--accent-primary)' }}>
-                  ℹ️ If the email belongs to an existing user, they will be promoted to college_admin. Otherwise, a new account will be created.
-                </p>
-              </div>
-
-              <div className="form-actions">
-                <button type="submit" className="btn-primary">Update Institution</button>
-                <button
-                  type="button"
-                  className="btn-secondary"
-                  onClick={() => {
-                    setShowEditModal(false)
-                    setSelectedInstitution(null)
-                    setFormData({ name: '', admin_name: '', admin_email: '' })
-                    setErrors({})
-                  }}
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
 
 export default Institutions
-

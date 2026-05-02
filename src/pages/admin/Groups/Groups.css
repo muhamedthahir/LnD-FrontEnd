@@ -102,6 +102,18 @@
   border-color: var(--error);
 }
 
+.group-form-card .form-group .themed-select,
+.create-form .form-group .themed-select {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.group-form-card .form-group .themed-select .themed-select__trigger,
+.create-form .form-group .themed-select .themed-select__trigger {
+  min-height: 2.5rem;
+}
+
 .error-text {
   font-size: 0.75rem;
   color: var(--error);

@@ -327,3 +327,21 @@
   max-width: 400px;
 }
 
+.institution-status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.institution-status-badge.active {
+  background: rgba(34, 197, 94, 0.15);
+  color: #16a34a;
+}
+
+.institution-status-badge.inactive {
+  background: rgba(107, 114, 128, 0.2);
+  color: var(--text-secondary);
+}
+

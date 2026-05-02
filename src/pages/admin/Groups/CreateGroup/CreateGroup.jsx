@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { useApi } from '../../../../contexts/ApiContext'
 import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES, VALIDATION_MESSAGES } from '../../../../constants/constants'
+import ThemedSelect from '../../../../components/ThemedSelect/ThemedSelect'
 import '../Groups.css'
 import './CreateGroup.css'
 
@@ -29,10 +30,40 @@ function CreateGroup() {
   const [leftPageSize, setLeftPageSize] = useState(10)
   const [rightPageSize, setRightPageSize] = useState(10)
   const [loading, setLoading] = useState(false)
+  const [catalogDepartments, setCatalogDepartments] = useState([])
+  const [catalogDegrees, setCatalogDegrees] = useState([])
 
   useEffect(() => {
     fetchInstitutions()
   }, [])
+
+  useEffect(() => {
+    if (!apiBaseUrl) return
+    const loadCatalog = async () => {
+      const token = accessToken || localStorage.getItem('accessToken')
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` })
+      }
+      try {
+        const [dRes, gRes] = await Promise.all([
+          fetch(`${apiBaseUrl}${API_ENDPOINTS.MASTER_DATA.DEPARTMENTS}`, { headers }),
+          fetch(`${apiBaseUrl}${API_ENDPOINTS.MASTER_DATA.DEGREES}`, { headers })
+        ])
+        if (dRes.ok) {
+          const data = await dRes.json()
+          setCatalogDepartments(data.departments || [])
+        }
+        if (gRes.ok) {
+          const data = await gRes.json()
+          setCatalogDegrees(data.degrees || [])
+        }
+      } catch (e) {
+        console.error('Failed to load department/degree catalog:', e)
+      }
+    }
+    loadCatalog()
+  }, [apiBaseUrl, accessToken])
 
   useEffect(() => {
     if (formData.college_name && formPage === 2) {
@@ -277,23 +308,29 @@ function CreateGroup() {
 
                 <div className="form-group">
                   <label>Degree</label>
-                  <input
-                    type="text"
+                  <ThemedSelect
                     name="degree"
-                    value={formData.degree}
+                    value={formData.degree || ''}
                     onChange={handleChange}
-                    placeholder="e.g., B.Tech, M.Tech"
+                    className="user-styled-select"
+                    options={[
+                      { value: '', label: 'Select Degree (optional)' },
+                      ...catalogDegrees.map((d) => ({ value: d.name, label: d.name }))
+                    ]}
                   />
                 </div>
 
                 <div className="form-group">
                   <label>Department</label>
-                  <input
-                    type="text"
+                  <ThemedSelect
                     name="department"
-                    value={formData.department}
+                    value={formData.department || ''}
                     onChange={handleChange}
-                    placeholder="e.g., Computer Science"
+                    className="user-styled-select"
+                    options={[
+                      { value: '', label: 'Select Department (optional)' },
+                      ...catalogDepartments.map((d) => ({ value: d.name, label: d.name }))
+                    ]}
                   />
                 </div>
 
@@ -351,6 +388,7 @@ function CreateGroup() {
                         <input
                           type="checkbox"
                           checked={selectedStudentIds.includes(student.id)}
+                          onClick={(e) => e.stopPropagation()}
                           onChange={() => toggleStudentSelection(student.id)}
                         />
                         <div>
@@ -403,6 +441,7 @@ function CreateGroup() {
                         <input
                           type="checkbox"
                           checked={selectedStudentIds.includes(student.id)}
+                          onClick={(e) => e.stopPropagation()}
                           onChange={() => toggleStudentSelection(student.id)}
                         />
                         <div>

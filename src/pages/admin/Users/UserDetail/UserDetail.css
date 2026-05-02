@@ -32,27 +32,74 @@
   margin-bottom: var(--spacing-xl);
 }
 
-.user-detail-header .back-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-xs) var(--spacing-sm);
-  background: transparent;
+/* Back control: unique class + combinators so global .back-btn rules never win */
+.user-detail-page > header.user-detail-header > button.user-detail-back-nav,
+.user-detail-page > .user-detail-error > button.user-detail-back-nav {
+  display: inline-block;
+  margin: 0 0 var(--spacing-lg) 0;
+  padding: 0;
   border: none;
-  color: var(--text-secondary);
-  font-size: 0.875rem;
+  background: transparent;
   cursor: pointer;
-  margin-bottom: var(--spacing-lg);
-  transition: color var(--transition-fast);
+  font: inherit;
+  line-height: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  vertical-align: middle;
 }
 
-.user-detail-header .back-btn:hover {
+.user-detail-page > .user-detail-error > button.user-detail-back-nav {
+  margin-bottom: 0;
+}
+
+.user-detail-page > header.user-detail-header > button.user-detail-back-nav:focus-visible,
+.user-detail-page > .user-detail-error > button.user-detail-back-nav:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-md);
+}
+
+.user-detail-page button.user-detail-back-nav .user-detail-back-nav__inner {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  min-height: 2.5rem;
+  padding: 0.5rem 1rem;
+  width: max-content;
+  max-width: 100%;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.user-detail-page button.user-detail-back-nav:hover .user-detail-back-nav__inner,
+.user-detail-page button.user-detail-back-nav:focus-visible .user-detail-back-nav__inner {
+  background-color: var(--bg-tertiary);
+  border-color: var(--accent-primary);
   color: var(--accent-primary);
 }
 
-.user-detail-header .back-btn svg {
+.user-detail-page button.user-detail-back-nav .user-detail-back-nav__icon {
   width: 1rem;
   height: 1rem;
+  flex-shrink: 0;
+  display: block;
+}
+
+.user-detail-page button.user-detail-back-nav .user-detail-back-nav__label {
+  display: inline-block;
+  white-space: nowrap;
+  line-height: 1.25;
 }
 
 .header-content {
@@ -278,6 +325,30 @@
   white-space: pre-wrap;
 }
 
+/* Admin view: personal details not provided — read-only fields, placeholder = label */
+.user-detail-personal-placeholder {
+  box-sizing: border-box;
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: 0.9375rem;
+  font-family: inherit;
+  color: var(--text-primary);
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  resize: none;
+  cursor: default;
+}
+
+.user-detail-personal-placeholder::placeholder {
+  color: var(--text-tertiary);
+  opacity: 1;
+}
+
+.user-detail-personal-placeholder:focus {
+  outline: none;
+}
+
 /* Empty State */
 .empty-state-small {
   display: flex;
@@ -378,6 +449,18 @@
   color: var(--text-secondary);
   cursor: not-allowed;
   opacity: 0.7;
+}
+
+/* Match admin Users page: themed dropdown in modal */
+.modal-content .form-group .themed-select {
+  width: 100%;
+  max-width: 100%;
+  min-height: 2.5rem;
+  box-sizing: border-box;
+}
+
+.modal-content .form-group .themed-select .themed-select__trigger {
+  min-height: 2.5rem;
 }
 
 .form-actions {

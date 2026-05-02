@@ -160,7 +160,8 @@
 
 
 .filter-select option,
-.form-group select option {
+.form-group select:not(.user-styled-select) option,
+select.user-styled-select option {
   color: var(--text-primary);
   background: var(--bg-input);
   padding: var(--spacing-sm);
@@ -200,6 +201,56 @@
   height: var(--icon-sm);
 }
 
+/* Users filter bar: scoped selectors to avoid cross-page specificity clashes */
+.user-admin-page .users-filters-section .users-filters {
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.user-admin-page .users-filters-section .users-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.user-admin-page .users-filters-section .users-filter-group > label {
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.user-admin-page .users-filters-section .users-search-input,
+.user-admin-page .users-filters-section .users-filter-select.themed-select {
+  min-width: 15rem;
+  box-sizing: border-box;
+}
+
+.user-admin-page .users-filters-section .users-search-input {
+  min-width: 18rem;
+}
+
+.user-admin-page .users-filters-section .users-btn-clear-filters {
+  margin-left: auto;
+  align-self: flex-start;
+  height: 2.25rem;
+}
+
+/* Toolbar college filter: compact themed dropdown */
+.user-admin-page .users-filters-section .themed-select.themed-select--compact .themed-select__trigger {
+  min-height: 2.25rem;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.875rem;
+}
+
+.user-admin-page .users-filters-section .themed-select.themed-select--compact .themed-select__chevron svg {
+  width: 1rem;
+  height: 1rem;
+}
+
 .user-form-card h2 {
   font-size: 1.25rem;
   font-weight: 600;
@@ -232,7 +283,7 @@
 }
 
 .form-group input,
-.form-group select {
+.form-group select:not(.user-styled-select) {
   padding: var(--spacing-sm);
   background: var(--bg-input);
   border: var(--border-sm) solid var(--border-color);
@@ -245,7 +296,7 @@
   width: 100%;
 }
 
-.form-group select {
+.form-group select:not(.user-styled-select) {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right var(--spacing-md) center;
@@ -256,12 +307,12 @@
   max-width: 100%;
 }
 
-.form-group select:hover {
+.form-group select:not(.user-styled-select):hover {
   border-color: var(--accent-primary);
 }
 
 .form-group input:focus,
-.form-group select:focus {
+.form-group select:not(.user-styled-select):focus {
   outline: none;
   border-color: var(--accent-primary);
   box-shadow: 0 0 0 var(--spacing-xs) var(--accent-subtle);
@@ -634,13 +685,35 @@
   margin-bottom: 0;
 }
 
+.modal-content .form-group .themed-select {
+  width: 100%;
+  max-width: 100%;
+  min-height: 2.5rem;
+  box-sizing: border-box;
+}
+
+.modal-content .form-group .themed-select .themed-select__trigger {
+  min-height: 2.5rem;
+}
+
+.user-form-card .form-group .themed-select {
+  width: 100%;
+  max-width: 100%;
+  min-height: 2.5rem;
+  box-sizing: border-box;
+}
+
+.user-form-card .form-group .themed-select .themed-select__trigger {
+  min-height: 2.5rem;
+}
+
 /* Bulk Upload Modal */
 .bulk-upload-modal {
   max-width: 600px;
   width: 90%;
 }
 
-.bulk-upload-modal .form-group select {
+.bulk-upload-modal .form-group select:not(.user-styled-select) {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right var(--spacing-sm) center;
@@ -653,7 +726,7 @@
   max-width: 100%;
 }
 
-.bulk-upload-modal .form-group select:hover {
+.bulk-upload-modal .form-group select:not(.user-styled-select):hover {
   border-color: var(--accent-primary);
 }
 
@@ -838,8 +911,25 @@
   }
 
   .search-input,
-  .filter-select {
+  .filter-select,
+  .user-admin-page .users-filters-section .users-filter-select.themed-select {
     width: 100%;
+  }
+
+  .user-admin-page .users-filters-section .users-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .user-admin-page .users-filters-section .users-search-input,
+  .user-admin-page .users-filters-section .users-filter-select.themed-select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .user-admin-page .users-filters-section .users-btn-clear-filters {
+    margin-left: 0;
+    align-self: flex-start;
   }
 }
 

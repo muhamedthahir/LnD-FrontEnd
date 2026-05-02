@@ -125,6 +125,44 @@
   border-color: var(--error);
 }
 
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: var(--spacing-sm);
+  font-size: 1rem;
+  color: var(--text-primary);
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.form-group textarea {
+  min-height: 4rem;
+  resize: vertical;
+}
+
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--accent-subtle);
+}
+
+.create-form .form-row-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-lg);
+}
+
+@media (max-width: 640px) {
+  .create-form .form-row-two {
+    grid-template-columns: 1fr;
+  }
+}
+
 .error-text {
   display: block;
   margin-top: var(--spacing-xs);
