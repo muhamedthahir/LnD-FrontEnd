@@ -59,67 +59,6 @@ function AssessmentManagement() {
     return () => clearTimeout(timer)
   }, [fetchAssessments])
 
-  const handleStatusChange = async (id, newStatus) => {
-    try {
-      const response = await fetch(`${apiBaseUrl}/api/assessment/assessments/${id}/status`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
-        },
-        body: JSON.stringify({ status: newStatus })
-      })
-
-      if (!response.ok) throw new Error('Failed to update status')
-
-      toast.success('Status updated successfully!')
-      fetchAssessments()
-    } catch (error) {
-      console.error('Error updating status:', error)
-      toast.error('Failed to update status')
-    }
-  }
-
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this assessment?')) return
-
-    try {
-      const response = await fetch(`${apiBaseUrl}/api/assessment/assessments/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
-        }
-      })
-
-      if (!response.ok) throw new Error('Failed to delete assessment')
-
-      toast.success('Assessment deleted successfully!')
-      fetchAssessments()
-    } catch (error) {
-      console.error('Error deleting assessment:', error)
-      toast.error('Failed to delete assessment')
-    }
-  }
-
-  const handleDuplicate = async (id) => {
-    try {
-      const response = await fetch(`${apiBaseUrl}/api/assessment/assessments/${id}/duplicate`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
-        }
-      })
-
-      if (!response.ok) throw new Error('Failed to duplicate assessment')
-
-      toast.success('Assessment duplicated successfully!')
-      fetchAssessments()
-    } catch (error) {
-      console.error('Error duplicating assessment:', error)
-      toast.error('Failed to duplicate assessment')
-    }
-  }
-
   const getStatusBadgeClass = (status) => {
     switch (status) {
       case 'PUBLISHED': return 'status-badge published'
@@ -205,7 +144,7 @@ function AssessmentManagement() {
                   <th>Configurations</th>
                   <th>Status</th>
                   <th>Created</th>
-                  <th>Actions</th>
+                  <th>View/Edit</th>
                 </tr>
               </thead>
               <tbody>
@@ -242,65 +181,11 @@ function AssessmentManagement() {
                         <button 
                           className="action-btn edit"
                           onClick={() => navigate(`/admin/assessments/${assessment.id}/edit`)}
-                          title="Edit"
+                          title="Open View/Edit"
                         >
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                          </svg>
-                        </button>
-                        <button 
-                          className="action-btn config"
-                          onClick={() => navigate(`/admin/assessments/${assessment.id}/configurations`)}
-                          title="Configurations"
-                        >
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
-                            <circle cx="12" cy="12" r="3"/>
-                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-                          </svg>
-                        </button>
-                        <button 
-                          className="action-btn duplicate"
-                          onClick={() => handleDuplicate(assessment.id)}
-                          title="Duplicate"
-                        >
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
-                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                          </svg>
-                        </button>
-                        {assessment.status === 'DRAFT' && (
-                          <button 
-                            className="action-btn publish"
-                            onClick={() => handleStatusChange(assessment.id, 'PUBLISHED')}
-                            title="Publish"
-                          >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
-                              <polyline points="20 6 9 17 4 12"/>
-                            </svg>
-                          </button>
-                        )}
-                        {assessment.status === 'PUBLISHED' && (
-                          <button 
-                            className="action-btn archive"
-                            onClick={() => handleStatusChange(assessment.id, 'ARCHIVED')}
-                            title="Archive"
-                          >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
-                              <polyline points="21 8 21 21 3 21 3 8"/>
-                              <rect x="1" y="3" width="22" height="5"/>
-                              <line x1="10" y1="12" x2="14" y2="12"/>
-                            </svg>
-                          </button>
-                        )}
-                        <button 
-                          className="action-btn delete"
-                          onClick={() => handleDelete(assessment.id)}
-                          title="Delete"
-                        >
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
-                            <polyline points="3 6 5 6 21 6"/>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                           </svg>
                         </button>
                       </div>

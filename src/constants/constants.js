@@ -119,7 +119,9 @@ export const API_ENDPOINTS = {
     ADD_TO_BANK: (id) => `/api/questions/${id}/add-to-bank`,
     REMOVE_FROM_BANK: (id) => `/api/questions/${id}/remove-from-bank`,
     BULK_MCQ_TEMPLATE: '/api/questions/bulk-upload/mcq/template',
-    BULK_MCQ_UPLOAD: '/api/questions/bulk-upload/mcq'
+    BULK_MCQ_UPLOAD: '/api/questions/bulk-upload/mcq',
+    BULK_PROGRAMMING_TEMPLATE: '/api/questions/bulk-upload/programming/template',
+    BULK_PROGRAMMING_UPLOAD: '/api/questions/bulk-upload/programming'
   },
 
   // Assessments
@@ -135,7 +137,9 @@ export const API_ENDPOINTS = {
     UPDATE: (id) => `/api/test-cases/${id}`,
     DELETE: (id) => `/api/test-cases/${id}`,
     TOGGLE_ACTIVE: (id) => `/api/test-cases/${id}/toggle-active`,
-    TOGGLE_HIDDEN: (id) => `/api/test-cases/${id}/toggle-hidden`
+    TOGGLE_HIDDEN: (id) => `/api/test-cases/${id}/toggle-hidden`,
+    BULK_TEMPLATE: '/api/test-cases/bulk-upload/template',
+    BULK_UPLOAD: (programmingQuestionId) => `/api/test-cases/bulk-upload/${programmingQuestionId}`
   },
 
   // Master Data
@@ -168,6 +172,16 @@ export const API_ENDPOINTS = {
     REMOVE_PROGRAMMING_QUESTION: (id, questionId) => `/api/practice-segments/${id}/programming-questions/${questionId}`,
     ADD_MCQ_QUESTION: (id) => `/api/practice-segments/${id}/mcq-questions`,
     REMOVE_MCQ_QUESTION: (id, questionId) => `/api/practice-segments/${id}/mcq-questions/${questionId}`
+  },
+
+  // Playground
+  PLAYGROUND: {
+    LIST: '/api/playground',
+    CREATE: '/api/playground',
+    GET: (id) => `/api/playground/${id}`,
+    UPDATE: (id) => `/api/playground/${id}`,
+    DELETE: (id) => `/api/playground/${id}`,
+    PUBLIC: (shareId) => `/api/playground/public/${shareId}`
   }
 }
 

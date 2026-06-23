@@ -8,7 +8,7 @@ import { API_ENDPOINTS } from '../../constants/constants'
 import styles from './Layout.module.css'
 
 function Layout() {
-  const { apiBaseUrl, accessToken, refreshToken, clearTokens } = useApi()
+  const { apiBaseUrl, accessToken, refreshToken, clearTokens, setTokens } = useApi()
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
@@ -58,13 +58,14 @@ function Layout() {
   const logout = async () => {
     try {
       // Call logout endpoint if refresh token exists
-      if (refreshToken) {
+      const rt = refreshToken || localStorage.getItem('refreshToken')
+      if (rt) {
         await fetch(`${apiBaseUrl}${API_ENDPOINTS.AUTH.LOGOUT}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ refreshToken })
+          body: JSON.stringify({ refreshToken: rt })
         })
       }
     } catch (error) {
@@ -93,27 +94,29 @@ function Layout() {
       }
     }
     
+    const effectiveAccess = accessToken || localStorage.getItem('accessToken')
+    const effectiveRefresh = refreshToken || localStorage.getItem('refreshToken')
+
     try {
       // Add cache-busting to prevent 304 responses
       const timestamp = new Date().getTime()
       const headers = {
         'Content-Type': 'application/json'
       }
-      
-      // Add Authorization header if access token exists
-      if (accessToken) {
-        headers['Authorization'] = `Bearer ${accessToken}`
+
+      if (effectiveAccess) {
+        headers['Authorization'] = `Bearer ${effectiveAccess}`
       }
-      
+
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.AUTH.CHECK}?t=${timestamp}`, {
         method: 'GET',
         headers
       })
-      
+
       if (!response.ok) {
         throw new Error(`Auth check failed: ${response.status}`)
       }
-      
+
       const data = await response.json()
 
       if (data.authenticated && data.user) {
@@ -121,21 +124,20 @@ function Layout() {
         localStorage.setItem('user', JSON.stringify(data.user))
         setLoading(false)
       } else {
-        // Access token is invalid or expired
-        // Try to refresh if we have a refresh token
-        if (refreshToken) {
+        if (effectiveRefresh) {
           try {
             const refreshResponse = await fetch(`${apiBaseUrl}${API_ENDPOINTS.AUTH.REFRESH}`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json'
               },
-              body: JSON.stringify({ refreshToken })
+              body: JSON.stringify({ refreshToken: effectiveRefresh })
             })
 
             if (refreshResponse.ok) {
               const refreshData = await refreshResponse.json()
               if (refreshData.accessToken) {
+                setTokens(refreshData.accessToken, effectiveRefresh)
                 localStorage.setItem('accessToken', refreshData.accessToken)
                 if (refreshData.user) {
                   localStorage.setItem('user', JSON.stringify(refreshData.user))

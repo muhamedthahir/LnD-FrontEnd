@@ -93,11 +93,15 @@ function QuestionDetail() {
     <div className="question-form-page">
       <div className="page-header">
         <div>
-          <button className="back-btn" onClick={() => navigate('/admin/questions/list')}>
+          <button
+            type="button"
+            className="btn-secondary back-btn"
+            onClick={() => navigate('/admin/questions/list')}
+          >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <polyline points="15 18 9 12 15 6"/>
             </svg>
-            Back to Questions
+            Back
           </button>
           <h1>{question.name}</h1>
           <div className="page-meta">

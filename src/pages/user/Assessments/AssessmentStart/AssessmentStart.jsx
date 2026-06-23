@@ -59,6 +59,13 @@ function AssessmentStart() {
     return `${minutes} minute${minutes !== 1 ? 's' : ''}`
   }
 
+  const formatDateTime = (value) => {
+    if (!value) return null
+    const date = new Date(value)
+    if (Number.isNaN(date.getTime())) return null
+    return date.toLocaleString()
+  }
+
   const handleStartAssessment = async () => {
     if (!agreed) {
       toast.warning('Please agree to the terms before starting')
@@ -302,6 +309,26 @@ function AssessmentStart() {
                 ? 'The assessment will auto-submit when time runs out.'
                 : 'Make sure to submit before time runs out.'}
             </li>
+            {assessmentData.timing_mode && (
+              <li className="rule-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
+                  <path d="M8 7h8M8 12h8M8 17h8"/>
+                  <rect x="3" y="4" width="18" height="16" rx="2"/>
+                </svg>
+                Timing mode: {assessmentData.timing_mode === 'SEGMENT_WISE' ? 'Segment-wise timer' : 'Overall timer'}.
+              </li>
+            )}
+            {formatDateTime(assessmentData.start_date_time) && formatDateTime(assessmentData.end_date_time) && (
+              <li className="rule-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
+                  <rect x="3" y="4" width="18" height="18" rx="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6"/>
+                  <line x1="8" y1="2" x2="8" y2="6"/>
+                  <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                Access window: {formatDateTime(assessmentData.start_date_time)} to {formatDateTime(assessmentData.end_date_time)}.
+              </li>
+            )}
             {!assessmentData.allow_back_navigation && (
               <li className="rule-item">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
@@ -320,6 +347,52 @@ function AssessmentStart() {
                 Negative marking is enabled ({assessmentData.negative_mark_percentage}% deduction for wrong answers).
               </li>
             )}
+            {assessmentData.fetch_random_question && (
+              <li className="rule-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
+                  <polyline points="16 3 21 3 21 8"/>
+                  <line x1="4" y1="20" x2="21" y2="3"/>
+                  <polyline points="21 16 21 21 16 21"/>
+                  <line x1="15" y1="15" x2="21" y2="21"/>
+                  <line x1="4" y1="4" x2="9" y2="9"/>
+                </svg>
+                Questions are fetched using randomization criteria.
+              </li>
+            )}
+            {assessmentData.randomize_question_to_users && (
+              <li className="rule-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
+                  <path d="M3 6h18M3 12h18M3 18h18"/>
+                </svg>
+                Question order is randomized per user.
+              </li>
+            )}
+            {assessmentData.ip_restriction && (
+              <li className="rule-item warning">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
+                  <rect x="3" y="11" width="18" height="10" rx="2"/>
+                  <circle cx="12" cy="16" r="1"/>
+                  <path d="M7 11V8a5 5 0 0 1 10 0v3"/>
+                </svg>
+                IP restriction is enabled for this assessment.
+              </li>
+            )}
+            <li className="rule-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
+                <path d="M12 20h9"/>
+                <path d="M12 4h9"/>
+                <path d="M4 9h16"/>
+                <path d="M4 15h16"/>
+              </svg>
+              Scoring threshold: {assessmentData.threshold_for_pass}
+              {assessmentData.threshold_type === 'PERCENTAGE' ? '%' : ' points'} to pass.
+            </li>
+            <li className="rule-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
+                <path d="M12 2v20M2 12h20"/>
+              </svg>
+              Maximum attempts allowed: {assessmentData.max_attempts || 1}.
+            </li>
             {assessmentData.allow_resume && (
               <li className="rule-item success">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">

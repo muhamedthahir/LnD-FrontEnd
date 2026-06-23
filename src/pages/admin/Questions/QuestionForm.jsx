@@ -77,6 +77,7 @@ function QuestionForm() {
   const [bulkUploadFile, setBulkUploadFile] = useState(null)
   const [bulkUploadLoading, setBulkUploadLoading] = useState(false)
   const [bulkUploadResult, setBulkUploadResult] = useState(null)
+  const [bulkUploadType, setBulkUploadType] = useState('mcq') // 'mcq' | 'programming'
   const fileInputRef = useRef(null)
 
   useEffect(() => {
@@ -362,9 +363,39 @@ function QuestionForm() {
     }))
   }
 
-  const handleDownloadTemplate = async () => {
+  const openBulkUploadModal = (type) => {
+    setBulkUploadType(type)
+    setBulkUploadFile(null)
+    setBulkUploadResult(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+    setShowBulkUploadModal(true)
+  }
+
+  const closeBulkUploadModal = () => {
+    // If any questions were created, return to the list so it reflects the new questions
+    const createdAny = bulkUploadResult?.created > 0
+    setShowBulkUploadModal(false)
+    setBulkUploadFile(null)
+    setBulkUploadResult(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+    if (createdAny) {
+      navigate(getBackPath())
+    }
+  }
+
+  const handleDownloadTemplate = async (type = 'mcq') => {
+    const endpoint = type === 'programming'
+      ? API_ENDPOINTS.QUESTIONS.BULK_PROGRAMMING_TEMPLATE
+      : API_ENDPOINTS.QUESTIONS.BULK_MCQ_TEMPLATE
+    const fileName = type === 'programming'
+      ? 'programming_bulk_upload_template.xlsx'
+      : 'mcq_bulk_upload_template.xlsx'
     try {
-      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.QUESTIONS.BULK_MCQ_TEMPLATE}`, {
+      const response = await fetch(`${apiBaseUrl}${endpoint}`, {
         headers: {
           'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
         }
@@ -375,7 +406,7 @@ function QuestionForm() {
         const url = window.URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
-        a.download = 'mcq_bulk_upload_template.xlsx'
+        a.download = fileName
         document.body.appendChild(a)
         a.click()
         window.URL.revokeObjectURL(url)
@@ -404,8 +435,12 @@ function QuestionForm() {
     try {
       const formData = new FormData()
       formData.append('file', bulkUploadFile)
-      
-      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.QUESTIONS.BULK_MCQ_UPLOAD}`, {
+
+      const uploadEndpoint = bulkUploadType === 'programming'
+        ? API_ENDPOINTS.QUESTIONS.BULK_PROGRAMMING_UPLOAD
+        : API_ENDPOINTS.QUESTIONS.BULK_MCQ_UPLOAD
+
+      const response = await fetch(`${apiBaseUrl}${uploadEndpoint}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
@@ -417,16 +452,17 @@ function QuestionForm() {
       
       if (response.ok) {
         setBulkUploadResult({
-          success: true,
-          created: data.created,
+          success: data.created > 0,
+          created: data.created || 0,
           errors: data.errors,
           createdQuestions: data.createdQuestions
         })
-        toast.success(`Successfully created ${data.created} question(s)`)
-        // Navigate back to questions list after successful upload
-        setTimeout(() => {
-          navigate(getBackPath())
-        }, 2000)
+        if (data.created > 0) {
+          toast.success(`Successfully created ${data.created} question(s)`)
+        } else {
+          toast.error('No questions were created. Please review the errors below.')
+        }
+        // Modal stays open so the user can review the result; it closes only when dismissed.
       } else {
         setBulkUploadResult({
           success: false,
@@ -538,7 +574,11 @@ function QuestionForm() {
     <div className="question-form-page">
       <div className="page-header">
         <div>
-          <button className="back-btn" onClick={() => navigate(getBackPath())}>
+          <button
+            type="button"
+            className="btn-secondary back-btn"
+            onClick={() => navigate(getBackPath())}
+          >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <polyline points="15 18 9 12 15 6"/>
             </svg>
@@ -651,7 +691,7 @@ function QuestionForm() {
                       <button
                         type="button"
                         className="btn-secondary"
-                        onClick={handleDownloadTemplate}
+                        onClick={() => handleDownloadTemplate('mcq')}
                       >
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -663,7 +703,48 @@ function QuestionForm() {
                       <button
                         type="button"
                         className="btn-secondary"
-                        onClick={() => setShowBulkUploadModal(true)}
+                        onClick={() => openBulkUploadModal('mcq')}
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                          <polyline points="17 8 12 3 7 8"></polyline>
+                          <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        Bulk Upload
+                      </button>
+                    </div>
+                    <div className="bulk-upload-divider">
+                      <span>OR</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Bulk Upload Option for Programming */}
+              {isProgramming() && !isEditing && (
+                <div className="form-section bulk-upload-section">
+                  <div className="bulk-upload-card">
+                    <div className="bulk-upload-header">
+                      <h3>Bulk Upload Programming Questions</h3>
+                      <p>Upload multiple programming questions at once using an Excel template</p>
+                    </div>
+                    <div className="bulk-upload-actions">
+                      <button
+                        type="button"
+                        className="btn-secondary"
+                        onClick={() => handleDownloadTemplate('programming')}
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                          <polyline points="7 10 12 15 17 10"></polyline>
+                          <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Download Template
+                      </button>
+                      <button
+                        type="button"
+                        className="btn-secondary"
+                        onClick={() => openBulkUploadModal('programming')}
                       >
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -1204,22 +1285,26 @@ function QuestionForm() {
 
       {/* Bulk Upload Modal */}
       {showBulkUploadModal && (
-        <div className="modal-overlay" onClick={() => {
-          setShowBulkUploadModal(false)
-          setBulkUploadFile(null)
-          setBulkUploadResult(null)
-          if (fileInputRef.current) {
-            fileInputRef.current.value = ''
-          }
-        }}>
+        <div className="modal-overlay" onClick={closeBulkUploadModal}>
           <div className="modal-content bulk-upload-modal" onClick={(e) => e.stopPropagation()}>
-            <h2>Bulk Upload MCQ Questions</h2>
+            <h2>{bulkUploadType === 'programming' ? 'Bulk Upload Programming Questions' : 'Bulk Upload MCQ Questions'}</h2>
             
             <div className="bulk-upload-info">
-              <p>Upload MCQ questions using the Excel template. The template includes columns for question title, description, options (A, B, C, D), correct answer, and other metadata.</p>
-              <p style={{ marginTop: 'var(--spacing-sm)', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                <strong>Note:</strong> Correct Answer must be A, B, C, or D. All four options are required.
-              </p>
+              {bulkUploadType === 'programming' ? (
+                <>
+                  <p>Upload programming questions using the Excel template. The template includes columns for question title, description, allowed languages, limits, constraints, sample I/O, test cases, and other metadata.</p>
+                  <p style={{ marginTop: 'var(--spacing-sm)', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                    <strong>Note:</strong> Languages are required (comma-separated, e.g. "Python, Java") and must match existing languages. Test cases can be provided in the Test Case columns.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p>Upload MCQ questions using the Excel template. The template includes columns for question title, description, options (A, B, C, D), correct answer, and other metadata.</p>
+                  <p style={{ marginTop: 'var(--spacing-sm)', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                    <strong>Note:</strong> Correct Answer must be A, B, C, or D. All four options are required.
+                  </p>
+                </>
+              )}
             </div>
 
             <form onSubmit={handleBulkUpload}>
@@ -1263,9 +1348,15 @@ function QuestionForm() {
                       <line x1="6" y1="6" x2="18" y2="18"></line>
                     </svg>
                   </button>
-                  {bulkUploadResult.success ? (
+                  {bulkUploadResult.error ? (
+                    <p>✗ {bulkUploadResult.error}</p>
+                  ) : (
                     <>
-                      <p>✓ Successfully created {bulkUploadResult.created} question(s)</p>
+                      <p>
+                        {bulkUploadResult.created > 0 ? '✓' : '✗'} {bulkUploadResult.created > 0
+                          ? `Successfully created ${bulkUploadResult.created} question(s)`
+                          : 'No questions were created'}
+                      </p>
                       {bulkUploadResult.errors && bulkUploadResult.errors.length > 0 && (
                         <div className="bulk-upload-errors">
                           <p>Errors ({bulkUploadResult.errors.length}):</p>
@@ -1280,8 +1371,6 @@ function QuestionForm() {
                         </div>
                       )}
                     </>
-                  ) : (
-                    <p>✗ {bulkUploadResult.error}</p>
                   )}
                 </div>
               )}
@@ -1290,16 +1379,9 @@ function QuestionForm() {
                 <button
                   type="button"
                   className="btn-secondary"
-                  onClick={() => {
-                    setShowBulkUploadModal(false)
-                    setBulkUploadFile(null)
-                    setBulkUploadResult(null)
-                    if (fileInputRef.current) {
-                      fileInputRef.current.value = ''
-                    }
-                  }}
+                  onClick={closeBulkUploadModal}
                 >
-                  Cancel
+                  {bulkUploadResult?.created > 0 ? 'Done' : 'Cancel'}
                 </button>
                 <button
                   type="submit"

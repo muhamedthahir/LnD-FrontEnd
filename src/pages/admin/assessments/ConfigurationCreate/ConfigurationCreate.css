@@ -98,7 +98,9 @@
 }
 
 .step-icon {
-  font-size: 1.125rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .step-label {
@@ -108,9 +110,9 @@
 
 .step-check {
   margin-left: auto;
+  display: inline-flex;
+  align-items: center;
   color: #28a745;
-  font-size: 0.75rem;
-  font-weight: 600;
 }
 
 /* Form Content */

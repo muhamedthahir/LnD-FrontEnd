@@ -1,3 +1,5 @@
+@import url('../../../components/Button/Button.css');
+
 .question-form-page {
   padding: var(--spacing-lg);
   max-width: 1000px;
@@ -10,6 +12,11 @@
   align-items: flex-start;
   margin-bottom: var(--spacing-lg);
   gap: var(--spacing-md);
+}
+
+/* Keep title stack from flex-shrinking beside primary actions (stops back label feeling cramped) */
+.question-form-page .page-header > div:has(.back-btn) {
+  flex-shrink: 0;
 }
 
 .page-header h1 {
@@ -46,26 +53,30 @@
   height: 16px;
 }
 
-.back-btn {
-  display: flex;
+/* Back control: wide horizontal padding + flex-shrink 0 so row layout cannot compress label */
+.question-form-page .btn-secondary.back-btn {
+  display: inline-flex;
   align-items: center;
-  gap: var(--spacing-xs);
-  padding: 0;
-  background: none;
-  border: none;
-  color: var(--text-secondary);
+  justify-content: center;
+  flex-shrink: 0;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  min-height: 2.5rem;
+  min-inline-size: fit-content;
   font-size: 0.875rem;
+  line-height: 1.25;
+  white-space: nowrap;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: color var(--transition-fast);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast),
+    color var(--transition-fast);
+  box-sizing: border-box;
 }
 
-.back-btn:hover {
-  color: var(--accent-primary);
-}
-
-.back-btn svg {
+.question-form-page .btn-secondary.back-btn svg {
   width: 18px;
   height: 18px;
+  flex-shrink: 0;
 }
 
 /* Form Card */
@@ -347,6 +358,17 @@ textarea.form-input {
 
 .detail-card .card-header h2 {
   margin: 0;
+}
+
+.detail-card .card-header .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.detail-card .card-header .btn-primary svg {
+  width: 18px;
+  height: 18px;
 }
 
 .description-content {

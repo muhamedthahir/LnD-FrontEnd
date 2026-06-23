@@ -1,21 +1,26 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import PasswordSetup from '../../components/PasswordSetup/PasswordSetup'
 import InputModal from '../../components/InputModal/InputModal'
-import { useApi } from '../../contexts/ApiContext'
+import { useApi, AUTH_REMEMBER_ME_KEY } from '../../contexts/ApiContext'
+import {
+  hasPersistedSession,
+  AUTH_SYNC_CHANNEL,
+  broadcastAuthSync
+} from '../../auth/sessionClient'
 import { useMasterData } from '../../hooks/useMasterData'
 import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES } from '../../constants/constants'
 import styles from './Login.module.css'
 
 function Login() {
-  const { apiBaseUrl, setTokens } = useApi()
+  const { apiBaseUrl, setTokens, accessToken, refreshToken } = useApi()
   const { loadAllData } = useMasterData()
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    rememberMe: false
+    rememberMe: localStorage.getItem(AUTH_REMEMBER_ME_KEY) === '1'
   })
   const [errors, setErrors] = useState({})
   const [isLoading, setIsLoading] = useState(false)
@@ -23,6 +28,47 @@ function Login() {
   const [requiresPasswordSetup, setRequiresPasswordSetup] = useState(false)
   const [passwordSetupData, setPasswordSetupData] = useState(null)
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false)
+
+  const redirectIfSession = useCallback(() => {
+    if (requiresPasswordSetup) return
+    if (hasPersistedSession() || accessToken || refreshToken) {
+      navigate('/dashboard', { replace: true })
+    }
+  }, [navigate, requiresPasswordSetup, accessToken, refreshToken])
+
+  // Leave login when a session exists (this tab, storage from other tabs, or BroadcastChannel after login elsewhere)
+  useEffect(() => {
+    redirectIfSession()
+
+    const onStorage = (e) => {
+      if (e.storageArea !== localStorage) return
+      if (
+        e.key === 'accessToken' ||
+        e.key === 'refreshToken' ||
+        e.key === null
+      ) {
+        redirectIfSession()
+      }
+    }
+    window.addEventListener('storage', onStorage)
+
+    let bc
+    try {
+      bc = new BroadcastChannel(AUTH_SYNC_CHANNEL)
+      bc.onmessage = () => redirectIfSession()
+    } catch {
+      // BroadcastChannel unsupported
+    }
+
+    return () => {
+      window.removeEventListener('storage', onStorage)
+      try {
+        bc?.close()
+      } catch {
+        // ignore
+      }
+    }
+  }, [redirectIfSession])
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -118,12 +164,11 @@ function Login() {
       localStorage.setItem('accessToken', data.accessToken)
       localStorage.setItem('refreshToken', data.refreshToken)
       localStorage.setItem('user', JSON.stringify(data.user))
+      localStorage.setItem(AUTH_REMEMBER_ME_KEY, formData.rememberMe ? '1' : '0')
       
-      // Update tokens in ApiContext if available
-      if (setTokens) {
-        setTokens(data.accessToken, data.refreshToken)
-      }
-      
+      setTokens(data.accessToken, data.refreshToken)
+      broadcastAuthSync()
+
       // Load master data in background after login
       // This pre-fetches data to avoid multiple calls later
       loadAllData().catch(console.error)
@@ -173,7 +218,11 @@ function Login() {
   const handlePasswordSetupComplete = () => {
     setRequiresPasswordSetup(false)
     setPasswordSetupData(null)
-    setFormData({ email: '', password: '' })
+    setFormData({
+      email: '',
+      password: '',
+      rememberMe: localStorage.getItem(AUTH_REMEMBER_ME_KEY) === '1'
+    })
     toast.success(SUCCESS_MESSAGES.PASSWORD_SET)
   }
 

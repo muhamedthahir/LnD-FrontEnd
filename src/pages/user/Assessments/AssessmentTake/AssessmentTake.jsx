@@ -6,6 +6,7 @@ import Button from '../../../../components/Button/Button'
 import CodeEditor from '../../../CodeEditor/CodeEditor'
 import styles from './AssessmentTake.module.css'
 
+
 function AssessmentTake() {
   const { mappingId } = useParams()
   const navigate = useNavigate()
@@ -52,6 +53,32 @@ function AssessmentTake() {
   const [isTabLimitExceeded, setIsTabLimitExceeded] = useState(false)
   const countdownTimerRef = useRef(null)
   const exitingRef = useRef(false)
+
+  // Per-question millisecond time tracking. We accumulate time the candidate spends
+  // while a question is the active view, then send it (as a delta) to the server so
+  // the assessment report can show real, millisecond-precise per-question time.
+  const questionEnterTsRef = useRef(null)              // performance.now() when current question became active
+  const pendingQuestionMsRef = useRef({})             // questionId -> ms accumulated but not yet sent
+
+  // Add elapsed time since the question became active to its pending bucket and
+  // restart the clock. Safe to call repeatedly.
+  const accumulateQuestionTime = (questionId) => {
+    const now = (typeof performance !== 'undefined' ? performance.now() : Date.now())
+    if (questionEnterTsRef.current != null && questionId != null) {
+      const delta = now - questionEnterTsRef.current
+      if (delta > 0) {
+        pendingQuestionMsRef.current[questionId] = (pendingQuestionMsRef.current[questionId] || 0) + delta
+      }
+    }
+    questionEnterTsRef.current = now
+  }
+
+  // Return the pending ms for a question and reset it (it is about to be persisted).
+  const consumeQuestionTime = (questionId) => {
+    const ms = Math.round(pendingQuestionMsRef.current[questionId] || 0)
+    pendingQuestionMsRef.current[questionId] = 0
+    return ms
+  }
 
   const getAuthHeader = () => ({
     'Content-Type': 'application/json',
@@ -458,6 +485,8 @@ function AssessmentTake() {
   // Trigger immediate save when navigating questions or segments
   useEffect(() => {
     if (assessmentData) {
+      // Start (or restart) the per-question stopwatch for the newly active question.
+      questionEnterTsRef.current = (typeof performance !== 'undefined' ? performance.now() : Date.now())
       saveProgress()
     }
   }, [currentQuestionIndex, currentSegmentIndex, assessmentData])
@@ -539,6 +568,14 @@ function AssessmentTake() {
     const newAnswers = { ...answers, [questionId]: answer }
     setAnswers(newAnswers)
 
+    // For MCQ, attach the time spent on this question (delta) so the server can
+    // accumulate it. Programming time is sent via the code-submission call instead.
+    let timeTakenMs = 0
+    if (type === 'MCQ') {
+      accumulateQuestionTime(questionId)
+      timeTakenMs = consumeQuestionTime(questionId)
+    }
+
     // Auto-save answer
     try {
       await fetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/save-answer`, {
@@ -547,7 +584,8 @@ function AssessmentTake() {
         body: JSON.stringify({
           question_id: questionId,
           question_type: type,
-          answer: answer
+          answer: answer,
+          time_taken_ms: timeTakenMs
         })
       })
     } catch (error) {
@@ -564,14 +602,17 @@ function AssessmentTake() {
   const canGoNext = currentQuestionIndex < questions.length - 1
   const isLastQuestion = currentQuestionIndex === questions.length - 1
 
-  const handlePrevious = () => {
+  const handlePrevious = async () => {
     if (canGoBack) {
+      await saveCurrentProgress()
       setCurrentQuestionIndex(prev => prev - 1)
     }
   }
 
   const saveCurrentProgress = async () => {
     if (!assessmentData || !currentQuestion) return
+    // Capture the time spent on the current question before we navigate away.
+    accumulateQuestionTime(currentQuestion.id)
     await saveProgressRef.current?.()
 
     const qType = currentQuestion.question_type || currentQuestion.type
@@ -589,7 +630,8 @@ function AssessmentTake() {
             body: JSON.stringify({
               question_id: currentQuestion.id,
               question_type: 'MCQ',
-              answer: currentAnswer
+              answer: currentAnswer,
+              time_taken_ms: consumeQuestionTime(currentQuestion.id)
             })
           })
         } catch (error) {
@@ -1025,7 +1067,11 @@ function AssessmentTake() {
                       onSubmit={async (submissionData) => {
                         // Save the code answer for this question
                         handleAnswerChange(currentQuestion.id, submissionData.code, 'PROGRAMMING')
-                        
+
+                        // Capture millisecond time spent on this programming question.
+                        accumulateQuestionTime(currentQuestion.id)
+                        const codeTimeMs = consumeQuestionTime(currentQuestion.id)
+
                         // Submit to assessment-specific endpoint
                         try {
                           const response = await fetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/submit-code`, {
@@ -1034,7 +1080,8 @@ function AssessmentTake() {
                             body: JSON.stringify({
                               question_id: currentQuestion.id,
                               code: submissionData.code,
-                              language: submissionData.language
+                              language: submissionData.language,
+                              time_taken_ms: codeTimeMs
                             })
                           })
                           

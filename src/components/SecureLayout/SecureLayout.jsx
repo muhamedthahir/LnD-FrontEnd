@@ -10,7 +10,7 @@ import styles from './SecureLayout.module.css'
  * No sidebar, no header navigation - just the content
  */
 function SecureLayout() {
-  const { apiBaseUrl, accessToken, refreshToken, clearTokens, isLoading: apiLoading } = useApi()
+  const { apiBaseUrl, accessToken, refreshToken, clearTokens, setTokens, isLoading: apiLoading } = useApi()
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
@@ -47,62 +47,68 @@ function SecureLayout() {
       // Use the correct auth check endpoint
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.AUTH.CHECK}`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       })
 
-      if (response.ok) {
-        const data = await response.json()
-        const userData = data.user || data
-        setUser(userData)
-        localStorage.setItem('user', JSON.stringify(userData))
-        setLoading(false)
-      } else {
-        // Token is invalid, try refresh
-        const storedRefreshToken = refreshToken || localStorage.getItem('refreshToken')
-        if (storedRefreshToken) {
-          try {
-            const refreshResponse = await fetch(`${apiBaseUrl}${API_ENDPOINTS.AUTH.REFRESH}`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({ refreshToken: storedRefreshToken })
-            })
+      if (!response.ok) {
+        throw new Error(`Auth check failed: ${response.status}`)
+      }
 
-            if (refreshResponse.ok) {
-              const refreshData = await refreshResponse.json()
-              if (refreshData.accessToken && refreshData.user) {
-                localStorage.setItem('accessToken', refreshData.accessToken)
+      const data = await response.json()
+
+      if (data.authenticated && data.user) {
+        setUser(data.user)
+        localStorage.setItem('user', JSON.stringify(data.user))
+        setLoading(false)
+        return
+      }
+
+      const storedRefreshToken = refreshToken || localStorage.getItem('refreshToken')
+      if (storedRefreshToken) {
+        try {
+          const refreshResponse = await fetch(`${apiBaseUrl}${API_ENDPOINTS.AUTH.REFRESH}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ refreshToken: storedRefreshToken })
+          })
+
+          if (refreshResponse.ok) {
+            const refreshData = await refreshResponse.json()
+            if (refreshData.accessToken) {
+              setTokens(refreshData.accessToken, storedRefreshToken)
+              localStorage.setItem('accessToken', refreshData.accessToken)
+              if (refreshData.user) {
                 localStorage.setItem('user', JSON.stringify(refreshData.user))
                 setUser(refreshData.user)
-                setLoading(false)
-                return
               }
+              setLoading(false)
+              return
             }
-          } catch (refreshError) {
-            console.error('Token refresh failed:', refreshError)
           }
+        } catch (refreshError) {
+          console.error('Token refresh failed:', refreshError)
         }
-
-        // As a last resort, try using stored user data
-        const storedUser = localStorage.getItem('user')
-        if (storedUser) {
-          try {
-            setUser(JSON.parse(storedUser))
-            setLoading(false)
-            return
-          } catch (e) {
-            // Invalid stored user
-          }
-        }
-
-        clearTokens()
-        localStorage.removeItem('user')
-        setUser(null)
-        setLoading(false)
       }
+
+      const storedUser = localStorage.getItem('user')
+      if (storedUser) {
+        try {
+          setUser(JSON.parse(storedUser))
+          setLoading(false)
+          return
+        } catch (e) {
+          // Invalid stored user
+        }
+      }
+
+      clearTokens()
+      localStorage.removeItem('user')
+      setUser(null)
+      setLoading(false)
     } catch (error) {
       console.error('Auth check failed:', error)
       
@@ -123,7 +129,7 @@ function SecureLayout() {
       setUser(null)
       setLoading(false)
     }
-  }, [apiBaseUrl, accessToken, refreshToken, clearTokens, apiLoading])
+  }, [apiBaseUrl, accessToken, refreshToken, clearTokens, setTokens, apiLoading])
 
   useEffect(() => {
     checkAuth()

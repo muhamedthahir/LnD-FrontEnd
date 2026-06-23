@@ -457,7 +457,7 @@ function AssessmentResult() {
                 </thead>
                 <tbody>
                   {proctoring_logs.map((log, idx) => (
-                    <tr key={idx} className={log.event_type === 'TAB_SWITCH' || log.event_type === 'WINDOW_BLUR' ? styles.logWarning : ''}>
+                    <tr key={idx} className={log.event_type === 'TAB_SWITCH' || log.event_type === 'WINDOW_BLUR' || log.event_type === 'RAPID_ANSWER' ? styles.logWarning : ''}>
                       <td>{formatDate(log.event_timestamp)}</td>
                       <td>
                         <span className={`${styles.logTypeBadge} ${styles['logType' + log.event_type]}`}>

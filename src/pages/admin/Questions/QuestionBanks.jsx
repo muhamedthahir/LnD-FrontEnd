@@ -6,6 +6,7 @@ import { API_ENDPOINTS } from '../../../constants/constants'
 import Pagination from '../../../components/Pagination/Pagination'
 import Table from '../../../components/Table/Table'
 import './Questions.css'
+import { stripHtml } from './questionUtils'
 
 function QuestionBanks() {
   const navigate = useNavigate()
@@ -157,7 +158,9 @@ function QuestionBanks() {
                     >
                       {bank.name}
                     </td>
-                    <td className="description-cell">{bank.description || '-'}</td>
+                    <td className="description-cell">
+                      {bank.description ? stripHtml(bank.description) : '-'}
+                    </td>
                     <td>{bank.institution_name || '-'}</td>
                     <td>
                       <span className={`status-badge ${getStatusBadgeClass(bank.status_name)}`}>
@@ -167,7 +170,22 @@ function QuestionBanks() {
                     <td>{bank.question_count || 0}</td>
                     <td>{new Date(bank.created_at).toLocaleDateString()}</td>
                     <td className="actions-cell">
-                      <button 
+                      <button
+                        type="button"
+                        className="action-btn view"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          navigate(`/admin/questions/banks/${bank.id}`)
+                        }}
+                        title="View"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                          <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
                         className="action-btn edit"
                         onClick={(e) => {
                           e.stopPropagation()

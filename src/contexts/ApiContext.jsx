@@ -1,7 +1,16 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { getConfig } from '../config'
+import { API_ENDPOINTS } from '../constants/constants'
 
 const ApiContext = createContext()
+
+/** Persisted so "Remember me" preference survives reloads; cleared with auth. */
+export const AUTH_REMEMBER_ME_KEY = 'lnd_auth_remember'
+
+const readTokensFromStorage = () => ({
+  access: localStorage.getItem('accessToken') || null,
+  refresh: localStorage.getItem('refreshToken') || null
+})
 
 export const useApi = () => {
   const context = useContext(ApiContext)
@@ -56,43 +65,76 @@ export const ApiProvider = ({ children }) => {
     loadConfig()
   }, [])
 
-  const setTokens = (accessToken, refreshTokenValue) => {
-    setAccessToken(accessToken)
+  const setTokens = useCallback((nextAccess, refreshTokenValue) => {
+    setAccessToken(nextAccess || null)
     if (refreshTokenValue) {
       setRefreshToken(refreshTokenValue)
     }
-  }
+  }, [])
 
-  const clearTokens = () => {
+  // Other tabs / same-tab: keep React state aligned with localStorage (storage does not fire in the tab that wrote).
+  useEffect(() => {
+    const applyStoredTokens = () => {
+      const { access, refresh } = readTokensFromStorage()
+      setAccessToken((prev) => (prev !== access ? access : prev))
+      setRefreshToken((prev) => (prev !== refresh ? refresh : prev))
+    }
+
+    const onStorage = (e) => {
+      if (e.storageArea !== localStorage) return
+      if (
+        e.key === 'accessToken' ||
+        e.key === 'refreshToken' ||
+        e.key === null
+      ) {
+        applyStoredTokens()
+      }
+    }
+
+    window.addEventListener('storage', onStorage)
+    window.addEventListener('focus', applyStoredTokens)
+    return () => {
+      window.removeEventListener('storage', onStorage)
+      window.removeEventListener('focus', applyStoredTokens)
+    }
+  }, [])
+
+  const clearTokens = useCallback(() => {
     setAccessToken(null)
     setRefreshToken(null)
     localStorage.removeItem('accessToken')
     localStorage.removeItem('refreshToken')
-  }
+    localStorage.removeItem(AUTH_REMEMBER_ME_KEY)
+  }, [])
 
   // Auto-refresh token when access token expires
   useEffect(() => {
-    if (!apiBaseUrl || !refreshToken) return
+    if (!apiBaseUrl) return
+
+    const getStoredRefresh = () => refreshToken || localStorage.getItem('refreshToken')
+    const getStoredAccess = () => accessToken || localStorage.getItem('accessToken')
 
     const refreshAccessToken = async () => {
+      const rt = getStoredRefresh()
+      if (!rt) return
+
       try {
-        const response = await fetch(`${apiBaseUrl}/api/auth/refresh`, {
+        const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.AUTH.REFRESH}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ refreshToken })
+          body: JSON.stringify({ refreshToken: rt })
         })
 
         if (!response.ok) {
-          // Refresh token is invalid, clear everything
           clearTokens()
           localStorage.removeItem('user')
           return
         }
 
         const data = await response.json()
-        
+
         if (data.accessToken) {
           setAccessToken(data.accessToken)
           if (data.user) {
@@ -106,43 +148,33 @@ export const ApiProvider = ({ children }) => {
       }
     }
 
-    // Check if access token is expired and refresh if needed
     const checkAndRefresh = async () => {
-      if (!accessToken) {
-        // No access token, try to refresh
-        if (refreshToken) {
-          await refreshAccessToken()
-        }
+      const at = getStoredAccess()
+      const rt = getStoredRefresh()
+
+      if (!at) {
+        if (rt) await refreshAccessToken()
         return
       }
 
       try {
-        // Decode JWT to check expiration (without verification)
-        const payload = JSON.parse(atob(accessToken.split('.')[1]))
-        const expirationTime = payload.exp * 1000 // Convert to milliseconds
-        const now = Date.now()
-        const timeUntilExpiry = expirationTime - now
+        const payload = JSON.parse(atob(at.split('.')[1]))
+        const expirationTime = payload.exp * 1000
+        const timeUntilExpiry = expirationTime - Date.now()
 
-        // If token expires in less than 5 minutes, refresh it
         if (timeUntilExpiry < 5 * 60 * 1000) {
           await refreshAccessToken()
         }
-      } catch (error) {
-        // Token is invalid, try to refresh
-        if (refreshToken) {
-          await refreshAccessToken()
-        }
+      } catch {
+        if (rt) await refreshAccessToken()
       }
     }
 
-    // Check immediately
     checkAndRefresh()
-
-    // Set up interval to check every minute
     const interval = setInterval(checkAndRefresh, 60 * 1000)
 
     return () => clearInterval(interval)
-  }, [apiBaseUrl, accessToken, refreshToken])
+  }, [apiBaseUrl, accessToken, refreshToken, clearTokens])
 
   return (
     <ApiContext.Provider value={{ 

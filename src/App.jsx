@@ -55,8 +55,14 @@ import QuestionForm from './pages/admin/Questions/QuestionForm'
 import QuestionDetail from './pages/admin/Questions/QuestionDetail'
 import TestCaseManager from './pages/admin/Questions/TestCaseManager'
 import CodeEditorLayout from './pages/CodeEditor/CodeEditorLayout'
+import Playground from './pages/Playground/Playground'
 import PersonalDetails from './pages/PersonalDetails/PersonalDetails'
+import { hasPersistedSession } from './auth/sessionClient'
 import './App.css'
+
+function RootEntry() {
+  return <Navigate to={hasPersistedSession() ? '/dashboard' : '/login'} replace />
+}
 
 function App() {
   return (
@@ -75,10 +81,12 @@ function App() {
         className="toast-theme"
       />
       <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<RootEntry />} />
         <Route path="/login" element={<Login />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/codeeditor" element={<CodeEditorLayout />} />
+        <Route path="/playground" element={<Playground />} />
+        <Route path="/playground/share/:shareId" element={<Playground />} />
         
         {/* Secure Assessment Routes - No sidebar/header */}
         <Route element={<SecureLayout />}>

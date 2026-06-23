@@ -186,30 +186,61 @@ function ConfigurationCreate() {
     return counts
   }
 
-  const handleQuestionBankChange = async (segmentId, questionBankId, segmentQ) => {
-    setFormData({
-      ...formData,
+  // Count the questions manually added to a segment (its "question pool"), by difficulty,
+  // filtered to the chosen question type. Used when a segment's source is POOL.
+  const fetchSegmentPoolCounts = async (segmentId, questionType) => {
+    try {
+      const res = await fetch(`${apiBaseUrl}/api/assessment/segments/${segmentId}`, {
+        headers: getAuthHeader()
+      })
+      if (!res.ok) return { total: 0, easy: 0, medium: 0, hard: 0 }
+      const data = await res.json()
+      const list = (questionType === 'PROGRAMMING' ? data.programming_questions : data.mcq_questions) || []
+      const counts = { total: list.length, easy: 0, medium: 0, hard: 0 }
+      list.forEach(q => {
+        const lvl = (q.level_name || '').toLowerCase()
+        if (lvl === 'easy') counts.easy += 1
+        else if (lvl === 'medium') counts.medium += 1
+        else if (lvl === 'hard') counts.hard += 1
+      })
+      return counts
+    } catch (error) {
+      console.error(`Error fetching pool counts for segment ${segmentId}:`, error)
+      return { total: 0, easy: 0, medium: 0, hard: 0 }
+    }
+  }
+
+  // Resolve available question counts for a segment based on its source (set in Management):
+  //  - BANK  => count from the linked question bank
+  //  - POOL  => count from the questions manually added to the segment
+  const fetchSegmentCounts = async (segment, questionType) => {
+    if (segment.question_source === 'BANK' && segment.question_bank_id) {
+      return fetchQuestionCountsForBank(segment.question_bank_id, levelMapRef.current)
+    }
+    // POOL (and legacy/unset segments, which default to pool going forward):
+    // count the questions manually added to the segment.
+    return fetchSegmentPoolCounts(segment.id, questionType)
+  }
+
+  const handleSegmentTypeChange = async (segment, questionType, segmentQ) => {
+    setFormData(prev => ({
+      ...prev,
       question: {
-        ...formData.question,
+        ...prev.question,
         segment_questions: {
-          ...formData.question.segment_questions,
-          [segmentId]: {
+          ...prev.question.segment_questions,
+          [segment.id]: {
             ...segmentQ,
-            question_bank_id: questionBankId || '',
-            question_type: segmentQ?.question_type || 'MCQ'
+            question_type: questionType
           }
         }
       }
-    })
-
+    }))
     try {
-      const counts = await fetchQuestionCountsForBank(questionBankId || '', levelMapRef.current)
-      setSegmentQuestionCounts(prev => ({
-        ...prev,
-        [segmentId]: counts
-      }))
+      const counts = await fetchSegmentCounts(segment, questionType)
+      setSegmentQuestionCounts(prev => ({ ...prev, [segment.id]: counts }))
     } catch (error) {
-      console.error(`Error fetching counts for segment ${segmentId}:`, error)
+      console.error(`Error refreshing counts for segment ${segment.id}:`, error)
     }
   }
 
@@ -253,13 +284,12 @@ function ConfigurationCreate() {
           const segmentsData = await segmentsRes.json()
           setSegments(segmentsData.segments || segmentsData || [])
           
-          // Fetch question counts for each segment by difficulty (based on question bank)
+          // Fetch question counts for each segment based on its configured source (POOL/BANK)
           const counts = {}
           for (const segment of (segmentsData.segments || segmentsData || [])) {
             try {
               const segmentQ = formData.question.segment_questions?.[segment.id]
-              const countsForBank = await fetchQuestionCountsForBank(segmentQ?.question_bank_id || '', levelMap)
-              counts[segment.id] = countsForBank
+              counts[segment.id] = await fetchSegmentCounts(segment, segmentQ?.question_type || 'MCQ')
             } catch (error) {
               console.error(`Error fetching question counts for segment ${segment.id}:`, error)
               counts[segment.id] = { total: 0, easy: 0, medium: 0, hard: 0 }
@@ -335,9 +365,9 @@ function ConfigurationCreate() {
                 const segmentQ = segmentQuestionsFromCriteria[segment.id]
                 if (segmentQ) {
                   try {
-                    updatedCounts[segment.id] = await fetchQuestionCountsForBank(segmentQ.question_bank_id || '', levelMap)
+                    updatedCounts[segment.id] = await fetchSegmentCounts(segment, segmentQ.question_type || 'MCQ')
                   } catch (error) {
-                    console.error(`Error fetching bank counts for segment ${segment.id}:`, error)
+                    console.error(`Error fetching counts for segment ${segment.id}:`, error)
                   }
                 }
               }
@@ -601,13 +631,58 @@ function ConfigurationCreate() {
   }
 
   const steps = [
-    { id: 'basic', label: 'Basic Info', icon: '📋' },
-    { id: 'timing', label: 'Timing', icon: '⏱️' },
-    { id: 'proctoring', label: 'Proctoring', icon: '👁️' },
-    { id: 'scoring', label: 'Scoring', icon: '📊' },
-    { id: 'questions', label: 'Questions', icon: '❓' },
-    { id: 'access', label: 'Access', icon: '🔐' }
+    { id: 'basic', label: 'Basic Info' },
+    { id: 'timing', label: 'Timing' },
+    { id: 'proctoring', label: 'Proctoring' },
+    { id: 'scoring', label: 'Scoring' },
+    { id: 'questions', label: 'Questions' },
+    { id: 'access', label: 'Access' }
   ]
+
+  const stepIcons = {
+    basic: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
+        <path d="M9 2h6a1 1 0 0 1 1 1v1h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2V3a1 1 0 0 1 1-1z"/>
+        <path d="M9 4h6"/>
+        <path d="M8 11h8M8 15h5"/>
+      </svg>
+    ),
+    timing: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
+        <circle cx="12" cy="13" r="8"/>
+        <path d="M12 9v4l2.5 2.5"/>
+        <path d="M9 2h6"/>
+      </svg>
+    ),
+    proctoring: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+        <circle cx="12" cy="12" r="3"/>
+      </svg>
+    ),
+    scoring: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
+        <path d="M3 3v18h18"/>
+        <rect x="7" y="11" width="3" height="6"/>
+        <rect x="12" y="7" width="3" height="10"/>
+        <rect x="17" y="13" width="3" height="4"/>
+      </svg>
+    ),
+    questions: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+        <line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+    ),
+    access: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
+        <rect x="3" y="11" width="18" height="11" rx="2"/>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        <circle cx="12" cy="16" r="1"/>
+      </svg>
+    )
+  }
 
   if (loading) {
     return (
@@ -645,10 +720,14 @@ function ConfigurationCreate() {
               className={`step-item ${activeStep === index ? 'active' : ''} ${activeStep > index ? 'completed' : ''}`}
               onClick={() => setActiveStep(index)}
             >
-              <span className="step-icon">{step.icon}</span>
+              <span className="step-icon">{stepIcons[step.id]}</span>
               <span className="step-label">{step.label}</span>
               {activeStep > index && (
-                <span className="step-check">✓</span>
+                <span className="step-check">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" width="14" height="14">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </span>
               )}
             </button>
           ))}
@@ -833,10 +912,24 @@ function ConfigurationCreate() {
                   <input
                     type="checkbox"
                     checked={formData.proctoring.proctoring_enabled}
-                    onChange={(e) => setFormData({ ...formData, proctoring: { ...formData.proctoring, proctoring_enabled: e.target.checked } })}
+                    onChange={(e) => {
+                      const enabled = e.target.checked
+                      setFormData({
+                        ...formData,
+                        proctoring: {
+                          ...formData.proctoring,
+                          proctoring_enabled: enabled,
+                          // Master switch: turning proctoring on/off cascades to the security options
+                          full_screen_mandatory: enabled,
+                          webcam_required: enabled,
+                          disable_copy_paste: enabled,
+                          disable_right_click: enabled
+                        }
+                      })
+                    }}
                   />
                   <span className="toggle-label">Enable Proctoring</span>
-                  <span className="toggle-desc">Turn on proctoring features for this configuration</span>
+                  <span className="toggle-desc">Turn on proctoring features for this configuration (auto-enables the options below)</span>
                 </label>
                 <label className="toggle-item">
                   <input
@@ -1195,40 +1288,19 @@ function ConfigurationCreate() {
                             
                             <div className="form-row" style={{ marginBottom: '16px' }}>
                               <div className="form-group">
-                                <label>Question Bank</label>
-                                <select
-                                  value={segmentQ.question_bank_id || ''}
-                                  onChange={(e) => handleQuestionBankChange(segment.id, e.target.value, segmentQ)}
-                                >
-                                  <option value="">All Question Banks</option>
-                                  {questionBanks.map((bank) => (
-                                    <option key={bank.id} value={bank.id}>
-                                      {bank.name}
-                                    </option>
-                                  ))}
-                                </select>
-                                <span className="help-text">Choose a bank to restrict random fetch</span>
+                                <label>Question Source</label>
+                                <div style={{ padding: '8px 12px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-sm)', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                                  {segment.question_source === 'BANK'
+                                    ? `Question Bank${(() => { const b = questionBanks.find(qb => String(qb.id) === String(segment.question_bank_id)); return b ? `: ${b.name}` : '' })()}`
+                                    : 'Question Pool (questions added in Management)'}
+                                </div>
+                                <span className="help-text">Set per segment in Management &rarr; Segments</span>
                               </div>
                               <div className="form-group">
                                 <label>Question Type</label>
                                 <select
                                   value={segmentQ.question_type || 'MCQ'}
-                                  onChange={(e) => {
-                                    const questionType = e.target.value
-                                    setFormData({ 
-                                      ...formData, 
-                                      question: { 
-                                        ...formData.question,
-                                        segment_questions: {
-                                          ...formData.question.segment_questions,
-                                          [segment.id]: {
-                                            ...segmentQ,
-                                            question_type: questionType
-                                          }
-                                        }
-                                      } 
-                                    })
-                                  }}
+                                  onChange={(e) => handleSegmentTypeChange(segment, e.target.value, segmentQ)}
                                 >
                                   <option value="MCQ">MCQ / Multiselect</option>
                                   <option value="PROGRAMMING">Programming</option>

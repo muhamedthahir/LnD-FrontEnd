@@ -249,6 +249,27 @@
 .score.passed { color: #28a745; }
 .score.failed { color: #dc3545; }
 
+.attempt-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.attempt-select {
+  min-width: 240px;
+  padding: 6px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 0.8rem;
+}
+
+.attempt-count {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
 /* Action Buttons */
 .action-buttons {
   display: flex;

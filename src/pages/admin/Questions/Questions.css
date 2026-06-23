@@ -290,6 +290,15 @@
   background: rgba(99, 102, 241, 0.2);
 }
 
+.action-btn.view {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.action-btn.view:hover {
+  background: rgba(59, 130, 246, 0.2);
+}
+
 .action-btn.test-case {
   background: rgba(20, 184, 166, 0.1);
   color: #14b8a6;

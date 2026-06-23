@@ -69,7 +69,6 @@
   color: var(--text-primary);
   margin: 0;
   flex: 1;
-  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
 }
 
 .btnRefreshViolation {
@@ -688,6 +687,11 @@
 .logTypeFULLSCREEN_EXIT {
   background: rgba(245, 158, 11, 0.1);
   color: #f59e0b;
+}
+
+.logTypeRAPID_ANSWER {
+  background: rgba(168, 85, 247, 0.12);
+  color: #a855f7;
 }
 
 .logMetadata {

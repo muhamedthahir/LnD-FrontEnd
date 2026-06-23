@@ -43,6 +43,7 @@ function AssessmentUserMapping() {
     mapping: null
   })
   const [confirmLoading, setConfirmLoading] = useState(false)
+  const [selectedAttemptByUser, setSelectedAttemptByUser] = useState({})
 
   const getAuthHeader = () => ({
     'Content-Type': 'application/json',
@@ -498,6 +499,49 @@ function AssessmentUserMapping() {
     return true
   })
 
+  const groupedUsers = useMemo(() => {
+    const groups = new Map()
+    filteredUsers.forEach((mapping) => {
+      const key = mapping.user_id
+      if (!groups.has(key)) {
+        groups.set(key, {
+          user_id: mapping.user_id,
+          user_name: mapping.user_name,
+          user_email: mapping.user_email,
+          attempts: []
+        })
+      }
+      groups.get(key).attempts.push(mapping)
+    })
+
+    return Array.from(groups.values())
+      .map((group) => {
+        const attempts = [...group.attempts].sort((a, b) => (b.attempt_number || 0) - (a.attempt_number || 0))
+        const bestAttempt = attempts.reduce((best, current) => {
+          const bestScore = Number(best?.percentage_score ?? -1)
+          const currentScore = Number(current?.percentage_score ?? -1)
+          if (currentScore > bestScore) return current
+          if (currentScore === bestScore && (current?.attempt_number || 0) > (best?.attempt_number || 0)) return current
+          return best
+        }, attempts[0] || null)
+
+        const selectedId = selectedAttemptByUser[group.user_id]
+        const selectedAttempt = attempts.find((attempt) => attempt.id === selectedId) || bestAttempt || attempts[0]
+
+        return {
+          ...group,
+          attempts,
+          bestAttempt,
+          selectedAttempt
+        }
+      })
+      .sort((a, b) => (a.user_name || '').localeCompare(b.user_name || ''))
+  }, [filteredUsers, selectedAttemptByUser])
+
+  const latestAttemptByUser = useMemo(() => {
+    return groupedUsers.map((group) => group.attempts[0]).filter(Boolean)
+  }, [groupedUsers])
+
   const filteredGroups = useMemo(() => {
     return availableGroups.filter(group => 
       group.name.toLowerCase().includes(groupSearch.toLowerCase())
@@ -558,6 +602,26 @@ function AssessmentUserMapping() {
     }
     return { title: '', message: '', confirmText: 'Proceed' }
   }, [confirmModal.mapping, confirmModal.type])
+
+  useEffect(() => {
+    setSelectedAttemptByUser((prev) => {
+      const next = {}
+      groupedUsers.forEach((group) => {
+        if (prev[group.user_id] && group.attempts.some((attempt) => attempt.id === prev[group.user_id])) {
+          next[group.user_id] = prev[group.user_id]
+        }
+      })
+
+      const prevKeys = Object.keys(prev)
+      const nextKeys = Object.keys(next)
+      if (prevKeys.length === nextKeys.length) {
+        const isSame = prevKeys.every((key) => prev[key] === next[key])
+        if (isSame) return prev
+      }
+
+      return next
+    })
+  }, [groupedUsers])
 
   if (loading) {
     return (
@@ -855,19 +919,19 @@ function AssessmentUserMapping() {
 
       <div className="stats-bar">
         <div className="stat">
-          <span className="stat-value">{userMappings.length}</span>
+          <span className="stat-value">{groupedUsers.length}</span>
           <span className="stat-label">Total Users</span>
         </div>
         <div className="stat">
-          <span className="stat-value">{userMappings.filter(m => m.status === 'NOT_STARTED').length}</span>
+          <span className="stat-value">{latestAttemptByUser.filter(m => m?.status === 'NOT_STARTED').length}</span>
           <span className="stat-label">Pending</span>
         </div>
         <div className="stat">
-          <span className="stat-value">{userMappings.filter(m => m.status === 'IN_PROGRESS').length}</span>
+          <span className="stat-value">{latestAttemptByUser.filter(m => m?.status === 'IN_PROGRESS').length}</span>
           <span className="stat-label">In Progress</span>
         </div>
         <div className="stat">
-          <span className="stat-value">{userMappings.filter(m => ['COMPLETED', 'SUBMITTED'].includes(m.status)).length}</span>
+          <span className="stat-value">{latestAttemptByUser.filter(m => m && ['COMPLETED', 'SUBMITTED'].includes(m.status)).length}</span>
           <span className="stat-label">Completed</span>
         </div>
       </div>
@@ -881,7 +945,7 @@ function AssessmentUserMapping() {
         </select>
       </div>
 
-      {filteredUsers.length === 0 ? (
+      {groupedUsers.length === 0 ? (
         <div className="empty-state">
           <h3>No users found</h3>
           <p>Add users to this assessment configuration.</p>
@@ -905,16 +969,19 @@ function AssessmentUserMapping() {
               </tr>
             </thead>
             <tbody>
-              {filteredUsers.map(mapping => (
-                <tr key={mapping.id}>
+              {groupedUsers.map(group => {
+                const mapping = group.selectedAttempt
+                if (!mapping) return null
+                return (
+                <tr key={group.user_id}>
                   <td>
                     <div className="user-cell">
                       <div className="user-avatar">
-                        {mapping.user_name?.charAt(0) || mapping.user_email?.charAt(0) || '?'}
+                        {group.user_name?.charAt(0) || group.user_email?.charAt(0) || '?'}
                       </div>
                       <div className="user-info">
-                        <span className="user-name">{mapping.user_name || 'Unknown'}</span>
-                        <span className="user-email">{mapping.user_email}</span>
+                        <span className="user-name">{group.user_name || 'Unknown'}</span>
+                        <span className="user-email">{group.user_email}</span>
                       </div>
                     </div>
                   </td>
@@ -923,7 +990,31 @@ function AssessmentUserMapping() {
                       {mapping.status?.replace('_', ' ') || 'NOT STARTED'}
                     </span>
                   </td>
-                  <td>{mapping.attempts_used || 0} / {mapping.max_attempts || 1}</td>
+                  <td>
+                    <div className="attempt-cell">
+                      <select
+                        className="attempt-select"
+                        value={selectedAttemptByUser[group.user_id] || 'best'}
+                        onChange={(e) => {
+                          const value = e.target.value
+                          setSelectedAttemptByUser((prev) => ({
+                            ...prev,
+                            [group.user_id]: value === 'best' ? undefined : Number(value)
+                          }))
+                        }}
+                      >
+                        <option value="best">
+                          Best Attempt ({Math.round(Number(group.bestAttempt?.percentage_score ?? 0))}%)
+                        </option>
+                        {group.attempts.map((attempt) => (
+                          <option key={attempt.id} value={attempt.id}>
+                            Attempt #{attempt.attempt_number || 1} - {attempt.status?.replace('_', ' ') || 'NOT STARTED'}
+                          </option>
+                        ))}
+                      </select>
+                      <span className="attempt-count">{group.attempts.length} / {mapping.max_attempts || 1}</span>
+                    </div>
+                  </td>
                   <td>
                     <div className="progress-report-cell">
                       {['IN_PROGRESS', 'COMPLETED', 'SUBMITTED', 'DISQUALIFIED'].includes(mapping.status) ? (
@@ -1026,7 +1117,7 @@ function AssessmentUserMapping() {
                     </div>
                   </td>
                 </tr>
-              ))}
+              )})}
             </tbody>
           </Table>
         </div>

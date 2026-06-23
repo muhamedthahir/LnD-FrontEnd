@@ -34,11 +34,25 @@ function QuestionBankForm() {
   })
 
   useEffect(() => {
-    fetchMasterData()
-    if (isEditing) {
-      fetchQuestionBank()
+    if (!apiBaseUrl) return
+
+    if (!isEditing) {
+      fetchMasterData()
+      return
     }
-  }, [id])
+
+    let cancelled = false
+    setLoading(true)
+    Promise.all([fetchMasterData(), fetchQuestionBank({ manageLoading: false })])
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [apiBaseUrl, id, isEditing])
 
   const fetchMasterData = async () => {
     try {
@@ -82,11 +96,11 @@ function QuestionBankForm() {
     }
   }
 
-  const fetchQuestionBank = async () => {
+  const fetchQuestionBank = async ({ manageLoading = true } = {}) => {
+    if (manageLoading) setLoading(true)
     try {
-      setLoading(true)
       const response = await fetch(
-        `${apiBaseUrl}${API_ENDPOINTS.QUESTION_BANKS.GET(id)}`,
+        `${apiBaseUrl}${API_ENDPOINTS.QUESTION_BANKS.GET(id)}?include_questions=false`,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -117,7 +131,7 @@ function QuestionBankForm() {
       toast.error('Failed to fetch question bank')
       navigate('/admin/questions/banks')
     } finally {
-      setLoading(false)
+      if (manageLoading) setLoading(false)
     }
   }
 
@@ -180,11 +194,15 @@ function QuestionBankForm() {
     <div className="question-form-page">
       <div className="page-header">
         <div>
-          <button className="back-btn" onClick={() => navigate('/admin/questions/banks')}>
+          <button
+            type="button"
+            className="btn-secondary back-btn"
+            onClick={() => navigate('/admin/questions/banks')}
+          >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <polyline points="15 18 9 12 15 6"/>
             </svg>
-            Back to Question Banks
+            Back
           </button>
           <h1>{isEditing ? 'Edit Question Bank' : 'Create Question Bank'}</h1>
         </div>

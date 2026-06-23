@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
-import { useApi } from '../../contexts/ApiContext'
+import { useApi, AUTH_REMEMBER_ME_KEY } from '../../contexts/ApiContext'
 import styles from './Header.module.css'
 
 function Header({ user, logout, onToggleSidebar, isSidebarCollapsed }) {
@@ -102,6 +102,7 @@ function Header({ user, logout, onToggleSidebar, isSidebarCollapsed }) {
       localStorage.removeItem('user')
       localStorage.removeItem('accessToken')
       localStorage.removeItem('refreshToken')
+      localStorage.removeItem(AUTH_REMEMBER_ME_KEY)
       navigate('/login')
     }
     setShowUserMenu(false)

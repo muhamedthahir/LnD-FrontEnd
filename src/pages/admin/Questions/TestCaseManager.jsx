@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { useApi } from '../../../contexts/ApiContext'
@@ -36,6 +36,13 @@ function TestCaseManager() {
   
   // Delete confirmation
   const [deleteModal, setDeleteModal] = useState({ show: false, testCase: null })
+
+  // Bulk upload state
+  const [showBulkUploadModal, setShowBulkUploadModal] = useState(false)
+  const [bulkUploadFile, setBulkUploadFile] = useState(null)
+  const [bulkUploadLoading, setBulkUploadLoading] = useState(false)
+  const [bulkUploadResult, setBulkUploadResult] = useState(null)
+  const fileInputRef = useRef(null)
 
   useEffect(() => {
     fetchQuestionAndTestCases()
@@ -270,6 +277,119 @@ function TestCaseManager() {
     }
   }
 
+  const handleDownloadTemplate = async () => {
+    try {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.TEST_CASES.BULK_TEMPLATE}`, {
+        headers: {
+          'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
+        }
+      })
+
+      if (response.ok) {
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = 'test_cases_bulk_upload_template.xlsx'
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(a)
+        toast.success('Template downloaded successfully')
+      } else {
+        toast.error('Failed to download template')
+      }
+    } catch (error) {
+      console.error('Error downloading template:', error)
+      toast.error('Failed to download template')
+    }
+  }
+
+  const openBulkUploadModal = () => {
+    setBulkUploadFile(null)
+    setBulkUploadResult(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+    setShowBulkUploadModal(true)
+  }
+
+  const closeBulkUploadModal = () => {
+    const createdAny = bulkUploadResult?.created > 0
+    setShowBulkUploadModal(false)
+    setBulkUploadFile(null)
+    setBulkUploadResult(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+    if (createdAny) {
+      fetchQuestionAndTestCases()
+    }
+  }
+
+  const handleBulkUpload = async (e) => {
+    e.preventDefault()
+
+    if (!bulkUploadFile) {
+      toast.error('Please select an Excel file')
+      return
+    }
+
+    if (!programmingQuestion?.id) {
+      toast.error('Programming question not loaded')
+      return
+    }
+
+    setBulkUploadLoading(true)
+    setBulkUploadResult(null)
+
+    try {
+      const uploadData = new FormData()
+      uploadData.append('file', bulkUploadFile)
+
+      const response = await fetch(
+        `${apiBaseUrl}${API_ENDPOINTS.TEST_CASES.BULK_UPLOAD(programmingQuestion.id)}`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
+          },
+          body: uploadData
+        }
+      )
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setBulkUploadResult({
+          success: data.created > 0,
+          created: data.created || 0,
+          errors: data.errors
+        })
+        if (data.created > 0) {
+          toast.success(`Successfully created ${data.created} test case(s)`)
+        } else {
+          toast.error('No test cases were created. Please review the errors below.')
+        }
+      } else {
+        setBulkUploadResult({
+          success: false,
+          error: data.error || 'Failed to upload test cases'
+        })
+        toast.error(data.error || 'Failed to upload test cases')
+      }
+    } catch (error) {
+      console.error('Error uploading test cases:', error)
+      setBulkUploadResult({
+        success: false,
+        error: 'Failed to upload test cases'
+      })
+      toast.error('Failed to upload test cases')
+    } finally {
+      setBulkUploadLoading(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="testcase-manager-page">
@@ -295,13 +415,31 @@ function TestCaseManager() {
           </div>
         </div>
         {!showForm && (
-          <button className="btn-primary" onClick={handleAddNew}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="12" y1="5" x2="12" y2="19"/>
-              <line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-            Add Test Case
-          </button>
+          <div className="header-actions">
+            <button className="btn-secondary" onClick={handleDownloadTemplate}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              Download Template
+            </button>
+            <button className="btn-secondary" onClick={openBulkUploadModal}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              Bulk Upload
+            </button>
+            <button className="btn-primary" onClick={handleAddNew}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              Add Test Case
+            </button>
+          </div>
         )}
       </div>
 
@@ -556,6 +694,109 @@ function TestCaseManager() {
           </div>
         )}
       </div>
+
+      {/* Bulk Upload Modal */}
+      {showBulkUploadModal && (
+        <div className="modal-overlay" onClick={closeBulkUploadModal}>
+          <div className="modal-content bulk-upload-modal" onClick={(e) => e.stopPropagation()}>
+            <h2>Bulk Upload Test Cases</h2>
+
+            <div className="bulk-upload-info">
+              <p>Upload multiple test cases at once using the Excel template. Columns: Name, Description, Input, Expected Output, Weight, Active, Hidden from User, Exact Match, Match Percentage.</p>
+              <p style={{ marginTop: 'var(--spacing-sm)', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                <strong>Note:</strong> Name and Expected Output are required. Active / Hidden / Exact Match accept Yes or No (defaults: Active=Yes, Hidden=No, Exact Match=Yes). Match Percentage applies only when Exact Match is No.
+              </p>
+            </div>
+
+            <form onSubmit={handleBulkUpload}>
+              <div className="form-group">
+                <label>Upload Excel File *</label>
+                <div className="file-input-wrapper">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".xlsx,.xls"
+                    onChange={(e) => setBulkUploadFile(e.target.files[0] || null)}
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="file-input-button"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                      <polyline points="17 8 12 3 7 8"></polyline>
+                      <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    {bulkUploadFile ? bulkUploadFile.name : 'Choose File'}
+                  </button>
+                </div>
+                {bulkUploadFile && (
+                  <div className="file-input-label">Selected: {bulkUploadFile.name}</div>
+                )}
+              </div>
+
+              {bulkUploadResult && (
+                <div className={`bulk-upload-result ${bulkUploadResult.success ? 'success' : 'error'}`}>
+                  <button
+                    type="button"
+                    className="bulk-upload-close"
+                    onClick={() => setBulkUploadResult(null)}
+                    title="Close"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </button>
+                  {bulkUploadResult.error ? (
+                    <p>✗ {bulkUploadResult.error}</p>
+                  ) : (
+                    <>
+                      <p>
+                        {bulkUploadResult.created > 0 ? '✓' : '✗'} {bulkUploadResult.created > 0
+                          ? `Successfully created ${bulkUploadResult.created} test case(s)`
+                          : 'No test cases were created'}
+                      </p>
+                      {bulkUploadResult.errors && bulkUploadResult.errors.length > 0 && (
+                        <div className="bulk-upload-errors">
+                          <p>Errors ({bulkUploadResult.errors.length}):</p>
+                          <ul>
+                            {bulkUploadResult.errors.slice(0, 10).map((err, idx) => (
+                              <li key={idx}>Row {err.row}: {err.error}</li>
+                            ))}
+                            {bulkUploadResult.errors.length > 10 && (
+                              <li>... and {bulkUploadResult.errors.length - 10} more errors</li>
+                            )}
+                          </ul>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={closeBulkUploadModal}
+                >
+                  {bulkUploadResult?.created > 0 ? 'Done' : 'Cancel'}
+                </button>
+                <button
+                  type="submit"
+                  className="btn-primary"
+                  disabled={bulkUploadLoading}
+                >
+                  {bulkUploadLoading ? 'Uploading...' : 'Upload Test Cases'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Delete Confirmation Modal */}
       <ConfirmModal

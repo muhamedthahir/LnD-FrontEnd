@@ -22,9 +22,6 @@ function AssessmentEdit() {
   const [publishing, setPublishing] = useState(false)
   const [showPublishConfirm, setShowPublishConfirm] = useState(false)
   
-  // Assessment-level settings
-  const [enableSectionWiseTimer, setEnableSectionWiseTimer] = useState(false)
-  
   // Question selection modal
   const [showQuestionModal, setShowQuestionModal] = useState(false)
   const [currentSegmentForQuestions, setCurrentSegmentForQuestions] = useState(null)
@@ -46,7 +43,9 @@ function AssessmentEdit() {
     segment_duration: 1800,
     allow_back_navigation: true,
     is_locked: false,
-    negative_marking_enabled: null
+    negative_marking_enabled: null,
+    question_source: 'POOL',
+    question_bank_id: ''
   })
   
   // Question selection (inline in segment)
@@ -158,6 +157,58 @@ function AssessmentEdit() {
     }
   }
 
+  const handleDuplicateAssessment = async () => {
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/assessment/assessments/${id}/duplicate`, {
+        method: 'POST',
+        headers: getAuthHeader()
+      })
+
+      if (!response.ok) throw new Error('Failed to duplicate assessment')
+
+      const data = await response.json()
+      toast.success('Assessment duplicated successfully!')
+      if (data?.assessment?.id) {
+        navigate(`/admin/assessments/${data.assessment.id}/edit`)
+      }
+    } catch (error) {
+      console.error('Error duplicating assessment:', error)
+      toast.error('Failed to duplicate assessment')
+    }
+  }
+
+  const handleArchiveAssessment = async () => {
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/assessment/assessments/${id}/status`, {
+        method: 'PATCH',
+        headers: getAuthHeader(),
+        body: JSON.stringify({ status: 'ARCHIVED' })
+      })
+      if (!response.ok) throw new Error('Failed to archive assessment')
+      toast.success('Assessment archived successfully!')
+      fetchAssessment()
+    } catch (error) {
+      console.error('Error archiving assessment:', error)
+      toast.error('Failed to archive assessment')
+    }
+  }
+
+  const handleDeleteAssessment = async () => {
+    if (!window.confirm('Are you sure you want to delete this assessment?')) return
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/assessment/assessments/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeader()
+      })
+      if (!response.ok) throw new Error('Failed to delete assessment')
+      toast.success('Assessment deleted successfully!')
+      navigate('/admin/assessments/management')
+    } catch (error) {
+      console.error('Error deleting assessment:', error)
+      toast.error('Failed to delete assessment')
+    }
+  }
+
   const handleSaveDetails = async () => {
     try {
       const response = await fetch(`${apiBaseUrl}/api/assessment/assessments/${id}`, {
@@ -185,8 +236,11 @@ function AssessmentEdit() {
       segment_duration: 1800,
       allow_back_navigation: true,
       is_locked: false,
-      negative_marking_enabled: null
+      negative_marking_enabled: null,
+      question_source: 'POOL',
+      question_bank_id: ''
     })
+    fetchQuestionBanks()
     setShowSegmentModal(true)
   }
 
@@ -198,14 +252,22 @@ function AssessmentEdit() {
       segment_duration: segment.segment_duration,
       allow_back_navigation: segment.allow_back_navigation,
       is_locked: segment.is_locked,
-      negative_marking_enabled: segment.negative_marking_enabled ?? null
+      negative_marking_enabled: segment.negative_marking_enabled ?? null,
+      question_source: segment.question_source || 'POOL',
+      question_bank_id: segment.question_bank_id || ''
     })
+    fetchQuestionBanks()
     setShowSegmentModal(true)
   }
 
   const handleSaveSegment = async () => {
     if (!segmentForm.name.trim()) {
       toast.error('Segment name is required')
+      return
+    }
+
+    if (segmentForm.question_source === 'BANK' && !segmentForm.question_bank_id) {
+      toast.error('Please select a question bank for this segment')
       return
     }
 
@@ -223,7 +285,9 @@ function AssessmentEdit() {
             segment_duration: segmentForm.segment_duration,
             allow_back_navigation: segmentForm.allow_back_navigation,
             is_locked: segmentForm.is_locked,
-            negative_marking_enabled: segmentForm.negative_marking_enabled ?? null
+            negative_marking_enabled: segmentForm.negative_marking_enabled ?? null,
+            question_source: segmentForm.question_source,
+            question_bank_id: segmentForm.question_source === 'BANK' ? (segmentForm.question_bank_id || null) : null
           })
         })
         if (!response.ok) {
@@ -413,6 +477,23 @@ function AssessmentEdit() {
         ? prev.filter(id => id !== questionId)
         : [...prev, questionId]
     )
+  }
+
+  // Select/deselect all questions under the current filter (the currently loaded list)
+  const areAllVisibleSelected = availableQuestions.length > 0 &&
+    availableQuestions.every(q => selectedQuestions.includes(q.id))
+
+  const toggleSelectAllQuestions = () => {
+    if (areAllVisibleSelected) {
+      const visibleIds = new Set(availableQuestions.map(q => q.id))
+      setSelectedQuestions(prev => prev.filter(id => !visibleIds.has(id)))
+    } else {
+      setSelectedQuestions(prev => {
+        const merged = new Set(prev)
+        availableQuestions.forEach(q => merged.add(q.id))
+        return Array.from(merged)
+      })
+    }
   }
 
   // Add selected questions to segment
@@ -1090,6 +1171,22 @@ function AssessmentEdit() {
           <Button variant="outline" onClick={() => navigate(`/admin/assessments/${id}/configurations`)}>
             Configurations
           </Button>
+          <Button variant="outline" onClick={handleDuplicateAssessment}>
+            Duplicate
+          </Button>
+          {assessment.status === 'PUBLISHED' && (
+            <Button variant="outline" onClick={handleArchiveAssessment}>
+              Archive
+            </Button>
+          )}
+          {assessment.status === 'DRAFT' && (
+            <Button variant="primary" onClick={() => setShowPublishConfirm(true)} disabled={publishing}>
+              Publish
+            </Button>
+          )}
+          <Button variant="danger" onClick={handleDeleteAssessment}>
+            Delete
+          </Button>
         </div>
       </div>
 
@@ -1182,18 +1279,6 @@ function AssessmentEdit() {
               </svg>
               Add Segment
             </Button>
-          </div>
-          
-          {/* Assessment-level Settings */}
-          <div className={styles.assessmentSettings}>
-            <div className={styles.settingItem}>
-              <Toggle
-                checked={enableSectionWiseTimer}
-                onChange={setEnableSectionWiseTimer}
-                label="Enable Section Wise Timer"
-              />
-              <span className={styles.settingHelp}>When enabled, each segment can have its own duration</span>
-            </div>
           </div>
 
           {segments.length === 0 ? (
@@ -1335,12 +1420,19 @@ function AssessmentEdit() {
                         <span className={`${styles.settingBadge} ${segment.allow_back_navigation ? styles.enabled : styles.disabled}`}>
                           {segment.allow_back_navigation ? '✓' : '✗'} Back Navigation
                         </span>
-                        <span className={`${styles.settingBadge} ${segment.is_locked ? styles.enabled : styles.disabled}`}>
-                          {segment.is_locked ? '✓' : '✗'} Locked After Complete
+                        <span className={`${styles.settingBadge} ${styles.enabled}`}>
+                          {segment.question_source === 'BANK' ? 'Source: Question Bank' : 'Source: Question Pool'}
                         </span>
                       </div>
 
                       {/* Unified Questions Section */}
+                      {segment.question_source === 'BANK' ? (
+                        <div className={styles.questionsSection}>
+                          <p className={styles.noQuestions}>
+                            This segment pulls questions from a question bank. Configure how many to fetch (and the difficulty mix) in the assessment's Configurations &rarr; Questions step. No need to add questions here.
+                          </p>
+                        </div>
+                      ) : (
                       <div className={styles.questionsSection}>
                         <div className={styles.questionsHeader}>
                           <h5>Questions ({(segment.programming_questions?.length || 0) + (segment.mcq_questions?.length || 0)})</h5>
@@ -1529,6 +1621,7 @@ function AssessmentEdit() {
                           <p className={styles.noQuestions}>No questions added yet. Click "Add Question" to get started.</p>
                         )}
                       </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -1687,7 +1780,15 @@ function AssessmentEdit() {
                     <Table className={styles.questionsTable}>
                       <thead>
                         <tr>
-                          <th style={{width: '40px'}}></th>
+                          <th style={{width: '40px'}}>
+                            <input
+                              type="checkbox"
+                              checked={areAllVisibleSelected}
+                              onChange={toggleSelectAllQuestions}
+                              onClick={(e) => e.stopPropagation()}
+                              title="Select all questions under current filter"
+                            />
+                          </th>
                           <th style={{width: '70px'}}>ID</th>
                           <th>Question</th>
                           <th style={{width: '100px'}}>Type</th>
@@ -1795,16 +1896,63 @@ function AssessmentEdit() {
                 />
               </div>
 
-              {enableSectionWiseTimer && (
+              <div className={styles.formGroup}>
+                <label>Duration (minutes)</label>
+                <input
+                  type="number"
+                  value={segmentForm.segment_duration / 60}
+                  onChange={(e) => setSegmentForm({ ...segmentForm, segment_duration: parseInt(e.target.value) * 60 })}
+                  min="1"
+                />
+                <span className={styles.helpText}>Used when the configuration's timing mode is segment-wise</span>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Question Source</label>
+                <div className={styles.sourceOptions}>
+                  <label className={styles.sourceOption}>
+                    <input
+                      type="radio"
+                      name="question_source"
+                      value="POOL"
+                      checked={segmentForm.question_source === 'POOL'}
+                      onChange={() => setSegmentForm({ ...segmentForm, question_source: 'POOL', question_bank_id: '' })}
+                    />
+                    <span>
+                      <strong>Create New Question Pool</strong>
+                      <small>Add specific questions to this segment; random fetch (if enabled) draws from them</small>
+                    </span>
+                  </label>
+                  <label className={styles.sourceOption}>
+                    <input
+                      type="radio"
+                      name="question_source"
+                      value="BANK"
+                      checked={segmentForm.question_source === 'BANK'}
+                      onChange={() => setSegmentForm({ ...segmentForm, question_source: 'BANK' })}
+                    />
+                    <span>
+                      <strong>From Question Bank</strong>
+                      <small>Random fetch draws from the selected bank; no need to add questions here</small>
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              {segmentForm.question_source === 'BANK' && (
                 <div className={styles.formGroup}>
-                  <label>Duration (minutes)</label>
-                  <input
-                    type="number"
-                    value={segmentForm.segment_duration / 60}
-                    onChange={(e) => setSegmentForm({ ...segmentForm, segment_duration: parseInt(e.target.value) * 60 })}
-                    min="1"
-                    disabled={!enableSectionWiseTimer}
-                  />
+                  <label>Question Bank <span className={styles.required}>*</span></label>
+                  <select
+                    value={segmentForm.question_bank_id || ''}
+                    onChange={(e) => setSegmentForm({ ...segmentForm, question_bank_id: e.target.value })}
+                  >
+                    <option value="">Select a question bank</option>
+                    {questionBanks.map(bank => (
+                      <option key={bank.id} value={bank.id}>
+                        {bank.name}{bank.question_count != null ? ` (${bank.question_count})` : ''}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               )}
 
@@ -1818,18 +1966,6 @@ function AssessmentEdit() {
                   Allow Back Navigation
                 </label>
                 <span className={styles.helpText}>Users can go back to previous questions</span>
-              </div>
-
-              <div className={`${styles.formGroup} ${styles.checkboxGroup}`}>
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={segmentForm.is_locked}
-                    onChange={(e) => setSegmentForm({ ...segmentForm, is_locked: e.target.checked })}
-                  />
-                  Lock After Completion
-                </label>
-                <span className={styles.helpText}>Once completed, users cannot return to this segment</span>
               </div>
             </div>
 
