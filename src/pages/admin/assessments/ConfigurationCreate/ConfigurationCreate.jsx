@@ -222,6 +222,72 @@ function ConfigurationCreate() {
     return fetchSegmentPoolCounts(segment.id, questionType)
   }
 
+  const getSegmentQuestionEntry = (segmentQuestions, segmentId) => {
+    if (!segmentQuestions) return {}
+    return segmentQuestions[segmentId] ?? segmentQuestions[String(segmentId)] ?? {}
+  }
+
+  /** Prefer stored type when valid; otherwise infer from segment pool composition. */
+  const resolveSegmentQuestionType = (segment, segmentQ = {}) => {
+    const prog = Number(segment.programming_question_count) || 0
+    const mcq = Number(segment.mcq_question_count) || 0
+    const stored = segmentQ.question_type
+    if (stored === 'PROGRAMMING' && prog > 0) return 'PROGRAMMING'
+    if (stored === 'MCQ' && mcq > 0) return 'MCQ'
+    if (prog > 0 && mcq === 0) return 'PROGRAMMING'
+    if (mcq > 0 && prog === 0) return 'MCQ'
+    if (prog > mcq) return 'PROGRAMMING'
+    if (mcq > prog) return 'MCQ'
+    return stored || 'MCQ'
+  }
+
+  const buildDefaultSegmentQuestions = (segmentsList) => {
+    const segmentQuestions = {}
+    for (const segment of segmentsList) {
+      segmentQuestions[segment.id] = {
+        total: 0,
+        easy: 0,
+        medium: 0,
+        hard: 0,
+        question_bank_id: '',
+        question_type: resolveSegmentQuestionType(segment, {})
+      }
+    }
+    return segmentQuestions
+  }
+
+  const normalizeSegmentQuestions = (segmentsList, segmentQuestions = {}) => {
+    const normalized = {}
+    for (const segment of segmentsList) {
+      const existing = getSegmentQuestionEntry(segmentQuestions, segment.id)
+      normalized[segment.id] = {
+        total: 0,
+        easy: 0,
+        medium: 0,
+        hard: 0,
+        question_bank_id: '',
+        ...existing,
+        question_type: resolveSegmentQuestionType(segment, existing)
+      }
+    }
+    return normalized
+  }
+
+  const buildSegmentCountsMap = async (segmentsList, segmentQuestions) => {
+    const counts = {}
+    for (const segment of segmentsList) {
+      const segmentQ = getSegmentQuestionEntry(segmentQuestions, segment.id)
+      const questionType = resolveSegmentQuestionType(segment, segmentQ)
+      try {
+        counts[segment.id] = await fetchSegmentCounts(segment, questionType)
+      } catch (error) {
+        console.error(`Error fetching question counts for segment ${segment.id}:`, error)
+        counts[segment.id] = { total: 0, easy: 0, medium: 0, hard: 0 }
+      }
+    }
+    return counts
+  }
+
   const handleSegmentTypeChange = async (segment, questionType, segmentQ) => {
     setFormData(prev => ({
       ...prev,
@@ -250,6 +316,9 @@ function ConfigurationCreate() {
       
       try {
         setLoading(true)
+
+        let segmentsList = []
+        let segmentQuestionsForCounts = null
         
         // Fetch assessment
         let assessmentData = null
@@ -282,102 +351,20 @@ function ConfigurationCreate() {
         })
         if (segmentsRes.ok) {
           const segmentsData = await segmentsRes.json()
-          setSegments(segmentsData.segments || segmentsData || [])
-          
-          // Fetch question counts for each segment based on its configured source (POOL/BANK)
-          const counts = {}
-          for (const segment of (segmentsData.segments || segmentsData || [])) {
-            try {
-              const segmentQ = formData.question.segment_questions?.[segment.id]
-              counts[segment.id] = await fetchSegmentCounts(segment, segmentQ?.question_type || 'MCQ')
-            } catch (error) {
-              console.error(`Error fetching question counts for segment ${segment.id}:`, error)
-              counts[segment.id] = { total: 0, easy: 0, medium: 0, hard: 0 }
-            }
-          }
-          setSegmentQuestionCounts(counts)
-          
-          // Initialize segment_questions in formData if not exists
-          setFormData(prev => {
-            const segmentQuestions = { ...prev.question.segment_questions || {} }
-            for (const segment of (segmentsData.segments || segmentsData || [])) {
-              if (!segmentQuestions[segment.id]) {
-                segmentQuestions[segment.id] = { total: 0, easy: 0, medium: 0, hard: 0, question_bank_id: '', question_type: 'MCQ' }
-              }
-            }
-            return {
+          segmentsList = segmentsData.segments || segmentsData || []
+          setSegments(segmentsList)
+          if (!editConfigId) {
+            segmentQuestionsForCounts = buildDefaultSegmentQuestions(segmentsList)
+            setFormData(prev => ({
               ...prev,
               question: {
                 ...prev.question,
-                segment_questions: segmentQuestions
-              }
-            }
-          })
-          
-          // If editing, fetch existing random fetch criteria for each segment
-          if (editConfigId) {
-            const segmentQuestionsFromCriteria = {}
-            for (const segment of (segmentsData.segments || segmentsData || [])) {
-              try {
-                const criteriaRes = await fetch(`${apiBaseUrl}/api/assessment/segments/${segment.id}/random-fetch-criteria`, {
-                  headers: getAuthHeader()
-                })
-                if (criteriaRes.ok) {
-                  const criteria = await criteriaRes.json()
-                  // Aggregate criteria by segment (there might be multiple criteria per segment for different question types)
-                  if (criteria && criteria.length > 0) {
-                    const aggregated = criteria.reduce((acc, c) => {
-                      acc.total = (acc.total || 0) + (c.total_questions || 0)
-                      acc.easy = (acc.easy || 0) + (c.easy_count || 0)
-                      acc.medium = (acc.medium || 0) + (c.medium_count || 0)
-                      acc.hard = (acc.hard || 0) + (c.hard_count || 0)
-                      if (!acc.question_type && c.question_type) {
-                        acc.question_type = c.question_type
-                      }
-                      if (!acc.question_bank_id && c.question_bank_id) {
-                        acc.question_bank_id = c.question_bank_id
-                      }
-                      return acc
-                    }, { total: 0, easy: 0, medium: 0, hard: 0, question_bank_id: '', question_type: 'MCQ' })
-                    segmentQuestionsFromCriteria[segment.id] = aggregated
-                  }
-                }
-              } catch (error) {
-                console.error(`Error fetching criteria for segment ${segment.id}:`, error)
-              }
-            }
-            
-            // Update formData with fetched criteria
-            if (Object.keys(segmentQuestionsFromCriteria).length > 0) {
-              setFormData(prev => ({
-                ...prev,
-                question: {
-                  ...prev.question,
-                  segment_questions: {
-                    ...prev.question.segment_questions,
-                    ...segmentQuestionsFromCriteria
-                  }
-                }
-              }))
-
-              const updatedCounts = {}
-              for (const segment of (segmentsData.segments || segmentsData || [])) {
-                const segmentQ = segmentQuestionsFromCriteria[segment.id]
-                if (segmentQ) {
-                  try {
-                    updatedCounts[segment.id] = await fetchSegmentCounts(segment, segmentQ.question_type || 'MCQ')
-                  } catch (error) {
-                    console.error(`Error fetching counts for segment ${segment.id}:`, error)
-                  }
+                segment_questions: {
+                  ...prev.question.segment_questions,
+                  ...segmentQuestionsForCounts
                 }
               }
-              if (Object.keys(updatedCounts).length > 0) {
-                setSegmentQuestionCounts(prev => ({
-                  ...prev,
-                  ...updatedCounts
-                }))
-              }
-            }
+            }))
           }
         }
 
@@ -428,6 +415,10 @@ function ConfigurationCreate() {
             const scoringConfig = config.scoring_config || {}
             const questionConfig = config.question_config || {}
             const accessConfig = config.access_config || {}
+            segmentQuestionsForCounts = normalizeSegmentQuestions(
+              segmentsList,
+              questionConfig.segment_questions || {}
+            )
             
             // Handle backward compatibility for new scheduling fields
             let showScoreMode = 'never'
@@ -505,7 +496,7 @@ function ConfigurationCreate() {
                 easy_count: questionConfig.easy_count ?? 0,
                 medium_count: questionConfig.medium_count ?? 0,
                 hard_count: questionConfig.hard_count ?? 0,
-                segment_questions: questionConfig.segment_questions || {}
+                segment_questions: segmentQuestionsForCounts
               },
               access: {
                 access_code: accessConfig.access_code || '',
@@ -522,6 +513,12 @@ function ConfigurationCreate() {
             console.error('Failed to fetch config:', configRes.status, configRes.statusText)
             toast.error('Failed to load configuration data')
           }
+        }
+
+        if (segmentsList.length > 0) {
+          const sq = segmentQuestionsForCounts
+            || buildDefaultSegmentQuestions(segmentsList)
+          setSegmentQuestionCounts(await buildSegmentCountsMap(segmentsList, sq))
         }
       } catch (error) {
         console.error('Error fetching data:', error)
@@ -542,6 +539,10 @@ function ConfigurationCreate() {
 
     try {
       setSaving(true)
+      const normalizedSegmentQuestions = segments.length > 0
+        ? normalizeSegmentQuestions(segments, formData.question.segment_questions)
+        : formData.question.segment_questions
+
       const payload = {
         adminData: {
           assessment_id: assessmentId,
@@ -559,7 +560,10 @@ function ConfigurationCreate() {
           timing: formData.timing,
           proctoring: formData.proctoring,
           scoring: formData.scoring,
-          question: formData.question,
+          question: {
+            ...formData.question,
+            segment_questions: normalizedSegmentQuestions
+          },
           access: formData.access
         }
       }
@@ -1277,7 +1281,11 @@ function ConfigurationCreate() {
                     ) : (
                       segments.map(segment => {
                         const counts = segmentQuestionCounts[segment.id] || { total: 0, easy: 0, medium: 0, hard: 0 }
-                        const segmentQ = formData.question.segment_questions?.[segment.id] || { total: 0, easy: 0, medium: 0, hard: 0, question_bank_id: '' }
+                        const segmentQEntry = getSegmentQuestionEntry(formData.question.segment_questions, segment.id)
+                        const segmentQ = {
+                          ...segmentQEntry,
+                          question_type: resolveSegmentQuestionType(segment, segmentQEntry)
+                        }
                         
                         return (
                           <div key={segment.id} style={{ marginBottom: '24px', padding: '16px', background: 'var(--bg-primary)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
@@ -1342,6 +1350,7 @@ function ConfigurationCreate() {
                                           segment_questions: {
                                             ...formData.question.segment_questions,
                                             [segment.id]: {
+                                              ...segmentQ,
                                               total: newTotal,
                                               easy: newEasy,
                                               medium: newMedium,

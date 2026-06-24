@@ -4,6 +4,7 @@ import { toast } from 'react-toastify'
 import Editor from '@monaco-editor/react'
 import { useApi } from '../../contexts/ApiContext'
 import { API_ENDPOINTS } from '../../constants/constants'
+import { useConfirmModal } from '../../hooks/useConfirmModal'
 import styles from './Playground.module.css'
 
 const DEFAULT_HTML = `<div class="card">
@@ -68,6 +69,7 @@ function Playground() {
   const { shareId } = useParams()
   const navigate = useNavigate()
   const { apiBaseUrl, accessToken } = useApi()
+  const { confirm, ConfirmDialog } = useConfirmModal()
   const shareMode = Boolean(shareId)
 
   const [html, setHtml] = useState(DEFAULT_HTML)
@@ -348,7 +350,12 @@ ${js}
 
   const handleDelete = useCallback(async (id, e) => {
     e.stopPropagation()
-    if (!window.confirm('Delete this playground?')) return
+    const ok = await confirm({
+      title: 'Delete playground',
+      message: 'Delete this playground? This action cannot be undone.',
+      confirmText: 'Delete'
+    })
+    if (!ok) return
     try {
       await apiFetch(API_ENDPOINTS.PLAYGROUND.DELETE(id), { method: 'DELETE' })
       if (id === projectId) resetToNew()
@@ -357,7 +364,7 @@ ${js}
     } catch (err) {
       toast.error(err.message || 'Failed to delete')
     }
-  }, [apiFetch, projectId, resetToNew, loadProjects, search])
+  }, [apiFetch, projectId, resetToNew, loadProjects, search, confirm])
 
   return (
     <div className={styles.playground}>
@@ -528,6 +535,7 @@ ${js}
           </div>
         </div>
       </div>
+      <ConfirmDialog />
     </div>
   )
 }

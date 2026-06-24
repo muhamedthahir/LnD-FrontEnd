@@ -7,6 +7,7 @@ import { useApi } from '../../../contexts/ApiContext'
 import MailerTemplateForm from './MailerTemplateForm'
 import { emptyFormState, validateMailerTemplateForm } from './mailerTemplateConstants'
 import ThemedSelect from '../../../components/ThemedSelect/ThemedSelect'
+import { useConfirmModal } from '../../../hooks/useConfirmModal'
 import '../Users/Users.css'
 import './MailerTemplates.css'
 
@@ -31,6 +32,7 @@ const STATUS_FILTER_OPTIONS = [
 function MailerTemplates() {
   const navigate = useNavigate()
   const { apiBaseUrl, accessToken } = useApi()
+  const { confirm, ConfirmDialog } = useConfirmModal()
   const [templates, setTemplates] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -189,8 +191,13 @@ function MailerTemplates() {
   }
 
   const handleDelete = async (template) => {
-    if (!window.confirm(`Are you sure you want to delete "${template.name}"?`)) return
-    
+    const ok = await confirm({
+      title: 'Delete template',
+      message: `Are you sure you want to delete "${template.name}"?`,
+      confirmText: 'Delete'
+    })
+    if (!ok) return
+
     try {
       const response = await fetch(`${apiBaseUrl}/api/mailer-templates/${template.id}`, {
         method: 'DELETE',
@@ -549,6 +556,7 @@ function MailerTemplates() {
           </div>
         </div>
       )}
+      <ConfirmDialog />
     </div>
   )
 }

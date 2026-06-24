@@ -1,0 +1,53 @@
+---
+description: Use modals and toasts for user feedback — never alert() or window.confirm()
+globs: src/**/*.{js,jsx,ts,tsx}
+alwaysApply: false
+---
+
+# User feedback: modals and toasts only
+
+Do **not** use `alert()`, `window.alert()`, `confirm()`, or `window.confirm()` in the frontend.
+
+## Confirmations (destructive or irreversible actions)
+
+Use `useConfirmModal` for promise-based confirms:
+
+```jsx
+import { useConfirmModal } from '../../hooks/useConfirmModal'
+
+const { confirm, ConfirmDialog } = useConfirmModal()
+
+const handleDelete = async () => {
+  const ok = await confirm({
+    title: 'Delete item',
+    message: 'Are you sure? This cannot be undone.',
+    confirmText: 'Delete'
+  })
+  if (!ok) return
+  // ... perform action
+}
+
+// In JSX:
+<ConfirmDialog />
+```
+
+For pages that already manage modal state (e.g. multiple confirm types), use `ConfirmModal` directly instead of adding a second modal system.
+
+## Notifications (success, error, info)
+
+Use `react-toastify`:
+
+```jsx
+import { toast } from 'react-toastify'
+
+toast.success('Saved successfully')
+toast.error('Failed to save')
+```
+
+## When to use which
+
+| Need | Use |
+|------|-----|
+| User must approve before an action | `useConfirmModal` or `ConfirmModal` |
+| Action completed or failed | `toast.success` / `toast.error` |
+| Blocking system requirement (e.g. fullscreen) | Dedicated modal component in the page |

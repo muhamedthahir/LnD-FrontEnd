@@ -403,6 +403,22 @@ function PracticeExercise() {
                   allowedLanguages={currentQuestion.languages || []}
                   codeTemplates={currentQuestion.codeTemplates || []}
                   testCases={currentQuestion.testCases || []}
+                  onSaveCode={async ({ code, language }) => {
+                    await fetch(`${apiBaseUrl}/api/submissions/programming/save-code`, {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
+                      },
+                      body: JSON.stringify({
+                        programming_question_id: currentQuestion.id,
+                        practice_segment_id: parseInt(practiceId),
+                        course_id: parseInt(courseId),
+                        submitted_code: code,
+                        language_used: language
+                      })
+                    })
+                  }}
                   onSubmit={async (data) => {
                     try {
                       const response = await fetch(`${apiBaseUrl}/api/submissions/programming/submit`, {

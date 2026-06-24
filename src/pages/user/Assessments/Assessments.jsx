@@ -63,6 +63,7 @@ function Assessments() {
       IN_PROGRESS: { label: 'In Progress', color: 'in-progress', canStart: true },
       COMPLETED: { label: 'Completed', color: 'completed', canStart: false },
       SUBMITTED: { label: 'Completed', color: 'completed', canStart: false },
+      DISQUALIFIED: { label: 'Disqualified', color: 'expired', canStart: false },
       EXPIRED: { label: 'Expired', color: 'expired', canStart: false },
       PAUSED: { label: 'In Progress', color: 'in-progress', canStart: true }
     }
@@ -159,10 +160,41 @@ function Assessments() {
     navigate(`/user/assessments/${mappingId}/results`)
   }
 
+  const handleRetake = async (assessment) => {
+    const mappingId = assessment.user_mapping_id || assessment.id
+    if (!mappingId) {
+      toast.error('Invalid assessment data')
+      return
+    }
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/retake`, {
+        method: 'POST',
+        headers: getAuthHeader()
+      })
+      if (response.ok) {
+        const data = await response.json()
+        const newMappingId = data.mapping_id || data.id
+        toast.success('New attempt created')
+        navigate(`/user/assessments/${newMappingId}/start`)
+      } else {
+        const errorData = await response.json().catch(() => ({}))
+        toast.error(errorData.error || 'Failed to start retake')
+      }
+    } catch (error) {
+      console.error('Error starting retake:', error)
+      toast.error('Failed to start retake')
+    }
+  }
+
+  // Whether a finished attempt can still be retaken (attempts remaining + window open).
+  const canRetake = (assessment) =>
+    ['COMPLETED', 'SUBMITTED', 'DISQUALIFIED'].includes(assessment.status) &&
+    (assessment.total_attempts || 1) < (assessment.max_attempts || 1)
+
   // Count assessments by category
   const inProgressCount = assessments.filter(a => ['IN_PROGRESS', 'PAUSED'].includes(a.status)).length
   const notStartedCount = assessments.filter(a => ['INVITED', 'NOT_STARTED'].includes(a.status)).length
-  const completedCount = assessments.filter(a => ['COMPLETED', 'SUBMITTED'].includes(a.status)).length
+  const completedCount = assessments.filter(a => ['COMPLETED', 'SUBMITTED', 'DISQUALIFIED', 'EXPIRED'].includes(a.status)).length
 
   // Tab configuration
   const tabs = [
@@ -183,7 +215,7 @@ function Assessments() {
         filtered = assessments.filter(a => ['INVITED', 'NOT_STARTED'].includes(a.status))
         break
       case 'completed':
-        filtered = assessments.filter(a => ['COMPLETED', 'SUBMITTED'].includes(a.status))
+        filtered = assessments.filter(a => ['COMPLETED', 'SUBMITTED', 'DISQUALIFIED', 'EXPIRED'].includes(a.status))
         break
       default:
         filtered = []
@@ -276,9 +308,9 @@ function Assessments() {
                   <span className={`status-badge ${statusConfig.color}`}>
                     {statusConfig.label}
                   </span>
-                  {assessment.total_attempts > 1 && (
+                  {(assessment.max_attempts || 1) > 1 && (
                     <span className="attempts-badge">
-                      Attempt {assessment.current_attempt || assessment.attempt_number || 1} of {assessment.total_attempts}
+                      Attempt {assessment.current_attempt || assessment.attempt_number || 1} of {assessment.max_attempts}
                     </span>
                   )}
                 </div>
@@ -366,12 +398,20 @@ function Assessments() {
                        assessment.status === 'INVITED' ? 'Start Assessment' : 'Start Assessment'}
                     </Button>
                   )}
-                  {['COMPLETED', 'SUBMITTED'].includes(assessment.status) && (
+                  {['COMPLETED', 'SUBMITTED', 'DISQUALIFIED'].includes(assessment.status) && (
                     <Button 
                       variant="outline" 
                       onClick={() => handleViewResults(assessment)}
                     >
                       View Results
+                    </Button>
+                  )}
+                  {canRetake(assessment) && (
+                    <Button 
+                      variant="primary" 
+                      onClick={() => handleRetake(assessment)}
+                    >
+                      Retake
                     </Button>
                   )}
                 </div>

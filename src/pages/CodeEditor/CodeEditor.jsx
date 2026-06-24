@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import Editor from '@monaco-editor/react'
 import { useApi } from '../../contexts/ApiContext'
 import { CODE_SNIPPETS, LANGUAGE_KEY_MAP } from '../../constants/constants'
+import { outputsMatch } from '../../utils/outputCompare'
 import styles from './CodeEditor.module.css'
 
 function CodeEditor({ 
@@ -11,18 +12,24 @@ function CodeEditor({
   codeTemplates = [],
   testCases = [],
   onSubmit,
+  onSaveCode,
   onRunComplete,
-  assessmentMode = false,  // Hide pass/fail status, marks, percentages
-  assessmentMappingId = null  // For assessment-specific submissions
+  assessmentMode = false,  // Assessment-specific display rules for test results/history
+  assessmentMappingId = null,  // For assessment-specific submissions
+  assessmentSegmentId = null
 }) {
   const { apiBaseUrl, accessToken } = useApi()
-  const [editorHeight, setEditorHeight] = useState(65) // percentage
+  const [editorHeight, setEditorHeight] = useState(52) // percentage — leave room for test results
   const [code, setCode] = useState('')
+  const [savedCodeSnapshot, setSavedCodeSnapshot] = useState('')
+  const [lastTestedCode, setLastTestedCode] = useState('')
+  const [visibleTestsPassed, setVisibleTestsPassed] = useState(false)
   const [output, setOutput] = useState('')
   const [userInput, setUserInput] = useState('') // Custom input for programs
   const [interactiveInput, setInteractiveInput] = useState('') // Input for interactive mode
   const [language, setLanguage] = useState('')
   const [isRunning, setIsRunning] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isInteractive, setIsInteractive] = useState(false) // Interactive execution mode
   const [testResults, setTestResults] = useState([])
@@ -38,6 +45,16 @@ function CodeEditor({
   
   // Feature flag for interactive mode - set to false for now
   const useInteractiveMode = false
+
+  const visibleTestCases = testCases.filter(tc => !tc.is_hidden)
+  const hasTestCases = visibleTestCases.length > 0
+  const codeIsSaved = code === savedCodeSnapshot && code.trim().length > 0
+  const canSubmitCode = hasTestCases
+    ? visibleTestsPassed && lastTestedCode === code && codeIsSaved
+    : codeIsSaved
+  const saveButtonLabel = activeTab === 'custom'
+    ? 'Save & Run'
+    : (activeTab === 'testcases' ? 'Save & Test' : 'Save Code')
 
   // Default languages if none provided
   const defaultLanguages = [
@@ -62,7 +79,17 @@ function CodeEditor({
     
     setLoadingHistory(true)
     try {
-      const response = await fetch(`${apiBaseUrl}/api/submissions/programming/${qId}/history`, {
+      const params = new URLSearchParams()
+      if (assessmentMode && assessmentMappingId) {
+        params.set('assessment_user_mapping_id', String(assessmentMappingId))
+        if (assessmentSegmentId) {
+          params.set('assessment_segment_id', String(assessmentSegmentId))
+        }
+      }
+
+      const query = params.toString()
+      const url = `${apiBaseUrl}/api/submissions/programming/${qId}/history${query ? `?${query}` : ''}`
+      const response = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',
           ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
@@ -82,6 +109,15 @@ function CodeEditor({
     return null
   }
 
+  const parseSubmissionMeta = (submission) => {
+    if (!submission?.output) return {}
+    try {
+      return JSON.parse(submission.output)
+    } catch {
+      return {}
+    }
+  }
+
   // Clear state and initialize when question changes
   useEffect(() => {
     const initializeEditor = async () => {
@@ -97,6 +133,9 @@ function CodeEditor({
         setUserInput('')
         setTestResults([])
         setActiveTab('custom')
+        setSavedCodeSnapshot('')
+        setLastTestedCode('')
+        setVisibleTestsPassed(false)
       }
       
       // Fetch submission history
@@ -107,7 +146,6 @@ function CodeEditor({
       let selectedCode = ''
       
       if (previousSubmission && previousSubmission.last_submitted_code) {
-        // User has previously submitted - use their last submission
         const prevLangKey = previousSubmission.language_used || ''
         const langObj = languages.find(l => 
           l.key === prevLangKey || 
@@ -142,10 +180,25 @@ function CodeEditor({
       
       setLanguage(selectedLanguage)
       setCode(selectedCode)
+      setSavedCodeSnapshot(selectedCode || '')
     }
     
     initializeEditor()
-  }, [questionId, languages, codeTemplates, initialCode, apiBaseUrl, accessToken])
+  }, [questionId, assessmentMappingId, assessmentSegmentId, apiBaseUrl, accessToken])
+
+  // Give the results panel more space when viewing test cases or submissions
+  useEffect(() => {
+    if (activeTab === 'testcases' || activeTab === 'history') {
+      setEditorHeight((h) => Math.min(h, 48))
+    }
+  }, [activeTab])
+
+  // Reset pass state when code changes after a successful visible test run
+  useEffect(() => {
+    if (lastTestedCode && code !== lastTestedCode) {
+      setVisibleTestsPassed(false)
+    }
+  }, [code, lastTestedCode])
 
   // Handle language change - update code with corresponding template
   const handleLanguageChange = (newLanguage) => {
@@ -188,8 +241,8 @@ function CodeEditor({
     const containerRect = containerRef.current.getBoundingClientRect()
     const newHeight = ((e.clientY - containerRect.top) / containerRect.height) * 100
 
-    // Limit the height between 30% and 90%
-    if (newHeight >= 30 && newHeight <= 90) {
+    // Limit the height between 28% and 72%
+    if (newHeight >= 28 && newHeight <= 72) {
       setEditorHeight(newHeight)
     }
   }, [])
@@ -433,8 +486,16 @@ function CodeEditor({
     }
   }
 
+  const persistCode = async () => {
+    if (onSaveCode) {
+      await onSaveCode({ code, language, questionId })
+    }
+    setSavedCodeSnapshot(code)
+    return true
+  }
+
   const handleRunWithTestCases = async () => {
-    if (isRunning || !testCases.length) return
+    if (isRunning || visibleTestCases.length === 0) return
     
     setIsRunning(true)
     setTestResults([])
@@ -442,18 +503,8 @@ function CodeEditor({
     
     const results = []
     
-    for (let i = 0; i < testCases.length; i++) {
-      const testCase = testCases[i]
-      
-      // Skip hidden test cases for now (they would be run on server for submission)
-      if (testCase.is_hidden) {
-        results.push({
-          ...testCase,
-          status: 'hidden',
-          actualOutput: null
-        })
-        continue
-      }
+    for (let i = 0; i < visibleTestCases.length; i++) {
+      const testCase = visibleTestCases[i]
       
       try {
         const response = await fetch(`${apiBaseUrl}/api/codeExecute`, {
@@ -475,9 +526,10 @@ function CodeEditor({
         let passed = false
         
         if (response.ok && result.run) {
-          actualOutput = (result.run.stdout || '').trim()
-          const expectedOutput = (testCase.expected_result || testCase.expected_output || '').trim()
-          passed = actualOutput === expectedOutput
+          actualOutput = result.run.stdout || ''
+          const expectedOutput = testCase.expected_result || testCase.expected_output || ''
+          passed = outputsMatch(actualOutput, expectedOutput)
+          actualOutput = actualOutput.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trimEnd()
         } else {
           actualOutput = result.error || result.run?.stderr || 'Execution failed'
         }
@@ -496,103 +548,90 @@ function CodeEditor({
         })
       }
       
-      // Update results progressively
       setTestResults([...results])
     }
     
+    const passedCount = results.filter(r => r.status === 'passed').length
+    const allPassed = passedCount === visibleTestCases.length
+    setVisibleTestsPassed(allPassed)
+    setLastTestedCode(code)
+    setOutput(`> Visible test results: ${passedCount}/${visibleTestCases.length} passed\n`)
     setIsRunning(false)
+    return allPassed
+  }
+
+  const handleSaveAndRun = async () => {
+    if (isRunning || isSaving) return
+
+    setIsSaving(true)
+    try {
+      await persistCode()
+
+      if (activeTab === 'custom') {
+        await handleRunCodeBatch()
+      } else if (activeTab === 'testcases') {
+        await handleRunWithTestCases()
+      } else {
+        setOutput('> Code saved\n')
+      }
+    } catch (error) {
+      setOutput(`> Save failed: ${error.message}`)
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const handleSubmit = async () => {
-    if (isSubmitting) return
+    if (isSubmitting || !canSubmitCode) return
     
     setIsSubmitting(true)
     setOutput(`> Submitting solution...\n`)
-    setActiveTab('output')
     
     try {
-      // Run all test cases before submitting
-      let testCasesPassed = 0
-      let testCasesTotal = testCases.length
-      
-      if (testCasesTotal > 0) {
-        setOutput(`> Running ${testCasesTotal} test cases...\n`)
-        
-        for (const testCase of testCases) {
-          try {
-            const requestBody = {
-              language: language,
-              code: code
-            }
-            if (testCase.input) {
-              requestBody.stdin = testCase.input
-            }
-            
-            const response = await fetch(`${apiBaseUrl}/api/codeExecute`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
-              },
-              body: JSON.stringify(requestBody)
-            })
-            
-            const result = await response.json()
-            
-            if (response.ok && result.run) {
-              const actualOutput = (result.run.stdout || '').trim()
-              const expectedOutput = (testCase.expected_result || testCase.expected_output || '').trim()
-              if (actualOutput === expectedOutput) {
-                testCasesPassed++
-              }
-            }
-          } catch (error) {
-            console.error('Test case execution error:', error)
-          }
-        }
-        
-        // Don't show pass/fail count in assessment mode
-        if (assessmentMode) {
-          setOutput(`> Test cases executed\n`)
-        } else {
-          setOutput(`> Test Results: ${testCasesPassed}/${testCasesTotal} passed\n`)
-        }
-      }
-      
+      await persistCode()
+
       if (onSubmit) {
         const result = await onSubmit({
           code,
           language,
           questionId,
-          testCasesPassed,
-          testCasesTotal
+          testCasesPassed: visibleTestCases.length,
+          testCasesTotal: visibleTestCases.length
         })
         
         if (result) {
           // In assessment mode, show test case results from server
           if (assessmentMode && result.testCasesTotal !== undefined) {
+            const visibleTotal = (result.testCasesTotal || 0) - (result.hiddenTotal || 0)
+            const visiblePassed = (result.testCasesPassed || 0) - (result.hiddenPassed || 0)
             let outputMsg = `> Code submitted successfully\n`
-            outputMsg += `> Test cases: ${result.testCasesPassed}/${result.testCasesTotal} passed\n`
+            outputMsg += `> Visible test cases: ${visiblePassed}/${visibleTotal} passed\n`
             if (result.hiddenTotal > 0) {
-              outputMsg += `> (includes ${result.hiddenPassed}/${result.hiddenTotal} hidden test cases)\n`
+              outputMsg += `> Hidden test cases: ${result.hiddenPassed}/${result.hiddenTotal} passed\n`
             }
             setOutput(prev => prev + outputMsg)
             
-            // Update test results display with server response
             if (result.results && result.results.length > 0) {
               setTestResults(result.results.map((r, i) => ({
                 id: i,
                 input: r.input,
-                expected_result: r.expected_output,
+                expected_result: r.expected_result || r.expected_output,
                 status: r.passed ? 'passed' : 'failed',
                 actualOutput: r.actual_output
               })))
               setActiveTab('testcases')
             }
+
+            await fetchSubmissionHistory(questionId)
+            setActiveTab('history')
           } else if (assessmentMode) {
             setOutput(prev => prev + `> Code submitted successfully\n`)
           } else {
-            const statusMsg = result.result?.successful ? '✓ All test cases passed!' : `✗ ${testCasesPassed}/${testCasesTotal} test cases passed`
+            const passed = result.result?.test_cases_passed ?? visibleTestCases.length
+            const total = result.result?.test_cases_total ?? visibleTestCases.length
+            const statusMsg = result.result?.successful
+              ? '✓ All test cases passed!'
+              : `✗ ${passed}/${total} test cases passed`
             setOutput(prev => prev + `> Submission recorded\n> ${statusMsg}\n`)
             
             // Refresh submission history after successful submission
@@ -634,7 +673,7 @@ function CodeEditor({
         }
       }
       
-      setActiveTab('output')
+      setActiveTab('custom')
       setOutput('> Code loaded from submission history')
     }
   }
@@ -653,9 +692,8 @@ function CodeEditor({
     })
   }
 
-  // Get visible test cases (non-hidden)
-  const visibleTestCases = testCases.filter(tc => !tc.is_hidden)
-  const hasTestCases = testCases.length > 0
+  // Get visible test cases (non-hidden) — used in render
+  const hasAnyTestCases = testCases.length > 0
 
   return (
     <div className={styles.codeEditorContainer} ref={containerRef}>
@@ -686,37 +724,45 @@ function CodeEditor({
                 Stop
               </button>
             ) : (
-              <button className={styles.btnRun} onClick={handleRunCode} disabled={isRunning}>
-                {isRunning ? (
+              <button
+                className={styles.btnSaveAndTest}
+                onClick={handleSaveAndRun}
+                disabled={isRunning || isSaving}
+                title={activeTab === 'custom'
+                  ? 'Save your code and run against your custom input'
+                  : (activeTab === 'testcases'
+                    ? 'Save your code and run against visible sample test cases'
+                    : 'Save your code')}
+              >
+                {(isRunning || isSaving) ? (
                   <>
                     <svg className={styles.spinner} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <circle cx="12" cy="12" r="10" strokeDasharray="32" strokeDashoffset="12"/>
                     </svg>
-                    Running...
+                    {isSaving ? 'Saving...' : 'Running...'}
                   </>
                 ) : (
                   <>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <polygon points="5 3 19 12 5 21 5 3"/>
+                      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                      <polyline points="17 21 17 13 7 13 7 21"/>
+                      <polyline points="7 3 7 8 15 8"/>
                     </svg>
-                    Run
+                    {saveButtonLabel}
                   </>
                 )}
               </button>
             )}
-            {hasTestCases && (
-              <button 
-                className={styles.btnRunTests} 
-                onClick={handleRunWithTestCases} 
-                disabled={isRunning}
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-                </svg>
-                Run Tests
-              </button>
-            )}
-            <button className={styles.btnSubmit} onClick={handleSubmit} disabled={isSubmitting}>
+            <button
+              className={styles.btnSubmit}
+              onClick={handleSubmit}
+              disabled={isSubmitting || !canSubmitCode}
+              title={canSubmitCode
+                ? 'Submit your solution for grading'
+                : (hasTestCases
+                  ? 'Pass all visible test cases with Save & Test before submitting'
+                  : 'Save your code before submitting')}
+            >
               {isSubmitting ? (
                 <>
                   <svg className={styles.spinner} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -729,7 +775,7 @@ function CodeEditor({
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polyline points="20 6 9 17 4 12"/>
                   </svg>
-                  Submit
+                  Submit Code
                 </>
               )}
             </button>
@@ -798,7 +844,7 @@ function CodeEditor({
               Custom Testcase
               {userInput.trim() && <span className={styles.inputIndicator}></span>}
             </button>
-            {hasTestCases && (
+            {hasAnyTestCases && (
               <button 
                 className={`${styles.tabBtn} ${activeTab === 'testcases' ? styles.active : ''}`}
                 onClick={() => setActiveTab('testcases')}
@@ -806,15 +852,13 @@ function CodeEditor({
                 Test Cases ({visibleTestCases.length})
               </button>
             )}
-            {/* Hide history tab in assessment mode */}
-            {!assessmentMode && (
-              <button 
-                className={`${styles.tabBtn} ${activeTab === 'history' ? styles.active : ''}`}
-                onClick={() => setActiveTab('history')}
-              >
-                History {submissionHistory.length > 0 && `(${submissionHistory.length})`}
-              </button>
-            )}
+            <button 
+              className={`${styles.tabBtn} ${activeTab === 'history' ? styles.active : ''}`}
+              onClick={() => setActiveTab('history')}
+            >
+              {assessmentMode ? 'Submissions' : 'History'}
+              {submissionHistory.length > 0 && ` (${submissionHistory.length})`}
+            </button>
           </div>
           <button className={styles.btnClear} onClick={handleClearOutput}>
             Clear
@@ -896,18 +940,17 @@ function CodeEditor({
             ) : (
               <div className={styles.testcaseList}>
                 {visibleTestCases.map((tc, index) => {
-                  const result = testResults.find(r => r.id === tc.id)
+                  const result = testResults.find(r => r.id === tc.id || r.id === index)
                   return (
                     <div 
                       key={tc.id || index} 
-                      className={`${styles.testcaseItem} ${!assessmentMode && result?.status ? styles[result.status] : ''}`}
+                      className={`${styles.testcaseItem} ${result?.status ? styles[result.status] : ''}`}
                     >
                       <div className={styles.testcaseHeader}>
                         <span className={styles.testcaseName}>
                           {tc.name || `Test Case ${index + 1}`}
                         </span>
-                        {/* Hide passed/failed status in assessment mode */}
-                        {!assessmentMode && result && (
+                        {result && (
                           <span className={`${styles.testcaseStatus} ${result.status === 'passed' ? styles.testcaseStatusPassed : result.status === 'failed' ? styles.testcaseStatusFailed : styles.testcaseStatusError}`}>
                             {result.status === 'passed' && (
                               <>
@@ -938,16 +981,6 @@ function CodeEditor({
                             )}
                           </span>
                         )}
-                        {/* Show simple "Executed" status in assessment mode */}
-                        {assessmentMode && result && (
-                          <span className={styles.testcaseStatusNeutral}>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <circle cx="12" cy="12" r="10"/>
-                              <polyline points="12 6 12 12 16 14"/>
-                            </svg>
-                            Executed
-                          </span>
-                        )}
                       </div>
                       <div className={styles.testcaseBody}>
                         <div className={styles.testcaseIo}>
@@ -962,8 +995,7 @@ function CodeEditor({
                           {result && result.actualOutput !== null && (
                             <div className={styles.ioSection}>
                               <label>Your Output:</label>
-                              {/* Don't color-code output in assessment mode */}
-                              <pre className={assessmentMode ? '' : (result.status === 'passed' ? styles.correct : styles.incorrect)}>
+                              <pre className={result.status === 'passed' ? styles.correct : styles.incorrect}>
                                 {result.actualOutput || '(no output)'}
                               </pre>
                             </div>
@@ -995,7 +1027,16 @@ function CodeEditor({
             ) : (
               <div className={styles.historyList}>
                 {submissionHistory.map((submission, index) => {
-                  const isSuccessful = submission.test_cases_passed === submission.test_cases_total && submission.test_cases_total > 0
+                  const meta = parseSubmissionMeta(submission)
+                  const visiblePassed = meta.visible_passed ?? submission.test_cases_passed ?? 0
+                  const visibleTotal = meta.visible_total ?? submission.test_cases_total ?? 0
+                  const hiddenPassed = meta.hidden_passed ?? 0
+                  const hiddenTotal = meta.hidden_total ?? 0
+                  const isSuccessful = assessmentMode
+                    ? (hiddenTotal > 0
+                      ? hiddenPassed === hiddenTotal && visiblePassed === visibleTotal
+                      : visibleTotal > 0 && visiblePassed === visibleTotal)
+                    : submission.test_cases_passed === submission.test_cases_total && submission.test_cases_total > 0
                   return (
                     <div 
                       key={submission.id || index} 
@@ -1035,12 +1076,28 @@ function CodeEditor({
                           <span className={styles.detailValue}>{submission.language_used || 'N/A'}</span>
                         </div>
                         <div className={styles.historyDetail}>
+                          <span className={styles.detailLabel}>Visible Tests:</span>
+                          <span className={`${styles.detailValue} ${visiblePassed === visibleTotal && visibleTotal > 0 ? styles.textSuccess : styles.textError}`}>
+                            {visiblePassed}/{visibleTotal} passed
+                          </span>
+                        </div>
+                        {assessmentMode && hiddenTotal > 0 && (
+                          <div className={styles.historyDetail}>
+                            <span className={styles.detailLabel}>Hidden Tests:</span>
+                            <span className={`${styles.detailValue} ${hiddenPassed === hiddenTotal ? styles.textSuccess : styles.textError}`}>
+                              {hiddenPassed}/{hiddenTotal} passed
+                            </span>
+                          </div>
+                        )}
+                        {!assessmentMode && (
+                        <div className={styles.historyDetail}>
                           <span className={styles.detailLabel}>Test Cases:</span>
                           <span className={`${styles.detailValue} ${isSuccessful ? styles.textSuccess : styles.textError}`}>
                             {submission.test_cases_passed || 0}/{submission.test_cases_total || 0} passed
                           </span>
                         </div>
-                        {submission.score !== undefined && (
+                        )}
+                        {submission.score !== undefined && !assessmentMode && (
                           <div className={styles.historyDetail}>
                             <span className={styles.detailLabel}>Score:</span>
                             <span className={styles.detailValue}>{submission.score}%</span>

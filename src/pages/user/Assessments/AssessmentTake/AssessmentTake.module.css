@@ -365,13 +365,37 @@
   font-style: italic;
 }
 
+/* Programming layout — prevent editor panel from stretching the page */
+.questionAreaProgramming {
+  overflow: hidden;
+  padding: 20px 24px;
+}
+
+.questionContainerProgramming {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  margin-bottom: 16px;
+  padding: 20px 24px;
+}
+
+.questionContainerProgramming .questionHeader {
+  flex-shrink: 0;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+}
+
 /* Programming Question */
 .programmingQuestion {
   width: 100%;
   display: flex;
   flex-direction: row;
   gap: 16px;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 /* Problem Panel - Left side with scrollable content */
@@ -379,6 +403,7 @@
   flex: 0 0 40%;
   max-width: 500px;
   min-width: 320px;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   background: var(--bg-secondary);
@@ -616,7 +641,10 @@
 .codeEditorWrapper {
   flex: 1;
   min-width: 0;
-  min-height: 400px;
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
   border-radius: var(--radius-md);
   overflow: hidden;
   border: 1px solid var(--border-color);
@@ -1013,6 +1041,22 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  padding: 24px;
+}
+
+/* Blocking fullscreen-required overlay: blurs the test behind it and, by covering the
+   whole viewport at a very high z-index, makes the assessment non-interactive until the
+   candidate re-enters fullscreen. */
+.fullscreenBlockOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
   padding: 24px;
 }
 

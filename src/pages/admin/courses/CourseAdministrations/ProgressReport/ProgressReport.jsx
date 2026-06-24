@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import { useApi } from '../../../../../contexts/ApiContext'
 import { API_ENDPOINTS } from '../../../../../constants/constants'
 import styles from './ProgressReport.module.css'
@@ -515,7 +516,7 @@ function ProgressReport() {
                 className={styles.btnCopyCode}
                 onClick={() => {
                   navigator.clipboard.writeText(codeModalData.code);
-                  alert('Code copied to clipboard!');
+                  toast.success('Code copied to clipboard!');
                 }}
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

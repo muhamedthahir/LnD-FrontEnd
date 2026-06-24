@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, useOutletContext } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import { useApi } from '../../../../contexts/ApiContext'
 import { API_ENDPOINTS } from '../../../../constants/constants'
 import './CourseOverview.css'
@@ -321,7 +322,7 @@ function CourseOverview() {
       navigate(`/courses/${id}/current`)
     } catch (error) {
       console.error('Error starting course:', error)
-      alert(error.message || 'Failed to start course')
+      toast.error(error.message || 'Failed to start course')
     }
   }
 

@@ -3,12 +3,14 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useApi } from '../../../../contexts/ApiContext'
 import { toast } from 'react-toastify'
 import Button from '../../../../components/Button/Button'
+import { useConfirmModal } from '../../../../hooks/useConfirmModal'
 import styles from './AssessmentConfigurations.module.css'
 
 function AssessmentConfigurations() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { apiBaseUrl, accessToken } = useApi()
+  const { confirm, ConfirmDialog } = useConfirmModal()
   
   const [assessment, setAssessment] = useState(null)
   const [configurations, setConfigurations] = useState([])
@@ -56,7 +58,12 @@ function AssessmentConfigurations() {
 
 
   const handleDeleteConfig = async (configId) => {
-    if (!window.confirm('Are you sure you want to delete this configuration?')) return
+    const ok = await confirm({
+      title: 'Delete configuration',
+      message: 'Are you sure you want to delete this configuration?',
+      confirmText: 'Delete'
+    })
+    if (!ok) return
 
     try {
       const response = await fetch(`${apiBaseUrl}/api/assessment/administrators/${configId}`, {
@@ -208,6 +215,7 @@ function AssessmentConfigurations() {
           ))}
         </div>
       )}
+      <ConfirmDialog />
     </div>
   )
 }

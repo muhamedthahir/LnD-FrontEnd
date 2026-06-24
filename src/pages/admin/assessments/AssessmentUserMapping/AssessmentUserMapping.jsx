@@ -351,9 +351,7 @@ function AssessmentUserMapping() {
     }
   }
 
-  const handleRemoveUserMapping = async (mappingId) => {
-    if (!window.confirm('Remove this user from the assessment?')) return
-
+  const removeUserMapping = async (mappingId) => {
     try {
       const response = await fetch(`${apiBaseUrl}/api/assessment/user-mappings/${mappingId}`, {
         method: 'DELETE',
@@ -367,6 +365,24 @@ function AssessmentUserMapping() {
     } catch (error) {
       console.error('Error removing user:', error)
       toast.error('Failed to remove user')
+    }
+  }
+
+  const sendAllInvitations = async () => {
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/assessment/administrators/${adminId}/send-all-invitations`, {
+        method: 'POST',
+        headers: getAuthHeader()
+      })
+
+      if (!response.ok) throw new Error('Failed to send invitations')
+
+      const data = await response.json()
+      toast.success(`Invitations sent to ${data.count} users!`)
+      fetchData()
+    } catch (error) {
+      console.error('Error sending invitations:', error)
+      toast.error('Failed to send invitations')
     }
   }
 
@@ -439,13 +455,16 @@ function AssessmentUserMapping() {
   }
 
   const handleConfirmAction = async () => {
-    if (!confirmModal.mapping) return
     setConfirmLoading(true)
     try {
       if (confirmModal.type === 'reattempt') {
         await allowReattempt(confirmModal.mapping)
       } else if (confirmModal.type === 'refresh') {
         await refreshViolation(confirmModal.mapping)
+      } else if (confirmModal.type === 'remove') {
+        await removeUserMapping(confirmModal.mapping.id)
+      } else if (confirmModal.type === 'sendAll') {
+        await sendAllInvitations()
       }
     } finally {
       setConfirmLoading(false)
@@ -453,24 +472,8 @@ function AssessmentUserMapping() {
     }
   }
 
-  const handleSendAllInvitations = async () => {
-    if (!window.confirm('Send invitations to all pending users?')) return
-
-    try {
-      const response = await fetch(`${apiBaseUrl}/api/assessment/administrators/${adminId}/send-all-invitations`, {
-        method: 'POST',
-        headers: getAuthHeader()
-      })
-
-      if (!response.ok) throw new Error('Failed to send invitations')
-
-      const data = await response.json()
-      toast.success(`Invitations sent to ${data.count} users!`)
-      fetchData()
-    } catch (error) {
-      console.error('Error sending invitations:', error)
-      toast.error('Failed to send invitations')
-    }
+  const handleSendAllInvitations = () => {
+    openConfirmModal('sendAll', null)
   }
 
   const getStatusBadgeClass = (status) => {
@@ -598,6 +601,20 @@ function AssessmentUserMapping() {
           </div>
         ),
         confirmText: 'Proceed'
+      }
+    }
+    if (confirmModal.type === 'remove') {
+      return {
+        title: 'Remove User',
+        message: `Remove ${name} from this assessment?`,
+        confirmText: 'Remove'
+      }
+    }
+    if (confirmModal.type === 'sendAll') {
+      return {
+        title: 'Send Invitations',
+        message: 'Send invitations to all pending users?',
+        confirmText: 'Send All'
       }
     }
     return { title: '', message: '', confirmText: 'Proceed' }
@@ -1008,7 +1025,7 @@ function AssessmentUserMapping() {
                         </option>
                         {group.attempts.map((attempt) => (
                           <option key={attempt.id} value={attempt.id}>
-                            Attempt #{attempt.attempt_number || 1} - {attempt.status?.replace('_', ' ') || 'NOT STARTED'}
+                            Attempt #{attempt.attempt_number || 1} - {Math.round(Number(attempt.percentage_score ?? 0))}% ({attempt.status?.replace('_', ' ') || 'NOT STARTED'})
                           </option>
                         ))}
                       </select>
@@ -1106,7 +1123,7 @@ function AssessmentUserMapping() {
                       )}
                       <button 
                         className="action-btn delete"
-                        onClick={() => handleRemoveUserMapping(mapping.id)}
+                        onClick={() => openConfirmModal('remove', mapping)}
                         title="Remove User"
                       >
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">

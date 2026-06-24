@@ -6,6 +6,71 @@ import Button from '../../../../components/Button/Button'
 import CodeEditor from '../../../CodeEditor/CodeEditor'
 import styles from './AssessmentTake.module.css'
 
+const isConfigFlagEnabled = (value, defaultEnabled = true) => {
+  if (value === undefined || value === null) return defaultEnabled
+  return value === true || value === 1 || value === '1'
+}
+
+// Answers are stored per question id within the *current segment only*. The API may
+// return rich objects ({ question_type, selected_options, code }); normalize to the
+// shape the UI expects (option id(s) or code string) so nav status and CodeEditor work.
+const getQuestionAnswerValue = (answers, questionId) => {
+  const raw = answers?.[questionId]
+  if (raw == null || raw === '') return null
+  if (typeof raw === 'object' && raw.question_type === 'MCQ') {
+    return raw.selected_options
+  }
+  if (typeof raw === 'object' && raw.question_type === 'PROGRAMMING') {
+    return raw.code
+  }
+  return raw
+}
+
+const normalizeSegmentAnswers = (savedAnswers, questionList) => {
+  const map = {}
+  if (!questionList?.length) return map
+
+  for (const q of questionList) {
+    const qid = q.id
+    const raw = savedAnswers?.[qid]
+      ?? savedAnswers?.[q.mcq_question_id]
+      ?? savedAnswers?.[q.programming_question_id]
+      ?? savedAnswers?.[q.question_id]
+
+    if (raw == null) continue
+
+    if (typeof raw === 'object' && raw.question_type === 'MCQ') {
+      if (raw.selected_options != null) {
+        const opts = Array.isArray(raw.selected_options) ? raw.selected_options : [raw.selected_options]
+        map[qid] = opts.map((id) => {
+          const n = Number(id)
+          return Number.isNaN(n) ? id : n
+        })
+      }
+    } else if (typeof raw === 'object' && raw.question_type === 'PROGRAMMING') {
+      if (raw.code != null) map[qid] = raw.code
+      if (raw.language) map[`${qid}_lang`] = raw.language
+    } else {
+      map[qid] = raw
+    }
+  }
+
+  return map
+}
+
+const mergeSegmentAnswers = (savedAnswers, questionList, segmentId, cacheRef) => {
+  const fromServer = normalizeSegmentAnswers(savedAnswers, questionList)
+  const cached = segmentId ? (cacheRef.current[segmentId] || {}) : {}
+  return { ...fromServer, ...cached }
+}
+
+const isQuestionAnswered = (answers, question) => {
+  const val = getQuestionAnswerValue(answers, question.id)
+  if (val == null || val === '') return false
+  if (Array.isArray(val)) return val.length > 0
+  if (typeof val === 'string') return val.trim().length > 0
+  return !!val
+}
 
 function AssessmentTake() {
   const { mappingId } = useParams()
@@ -32,6 +97,7 @@ function AssessmentTake() {
   const [totalTimeWorked, setTotalTimeWorked] = useState(0)
   const timerRef = useRef(null)
   const progressSaveRef = useRef(null)
+  const segmentAnswersCacheRef = useRef({})
   
   // Progress save interval in seconds (configurable - default 10 seconds)
   const PROGRESS_SAVE_INTERVAL = 10
@@ -40,6 +106,7 @@ function AssessmentTake() {
   const [showQuestionNav, setShowQuestionNav] = useState(false)
   const [showSubmitModal, setShowSubmitModal] = useState(false)
   const [showSegmentEndModal, setShowSegmentEndModal] = useState(false)
+  const [showSegmentSubmitModal, setShowSegmentSubmitModal] = useState(false)
   const [isFullScreen, setIsFullScreen] = useState(false)
   const [showCloseWarning, setShowCloseWarning] = useState(false)
   
@@ -48,11 +115,16 @@ function AssessmentTake() {
   const [proctoringWarning, setProctoringWarning] = useState(null)
   const [showFullscreenExitModal, setShowFullscreenExitModal] = useState(false)
   const [pendingFullscreenExit, setPendingFullscreenExit] = useState(false)
+  // Blocking dialog shown when fullscreen is mandatory but the candidate is not in
+  // fullscreen. It blurs the test and prevents answering until they re-enter fullscreen.
+  const [showFullscreenRequiredModal, setShowFullscreenRequiredModal] = useState(false)
   const [showTabSwitchModal, setShowTabSwitchModal] = useState(false)
   const [tabSwitchCountdown, setTabSwitchCountdown] = useState(5)
   const [isTabLimitExceeded, setIsTabLimitExceeded] = useState(false)
   const countdownTimerRef = useRef(null)
   const exitingRef = useRef(false)
+  const segmentTimeoutFiredRef = useRef(false)
+  const autoSubmitFiredRef = useRef(false)
 
   // Per-question millisecond time tracking. We accumulate time the candidate spends
   // while a question is the active view, then send it (as a delta) to the server so
@@ -102,12 +174,17 @@ function AssessmentTake() {
       }
 
       const data = await response.json()
+      const loadedQuestions = data.questions || []
+      const safeQuestionIndex = loadedQuestions.length > 0
+        ? Math.min(Math.max(0, data.current_question_index || 0), loadedQuestions.length - 1)
+        : 0
+
       setAssessmentData(data)
-      setQuestions(data.questions || [])
+      setQuestions(loadedQuestions)
       setTimeRemaining(data.time_remaining || data.total_duration)
       setSegmentTimeRemaining(data.segment_time_remaining || data.current_segment?.time_remaining || data.segments?.[0]?.segment_duration || 0)
       setCurrentSegmentIndex(data.current_segment_index || 0)
-      setCurrentQuestionIndex(data.current_question_index || 0)
+      setCurrentQuestionIndex(safeQuestionIndex)
       setTotalTimeWorked(data.total_time_worked || 0)
       
       // Restore tab switch count from server (for resume scenarios)
@@ -115,10 +192,10 @@ function AssessmentTake() {
         setTabSwitchCount(data.tab_switch_count)
       }
       
-      // Restore saved answers
-      if (data.saved_answers) {
-        setAnswers(data.saved_answers || '')
-      }
+      // Restore saved answers for the current segment only (not merged across segments)
+      const initialSegmentId = data.segments?.[data.current_segment_index || 0]?.id
+      setAnswers(mergeSegmentAnswers(data.saved_answers, loadedQuestions, initialSegmentId, segmentAnswersCacheRef))
+      segmentTimeoutFiredRef.current = false
       
       // Show resume notification if resuming
       if (data.resume_count > 0) {
@@ -258,26 +335,35 @@ function AssessmentTake() {
     }
   }, [isSecureWindow, tabSwitchCount, assessmentData, pendingFullscreenExit, isTabLimitExceeded])
 
-  // Timer logic
+  // Timer logic — keep the interval stable (do not recreate every second) and fire
+  // timeout handlers at most once per segment / assessment.
   useEffect(() => {
-    if (!assessmentData || timeRemaining <= 0) return
+    if (!assessmentData) return
 
     timerRef.current = setInterval(() => {
       setTimeRemaining(prev => {
         if (prev <= 1) {
-          handleAutoSubmit()
+          if (!autoSubmitFiredRef.current) {
+            autoSubmitFiredRef.current = true
+            handleAutoSubmit()
+          }
           return 0
         }
         return prev - 1
       })
 
-      // Increment total time worked
       setTotalTimeWorked(prev => prev + 1)
 
       if (assessmentData.timing_mode !== 'OVERALL') {
         setSegmentTimeRemaining(prev => {
+          // A value of 0 on load means the timer has not been initialized yet — do not
+          // treat it as an expired segment (that caused instant "Segment Complete" modals).
+          if (prev <= 0) return prev
           if (prev <= 1) {
-            handleSegmentTimeout()
+            if (!segmentTimeoutFiredRef.current) {
+              segmentTimeoutFiredRef.current = true
+              handleSegmentTimeout()
+            }
             return 0
           }
           return prev - 1
@@ -286,7 +372,7 @@ function AssessmentTake() {
     }, 1000)
 
     return () => clearInterval(timerRef.current)
-  }, [assessmentData, timeRemaining])
+  }, [assessmentData])
 
   // Proctoring: Tab visibility - Show modal on focus out
   useEffect(() => {
@@ -330,27 +416,33 @@ function AssessmentTake() {
     }
   }, [assessmentData, tabSwitchCount, isTabLimitExceeded])
 
-  // Proctoring: Fullscreen change
+  // Proctoring: Fullscreen change. When fullscreen is mandatory and the candidate
+  // leaves fullscreen, block the test behind a dialog (blurred + non-interactive)
+  // until they re-enter fullscreen via the OK button (a user gesture is required for
+  // requestFullscreen to succeed, so we cannot re-enter automatically).
   useEffect(() => {
     if (!assessmentData?.proctoring?.full_screen_mandatory) return
 
     const handleFullScreenChange = () => {
       const isFS = !!document.fullscreenElement
       setIsFullScreen(isFS)
-      
-      // If user exited fullscreen without confirming, re-enter fullscreen
-      if (!isFS && assessmentData?.proctoring?.full_screen_mandatory && !pendingFullscreenExit) {
-        // Re-enter fullscreen immediately
-        document.documentElement.requestFullscreen().catch(() => {
-          setProctoringWarning('Please return to fullscreen mode to continue.')
-        })
-        logProctoringEvent('FULLSCREEN_EXIT_ATTEMPT')
+
+      if (!isFS) {
+        setShowFullscreenRequiredModal(true)
+        logProctoringEvent('FULLSCREEN_EXIT')
+      } else {
+        setShowFullscreenRequiredModal(false)
       }
     }
 
     document.addEventListener('fullscreenchange', handleFullScreenChange)
+    // If we are already out of fullscreen when mandatory (e.g. auto-enter on load was
+    // blocked by the browser), show the dialog right away.
+    if (!document.fullscreenElement) {
+      setShowFullscreenRequiredModal(true)
+    }
     return () => document.removeEventListener('fullscreenchange', handleFullScreenChange)
-  }, [assessmentData, pendingFullscreenExit])
+  }, [assessmentData])
 
   // Proctoring: Escape key prevention - show warning modal instead
   useEffect(() => {
@@ -358,9 +450,10 @@ function AssessmentTake() {
 
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && isFullScreen) {
+        // Best-effort block of the Escape key. If the browser still exits fullscreen,
+        // the fullscreenchange handler shows the blocking "return to fullscreen" dialog.
         e.preventDefault()
         e.stopPropagation()
-        setShowFullscreenExitModal(true)
       }
     }
 
@@ -401,13 +494,24 @@ function AssessmentTake() {
     return () => document.removeEventListener('contextmenu', preventContextMenu)
   }, [assessmentData])
 
+  // When the blocking dialog appears, drop focus from any active field so the test
+  // cannot be edited via keyboard while it is blurred behind the overlay.
+  useEffect(() => {
+    if (showFullscreenRequiredModal && typeof document !== 'undefined') {
+      const active = document.activeElement
+      if (active && typeof active.blur === 'function') active.blur()
+    }
+  }, [showFullscreenRequiredModal])
+
   const enterFullScreen = async () => {
     try {
       await document.documentElement.requestFullscreen()
       setIsFullScreen(true)
       setPendingFullscreenExit(false)
+      setShowFullscreenRequiredModal(false)
     } catch (error) {
       console.error('Fullscreen error:', error)
+      // Stay blocked; the candidate can click the dialog button again.
     }
   }
 
@@ -515,6 +619,8 @@ function AssessmentTake() {
   }, [assessmentData])
 
   const handleAutoSubmit = async () => {
+    if (autoSubmitFiredRef.current) return
+    autoSubmitFiredRef.current = true
     toast.info('Time is up! Auto-submitting your assessment...')
     await submitAssessment(true)
   }
@@ -558,15 +664,37 @@ function AssessmentTake() {
   const handleSegmentTimeout = () => {
     if (currentSegmentIndex < (assessmentData?.segments?.length || 1) - 1) {
       setShowSegmentEndModal(true)
-    } else {
+    } else if (!autoSubmitFiredRef.current) {
       handleAutoSubmit()
     }
   }
 
-  // Answer handling
+  // Answer handling — programming answers are persisted via submit-code only
+  const updateSegmentAnswerCache = (nextAnswers) => {
+    const segId = assessmentData?.segments?.[currentSegmentIndex]?.id
+    if (segId) {
+      segmentAnswersCacheRef.current[segId] = { ...nextAnswers }
+    }
+  }
+
+  const normalizeMcqAnswer = (answer) => {
+    if (Array.isArray(answer)) {
+      return answer.map((v) => {
+        const n = Number(v)
+        return Number.isNaN(n) ? v : n
+      })
+    }
+    const n = Number(answer)
+    return Number.isNaN(n) ? answer : n
+  }
+
   const handleAnswerChange = async (questionId, answer, type) => {
-    const newAnswers = { ...answers, [questionId]: answer }
+    const storedAnswer = type === 'MCQ' ? normalizeMcqAnswer(answer) : answer
+    const newAnswers = { ...answers, [questionId]: storedAnswer }
     setAnswers(newAnswers)
+    updateSegmentAnswerCache(newAnswers)
+
+    if (type === 'PROGRAMMING') return
 
     // For MCQ, attach the time spent on this question (delta) so the server can
     // accumulate it. Programming time is sent via the code-submission call instead.
@@ -576,7 +704,7 @@ function AssessmentTake() {
       timeTakenMs = consumeQuestionTime(questionId)
     }
 
-    // Auto-save answer
+    // Auto-save MCQ answer
     try {
       await fetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/save-answer`, {
         method: 'POST',
@@ -584,7 +712,7 @@ function AssessmentTake() {
         body: JSON.stringify({
           question_id: questionId,
           question_type: type,
-          answer: answer,
+          answer: storedAnswer,
           time_taken_ms: timeTakenMs
         })
       })
@@ -596,11 +724,15 @@ function AssessmentTake() {
   // Navigation
   const currentQuestion = questions[currentQuestionIndex]
   const currentSegment = assessmentData?.segments?.[currentSegmentIndex]
+  const isProgrammingQuestion = currentQuestion && (
+    currentQuestion.type === 'PROGRAMMING' || currentQuestion.question_type === 'PROGRAMMING'
+  )
   
   // Always allow going back within the same segment
   const canGoBack = currentQuestionIndex > 0
   const canGoNext = currentQuestionIndex < questions.length - 1
   const isLastQuestion = currentQuestionIndex === questions.length - 1
+  const isLastSegment = currentSegmentIndex === (assessmentData?.segments?.length || 1) - 1
 
   const handlePrevious = async () => {
     if (canGoBack) {
@@ -617,7 +749,7 @@ function AssessmentTake() {
 
     const qType = currentQuestion.question_type || currentQuestion.type
     if (qType === 'MCQ') {
-      const currentAnswer = answers[currentQuestion.id]
+      const currentAnswer = getQuestionAnswerValue(answers, currentQuestion.id)
       const hasSelection = Array.isArray(currentAnswer)
         ? currentAnswer.length > 0
         : currentAnswer !== undefined && currentAnswer !== null && currentAnswer !== ''
@@ -641,12 +773,50 @@ function AssessmentTake() {
     }
   }
 
+  const cacheCurrentSegmentAnswers = () => {
+    const segId = assessmentData?.segments?.[currentSegmentIndex]?.id
+    if (segId) {
+      segmentAnswersCacheRef.current[segId] = { ...answers }
+    }
+  }
+
+  const saveAllMcqAnswersInSegment = async () => {
+    for (const q of questions) {
+      const qType = q.question_type || q.type
+      if (qType !== 'MCQ') continue
+      const val = getQuestionAnswerValue(answers, q.id)
+      const hasSelection = Array.isArray(val)
+        ? val.length > 0
+        : val !== undefined && val !== null && val !== ''
+      if (!hasSelection) continue
+      try {
+        await fetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/save-answer`, {
+          method: 'POST',
+          headers: getAuthHeader(),
+          body: JSON.stringify({
+            question_id: q.id,
+            question_type: 'MCQ',
+            answer: val
+          })
+        })
+      } catch (error) {
+        console.error('Failed to save MCQ answer before segment switch:', error)
+      }
+    }
+  }
+
   const handleNext = async () => {
     await saveCurrentProgress()
     if (canGoNext) {
       setCurrentQuestionIndex(prev => prev + 1)
     } else if (isLastQuestion) {
-      setShowSubmitModal(true)
+      // On the last question of a segment: submit the segment (and move to the next
+      // one). Only the final segment submits the entire assessment.
+      if (isLastSegment) {
+        setShowSubmitModal(true)
+      } else {
+        setShowSegmentSubmitModal(true)
+      }
     }
   }
 
@@ -661,20 +831,46 @@ function AssessmentTake() {
 
   const handleMoveToNextSegment = async () => {
     setShowSegmentEndModal(false)
-    
+    setShowSegmentSubmitModal(false)
+
+    cacheCurrentSegmentAnswers()
+    await saveAllMcqAnswersInSegment()
+    await saveCurrentProgress()
+
     try {
       const response = await fetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/next-segment`, {
         method: 'POST',
         headers: getAuthHeader()
       })
 
-      if (response.ok) {
-        const data = await response.json()
-        setCurrentSegmentIndex(prev => prev + 1)
-        setQuestions(data.questions || [])
-        setCurrentQuestionIndex(0)
-        setSegmentTimeRemaining(data.segment_duration)
-        setAnswers(prev => ({ ...prev, ...data.saved_answers }))
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        toast.error(errorData.error || 'Failed to move to next segment')
+        return
+      }
+
+      const data = await response.json()
+      const nextIndex = data.segment_index ?? currentSegmentIndex + 1
+      const nextSegmentSeconds = data.segment_time_remaining ?? data.segment_duration ?? 0
+      const nextQuestions = data.questions || []
+
+      segmentTimeoutFiredRef.current = false
+      setShowSegmentEndModal(false)
+      setCurrentSegmentIndex(nextIndex)
+      setQuestions(nextQuestions)
+      setCurrentQuestionIndex(0)
+      setSegmentTimeRemaining(nextSegmentSeconds)
+      setAnswers(mergeSegmentAnswers(
+        data.saved_answers,
+        nextQuestions,
+        data.segment?.id || assessmentData?.segments?.[nextIndex]?.id,
+        segmentAnswersCacheRef
+      ))
+      questionEnterTsRef.current = performance.now()
+
+      const segmentName = data.segment?.name || assessmentData?.segments?.[nextIndex]?.name
+      if (segmentName) {
+        toast.success(`Moved to ${segmentName}`)
       }
     } catch (error) {
       console.error('Error moving to next segment:', error)
@@ -684,6 +880,11 @@ function AssessmentTake() {
 
   const handleSegmentSwitch = async (targetIndex) => {
     if (targetIndex === currentSegmentIndex) return
+
+    cacheCurrentSegmentAnswers()
+    await saveAllMcqAnswersInSegment()
+    await saveCurrentProgress()
+    await saveProgressRef.current?.()
     
     try {
       const response = await fetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/switch-segment`, {
@@ -694,11 +895,18 @@ function AssessmentTake() {
 
       if (response.ok) {
         const data = await response.json()
+        const segmentQuestions = data.questions || []
         setCurrentSegmentIndex(targetIndex)
-        setQuestions(data.questions || [])
+        setQuestions(segmentQuestions)
         setCurrentQuestionIndex(0)
         setSegmentTimeRemaining(data.segment_time_remaining ?? data.segment_duration ?? 0)
-        setAnswers(prev => ({ ...prev, ...data.saved_answers }))
+        setAnswers(mergeSegmentAnswers(
+          data.saved_answers,
+          segmentQuestions,
+          data.segment?.id || assessmentData?.segments?.[targetIndex]?.id,
+          segmentAnswersCacheRef
+        ))
+        questionEnterTsRef.current = performance.now()
         toast.success(`Switched to ${assessmentData.segments[targetIndex]?.name || 'segment'}`)
       } else {
         const errorData = await response.json().catch(() => ({}))
@@ -710,11 +918,44 @@ function AssessmentTake() {
     }
   }
 
-  // Submission
+  // Submission — auto-submit saved programming code before finalizing
+  const submitSavedProgrammingAnswers = async () => {
+    for (const q of questions) {
+      const qType = q.question_type || q.type
+      if (qType !== 'PROGRAMMING') continue
+
+      const code = getQuestionAnswerValue(answers, q.id)
+      if (typeof code !== 'string' || !code.trim()) continue
+      const language = answers[`${q.id}_lang`] || 'javascript'
+
+      try {
+        accumulateQuestionTime(q.id)
+        const codeTimeMs = consumeQuestionTime(q.id)
+        await fetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/submit-code`, {
+          method: 'POST',
+          headers: getAuthHeader(),
+          body: JSON.stringify({
+            question_id: q.id,
+            code,
+            language,
+            time_taken_ms: codeTimeMs
+          })
+        })
+      } catch (error) {
+        console.error('Auto-submit saved code failed for question', q.id, error)
+      }
+    }
+  }
+
   const submitAssessment = async (isAutoSubmit = false) => {
     try {
       setSubmitting(true)
       exitingRef.current = true
+
+      if (isAutoSubmit && isProgrammingQuestion) {
+        await submitSavedProgrammingAnswers()
+      }
+
       const response = await fetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/submit`, {
         method: 'POST',
         headers: getAuthHeader(),
@@ -780,14 +1021,14 @@ function AssessmentTake() {
   const getQuestionStatus = (index) => {
     const q = questions[index]
     if (!q) return ''
-    if (answers[q.id]) return 'answered'
+    if (isQuestionAnswered(answers, q)) return 'answered'
     if (index === currentQuestionIndex) return 'current'
     if (index < currentQuestionIndex) return 'visited'
     return ''
   }
 
   const getAnsweredCount = () => {
-    return questions.filter(q => answers[q.id]).length
+    return questions.filter(q => isQuestionAnswered(answers, q)).length
   }
 
   if (loading) {
@@ -808,8 +1049,43 @@ function AssessmentTake() {
     )
   }
 
+  if (questions.length === 0) {
+    return (
+      <div className={`${styles.assessmentTakePage} ${styles.error}`}>
+        <h3>No questions available for this segment</h3>
+        <p>Please contact your administrator or try resuming again later.</p>
+        <Button onClick={() => navigate('/user/assessments')}>Back to Assessments</Button>
+      </div>
+    )
+  }
+
   return (
     <div className={`${styles.assessmentTakePage} ${isFullScreen ? styles.fullscreen : ''}`}>
+      {/* Fullscreen Required (blocking) Dialog — only when fullscreen is mandatory.
+          Blurs the test and prevents answering until the candidate re-enters fullscreen. */}
+      {showFullscreenRequiredModal && assessmentData?.proctoring?.full_screen_mandatory && (
+        <div className={styles.fullscreenBlockOverlay}>
+          <div className={styles.modalContent}>
+            <h2>⛶ Fullscreen Required</h2>
+            <p className={styles.warningText}>
+              This assessment must be taken in fullscreen mode. Your answers are locked
+              until you return to fullscreen.
+            </p>
+            <p style={{ marginBottom: '24px', color: 'var(--text-secondary)' }}>
+              Click "Go to Fullscreen" to continue your assessment.
+            </p>
+            <div className={styles.modalActions}>
+              <button
+                className={`${styles.modalBtn} ${styles.modalBtnPrimary}`}
+                onClick={enterFullScreen}
+              >
+                Go to Fullscreen
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Proctoring Warning */}
       {proctoringWarning && (
         <div className={styles.proctoringWarning}>
@@ -888,9 +1164,9 @@ function AssessmentTake() {
 
       <div className={styles.assessmentBody}>
         {/* Question Area */}
-        <main className={styles.questionArea}>
+        <main className={`${styles.questionArea} ${isProgrammingQuestion ? styles.questionAreaProgramming : ''}`}>
           {currentQuestion ? (
-            <div className={styles.questionContainer}>
+            <div className={`${styles.questionContainer} ${isProgrammingQuestion ? styles.questionContainerProgramming : ''}`}>
               <div className={styles.questionHeader}>
                 <span className={styles.questionNumber}>Question {currentQuestionIndex + 1}</span>
                 <span className={styles.questionType}>
@@ -906,13 +1182,14 @@ function AssessmentTake() {
                   
                   <div className={styles.optionsList}>
                     {(currentQuestion.options || []).map((option, idx) => {
-                      const optionValue = option.value || option.id
+                      const optionValue = option.value ?? option.id
                       const optionText = option.text || option.option_text || `Option ${idx + 1}`
                       const isMultiSelect = currentQuestion.is_multiselect || currentQuestion.is_multi_select
-                      const currentAnswer = answers[currentQuestion.id]
+                      const currentAnswer = getQuestionAnswerValue(answers, currentQuestion.id)
+                      const optionId = Number(optionValue)
                       const isSelected = isMultiSelect
-                        ? (Array.isArray(currentAnswer) && currentAnswer.includes(optionValue))
-                        : currentAnswer === optionValue
+                        ? (Array.isArray(currentAnswer) && currentAnswer.some((v) => Number(v) === optionId))
+                        : Number(currentAnswer) === optionId
                       
                       return (
                         <label 
@@ -928,11 +1205,11 @@ function AssessmentTake() {
                               if (isMultiSelect) {
                                 const current = Array.isArray(currentAnswer) ? currentAnswer : []
                                 const newVal = e.target.checked 
-                                  ? [...current, optionValue]
-                                  : current.filter(v => v !== optionValue)
+                                  ? [...current, optionId]
+                                  : current.filter((v) => Number(v) !== optionId)
                                 handleAnswerChange(currentQuestion.id, newVal, 'MCQ')
                               } else {
-                                handleAnswerChange(currentQuestion.id, optionValue, 'MCQ')
+                                handleAnswerChange(currentQuestion.id, optionId, 'MCQ')
                               }
                             }}
                           />
@@ -1057,16 +1334,45 @@ function AssessmentTake() {
                   {/* Code Editor Section */}
                   <div className={styles.codeEditorWrapper}>
                     <CodeEditor
+                      key={`code-q-${currentQuestion.id}`}
                       questionId={currentQuestion.id}
-                      initialCode={answers[currentQuestion.id] || currentQuestion.boilerplate_code || ''}
+                      initialCode={(() => {
+                        const code = getQuestionAnswerValue(answers, currentQuestion.id)
+                        return typeof code === 'string' ? code : (currentQuestion.boilerplate_code || '')
+                      })()}
                       allowedLanguages={currentQuestion.allowed_languages || []}
                       codeTemplates={currentQuestion.code_templates || []}
                       testCases={currentQuestion.test_cases || []}
                       assessmentMode={true}
                       assessmentMappingId={mappingId}
+                      assessmentSegmentId={currentSegment?.id}
+                      onSaveCode={async ({ code, language }) => {
+                        setAnswers(prev => ({
+                          ...prev,
+                          [currentQuestion.id]: code,
+                          [`${currentQuestion.id}_lang`]: language
+                        }))
+                        accumulateQuestionTime(currentQuestion.id)
+                        const codeTimeMs = consumeQuestionTime(currentQuestion.id)
+                        await fetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/save-answer`, {
+                          method: 'POST',
+                          headers: getAuthHeader(),
+                          body: JSON.stringify({
+                            question_id: currentQuestion.id,
+                            question_type: 'PROGRAMMING',
+                            answer: code,
+                            language,
+                            time_taken_ms: codeTimeMs
+                          })
+                        })
+                      }}
                       onSubmit={async (submissionData) => {
-                        // Save the code answer for this question
-                        handleAnswerChange(currentQuestion.id, submissionData.code, 'PROGRAMMING')
+                        // Keep local answer state in sync without triggering save-answer
+                        setAnswers(prev => ({
+                          ...prev,
+                          [currentQuestion.id]: submissionData.code,
+                          [`${currentQuestion.id}_lang`]: submissionData.language
+                        }))
 
                         // Capture millisecond time spent on this programming question.
                         accumulateQuestionTime(currentQuestion.id)
@@ -1136,7 +1442,7 @@ function AssessmentTake() {
               variant="primary" 
               onClick={handleNext}
             >
-              {isLastQuestion ? 'Review & Submit' : 'Next'}
+              {isLastQuestion ? (isLastSegment ? 'Submit Test' : 'Submit Segment') : 'Next'}
             </Button>
           </div>
         </main>
@@ -1153,15 +1459,21 @@ function AssessmentTake() {
                     const isCurrentSegment = index === currentSegmentIndex
                     const isPastSegment = index < currentSegmentIndex
                     const isFutureSegment = index > currentSegmentIndex
-                    const canSwitch = assessmentData.allow_segment_switch && !isPastSegment
+                    const allowSegmentSwitch = isConfigFlagEnabled(assessmentData.allow_segment_switch, true)
+                    const canSwitch = allowSegmentSwitch && !isCurrentSegment
+                    const segmentTitle = isCurrentSegment
+                      ? segment.name
+                      : !allowSegmentSwitch
+                        ? (isFutureSegment ? 'Complete current segment first' : 'Segment navigation is disabled')
+                        : `Go to ${segment.name}`
                     
                     return (
                       <button
                         key={segment.id}
-                        className={`${styles.segmentItem} ${isCurrentSegment ? styles.segmentItemCurrent : ''} ${isPastSegment ? styles.segmentItemCompleted : ''} ${isFutureSegment ? styles.segmentItemUpcoming : ''}`}
+                        className={`${styles.segmentItem} ${isCurrentSegment ? styles.segmentItemCurrent : ''} ${isPastSegment ? styles.segmentItemCompleted : ''} ${isFutureSegment && !allowSegmentSwitch ? styles.segmentItemUpcoming : ''}`}
                         onClick={() => canSwitch && handleSegmentSwitch(index)}
                         disabled={!canSwitch}
-                        title={!canSwitch && isFutureSegment ? 'Complete current segment first' : (isPastSegment ? 'Segment completed' : segment.name)}
+                        title={segmentTitle}
                       >
                         <span className={styles.segmentNumber}>{index + 1}</span>
                         <span className={styles.segmentName}>{segment.name}</span>
@@ -1207,9 +1519,9 @@ function AssessmentTake() {
             </div>
             <button 
               className={styles.submitBtn}
-              onClick={() => setShowSubmitModal(true)}
+              onClick={() => isLastSegment ? setShowSubmitModal(true) : setShowSegmentSubmitModal(true)}
             >
-              Submit Assessment
+              {isLastSegment ? 'Submit Test' : 'Submit Segment'}
             </button>
           </aside>
         )}
@@ -1286,13 +1598,62 @@ function AssessmentTake() {
         </div>
       )}
 
+      {/* Submit Segment Confirmation Modal */}
+      {showSegmentSubmitModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <h2>Submit Segment?</h2>
+            <div className={styles.submitSummary}>
+              <div className={styles.summaryItem}>
+                <span className={styles.summaryLabel}>Total Questions</span>
+                <span className={styles.summaryValue}>{questions.length}</span>
+              </div>
+              <div className={styles.summaryItem}>
+                <span className={styles.summaryLabel}>Answered</span>
+                <span className={`${styles.summaryValue} ${styles.summaryValueSuccess}`}>{getAnsweredCount()}</span>
+              </div>
+              <div className={styles.summaryItem}>
+                <span className={styles.summaryLabel}>Unanswered</span>
+                <span className={`${styles.summaryValue} ${styles.summaryValueWarning}`}>{questions.length - getAnsweredCount()}</span>
+              </div>
+            </div>
+            {questions.length - getAnsweredCount() > 0 && (
+              <p className={styles.warningText}>
+                You have {questions.length - getAnsweredCount()} unanswered question(s) in this segment.
+              </p>
+            )}
+            {!isConfigFlagEnabled(assessmentData?.allow_segment_switch, true) && (
+              <p className={styles.note}>Note: You will not be able to return to "{currentSegment?.name}" after submitting.</p>
+            )}
+            <div className={styles.modalActions}>
+              <button className={`${styles.modalBtn} ${styles.modalBtnSecondary}`} onClick={() => setShowSegmentSubmitModal(false)} disabled={submitting}>
+                Continue Segment
+              </button>
+              <button
+                className={`${styles.modalBtn} ${styles.modalBtnPrimary}`}
+                onClick={async () => {
+                  setShowSegmentSubmitModal(false)
+                  await saveCurrentProgress()
+                  await handleMoveToNextSegment()
+                }}
+                disabled={submitting}
+              >
+                Submit Segment
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Segment End Modal */}
       {showSegmentEndModal && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalContent}>
             <h2>Segment Complete</h2>
             <p>You have completed "{currentSegment?.name}". Ready to move to the next segment?</p>
-            <p className={styles.note}>Note: You will not be able to return to this segment.</p>
+            {!isConfigFlagEnabled(assessmentData?.allow_segment_switch, true) && (
+              <p className={styles.note}>Note: You will not be able to return to this segment.</p>
+            )}
             <div className={styles.modalActions}>
               <button className={`${styles.modalBtn} ${styles.modalBtnPrimary}`} onClick={handleMoveToNextSegment}>
                 Continue to Next Segment

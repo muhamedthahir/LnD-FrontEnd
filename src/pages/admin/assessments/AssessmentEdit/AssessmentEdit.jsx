@@ -6,6 +6,7 @@ import { toast } from 'react-toastify'
 import Button from '../../../../components/Button/Button'
 import Toggle from '../../../../components/Toggle/Toggle'
 import ConfirmModal from '../../../../components/ConfirmModal/ConfirmModal'
+import { useConfirmModal } from '../../../../hooks/useConfirmModal'
 import Table from '../../../../components/Table/Table'
 import styles from './AssessmentEdit.module.css'
 
@@ -13,6 +14,7 @@ function AssessmentEdit() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { apiBaseUrl, accessToken } = useApi()
+  const { confirm, ConfirmDialog } = useConfirmModal()
   const { questionTypes } = useSelector(state => state.masterData);
   const [assessment, setAssessment] = useState(null)
   const [segments, setSegments] = useState([])
@@ -194,7 +196,12 @@ function AssessmentEdit() {
   }
 
   const handleDeleteAssessment = async () => {
-    if (!window.confirm('Are you sure you want to delete this assessment?')) return
+    const ok = await confirm({
+      title: 'Delete assessment',
+      message: 'Are you sure you want to delete this assessment? This action cannot be undone.',
+      confirmText: 'Delete'
+    })
+    if (!ok) return
     try {
       const response = await fetch(`${apiBaseUrl}/api/assessment/assessments/${id}`, {
         method: 'DELETE',
@@ -323,7 +330,12 @@ function AssessmentEdit() {
   }
 
   const handleDeleteSegment = async (segmentId) => {
-    if (!window.confirm('Are you sure you want to delete this segment?')) return
+    const ok = await confirm({
+      title: 'Delete segment',
+      message: 'Are you sure you want to delete this segment?',
+      confirmText: 'Delete'
+    })
+    if (!ok) return
 
     try {
       const response = await fetch(`${apiBaseUrl}/api/assessment/segments/${segmentId}`, {
@@ -1073,7 +1085,12 @@ function AssessmentEdit() {
   }
 
   const handleRemoveQuestion = async (segmentId, questionId, type) => {
-    if (!window.confirm('Remove this question from segment?')) return
+    const ok = await confirm({
+      title: 'Remove question',
+      message: 'Remove this question from the segment?',
+      confirmText: 'Remove'
+    })
+    if (!ok) return
 
     try {
       const endpoint = type === 'PROGRAMMING'
@@ -1990,6 +2007,8 @@ function AssessmentEdit() {
         cancelText="Cancel"
         disabled={publishing}
       />
+
+      <ConfirmDialog />
 
     </div>
   )

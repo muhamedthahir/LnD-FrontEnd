@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import { useApi } from '../../../../contexts/ApiContext'
 import { API_ENDPOINTS } from '../../../../constants/constants'
 import Table from '../../../../components/Table/Table'
+import { useConfirmModal } from '../../../../hooks/useConfirmModal'
 import styles from './AssessmentResult.module.css'
 
 function AssessmentResult() {
   const { mappingId } = useParams()
   const navigate = useNavigate()
   const { apiBaseUrl, accessToken } = useApi()
+  const { confirm, ConfirmDialog } = useConfirmModal()
   
   const [loading, setLoading] = useState(true)
   const [reportData, setReportData] = useState(null)
@@ -98,7 +101,12 @@ function AssessmentResult() {
   const { mapping, segment_progress, proctoring_logs, proctoring_summary } = reportData
 
   const handleRefreshViolation = async () => {
-    if (!window.confirm('Refresh violation? This will reset the tab switch count and allow the user to continue the assessment.')) return
+    const ok = await confirm({
+      title: 'Refresh violation',
+      message: 'This will reset the tab switch count and allow the user to continue the assessment.',
+      confirmText: 'Refresh'
+    })
+    if (!ok) return
 
     try {
       const response = await fetch(`${apiBaseUrl}/api/assessment/user-mappings/${mappingId}/refresh-violation`, {
@@ -111,15 +119,15 @@ function AssessmentResult() {
 
       if (response.ok) {
         const data = await response.json()
-        alert(`Violation refreshed! User can now continue. (Refresh count: ${data.refresh_violation_count})`)
+        toast.success(`Violation refreshed! User can now continue. (Refresh count: ${data.refresh_violation_count})`)
         fetchAssessmentResult() // Refresh data
       } else {
         const error = await response.json()
-        alert(error.error || 'Failed to refresh violation')
+        toast.error(error.error || 'Failed to refresh violation')
       }
     } catch (error) {
       console.error('Error refreshing violation:', error)
-      alert('Failed to refresh violation')
+      toast.error('Failed to refresh violation')
     }
   }
 
@@ -351,7 +359,7 @@ function AssessmentResult() {
                                 {question.question_type === 'MCQ' ? 'MCQ' : 'Code'}
                               </span>
                               <span className={styles.questionScore}>
-                                {question.score || 0} / 1
+                                {Number(question.score || 0).toFixed(2)} / {question.weightage || 1}
                               </span>
                               <span className={`${styles.questionStatus} ${question.score > 0 ? styles.questionStatusCorrect : question.is_attempted ? styles.questionStatusAttempted : styles.questionStatusUnattempted}`}>
                                 {question.score > 0 ? '✓ Correct' : question.is_attempted ? 'Attempted' : 'Not Attempted'}
@@ -367,6 +375,7 @@ function AssessmentResult() {
                                         language: question.language_used || 'Unknown',
                                         code: question.submitted_code,
                                         score: question.score,
+                                        maxScore: question.weightage || 1,
                                         testCasesPassed: question.test_cases_passed,
                                         testCasesTotal: question.test_cases_total
                                       });
@@ -496,7 +505,7 @@ function AssessmentResult() {
                 <div className={styles.codeModalMeta}>
                   <span className={styles.languageBadge}>{codeModalData.language}</span>
                   <span className={styles.scoreBadge}>
-                    Score: {codeModalData.score}/1
+                    Score: {Number(codeModalData.score || 0).toFixed(2)}/{codeModalData.maxScore || 1}
                   </span>
                   <span className={styles.testCasesBadge}>
                     Test Cases: {codeModalData.testCasesPassed}/{codeModalData.testCasesTotal}
@@ -523,7 +532,7 @@ function AssessmentResult() {
                 className={styles.btnCopyCode}
                 onClick={() => {
                   navigator.clipboard.writeText(codeModalData.code);
-                  alert('Code copied to clipboard!');
+                  toast.success('Code copied to clipboard!');
                 }}
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -542,6 +551,7 @@ function AssessmentResult() {
           </div>
         </div>
       )}
+      <ConfirmDialog />
     </div>
   )
 }

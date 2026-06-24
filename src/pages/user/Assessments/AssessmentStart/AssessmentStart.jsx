@@ -126,7 +126,8 @@ function AssessmentStart() {
       ].join(',')
       
       // Use secure route without sidebar/header for proctored assessments
-      const assessmentUrl = `${window.location.origin}/secure/assessment/${mappingId}/take?attemptId=${data.attempt_id}`
+      const attemptId = data.attempt_id ?? data.mapping?.id ?? mappingId
+      const assessmentUrl = `${window.location.origin}/secure/assessment/${mappingId}/take?attemptId=${attemptId}`
       
       console.log('Opening assessment in popup:', assessmentUrl)
       const assessmentWindow = window.open(assessmentUrl, 'assessment_window', windowFeatures)
