@@ -245,18 +245,18 @@
 .logoIcon {
   width: var(--icon-2xl);
   height: var(--icon-2xl);
-  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+  background: var(--gradient-accent);
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 var(--spacing-sm) var(--spacing-xl) var(--accent-glow);
+  box-shadow: var(--shadow-glow);
 }
 
 .logoIcon svg {
   width: var(--icon-xl);
   height: var(--icon-xl);
-  color: var(--bg-primary);
+  color: var(--text-on-accent);
 }
 
 .brandName {

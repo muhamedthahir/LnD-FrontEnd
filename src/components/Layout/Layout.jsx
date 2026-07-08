@@ -186,6 +186,13 @@ function Layout() {
 
   return (
     <div className={styles.layout}>
+      {isSidebarOpen && (
+        <div
+          className={styles.sidebarBackdrop}
+          onClick={() => setIsSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
       <Sidebar 
         user={user} 
         isCollapsed={isSidebarCollapsed} 

@@ -1,8 +1,8 @@
 .create-page {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 3.5rem);
-  max-height: calc(100vh - 3.5rem);
+  height: calc(100vh - var(--layout-header-height));
+  max-height: calc(100vh - var(--layout-header-height));
   overflow: hidden;
 }
 

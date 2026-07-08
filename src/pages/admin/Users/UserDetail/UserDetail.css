@@ -1,6 +1,6 @@
 .user-detail-page {
   padding: var(--spacing-lg);
-  min-height: calc(100vh - 3.5rem);
+  min-height: calc(100vh - var(--layout-header-height));
 }
 
 .user-detail-loading,

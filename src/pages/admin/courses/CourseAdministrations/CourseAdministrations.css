@@ -1,8 +1,11 @@
 .groups-page {
   padding: var(--spacing-lg);
-  height: calc(100vh - 3.5rem);
   display: flex;
   flex-direction: column;
+  gap: var(--spacing-md);
+  box-sizing: border-box;
+  min-height: calc(100vh - var(--layout-header-height));
+  max-height: calc(100vh - var(--layout-header-height));
   overflow: hidden;
 }
 
@@ -10,7 +13,8 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: var(--spacing-xl);
+  flex-shrink: 0;
+  margin-bottom: 0;
 }
 
 .groups-header h1 {
@@ -118,9 +122,10 @@
 }
 
 .filters-section {
-  padding: var(--spacing-lg);
+  padding: var(--spacing-md) var(--spacing-lg);
   border-bottom: var(--border-sm) solid var(--border-color);
-  background: var(--bg-secondary);
+  background: var(--bg-card);
+  flex-shrink: 0;
 }
 
 .filters {
@@ -466,9 +471,10 @@
 }
 
 .pagination-wrapper {
-  padding: var(--spacing-lg);
+  flex-shrink: 0;
+  padding: var(--spacing-md) var(--spacing-lg);
   border-top: var(--border-sm) solid var(--border-color);
-  background: var(--bg-secondary);
+  background: var(--bg-card);
 }
 
 .pagination-wrapper > * {

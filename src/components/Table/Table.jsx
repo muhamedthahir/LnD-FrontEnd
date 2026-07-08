@@ -1,7 +1,11 @@
 import styles from './Table.module.css'
 
-function Table({ children, className = '', ...props }) {
-  const tableClassName = className ? `${styles.table} ${className}` : styles.table
+function Table({ children, className = '', variant = 'standalone', ...props }) {
+  const tableClassName = [
+    styles.table,
+    variant === 'embedded' && styles.embedded,
+    className
+  ].filter(Boolean).join(' ')
 
   return (
     <table className={tableClassName} {...props}>

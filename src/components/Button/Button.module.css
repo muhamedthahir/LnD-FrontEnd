@@ -22,14 +22,21 @@
 
 /* Primary Button */
 .primary {
-  background: var(--accent-primary);
-  color: var(--bg-primary);
+  background: var(--gradient-accent);
+  color: var(--text-on-accent);
   border: none;
+  box-shadow: var(--shadow-sm);
 }
 
 .primary:hover:not(:disabled) {
-  background: var(--accent-secondary);
-  transform: translateY(-0.0625rem);
+  box-shadow: var(--shadow-md), var(--shadow-glow);
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+}
+
+.primary:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Secondary Button */
@@ -63,26 +70,28 @@
 
 /* Draft Button */
 .draft {
-  background: rgba(245, 158, 11, 0.1);
-  color: #f59e0b;
-  border: var(--border-sm) solid #f59e0b;
+  background: var(--warning-glow);
+  color: var(--warning);
+  border: var(--border-sm) solid var(--warning);
 }
 
 .draft:hover:not(:disabled) {
-  background: rgba(245, 158, 11, 0.2);
+  background: rgba(184, 146, 58, 0.2);
 }
 
 /* Clear Filters Button */
 .clearFilters {
-  background: var(--accent-primary);
-  color: var(--bg-primary);
+  background: var(--gradient-accent);
+  color: var(--text-on-accent);
   border: none;
   height: 2.25rem;
+  box-shadow: var(--shadow-sm);
 }
 
 .clearFilters:hover:not(:disabled) {
-  background: var(--accent-secondary);
-  transform: translateY(-0.0625rem);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  filter: brightness(1.05);
 }
 
 .clearFilters svg {
@@ -93,8 +102,8 @@
 /* Edit Button */
 .edit {
   padding: var(--spacing-xs) var(--spacing-sm);
-  background: var(--accent-primary);
-  color: var(--bg-primary);
+  background: var(--gradient-accent);
+  color: var(--text-on-accent);
   border: none;
   border-radius: var(--radius-sm);
   font-size: 0.75rem;
@@ -104,7 +113,8 @@
 }
 
 .edit:hover:not(:disabled) {
-  background: var(--accent-secondary);
+  filter: brightness(1.08);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Delete Button */
@@ -121,19 +131,20 @@
 }
 
 .delete:hover:not(:disabled) {
-  background: #dc2626;
+  filter: brightness(0.92);
 }
 
 /* Danger Button (Full size) */
 .danger {
-  background: var(--error, #ef4444);
-  color: white;
+  background: var(--error);
+  color: var(--text-on-accent);
   border: none;
 }
 
 .danger:hover:not(:disabled) {
-  background: #dc2626;
-  transform: translateY(-0.0625rem);
+  filter: brightness(0.92);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Review Button */

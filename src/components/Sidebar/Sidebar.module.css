@@ -1,20 +1,22 @@
 .sidebar {
-  width: 12rem;
+  width: var(--sidebar-width);
   height: 100vh;
-  background: var(--bg-card);
-  border-right: var(--border-sm) solid var(--border-color);
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-right: var(--border-sm) solid var(--glass-border);
   display: flex;
   flex-direction: column;
   position: fixed;
   left: 0;
   top: 0;
-  z-index: 100;
+  z-index: var(--z-sidebar);
   box-shadow: var(--shadow-sm);
-  transition: width var(--transition-normal);
+  transition: width var(--transition-normal), transform var(--transition-normal);
 }
 
 .sidebar.collapsed {
-  width: 4rem;
+  width: var(--sidebar-width-collapsed);
 }
 
 .header {
@@ -34,8 +36,9 @@
 
 .header h2 {
   font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-primary);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--accent-primary);
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -133,8 +136,9 @@
   text-decoration: none;
   transition: all var(--transition-fast);
   border-left: 3px solid transparent;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   aspect-ratio: unset;
+  position: relative;
 }
 
 .sidebar.collapsed .navItem {
@@ -145,15 +149,17 @@
 }
 
 .navItem:hover {
-  background: var(--bg-secondary);
+  background: var(--bg-hover);
   color: var(--text-primary);
+  transform: translateX(2px);
 }
 
 .navItem.active {
-  background: var(--accent-subtle);
+  background: var(--gradient-accent-soft);
   color: var(--accent-primary);
   border-left-color: var(--accent-primary);
   font-weight: 600;
+  box-shadow: inset 0 0 0 1px var(--accent-subtle);
 }
 
 .navItem svg {
@@ -279,68 +285,34 @@
 
 @media (max-width: 600px) {
   .sidebar {
-    width: 5px; /* Small visible area for hover detection */
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateX(0);
-    transition: width var(--transition-normal);
-    overflow: hidden;
+    width: var(--sidebar-width);
+    transform: translateX(-100%);
+    z-index: var(--z-sidebar);
+    box-shadow: var(--shadow-lg);
   }
-  
-  /* Show sidebar when open (via click) */
+
   .sidebar.open {
-    width: 12rem;
-    z-index: 1000;
+    transform: translateX(0);
   }
-  
-  /* Show sidebar on hover */
-  .sidebar:hover {
-    width: 12rem;
-    z-index: 1000;
+
+  .navItem span,
+  .header h2,
+  .sectionLabel {
+    display: block;
+    opacity: 1;
+    width: auto;
+    height: auto;
+    visibility: visible;
   }
-  
-  /* Ensure all content is visible when sidebar is open or hovered */
-  .sidebar.open .navItem,
-  .sidebar:hover .navItem {
+
+  .navItem {
     justify-content: flex-start;
     padding: 0.5rem 0.75rem;
     margin: 0 0.5rem;
   }
-  
-  .sidebar.open .navItem svg,
-  .sidebar:hover .navItem svg {
-    display: flex !important;
-    width: var(--icon-md) !important;
-    height: var(--icon-md) !important;
-    flex-shrink: 0;
-    opacity: 1 !important;
-    visibility: visible !important;
-  }
-  
-  .sidebar.open .navItem span,
-  .sidebar:hover .navItem span {
-    display: block !important;
-    opacity: 1 !important;
-    width: auto !important;
-    overflow: visible !important;
-    visibility: visible !important;
-  }
-  
-  .sidebar.open .header h2,
-  .sidebar:hover .header h2 {
-    display: block !important;
-    opacity: 1 !important;
-    width: auto !important;
-    visibility: visible !important;
-  }
-  
-  .sidebar.open .sectionLabel,
-  .sidebar:hover .sectionLabel {
-    display: block !important;
-    opacity: 1 !important;
-    height: auto !important;
-    padding: 0.25rem 0.75rem 0.25rem 1.25rem !important;
-    visibility: visible !important;
+
+  .toggleBtn {
+    display: flex;
   }
 }
 

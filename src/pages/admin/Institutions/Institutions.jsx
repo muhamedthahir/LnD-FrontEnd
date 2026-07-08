@@ -387,7 +387,7 @@ function Institutions() {
                 <p>Get started by creating your first institution or college.</p>
               </div>
             ) : (
-              <Table>
+              <Table variant="embedded">
                 <thead>
                   <tr>
                     <th>Name</th>

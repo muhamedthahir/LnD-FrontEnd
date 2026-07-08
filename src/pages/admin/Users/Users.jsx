@@ -712,6 +712,7 @@ function Users() {
         </div>
       )}
 
+      {!showForm && (
       <div className="users-table-card">
         {/* Scrollable Container - Contains filters and table */}
         <div className="table-container">
@@ -735,7 +736,7 @@ function Users() {
                   value={selectedCollege}
                   onChange={(e) => setSelectedCollege(e.target.value)}
                   size="compact"
-                  className="filter-select users-filter-select user-styled-select"
+                  className="users-filter-select"
                   options={filterCollegeOptions}
                 />
               </div>
@@ -771,7 +772,7 @@ function Users() {
                 <p>Get started by creating your first user or uploading users in bulk.</p>
               </div>
             ) : (
-              <Table>
+              <Table variant="embedded">
                 <thead>
                   <tr>
                     <th>Name</th>
@@ -792,15 +793,11 @@ function Users() {
                       </td>
                       <td>{u.email}</td>
                       <td>
-                        <span className={`role-badge role-${u.role}`}>
-                          {u.role === 'college_admin' ? 'College Admin' : 
-                           u.role === 'primary_admin' ? 'Primary Admin' : 'Student'}
-                        </span>
+                        {u.role === 'college_admin' ? 'College Admin' : 
+                         u.role === 'primary_admin' ? 'Primary Admin' : 'Student'}
                       </td>
                       <td>
-                        <span className={`status-badge status-${u.status || 'activated'}`}>
-                          {u.status === 'pending' ? 'Pending' : 'Activated'}
-                        </span>
+                        {u.status === 'pending' ? 'Pending' : 'Activated'}
                       </td>
                       <td>{new Date(u.created_at).toLocaleDateString()}</td>
                       <td>
@@ -841,6 +838,7 @@ function Users() {
           )}
         </div>
       </div>
+      )}
 
       {showEditModal && selectedUser && (
         <div className="modal-overlay" onClick={() => setShowEditModal(false)}>

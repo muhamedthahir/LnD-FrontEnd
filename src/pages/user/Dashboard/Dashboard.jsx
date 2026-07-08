@@ -15,16 +15,27 @@ import {
 } from '../../../store/dashboardSlice'
 import styles from './Dashboard.module.css'
 
-// Pie chart colors
+// Pie chart colors — theme-aligned
 const COURSE_COLORS = {
-  published: '#10b981', // green
-  draft: '#f59e0b',     // amber
-  inProgress: '#3b82f6' // blue
+  published: '#3d8a6a',
+  draft: '#b8862e',
+  inProgress: '#2f5d8a'
 }
 
 const ADMIN_COLORS = {
-  published: '#10b981', // green
-  draft: '#f59e0b'      // amber
+  published: '#3d8a6a',
+  draft: '#b8862e'
+}
+
+const ChartTooltip = ({ active, payload }) => {
+  if (!active || !payload?.length) return null
+  const item = payload[0]
+  return (
+    <div className={styles.chartTooltip}>
+      <span className={styles.chartTooltipLabel}>{item.name}</span>
+      <span className={styles.chartTooltipValue}>{item.value}</span>
+    </div>
+  )
 }
 
 function Dashboard() {
@@ -195,12 +206,8 @@ function Dashboard() {
 
       <main className={styles.dashboardMain}>
         <div className={styles.dashboardContainer}>
-          
-
-          <div className={styles.dashboardContent}>
-            {/* Admin Dashboard Sections */}
-            {isAdmin && (
-              <div className={styles.adminDashboard}>
+          {isAdmin ? (
+            <div className={styles.adminDashboard}>
                 {/* Courses Section */}
                 <div className={styles.dashboardSection}>
                   <div className={styles.sectionHeader}>
@@ -255,8 +262,8 @@ function Dashboard() {
                                     <Cell key={`cell-${index}`} fill={entry.color} />
                                   ))}
                                 </Pie>
-                                <Tooltip />
-                                <Legend />
+                                <Tooltip content={<ChartTooltip />} />
+                                <Legend wrapperStyle={{ fontSize: '12px' }} />
                               </PieChart>
                             </ResponsiveContainer>
                           ) : (
@@ -344,8 +351,8 @@ function Dashboard() {
                                     <Cell key={`cell-${index}`} fill={entry.color} />
                                   ))}
                                 </Pie>
-                                <Tooltip />
-                                <Legend />
+                                <Tooltip content={<ChartTooltip />} />
+                                <Legend wrapperStyle={{ fontSize: '12px' }} />
                               </PieChart>
                             </ResponsiveContainer>
                           ) : (
@@ -368,44 +375,41 @@ function Dashboard() {
                             <span className={styles.statLabel}>Draft</span>
                           </div>
                         </div>
-                        
-                        {/* Recent Administrations List */}
-                        {administrations.length > 0 && (
-                          <div className={styles.recentList}>
-                            <h4>Recent Administrations</h4>
-                            <div className={styles.listItems}>
-                              {administrations.slice(0, 5).map(admin => (
-                                <div key={admin.id} className={styles.listItem}>
-                                  <div className={styles.listItemInfo}>
-                                    <span className={styles.listItemName}>{admin.administration_name}</span>
-                                    <span className={styles.listItemMeta}>
-                                      {admin.course_name} • {admin.total_invites || 0} users
-                                    </span>
-                                  </div>
-                                  <span className={`${styles.statusBadge} ${styles[admin.status]}`}>
-                                    {admin.status}
-                                  </span>
-                                </div>
-                              ))}
+                      </div>
+                    )}
+
+                    {/* Recent Administrations List */}
+                    {!administrationsLoading && administrations.length > 0 && (
+                      <div className={styles.recentList}>
+                        <h4>Recent Administrations</h4>
+                        <div className={styles.listItems}>
+                          {administrations.slice(0, 5).map(admin => (
+                            <div key={admin.id} className={styles.listItem}>
+                              <div className={styles.listItemInfo}>
+                                <span className={styles.listItemName}>{admin.administration_name}</span>
+                                <span className={styles.listItemMeta}>
+                                  {admin.course_name} • {admin.total_invites || 0} users
+                                </span>
+                              </div>
+                              <span className={`${styles.statusBadge} ${styles[admin.status]}`}>
+                                {admin.status}
+                              </span>
                             </div>
-                            <Link to="/admin/courses/administrations" className={styles.viewAllLink}>
-                              View All Administrations
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M5 12h14M12 5l7 7-7 7"/>
-                              </svg>
-                            </Link>
-                          </div>
-                        )}
+                          ))}
+                        </div>
+                        <Link to="/admin/courses/administrations" className={styles.viewAllLink}>
+                          View All Administrations
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                          </svg>
+                        </Link>
                       </div>
                     )}
                   </div>
                 </div>
               </div>
-            )}
-
-            {/* Student Dashboard */}
-            {!isAdmin && (
-              <>
+            ) : (
+              <div className={styles.dashboardContent}>
                 <div className={styles.welcomeSection}>
                   <h3>Dashboard</h3>
                   <p>Welcome to your learning dashboard!</p>
@@ -448,9 +452,8 @@ function Dashboard() {
                     <span className={styles.comingSoon}>Coming Soon</span>
                   </div>
                 </div>
-              </>
+              </div>
             )}
-          </div>
         </div>
       </main>
     </div>

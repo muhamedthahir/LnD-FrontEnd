@@ -219,8 +219,8 @@
 }
 
 .type-mcq {
-  background: rgba(99, 102, 241, 0.15);
-  color: #6366f1;
+  background: var(--accent-subtle);
+  color: var(--accent-primary);
 }
 
 .type-multi-select {
@@ -282,12 +282,12 @@
 }
 
 .action-btn.edit {
-  background: rgba(99, 102, 241, 0.1);
-  color: #6366f1;
+  background: var(--accent-subtle);
+  color: var(--accent-primary);
 }
 
 .action-btn.edit:hover {
-  background: rgba(99, 102, 241, 0.2);
+  background: var(--accent-glow);
 }
 
 .action-btn.view {
@@ -357,8 +357,9 @@
 
 /* Pagination */
 .pagination-wrapper {
-  padding: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
   border-top: var(--border-sm) solid var(--border-color);
+  background: var(--bg-card);
 }
 
 /* Responsive */

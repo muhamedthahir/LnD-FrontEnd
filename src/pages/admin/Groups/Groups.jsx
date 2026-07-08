@@ -1022,7 +1022,7 @@ function Groups() {
                 <p>{filters.college || filters.groupName ? 'Try adjusting your filters or create a new group.' : 'Get started by creating your first student group.'}</p>
               </div>
             ) : (
-              <Table>
+              <Table variant="embedded">
                 <thead>
                   <tr>
                     <th>Name</th>

@@ -59,13 +59,13 @@ function AssessmentManagement() {
     return () => clearTimeout(timer)
   }, [fetchAssessments])
 
-  const getStatusBadgeClass = (status) => {
-    switch (status) {
-      case 'PUBLISHED': return 'status-badge published'
-      case 'DRAFT': return 'status-badge draft'
-      case 'ARCHIVED': return 'status-badge archived'
-      default: return 'status-badge'
-    }
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [search, selectedStatus])
+
+  const formatStatus = (status) => {
+    if (!status) return '—'
+    return status.charAt(0) + status.slice(1).toLowerCase()
   }
 
   const formatDuration = (seconds) => {
@@ -75,6 +75,13 @@ function AssessmentManagement() {
     if (hours > 0) return `${hours}h ${minutes}m`
     return `${minutes}m`
   }
+
+  const handleClearFilters = () => {
+    setSearch('')
+    setSelectedStatus('')
+  }
+
+  const hasActiveFilters = search || selectedStatus
 
   return (
     <div className="assessment-management-page">
@@ -91,38 +98,11 @@ function AssessmentManagement() {
         </Button>
       </div>
 
-      <div className="filters-section">
-        <div className="filter-group">
-          <input
-            type="text"
-            className="search-input"
-            placeholder="Search assessments..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-        <div className="filter-group">
-          <select
-            className="filter-select"
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-          >
-            <option value="">All Status</option>
-            <option value="DRAFT">Draft</option>
-            <option value="PUBLISHED">Published</option>
-            <option value="ARCHIVED">Archived</option>
-          </select>
-        </div>
-      </div>
-
       {loading ? (
-        <div className="loading-state">
-          <div className="spinner"></div>
-          <p>Loading assessments...</p>
-        </div>
-      ) : assessments.length === 0 ? (
+        <div className="loading">Loading assessments...</div>
+      ) : totalCount === 0 && !hasActiveFilters ? (
         <div className="empty-state">
-          <div className="empty-icon">
+          <div className="empty-state-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M9 11l3 3L22 4"/>
               <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
@@ -130,87 +110,128 @@ function AssessmentManagement() {
           </div>
           <h3>No Assessments Found</h3>
           <p>Get started by creating your first assessment.</p>
-          <Button variant="primary" onClick={() => navigate('/admin/assessments/create')}>Create Assessment</Button>
+          <Button variant="primary" onClick={() => navigate('/admin/assessments/create')}>
+            Create Assessment
+          </Button>
         </div>
       ) : (
-        <>
-          <div className="assessments-table-container">
-            <Table>
-              <thead>
-                <tr>
-                  <th>Assessment</th>
-                  <th>Segments</th>
-                  <th>Duration</th>
-                  <th>Configurations</th>
-                  <th>Status</th>
-                  <th>Created</th>
-                  <th>View/Edit</th>
-                </tr>
-              </thead>
-              <tbody>
-                {assessments.map(assessment => (
-                  <tr key={assessment.id}>
-                    <td>
-                      <div className="assessment-info">
-                        <span className="assessment-id">{assessment.unique_id}</span>
-                        <span className="assessment-title">{assessment.title}</span>
-                        {assessment.topic_name && (
-                          <span className="assessment-topic">{assessment.topic_name}</span>
-                        )}
-                      </div>
-                    </td>
-                    <td>
-                      <span className="count-badge">{assessment.segment_count || 0}</span>
-                    </td>
-                    <td>{formatDuration(assessment.total_duration)}</td>
-                    <td>
-                      <span className="count-badge">{assessment.config_count || 0}</span>
-                    </td>
-                    <td>
-                      <span className={getStatusBadgeClass(assessment.status)}>
-                        {assessment.status}
-                      </span>
-                    </td>
-                    <td>
-                      <span className="date-text">
-                        {new Date(assessment.created_at).toLocaleDateString()}
-                      </span>
-                    </td>
-                    <td>
-                      <div className="action-buttons">
-                        <button 
-                          className="action-btn edit"
-                          onClick={() => navigate(`/admin/assessments/${assessment.id}/edit`)}
-                          title="Open View/Edit"
-                        >
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                          </svg>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </div>
-
-          {totalCount > pageSize && (
-            <div className="pagination-wrapper">
-              <Pagination
-                currentPage={currentPage}
-                pageSize={pageSize}
-                totalCount={totalCount}
-                onPageChange={setCurrentPage}
-                onPageSizeChange={setPageSize}
-              />
+        <div className="assessments-table-card">
+          <div className="table-container">
+            <div className="filters-section">
+              <div className="filters">
+                <div className="filter-group">
+                  <label>Assessment Name</label>
+                  <input
+                    type="text"
+                    className="filter-input"
+                    placeholder="Search by assessment name..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                </div>
+                <div className="filter-group">
+                  <label>Status</label>
+                  <select
+                    className="filter-select"
+                    value={selectedStatus}
+                    onChange={(e) => setSelectedStatus(e.target.value)}
+                  >
+                    <option value="">All</option>
+                    <option value="DRAFT">Draft</option>
+                    <option value="PUBLISHED">Published</option>
+                    <option value="ARCHIVED">Archived</option>
+                  </select>
+                </div>
+                {hasActiveFilters && (
+                  <button
+                    type="button"
+                    onClick={handleClearFilters}
+                    className="btn-clear-filters"
+                    title="Clear all filters"
+                  >
+                    <svg viewBox="64 64 896 896" focusable="false" width="1em" height="1em" fill="currentColor" aria-hidden="true">
+                      <path d="M899.1 869.6l-53-305.6H864c14.4 0 26-11.6 26-26V346c0-14.4-11.6-26-26-26H618V138c0-14.4-11.6-26-26-26H432c-14.4 0-26 11.6-26 26v182H160c-14.4 0-26 11.6-26 26v192c0 14.4 11.6 26 26 26h17.9l-53 305.6a25.95 25.95 0 0025.6 30.4h723c1.5 0 3-.1 4.4-.4a25.88 25.88 0 0021.2-30zM204 390h272V182h72v208h272v104H204V390zm468 440V674c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v156H416V674c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v156H202.8l45.1-260H776l45.1 260H672z"></path>
+                    </svg>
+                  </button>
+                )}
+              </div>
             </div>
-          )}
-        </>
-      )}
 
-      </div>
+            {assessments.length === 0 ? (
+              <div className="empty-state filtered-empty">
+                <h3>No Assessments Match Your Filters</h3>
+                <p>Try adjusting your filters or create a new assessment.</p>
+              </div>
+            ) : (
+              <div className="table-wrapper">
+                <Table variant="embedded">
+                  <thead>
+                    <tr>
+                      <th>Assessment</th>
+                      <th>Segments</th>
+                      <th>Duration</th>
+                      <th>Configurations</th>
+                      <th>Status</th>
+                      <th>Created</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {assessments.map(assessment => (
+                      <tr key={assessment.id}>
+                        <td>
+                          <button
+                            type="button"
+                            className="assessment-name-link"
+                            onClick={() => navigate(`/admin/assessments/${assessment.id}/edit`)}
+                          >
+                            {assessment.title}
+                          </button>
+                          <div className="assessment-meta">{assessment.unique_id}</div>
+                        </td>
+                        <td>{assessment.segment_count || 0}</td>
+                        <td>{formatDuration(assessment.total_duration)}</td>
+                        <td>{assessment.config_count || 0}</td>
+                        <td>{formatStatus(assessment.status)}</td>
+                        <td>{new Date(assessment.created_at).toLocaleDateString()}</td>
+                        <td>
+                          <div className="action-buttons">
+                            <button
+                              type="button"
+                              className="btn-edit"
+                              onClick={() => navigate(`/admin/assessments/${assessment.id}/edit`)}
+                              title="View/Edit Assessment"
+                            >
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                              </svg>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </div>
+            )}
+
+            {totalCount > 0 && (
+              <div className="pagination-wrapper">
+                <Pagination
+                  currentPage={currentPage}
+                  pageSize={pageSize}
+                  totalCount={totalCount}
+                  itemName="assessments"
+                  onPageChange={setCurrentPage}
+                  onPageSizeChange={setPageSize}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
 

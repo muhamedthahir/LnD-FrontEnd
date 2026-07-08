@@ -94,12 +94,13 @@
 }
 
 .btnConfirm {
-  background: var(--error);
-  color: white;
+  background: var(--gradient-accent);
+  color: var(--text-on-accent);
 }
 
 .btnConfirm:hover:not(:disabled) {
-  background: #dc2626;
+  filter: brightness(1.06);
+  box-shadow: var(--shadow-sm);
 }
 
 .btnConfirm.disabled,

@@ -4,65 +4,56 @@
   flex-direction: column;
 }
 
-/* Toast overrides – blue-based theme, slightly blue background */
+/* Toast — warm slate theme */
 .toast-theme.Toastify__toast-container {
   z-index: 9999;
 }
 
 .toast-theme .Toastify__toast {
-  background: var(--toast-bg) !important;
+  background: var(--glass-bg) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   color: var(--text-primary) !important;
-  border: 1px solid var(--border-color) !important;
-  box-shadow: var(--shadow-md) !important;
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: var(--shadow-lg) !important;
   border-radius: var(--radius-md) !important;
+  animation: slideDown 0.35s cubic-bezier(0.34, 1.2, 0.64, 1) both;
 }
 
 .toast-theme .Toastify__toast--default,
 .toast-theme .Toastify__toast--info {
-  border-left: 4px solid var(--accent-primary);
+  border-left: 3px solid var(--accent-primary) !important;
 }
 
 .toast-theme .Toastify__toast--success {
-  border-left: 4px solid var(--success);
-  background: var(--toast-bg) !important;
-  color: var(--text-primary) !important;
+  border-left: 3px solid var(--success) !important;
 }
 
-/* Error: blue accent instead of red (no red tick) */
 .toast-theme .Toastify__toast--error {
-  border-left: 4px solid var(--accent-primary);
-  background: var(--toast-bg) !important;
-  color: var(--text-primary) !important;
+  border-left: 3px solid var(--error) !important;
 }
 
 .toast-theme .Toastify__toast--error svg,
 .toast-theme .Toastify__toast--error [class*="icon"] {
-  fill: var(--accent-primary) !important;
-  color: var(--accent-primary) !important;
+  fill: var(--error) !important;
+  color: var(--error) !important;
 }
 
 .toast-theme .Toastify__toast--warning {
-  border-left: 4px solid var(--warning);
-  background: var(--toast-bg) !important;
-  color: var(--text-primary) !important;
+  border-left: 3px solid var(--warning) !important;
 }
 
 .toast-theme .Toastify__progress-bar {
-  background: linear-gradient(to right, var(--accent-primary), var(--accent-secondary)) !important;
-}
-
-.toast-theme .Toastify__toast--error .Toastify__progress-bar,
-.toast-theme .Toastify__toast--warning .Toastify__progress-bar {
-  background: linear-gradient(to right, var(--accent-primary), var(--accent-secondary)) !important;
+  background: var(--gradient-accent) !important;
+  height: 3px !important;
 }
 
 .toast-theme .Toastify__close-button {
-  color: var(--accent-primary) !important;
-  opacity: 0.9;
+  color: var(--text-secondary) !important;
+  opacity: 0.8;
 }
 
 .toast-theme .Toastify__close-button:hover {
-  color: var(--accent-secondary) !important;
+  color: var(--accent-primary) !important;
   opacity: 1;
 }
-  

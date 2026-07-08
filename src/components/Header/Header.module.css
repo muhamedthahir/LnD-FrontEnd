@@ -3,24 +3,26 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 3.5rem;
-  background: var(--bg-card);
-  border-bottom: var(--border-sm) solid var(--border-color);
+  height: var(--layout-header-height);
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: var(--border-sm) solid var(--glass-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 var(--spacing-lg);
-  z-index: 99;
+  z-index: var(--z-header);
   box-shadow: var(--shadow-sm);
   transition: left var(--transition-normal);
 }
 
 :global(html[data-sidebar-collapsed="false"]) .header {
-  left: 12rem;
+  left: var(--sidebar-width);
 }
 
 :global(html[data-sidebar-collapsed="true"]) .header {
-  left: 4rem;
+  left: var(--sidebar-width-collapsed);
 }
 
 .left {
@@ -61,8 +63,10 @@
 
 .progressFill {
   height: 100%;
-  background: var(--accent-primary);
-  transition: width var(--transition-normal);
+  background: var(--gradient-accent);
+  border-radius: inherit;
+  transition: width var(--transition-slow);
+  box-shadow: 0 0 8px var(--accent-glow);
 }
 
 .progressText {
@@ -151,8 +155,8 @@
   width: 1.5rem;
   height: 1.5rem;
   border-radius: var(--radius-sm);
-  background: var(--accent-primary);
-  color: var(--bg-primary);
+  background: var(--gradient-accent);
+  color: var(--text-on-accent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -198,7 +202,7 @@
   box-shadow: var(--shadow-lg);
   min-width: 16rem;
   overflow: hidden;
-  z-index: 1000;
+  z-index: var(--z-dropdown);
   animation: slideDown 0.2s ease-out;
 }
 
@@ -225,8 +229,8 @@
   width: 3rem;
   height: 3rem;
   border-radius: var(--radius-md);
-  background: var(--accent-primary);
-  color: var(--bg-primary);
+  background: var(--gradient-accent);
+  color: var(--text-on-accent);
   display: flex;
   align-items: center;
   justify-content: center;
