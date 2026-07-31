@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react'
 import { toast } from 'react-toastify'
 import { useApi } from '../contexts/ApiContext'
 import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES } from '../constants/constants'
+import { inferContentType, parseS3ErrorMessage } from '../utils/uploadUtils'
 
 // Allowed file extensions
 const ALLOWED_EXTENSIONS = {
@@ -19,49 +20,6 @@ const MAX_FILE_SIZES = {
   video: 500,
   document: 50,
   image: 10
-}
-
-const EXTENSION_TO_MIME = {
-  mp3: 'audio/mpeg',
-  wav: 'audio/wav',
-  ogg: 'audio/ogg',
-  webm: 'video/webm',
-  mp4: 'video/mp4',
-  mov: 'video/quicktime',
-  avi: 'video/x-msvideo',
-  pdf: 'application/pdf',
-  ppt: 'application/vnd.ms-powerpoint',
-  pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-  doc: 'application/msword',
-  docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  txt: 'text/plain',
-  jpg: 'image/jpeg',
-  jpeg: 'image/jpeg',
-  png: 'image/png',
-  gif: 'image/gif',
-  webp: 'image/webp'
-}
-
-const inferContentType = (fileName, fileType = '') => {
-  const normalizedType = String(fileType || '').trim()
-  if (normalizedType) return normalizedType
-
-  const extension = fileName.split('.').pop()?.toLowerCase()
-  return extension ? EXTENSION_TO_MIME[extension] || '' : ''
-}
-
-const parseS3ErrorMessage = async (response) => {
-  const responseText = await response.text()
-  const codeMatch = responseText.match(/<Code>([^<]+)<\/Code>/)
-  const messageMatch = responseText.match(/<Message>([^<]+)<\/Message>/)
-
-  if (codeMatch || messageMatch) {
-    console.error('[S3 upload error XML]', responseText)
-    return `${codeMatch?.[1] || 'S3Error'}: ${messageMatch?.[1] || response.statusText}`
-  }
-
-  console.error('[S3 upload error]', response.status, responseText || response.statusText)
-  return responseText || `S3 upload failed (${response.status})`
 }
 
 /**

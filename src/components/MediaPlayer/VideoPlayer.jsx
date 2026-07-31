@@ -1,5 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import styles from './VideoPlayer.module.css'
+import useResolvedMediaUrl from '../../hooks/useResolvedMediaUrl'
+
+const MEDIA_ERROR_LABELS = {
+  1: 'MEDIA_ERR_ABORTED',
+  2: 'MEDIA_ERR_NETWORK',
+  3: 'MEDIA_ERR_DECODE',
+  4: 'MEDIA_ERR_SRC_NOT_SUPPORTED'
+}
 
 /**
  * VideoPlayer component for displaying video content
@@ -9,6 +17,7 @@ import styles from './VideoPlayer.module.css'
 function VideoPlayer({ 
   url, 
   fileName = '', 
+  mediaKey = null,
   compact = false,
   autoPlay = false,
   controls = true,
@@ -28,6 +37,7 @@ function VideoPlayer({
   const lastReportedProgressRef = useRef(0)
   const lastReportedTimeRef = useRef(0)
   const progressPercentRef = useRef(initialProgress)
+  const { playbackUrl, resolving } = useResolvedMediaUrl(url, mediaKey)
 
   // Extract clean URL if user pasted iframe HTML or messy string
   const normalizeVideoUrl = (raw) => {
@@ -40,7 +50,7 @@ function VideoPlayer({
     return trimmed
   }
 
-  const cleanUrl = normalizeVideoUrl(url)
+  const cleanUrl = normalizeVideoUrl(playbackUrl || url)
 
   // Check if URL is an embedded video (YouTube, Vimeo, etc.)
   const isEmbedded = cleanUrl && (
@@ -84,6 +94,11 @@ function VideoPlayer({
 
     return u
   }
+
+  useEffect(() => {
+    setError(false)
+    setLoading(true)
+  }, [cleanUrl])
 
   // Handle progress tracking
   const handleTimeUpdate = useCallback(() => {
@@ -159,7 +174,16 @@ function VideoPlayer({
   }, [initialProgress])
 
   const handleError = (e) => {
-    console.error('Video error:', e, url)
+    const mediaError = videoRef.current?.error
+    const errorCode = mediaError?.code
+    console.error('Video error:', {
+      event: e,
+      url,
+      playbackUrl: cleanUrl,
+      mediaKey,
+      mediaErrorCode: errorCode,
+      mediaErrorLabel: errorCode ? MEDIA_ERROR_LABELS[errorCode] : undefined
+    })
     setError(true)
     setLoading(false)
     if (onError) onError(e)
@@ -212,10 +236,10 @@ function VideoPlayer({
 
   return (
     <div className={`${styles.container} ${compact ? styles.compact : ''}`}>
-      {loading && (
+      {loading && (resolving || !cleanUrl) && (
         <div className={styles.loading}>
           <div className="spinner"></div>
-          <span>Loading video...</span>
+          <span>{resolving ? 'Preparing video...' : 'Loading video...'}</span>
         </div>
       )}
       

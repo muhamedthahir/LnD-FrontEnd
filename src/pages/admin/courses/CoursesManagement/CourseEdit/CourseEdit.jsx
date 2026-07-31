@@ -6,6 +6,7 @@ import LessonModal from '../../../../../components/LessonModal/LessonModal'
 import ConfirmModal from '../../../../../components/ConfirmModal/ConfirmModal'
 import { useApi } from '../../../../../contexts/ApiContext'
 import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES, VALIDATION_MESSAGES } from '../../../../../constants/constants'
+import { inferContentType, parseS3ErrorMessage } from '../../../../../utils/uploadUtils'
 import './CourseEdit.css'
 
 function CourseEdit() {
@@ -1206,7 +1207,7 @@ function CourseEdit() {
                 body: JSON.stringify({
                   files: filesToUpload.map(file => ({
                     fileName: file.name,
-                    contentType: file.type
+                    contentType: inferContentType(file.name, file.type)
                   })),
                   courseId: course?.id,
                   courseName: course?.name,
@@ -1227,24 +1228,25 @@ function CourseEdit() {
               for (let i = 0; i < filesToUpload.length; i++) {
                 const file = filesToUpload[i]
                 const presignedInfo = presignedData.data[i]
+                const signedContentType = presignedInfo.contentType || inferContentType(file.name, file.type)
 
                 const uploadResponse = await fetch(presignedInfo.presignedUrl, {
                   method: 'PUT',
                   headers: {
-                    'Content-Type': file.type
+                    'Content-Type': signedContentType
                   },
                   body: file
                 })
 
                 if (!uploadResponse.ok) {
-                  throw new Error(`Failed to upload file ${file.name} to S3`)
+                  throw new Error(`${file.name}: ${await parseS3ErrorMessage(uploadResponse)}`)
                 }
 
                 uploadedFiles.push({
                   url: presignedInfo.fileUrl,
                   key: presignedInfo.key,
                   fileName: presignedInfo.originalFileName,
-                  contentType: file.type
+                  contentType: signedContentType
                 })
               }
 

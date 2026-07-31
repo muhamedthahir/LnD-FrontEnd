@@ -97,7 +97,8 @@ export const API_ENDPOINTS = {
     CREATE_BUCKET: '/api/upload/create-bucket',
     ALLOWED_TYPES: '/api/upload/allowed-types',
     PRESIGNED_URL: '/api/upload/presigned-url',
-    PRESIGNED_URLS: '/api/upload/presigned-urls'
+    PRESIGNED_URLS: '/api/upload/presigned-urls',
+    PRESIGNED_DOWNLOAD: '/api/upload/presigned-download'
   },
 
   // Question Banks

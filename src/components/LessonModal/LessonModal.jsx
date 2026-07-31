@@ -26,8 +26,10 @@ function LessonModal({ isOpen, onClose, onAdd, sectionId, editingLesson = null, 
   
   // Existing media from S3 (when editing)
   const [existingMediaUrl, setExistingMediaUrl] = useState(null)
+  const [existingMediaKey, setExistingMediaKey] = useState(null)
   const [existingMediaFileName, setExistingMediaFileName] = useState('')
   const [existingDocuments, setExistingDocuments] = useState([])
+  const [localMediaPreviewUrl, setLocalMediaPreviewUrl] = useState(null)
   
   // Modal states
   const [showLinkModal, setShowLinkModal] = useState(false)
@@ -55,8 +57,10 @@ function LessonModal({ isOpen, onClose, onAdd, sectionId, editingLesson = null, 
     setDocumentUrl('')
     setThresholdValue(100)
     setExistingMediaUrl(null)
+    setExistingMediaKey(null)
     setExistingMediaFileName('')
     setExistingDocuments([])
+    setLocalMediaPreviewUrl(null)
   }
 
   // Populate form when editing a lesson
@@ -97,6 +101,7 @@ function LessonModal({ isOpen, onClose, onAdd, sectionId, editingLesson = null, 
             // S3 uploaded video - show preview using presigned URL
             setVideoEmbedded(false)
             setExistingMediaUrl(content.presignedUrl || content.url)
+            setExistingMediaKey(content.key || null)
             setExistingMediaFileName(content.fileName || '')
           } else {
             setVideoEmbedded(false)
@@ -109,6 +114,7 @@ function LessonModal({ isOpen, onClose, onAdd, sectionId, editingLesson = null, 
             // S3 uploaded audio - show preview using presigned URL
             setVideoEmbedded(false)
             setExistingMediaUrl(content.presignedUrl || content.url)
+            setExistingMediaKey(content.key || null)
             setExistingMediaFileName(content.fileName || '')
           } else {
             setVideoEmbedded(false)
@@ -143,6 +149,22 @@ function LessonModal({ isOpen, onClose, onAdd, sectionId, editingLesson = null, 
       resetForm()
     }
   }, [editingLesson, isOpen])
+
+  useEffect(() => {
+    const selectedFile = contentType === 'video' ? videoFile : contentType === 'audio' ? audioFile : null
+
+    if (!selectedFile) {
+      setLocalMediaPreviewUrl(null)
+      return undefined
+    }
+
+    const objectUrl = URL.createObjectURL(selectedFile)
+    setLocalMediaPreviewUrl(objectUrl)
+
+    return () => {
+      URL.revokeObjectURL(objectUrl)
+    }
+  }, [videoFile, audioFile, contentType])
 
   const handleClose = () => {
     resetForm()
@@ -743,12 +765,14 @@ function LessonModal({ isOpen, onClose, onAdd, sectionId, editingLesson = null, 
                     {contentType === 'video' ? (
                       <VideoPlayer 
                         url={existingMediaUrl} 
+                        mediaKey={existingMediaKey}
                         fileName={existingMediaFileName}
                         compact={true}
                       />
                     ) : (
                       <AudioPlayer 
                         url={existingMediaUrl} 
+                        mediaKey={existingMediaKey}
                         fileName={existingMediaFileName}
                         compact={true}
                       />
@@ -842,6 +866,23 @@ function LessonModal({ isOpen, onClose, onAdd, sectionId, editingLesson = null, 
                             <polyline points="20 6 9 17 4 12"/>
                           </svg>
                           <span>{(contentType === 'video' ? videoFile : audioFile).name}</span>
+                        </div>
+                      )}
+                      {localMediaPreviewUrl && (
+                        <div className={styles.existingMediaPlayer}>
+                          {contentType === 'video' ? (
+                            <VideoPlayer
+                              url={localMediaPreviewUrl}
+                              fileName={(videoFile || audioFile)?.name || ''}
+                              compact={true}
+                            />
+                          ) : (
+                            <AudioPlayer
+                              url={localMediaPreviewUrl}
+                              fileName={(videoFile || audioFile)?.name || ''}
+                              compact={true}
+                            />
+                          )}
                         </div>
                       )}
                     </div>

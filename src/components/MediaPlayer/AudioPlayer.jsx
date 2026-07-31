@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import styles from './AudioPlayer.module.css'
+import useResolvedMediaUrl from '../../hooks/useResolvedMediaUrl'
 
 /**
  * AudioPlayer component for displaying audio content
@@ -9,6 +10,7 @@ import styles from './AudioPlayer.module.css'
 function AudioPlayer({ 
   url, 
   fileName = '', 
+  mediaKey = null,
   compact = false,
   autoPlay = false,
   onError = null,
@@ -28,6 +30,8 @@ function AudioPlayer({
   const [isComplete, setIsComplete] = useState(initialProgress >= thresholdValue)
   const audioRef = useRef(null)
   const lastReportedProgressRef = useRef(0)
+  const { playbackUrl, resolving } = useResolvedMediaUrl(url, mediaKey)
+  const resolvedUrl = playbackUrl || url
 
   useEffect(() => {
     const audio = audioRef.current
@@ -96,7 +100,7 @@ function AudioPlayer({
       audio.removeEventListener('ended', handleEnded)
       audio.removeEventListener('error', handleError)
     }
-  }, [url, onError, onProgressUpdate, onComplete, thresholdValue, isComplete])
+  }, [resolvedUrl, onError, onProgressUpdate, onComplete, thresholdValue, isComplete])
 
   const togglePlay = () => {
     if (!audioRef.current) return
@@ -132,7 +136,7 @@ function AudioPlayer({
     return `${minutes}:${seconds.toString().padStart(2, '0')}`
   }
 
-  if (!url) {
+  if (!resolvedUrl) {
     return (
       <div className={`${styles.container} ${compact ? styles.compact : ''}`}>
         <div className={styles.placeholder}>
@@ -167,7 +171,7 @@ function AudioPlayer({
     <div className={`${styles.container} ${compact ? styles.compact : ''}`}>
       <audio 
         ref={audioRef} 
-        src={url} 
+        src={resolvedUrl} 
         preload="metadata"
         autoPlay={autoPlay}
       />
