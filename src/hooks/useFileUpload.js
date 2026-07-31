@@ -21,6 +21,49 @@ const MAX_FILE_SIZES = {
   image: 10
 }
 
+const EXTENSION_TO_MIME = {
+  mp3: 'audio/mpeg',
+  wav: 'audio/wav',
+  ogg: 'audio/ogg',
+  webm: 'video/webm',
+  mp4: 'video/mp4',
+  mov: 'video/quicktime',
+  avi: 'video/x-msvideo',
+  pdf: 'application/pdf',
+  ppt: 'application/vnd.ms-powerpoint',
+  pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  doc: 'application/msword',
+  docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  txt: 'text/plain',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  png: 'image/png',
+  gif: 'image/gif',
+  webp: 'image/webp'
+}
+
+const inferContentType = (fileName, fileType = '') => {
+  const normalizedType = String(fileType || '').trim()
+  if (normalizedType) return normalizedType
+
+  const extension = fileName.split('.').pop()?.toLowerCase()
+  return extension ? EXTENSION_TO_MIME[extension] || '' : ''
+}
+
+const parseS3ErrorMessage = async (response) => {
+  const responseText = await response.text()
+  const codeMatch = responseText.match(/<Code>([^<]+)<\/Code>/)
+  const messageMatch = responseText.match(/<Message>([^<]+)<\/Message>/)
+
+  if (codeMatch || messageMatch) {
+    console.error('[S3 upload error XML]', responseText)
+    return `${codeMatch?.[1] || 'S3Error'}: ${messageMatch?.[1] || response.statusText}`
+  }
+
+  console.error('[S3 upload error]', response.status, responseText || response.statusText)
+  return responseText || `S3 upload failed (${response.status})`
+}
+
 /**
  * Get file category from extension
  */
@@ -92,6 +135,7 @@ export const useFileUpload = () => {
 
       // Step 1: Get presigned URL from backend
       setProgress(10)
+      const requestContentType = inferContentType(file.name, file.type)
       const presignedResponse = await fetch(`${apiBaseUrl}${API_ENDPOINTS.UPLOAD.PRESIGNED_URL}`, {
         method: 'POST',
         headers: {
@@ -100,7 +144,7 @@ export const useFileUpload = () => {
         },
         body: JSON.stringify({
           fileName: file.name,
-          contentType: file.type,
+          contentType: requestContentType,
           courseId: metadata.courseId,
           courseName: metadata.courseName,
           sectionId: metadata.sectionId,
@@ -115,19 +159,20 @@ export const useFileUpload = () => {
       }
 
       const presignedData = await presignedResponse.json()
+      const signedContentType = presignedData.data.contentType || requestContentType
       setProgress(30)
 
       // Step 2: Upload directly to S3 using presigned URL
       const uploadResponse = await fetch(presignedData.data.presignedUrl, {
         method: 'PUT',
         headers: {
-          'Content-Type': file.type
+          'Content-Type': signedContentType
         },
         body: file
       })
 
       if (!uploadResponse.ok) {
-        throw new Error('Failed to upload file to S3')
+        throw new Error(await parseS3ErrorMessage(uploadResponse))
       }
 
       setProgress(100)
@@ -139,7 +184,7 @@ export const useFileUpload = () => {
           url: presignedData.data.fileUrl,
           key: presignedData.data.key,
           fileName: presignedData.data.originalFileName,
-          contentType: file.type
+          contentType: signedContentType
         }
       }
 
@@ -188,7 +233,7 @@ export const useFileUpload = () => {
         body: JSON.stringify({
           files: fileArray.map(file => ({
             fileName: file.name,
-            contentType: file.type
+            contentType: inferContentType(file.name, file.type)
           })),
           courseId: metadata.courseId,
           courseName: metadata.courseName,
@@ -213,24 +258,25 @@ export const useFileUpload = () => {
       for (let i = 0; i < fileArray.length; i++) {
         const file = fileArray[i]
         const presignedInfo = presignedData.data[i]
+        const signedContentType = presignedInfo.contentType || inferContentType(file.name, file.type)
 
         const uploadResponse = await fetch(presignedInfo.presignedUrl, {
           method: 'PUT',
           headers: {
-            'Content-Type': file.type
+            'Content-Type': signedContentType
           },
           body: file
         })
 
         if (!uploadResponse.ok) {
-          throw new Error(`Failed to upload file ${file.name} to S3`)
+          throw new Error(`${file.name}: ${await parseS3ErrorMessage(uploadResponse)}`)
         }
 
         uploadedFiles.push({
           url: presignedInfo.fileUrl,
           key: presignedInfo.key,
           fileName: presignedInfo.originalFileName,
-          contentType: file.type
+          contentType: signedContentType
         })
 
         // Update progress
