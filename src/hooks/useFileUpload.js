@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react'
 import { toast } from 'react-toastify'
 import { useApi } from '../contexts/ApiContext'
 import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES } from '../constants/constants'
-import { inferContentType, parseS3ErrorMessage } from '../utils/uploadUtils'
+import { inferContentType, uploadFileWithProgress } from '../utils/uploadUtils'
 
 // Allowed file extensions
 const ALLOWED_EXTENSIONS = {
@@ -121,17 +121,12 @@ export const useFileUpload = () => {
       setProgress(30)
 
       // Step 2: Upload directly to S3 using presigned URL
-      const uploadResponse = await fetch(presignedData.data.presignedUrl, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': signedContentType
-        },
-        body: file
-      })
-
-      if (!uploadResponse.ok) {
-        throw new Error(await parseS3ErrorMessage(uploadResponse))
-      }
+      await uploadFileWithProgress(
+        file,
+        presignedData.data.presignedUrl,
+        signedContentType,
+        (filePercent) => setProgress(30 + Math.round(filePercent * 0.7))
+      )
 
       setProgress(100)
       toast.success(SUCCESS_MESSAGES.UPLOAD_SUCCESS)
@@ -217,18 +212,18 @@ export const useFileUpload = () => {
         const file = fileArray[i]
         const presignedInfo = presignedData.data[i]
         const signedContentType = presignedInfo.contentType || inferContentType(file.name, file.type)
+        const rangeStart = 30 + Math.round((i / totalFiles) * 70)
+        const rangeEnd = 30 + Math.round(((i + 1) / totalFiles) * 70)
 
-        const uploadResponse = await fetch(presignedInfo.presignedUrl, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': signedContentType
-          },
-          body: file
-        })
-
-        if (!uploadResponse.ok) {
-          throw new Error(`${file.name}: ${await parseS3ErrorMessage(uploadResponse)}`)
-        }
+        await uploadFileWithProgress(
+          file,
+          presignedInfo.presignedUrl,
+          signedContentType,
+          (filePercent) => {
+            const overall = rangeStart + Math.round((filePercent / 100) * (rangeEnd - rangeStart))
+            setProgress(overall)
+          }
+        )
 
         uploadedFiles.push({
           url: presignedInfo.fileUrl,
@@ -236,10 +231,9 @@ export const useFileUpload = () => {
           fileName: presignedInfo.originalFileName,
           contentType: signedContentType
         })
-
-        // Update progress
-        setProgress(30 + Math.round(((i + 1) / totalFiles) * 70))
       }
+
+      setProgress(100)
 
       toast.success(SUCCESS_MESSAGES.UPLOAD_MULTIPLE_SUCCESS(uploadedFiles.length))
       

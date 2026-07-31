@@ -6,7 +6,10 @@
 
 /* Toast — warm slate theme */
 .toast-theme.Toastify__toast-container {
-  z-index: 9999;
+  z-index: 10050;
+  pointer-events: none;
+  width: auto;
+  max-width: min(420px, calc(100vw - 2rem));
 }
 
 .toast-theme .Toastify__toast {
@@ -17,7 +20,17 @@
   border: 1px solid var(--glass-border) !important;
   box-shadow: var(--shadow-lg) !important;
   border-radius: var(--radius-md) !important;
-  animation: slideDown 0.35s cubic-bezier(0.34, 1.2, 0.64, 1) both;
+  pointer-events: auto;
+  min-height: unset;
+  margin-bottom: 0.5rem;
+}
+
+.toast-theme .Toastify__toast-icon {
+  flex-shrink: 0;
+}
+
+.toast-theme .Toastify__toast--rtl {
+  direction: ltr;
 }
 
 .toast-theme .Toastify__toast--default,
@@ -56,4 +69,9 @@
 .toast-theme .Toastify__close-button:hover {
   color: var(--accent-primary) !important;
   opacity: 1;
+}
+
+/* Let react-toastify handle enter/exit; avoid ghost overlays blocking clicks */
+.toast-theme .Toastify__toast-container[data-stacked='true'] {
+  width: 420px;
 }

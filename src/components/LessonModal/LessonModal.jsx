@@ -8,7 +8,7 @@ import RichTextEditor from '../RichTextEditor/RichTextEditor'
 import { VideoPlayer, AudioPlayer, DocumentViewer } from '../MediaPlayer'
 import styles from './LessonModal.module.css'
 
-function LessonModal({ isOpen, onClose, onAdd, sectionId, editingLesson = null, isSaving = false }) {
+function LessonModal({ isOpen, onClose, onAdd, sectionId, editingLesson = null, isSaving = false, saveProgress = 0, saveStatus = '' }) {
   const [lessonName, setLessonName] = useState('')
   const [contentType, setContentType] = useState('article') // article, video, document
   const [articleContent, setArticleContent] = useState('')
@@ -1053,19 +1053,30 @@ function LessonModal({ isOpen, onClose, onAdd, sectionId, editingLesson = null, 
         </div>
 
         <div className={styles.footer}>
+          {isSaving && (
+            <div className={styles.saveProgressBlock}>
+              <div className={styles.saveProgressHeader}>
+                <span className={styles.btnSpinner} aria-hidden="true" />
+                <span className={styles.saveProgressStatus}>{saveStatus || 'Saving…'}</span>
+                <span className={styles.saveProgressPct}>{saveProgress}%</span>
+              </div>
+              <div className={styles.saveProgressTrack} role="progressbar" aria-valuenow={saveProgress} aria-valuemin={0} aria-valuemax={100}>
+                <div className={styles.saveProgressFill} style={{ width: `${saveProgress}%` }} />
+              </div>
+            </div>
+          )}
+          <div className={styles.footerActions}>
           <Button variant="secondary" onClick={handleClose} disabled={isSaving}>
             Cancel
           </Button>
           <Button variant="primary" onClick={handleAdd} disabled={isSaving}>
             {isSaving ? (
-              <>
-                <span className={styles.btnSpinner}></span>
-                Saving...
-              </>
+              <>Please wait…</>
             ) : (
               editingLesson ? 'Update Lesson' : 'Add Lesson'
             )}
           </Button>
+          </div>
         </div>
       </div>
 
