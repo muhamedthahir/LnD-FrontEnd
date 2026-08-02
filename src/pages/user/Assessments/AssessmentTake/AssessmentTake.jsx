@@ -175,7 +175,18 @@ function AssessmentTake() {
       }
 
       const data = await response.json()
+
+      if (data.auto_submitted) {
+        toast.info(data.message || 'Assessment time expired and was submitted automatically.')
+        navigate(`/user/assessments/${mappingId}/results`)
+        return
+      }
+
       const loadedQuestions = data.questions || []
+      if (loadedQuestions.length === 0) {
+        throw new Error('No questions available for this segment. Please contact your administrator.')
+      }
+
       const safeQuestionIndex = loadedQuestions.length > 0
         ? Math.min(Math.max(0, data.current_question_index || 0), loadedQuestions.length - 1)
         : 0

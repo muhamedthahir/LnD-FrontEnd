@@ -8,8 +8,12 @@
 .toast-theme.Toastify__toast-container {
   z-index: 10050;
   pointer-events: none;
-  width: auto;
+  width: min(420px, calc(100vw - 2rem)) !important;
   max-width: min(420px, calc(100vw - 2rem));
+}
+
+.toast-theme.Toastify__toast-container[data-stacked='true'] {
+  width: min(420px, calc(100vw - 2rem)) !important;
 }
 
 .toast-theme .Toastify__toast {
@@ -23,6 +27,16 @@
   pointer-events: auto;
   min-height: unset;
   margin-bottom: 0.5rem;
+  min-width: min(300px, calc(100vw - 2rem));
+  width: 100% !important;
+  flex-direction: row !important;
+  align-items: center !important;
+}
+
+.toast-theme .Toastify__toast-body {
+  flex: 1 1 auto;
+  white-space: normal;
+  word-break: break-word;
 }
 
 .toast-theme .Toastify__toast-icon {
@@ -69,9 +83,4 @@
 .toast-theme .Toastify__close-button:hover {
   color: var(--accent-primary) !important;
   opacity: 1;
-}
-
-/* Let react-toastify handle enter/exit; avoid ghost overlays blocking clicks */
-.toast-theme .Toastify__toast-container[data-stacked='true'] {
-  width: 420px;
 }

@@ -79,7 +79,6 @@ function App() {
         draggable
         pauseOnHover
         limit={4}
-        stacked
         className="toast-theme"
       />
       <Routes>
