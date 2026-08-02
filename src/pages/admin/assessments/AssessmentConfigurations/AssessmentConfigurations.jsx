@@ -1,14 +1,16 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useApi } from '../../../../contexts/ApiContext'
 import { toast } from 'react-toastify'
 import Button from '../../../../components/Button/Button'
 import { useConfirmModal } from '../../../../hooks/useConfirmModal'
+import { formatConfigDateTime, withNoCache } from '../../../../utils/apiFetch'
 import styles from './AssessmentConfigurations.module.css'
 
 function AssessmentConfigurations() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const { apiBaseUrl, accessToken } = useApi()
   const { confirm, ConfirmDialog } = useConfirmModal()
   
@@ -28,18 +30,17 @@ function AssessmentConfigurations() {
       setLoading(true)
       
       // Fetch assessment
-      const assessmentRes = await fetch(`${apiBaseUrl}/api/assessment/assessments/${id}`, {
-        headers: getAuthHeader()
-      })
+      const assessmentRes = await fetch(`${apiBaseUrl}/api/assessment/assessments/${id}`, withNoCache(getAuthHeader()))
       if (assessmentRes.ok) {
         const data = await assessmentRes.json()
         setAssessment(data)
       }
       
       // Fetch configurations
-      const configsRes = await fetch(`${apiBaseUrl}/api/assessment/assessments/${id}/administrators`, {
-        headers: getAuthHeader()
-      })
+      const configsRes = await fetch(
+        `${apiBaseUrl}/api/assessment/assessments/${id}/administrators`,
+        withNoCache(getAuthHeader())
+      )
       if (configsRes.ok) {
         const data = await configsRes.json()
         setConfigurations(data || [])
@@ -50,11 +51,11 @@ function AssessmentConfigurations() {
     } finally {
       setLoading(false)
     }
-  }, [apiBaseUrl, id, accessToken])
+  }, [apiBaseUrl, id])
 
   useEffect(() => {
     fetchData()
-  }, [fetchData])
+  }, [fetchData, location.key])
 
 
   const handleDeleteConfig = async (configId) => {
@@ -93,10 +94,7 @@ function AssessmentConfigurations() {
     return classes[status] || ''
   }
 
-  const formatDateTime = (dateStr) => {
-    if (!dateStr) return '-'
-    return new Date(dateStr).toLocaleString()
-  }
+  const formatDateTime = formatConfigDateTime
 
   if (loading) {
     return (

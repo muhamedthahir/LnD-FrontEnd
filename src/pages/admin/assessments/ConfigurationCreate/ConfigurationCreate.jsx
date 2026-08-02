@@ -3,6 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { useApi } from '../../../../contexts/ApiContext'
 import { toast } from 'react-toastify'
 import Button from '../../../../components/Button/Button'
+import { withNoCache } from '../../../../utils/apiFetch'
 import './ConfigurationCreate.css'
 
 // Helper function to format datetime for datetime-local input (YYYY-MM-DDTHH:mm)
@@ -415,9 +416,10 @@ function ConfigurationCreate() {
 
         // If editing, fetch existing config
         if (editConfigId) {
-          const configRes = await fetch(`${apiBaseUrl}/api/assessment/administrators/${editConfigId}`, {
-            headers: getAuthHeader()
-          })
+          const configRes = await fetch(
+            `${apiBaseUrl}/api/assessment/administrators/${editConfigId}`,
+            withNoCache(getAuthHeader())
+          )
           if (configRes.ok) {
             const config = await configRes.json()
             console.log('Fetched config for editing:', config)
@@ -659,7 +661,7 @@ function ConfigurationCreate() {
         toast.success(editConfigId ? 'Configuration updated!' : 'Configuration created!')
       }
       
-      navigate(`/admin/assessments/${assessmentId}/configurations`)
+      navigate(`/admin/assessments/${assessmentId}/configurations`, { replace: true })
     } catch (error) {
       console.error('Error saving config:', error)
       toast.error(error.message || 'Failed to save configuration')
