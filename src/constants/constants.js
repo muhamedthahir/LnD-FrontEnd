@@ -321,37 +321,32 @@ export const ERROR_MESSAGES = {
 
 // Code Editor Placeholder Snippets
 export const CODE_SNIPPETS = {
-  javascript: `// Replace "Asslamu alaikum" and start writing your code
-console.log("Asslamu alaikum");
+  javascript: `console.log("Hello World");
 `,
 
-  python: `# Replace "Asslamu alaikum" and start writing your code
-print("Asslamu alaikum")
+  python: `print("Hello World")
 `,
 
-  java: `// Replace "Asslamu alaikum" and start writing your code
-public class Solution {
+  java: `public class Solution {
     public static void main(String[] args) {
-        System.out.println("Asslamu alaikum");
+        System.out.println("Hello World");
     }
 }
 `,
 
-  cpp: `// Replace "Asslamu alaikum" and start writing your code
-#include <iostream>
+  cpp: `#include <iostream>
 using namespace std;
 
 int main() {
-    cout << "Asslamu alaikum" << endl;
+    cout << "Hello World" << endl;
     return 0;
 }
 `,
 
-  c: `// Replace "Asslamu alaikum" and start writing your code
-#include <stdio.h>
+  c: `#include <stdio.h>
 
 int main() {
-    printf("Asslamu alaikum\\n");
+    printf("Hello World\\n");
     return 0;
 }
 `
@@ -364,15 +359,13 @@ export const DEFAULT_CODE_TEMPLATES = {
     template: `#include <stdio.h>
 
 int main() {
-    // Write your code here
-    
+    printf("Hello World\\n");
     return 0;
 }`,
     solution: `#include <stdio.h>
 
 int main() {
-    // Solution code here
-    
+    printf("Hello World\\n");
     return 0;
 }`
   },
@@ -380,103 +373,49 @@ int main() {
   cpp: {
     name: 'C++',
     template: `#include <iostream>
-#include <vector>
-#include <string>
 using namespace std;
 
 int main() {
-    // Write your code here
-    
+    cout << "Hello World" << endl;
     return 0;
 }`,
     solution: `#include <iostream>
-#include <vector>
-#include <string>
 using namespace std;
 
 int main() {
-    // Solution code here
-    
+    cout << "Hello World" << endl;
     return 0;
 }`
   },
   
   java: {
     name: 'Java',
-    template: `import java.util.*;
-
-public class Solution {
+    template: `public class Solution {
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        // Write your code here
-        
+        System.out.println("Hello World");
     }
 }`,
-    solution: `import java.util.*;
-
-public class Solution {
+    solution: `public class Solution {
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        // Solution code here
-        
+        System.out.println("Hello World");
     }
 }`
   },
   
   javascript: {
     name: 'JavaScript',
-    template: `// Read input from stdin
-const readline = require('readline');
-
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
-
-// Write your code here
-rl.on('line', (line) => {
-    // Process each line of input
-    console.log(line);
-});`,
-    solution: `// Read input from stdin
-const readline = require('readline');
-
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
-
-// Solution code here
-rl.on('line', (line) => {
-    // Process each line of input
-    console.log(line);
-});`
+    template: `console.log("Hello World");
+`,
+    solution: `console.log("Hello World");
+`
   },
   
   python: {
     name: 'Python',
-    template: `# Write your code here
-
-def main():
-    # Read input
-    n = int(input())
-    
-    # Your solution
-    pass
-
-if __name__ == "__main__":
-    main()`,
-    solution: `# Solution code here
-
-def main():
-    # Read input
-    n = int(input())
-    
-    # Solution implementation
-    pass
-
-if __name__ == "__main__":
-    main()`
+    template: `print("Hello World")
+`,
+    solution: `print("Hello World")
+`
   }
 }
 
