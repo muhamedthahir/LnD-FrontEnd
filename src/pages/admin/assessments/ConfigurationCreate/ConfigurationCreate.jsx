@@ -23,6 +23,19 @@ const formatDateTimeForInput = (dateStr) => {
   }
 }
 
+const normalizeDateTimeForPayload = (value) => {
+  if (value === null || value === undefined) return null
+  const trimmed = String(value).trim()
+  if (!trimmed) return null
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(trimmed)) {
+    return `${trimmed.replace('T', ' ')}:00`
+  }
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(trimmed)) {
+    return trimmed.replace('T', ' ')
+  }
+  return trimmed
+}
+
 function ConfigurationCreate() {
   const { id: assessmentId } = useParams()
   const [searchParams] = useSearchParams()
@@ -529,7 +542,52 @@ function ConfigurationCreate() {
     }
 
     fetchData()
-  }, [apiBaseUrl, assessmentId, editConfigId, accessToken])
+  }, [apiBaseUrl, assessmentId, editConfigId])
+
+  const buildSavePayload = (activate = false) => {
+    const normalizedSegmentQuestions = segments.length > 0
+      ? normalizeSegmentQuestions(segments, formData.question.segment_questions)
+      : formData.question.segment_questions
+
+    const timing = {
+      ...formData.timing,
+      start_date_time: normalizeDateTimeForPayload(formData.timing.start_date_time),
+      end_date_time: normalizeDateTimeForPayload(formData.timing.end_date_time)
+    }
+
+    const scoring = {
+      ...formData.scoring,
+      show_score_scheduled_time: normalizeDateTimeForPayload(formData.scoring.show_score_scheduled_time),
+      show_answers_scheduled_time: normalizeDateTimeForPayload(formData.scoring.show_answers_scheduled_time)
+    }
+
+    return {
+      adminData: {
+        assessment_id: assessmentId,
+        display_name: formData.display_name,
+        config_name: formData.config_name,
+        target_audience: formData.target_audience,
+        category_id: formData.category_id || null,
+        job_role: formData.job_role,
+        experience: formData.experience !== '' && formData.experience != null
+          ? parseInt(formData.experience, 10)
+          : null,
+        instruction_page: formData.instruction_page,
+        mailer_template_id: formData.mailer_template_id || null,
+        status: activate ? 'ACTIVE' : undefined
+      },
+      configData: {
+        timing,
+        proctoring: formData.proctoring,
+        scoring,
+        question: {
+          ...formData.question,
+          segment_questions: normalizedSegmentQuestions
+        },
+        access: formData.access
+      }
+    }
+  }
 
   const handleSave = async (activate = false) => {
     if (!formData.display_name.trim()) {
@@ -539,34 +597,7 @@ function ConfigurationCreate() {
 
     try {
       setSaving(true)
-      const normalizedSegmentQuestions = segments.length > 0
-        ? normalizeSegmentQuestions(segments, formData.question.segment_questions)
-        : formData.question.segment_questions
-
-      const payload = {
-        adminData: {
-          assessment_id: assessmentId,
-          display_name: formData.display_name,
-          config_name: formData.config_name,
-          target_audience: formData.target_audience,
-          category_id: formData.category_id || null,
-          job_role: formData.job_role,
-          experience: formData.experience ? parseInt(formData.experience) : null,
-          instruction_page: formData.instruction_page,
-          mailer_template_id: formData.mailer_template_id || null,
-          status: activate ? 'ACTIVE' : undefined
-        },
-        configData: {
-          timing: formData.timing,
-          proctoring: formData.proctoring,
-          scoring: formData.scoring,
-          question: {
-            ...formData.question,
-            segment_questions: normalizedSegmentQuestions
-          },
-          access: formData.access
-        }
-      }
+      const payload = buildSavePayload(activate)
 
       let response
       let configId = editConfigId
@@ -589,7 +620,10 @@ function ConfigurationCreate() {
         }
       }
 
-      if (!response.ok) throw new Error('Failed to save configuration')
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to save configuration')
+      }
 
       // If activating, ensure all users are allocated
       if (activate && configId) {
@@ -628,7 +662,7 @@ function ConfigurationCreate() {
       navigate(`/admin/assessments/${assessmentId}/configurations`)
     } catch (error) {
       console.error('Error saving config:', error)
-      toast.error('Failed to save configuration')
+      toast.error(error.message || 'Failed to save configuration')
     } finally {
       setSaving(false)
     }
