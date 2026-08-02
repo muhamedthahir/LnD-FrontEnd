@@ -171,6 +171,14 @@ function UserCourses() {
     setSelectedCategory('')
   }
 
+  const tabCounts = allCourses.reduce((counts, course) => {
+    const status = course.enrollment_status
+    if (status === 'invited' || status === 'in_progress' || status === 'completed' || status === 'expired') {
+      counts[status] = (counts[status] || 0) + 1
+    }
+    return counts
+  }, {})
+
   const tabs = [
     { id: 'invited', label: 'Invited' },
     { id: 'in_progress', label: 'In Progress' },
@@ -194,6 +202,7 @@ function UserCourses() {
             onClick={() => setActiveTab(tab.id)}
           >
             {tab.label}
+            <span className="tab-count">{tabCounts[tab.id] || 0}</span>
           </button>
         ))}
       </div>

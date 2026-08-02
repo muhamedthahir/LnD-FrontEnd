@@ -416,7 +416,7 @@ function Dashboard() {
                 </div>
 
                 <div className={styles.infoCards}>
-                  <div className={styles.infoCard}>
+                  <Link to="/courses/user-courses" className={styles.infoCard}>
                     <div className={styles.infoIcon}>
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M12 2L2 7l10 5 10-5-10-5z"/>
@@ -425,8 +425,8 @@ function Dashboard() {
                     </div>
                     <h4>Courses</h4>
                     <p>Manage and view your courses</p>
-                    <Link to="/courses" className={styles.cardLink}>View Courses</Link>
-                  </div>
+                    <span className={styles.cardLink}>View Courses</span>
+                  </Link>
 
                   <div className={styles.infoCard}>
                     <div className={styles.infoIcon}>

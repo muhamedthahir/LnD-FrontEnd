@@ -98,6 +98,7 @@ function App() {
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/personal-details" element={<PersonalDetails />} />
+          <Route path="/courses" element={<Navigate to="/courses/user-courses" replace />} />
           <Route path="/courses/user-courses" element={<UserCourses />} />
           <Route path="/courses/:id" element={<CourseOverview />} />
           <Route path="/courses/:id/current" element={<CurrentCourse />} />

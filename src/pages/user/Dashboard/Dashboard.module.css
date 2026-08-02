@@ -366,6 +366,13 @@
   animation: slideUp var(--transition-slow) ease-out both;
 }
 
+a.infoCard {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
 .infoCard:hover {
   transform: translateY(-5px);
   box-shadow: var(--shadow-md);
