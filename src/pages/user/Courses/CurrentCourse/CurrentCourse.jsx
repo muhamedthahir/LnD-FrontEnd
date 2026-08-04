@@ -902,6 +902,7 @@ function CurrentCourse() {
                                 return (
                                   <VideoPlayer 
                                     url={videoUrl}
+                                    mediaKey={contentObj.key || null}
                                     fileName={contentObj.fileName || ''}
                                     segmentId={selectedSegment.id}
                                     thresholdValue={thresholdValue}
@@ -923,6 +924,7 @@ function CurrentCourse() {
                                 return (
                                   <AudioPlayer 
                                     url={audioUrl}
+                                    mediaKey={contentObj.key || null}
                                     fileName={contentObj.fileName || ''}
                                     segmentId={selectedSegment.id}
                                     thresholdValue={thresholdValue}

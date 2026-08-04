@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useApi } from '../../../../contexts/ApiContext'
 import { toast } from 'react-toastify'
 import Button from '../../../../components/Button/Button'
+import { formatConfigDateTime } from '../../../../utils/apiFetch'
 import './AssessmentStart.css'
 
 function AssessmentStart() {
@@ -59,12 +60,13 @@ function AssessmentStart() {
     return `${minutes} minute${minutes !== 1 ? 's' : ''}`
   }
 
-  const formatDateTime = (value) => {
-    if (!value) return null
-    const date = new Date(value)
-    if (Number.isNaN(date.getTime())) return null
-    return date.toLocaleString()
-  }
+  const formatDateTime = formatConfigDateTime
+
+  const timingBlocked = assessmentData?.is_not_started_yet
+    ? `This assessment opens at ${formatConfigDateTime(assessmentData.start_date_time)}.`
+    : assessmentData?.is_expired
+      ? `This assessment closed at ${formatConfigDateTime(assessmentData.end_date_time)}.`
+      : null
 
   const handleStartAssessment = async () => {
     if (!agreed) {
@@ -89,7 +91,7 @@ function AssessmentStart() {
 
       if (!response.ok) {
         const data = await response.json()
-        throw new Error(data.message || 'Failed to start assessment')
+        throw new Error(data.error || data.message || 'Failed to start assessment')
       }
 
       const data = await response.json()
@@ -443,6 +445,12 @@ function AssessmentStart() {
           </div>
         )}
 
+        {timingBlocked && (
+          <div className="timing-blocked-banner">
+            {timingBlocked}
+          </div>
+        )}
+
         <div className="agreement-section">
           <label className="checkbox-label">
             <input
@@ -466,7 +474,7 @@ function AssessmentStart() {
           <Button 
             variant="primary" 
             onClick={handleStartAssessment}
-            disabled={!agreed || starting}
+            disabled={!agreed || starting || !!timingBlocked}
           >
             {starting ? (
               <>

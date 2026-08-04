@@ -3,6 +3,7 @@ import Editor from '@monaco-editor/react'
 import { useApi } from '../../contexts/ApiContext'
 import { CODE_SNIPPETS, LANGUAGE_KEY_MAP } from '../../constants/constants'
 import { outputsMatch } from '../../utils/outputCompare'
+import { configureMonacoClipboardBlock } from '../../hooks/useAssessmentClipboardGuard'
 import styles from './CodeEditor.module.css'
 
 function CodeEditor({ 
@@ -16,7 +17,8 @@ function CodeEditor({
   onRunComplete,
   assessmentMode = false,  // Assessment-specific display rules for test results/history
   assessmentMappingId = null,  // For assessment-specific submissions
-  assessmentSegmentId = null
+  assessmentSegmentId = null,
+  disableCopyPaste = false
 }) {
   const { apiBaseUrl, accessToken } = useApi()
   const [editorHeight, setEditorHeight] = useState(52) // percentage — leave room for test results
@@ -38,6 +40,7 @@ function CodeEditor({
   const [loadingHistory, setLoadingHistory] = useState(false)
   const containerRef = useRef(null)
   const editorRef = useRef(null)
+  const monacoRef = useRef(null)
   const isDragging = useRef(false)
   const previousQuestionIdRef = useRef(null)
   const wsRef = useRef(null) // WebSocket reference
@@ -221,7 +224,17 @@ function CodeEditor({
   // Monaco Editor mount handler
   const handleEditorDidMount = (editor, monaco) => {
     editorRef.current = editor
+    monacoRef.current = monaco
+    if (disableCopyPaste) {
+      configureMonacoClipboardBlock(editor, monaco)
+    }
   }
+
+  useEffect(() => {
+    if (disableCopyPaste && editorRef.current && monacoRef.current) {
+      configureMonacoClipboardBlock(editorRef.current, monacoRef.current)
+    }
+  }, [disableCopyPaste])
 
   // Monaco Editor change handler
   const handleEditorChange = (value) => {
@@ -802,7 +815,7 @@ function CodeEditor({
               renderLineHighlight: 'all',
               cursorBlinking: 'smooth',
               smoothScrolling: true,
-              contextmenu: true,
+              contextmenu: !disableCopyPaste,
               folding: true,
               bracketPairColorization: { enabled: true },
             }}

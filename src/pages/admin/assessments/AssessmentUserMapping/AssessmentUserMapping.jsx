@@ -386,6 +386,48 @@ function AssessmentUserMapping() {
     }
   }
 
+  const refreshAttemptForAll = async () => {
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/assessment/administrators/${adminId}/allow-reattempt-all`, {
+        method: 'POST',
+        headers: getAuthHeader()
+      })
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}))
+        throw new Error(error.error || 'Failed to refresh attempts for all users')
+      }
+
+      const data = await response.json()
+      toast.success(data.message || `Created ${data.created} new attempt(s).`)
+      fetchData()
+    } catch (error) {
+      console.error('Error refreshing attempts for all:', error)
+      toast.error(error.message || 'Failed to refresh attempts for all users')
+    }
+  }
+
+  const regradeSavedCode = async () => {
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/assessment/administrators/${adminId}/regrade-saved-code`, {
+        method: 'POST',
+        headers: getAuthHeader()
+      })
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}))
+        throw new Error(error.error || 'Failed to regrade saved code')
+      }
+
+      const data = await response.json()
+      toast.success(data.message || `Graded ${data.drafts_graded} saved submission(s).`)
+      fetchData()
+    } catch (error) {
+      console.error('Error regrading saved code:', error)
+      toast.error(error.message || 'Failed to regrade saved code')
+    }
+  }
+
   const handleSendInvitation = async (mappingId) => {
     try {
       const response = await fetch(`${apiBaseUrl}/api/assessment/user-mappings/${mappingId}/send-invitation`, {
@@ -465,6 +507,10 @@ function AssessmentUserMapping() {
         await removeUserMapping(confirmModal.mapping.id)
       } else if (confirmModal.type === 'sendAll') {
         await sendAllInvitations()
+      } else if (confirmModal.type === 'refreshAll') {
+        await refreshAttemptForAll()
+      } else if (confirmModal.type === 'regradeSaved') {
+        await regradeSavedCode()
       }
     } finally {
       setConfirmLoading(false)
@@ -474,6 +520,14 @@ function AssessmentUserMapping() {
 
   const handleSendAllInvitations = () => {
     openConfirmModal('sendAll', null)
+  }
+
+  const handleRefreshAttemptForAll = () => {
+    openConfirmModal('refreshAll', null)
+  }
+
+  const handleRegradeSavedCode = () => {
+    openConfirmModal('regradeSaved', null)
   }
 
   const getStatusBadgeClass = (status) => {
@@ -617,6 +671,20 @@ function AssessmentUserMapping() {
         confirmText: 'Send All'
       }
     }
+    if (confirmModal.type === 'refreshAll') {
+      return {
+        title: 'Refresh Attempt for All',
+        message: 'Create a new attempt for every user whose latest attempt is in progress, completed, submitted, or disqualified? Users who have not started yet will be skipped.',
+        confirmText: 'Refresh All'
+      }
+    }
+    if (confirmModal.type === 'regradeSaved') {
+      return {
+        title: 'Regrade Saved Code',
+        message: 'Run saved-but-unsubmitted programming code against test cases for all users in this configuration and update their scores? Use this after a code execution outage.',
+        confirmText: 'Regrade'
+      }
+    }
     return { title: '', message: '', confirmText: 'Proceed' }
   }, [confirmModal.mapping, confirmModal.type])
 
@@ -671,6 +739,12 @@ function AssessmentUserMapping() {
           </Button>
           <Button variant="secondary" onClick={handleDownloadReport}>
             Download Report
+          </Button>
+          <Button variant="secondary" onClick={handleRegradeSavedCode}>
+            Regrade Saved Code
+          </Button>
+          <Button variant="secondary" onClick={handleRefreshAttemptForAll}>
+            Refresh Attempt for All
           </Button>
           <Button variant="primary" onClick={handleSendAllInvitations}>
             Send All Invitations

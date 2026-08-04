@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react'
 import { toast } from 'react-toastify'
 import { useApi } from '../contexts/ApiContext'
 import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES } from '../constants/constants'
+import { inferContentType, uploadFileWithProgress } from '../utils/uploadUtils'
 
 // Allowed file extensions
 const ALLOWED_EXTENSIONS = {
@@ -92,6 +93,7 @@ export const useFileUpload = () => {
 
       // Step 1: Get presigned URL from backend
       setProgress(10)
+      const requestContentType = inferContentType(file.name, file.type)
       const presignedResponse = await fetch(`${apiBaseUrl}${API_ENDPOINTS.UPLOAD.PRESIGNED_URL}`, {
         method: 'POST',
         headers: {
@@ -100,7 +102,7 @@ export const useFileUpload = () => {
         },
         body: JSON.stringify({
           fileName: file.name,
-          contentType: file.type,
+          contentType: requestContentType,
           courseId: metadata.courseId,
           courseName: metadata.courseName,
           sectionId: metadata.sectionId,
@@ -115,20 +117,16 @@ export const useFileUpload = () => {
       }
 
       const presignedData = await presignedResponse.json()
+      const signedContentType = presignedData.data.contentType || requestContentType
       setProgress(30)
 
       // Step 2: Upload directly to S3 using presigned URL
-      const uploadResponse = await fetch(presignedData.data.presignedUrl, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': file.type
-        },
-        body: file
-      })
-
-      if (!uploadResponse.ok) {
-        throw new Error('Failed to upload file to S3')
-      }
+      await uploadFileWithProgress(
+        file,
+        presignedData.data.presignedUrl,
+        signedContentType,
+        (filePercent) => setProgress(30 + Math.round(filePercent * 0.7))
+      )
 
       setProgress(100)
       toast.success(SUCCESS_MESSAGES.UPLOAD_SUCCESS)
@@ -139,7 +137,7 @@ export const useFileUpload = () => {
           url: presignedData.data.fileUrl,
           key: presignedData.data.key,
           fileName: presignedData.data.originalFileName,
-          contentType: file.type
+          contentType: signedContentType
         }
       }
 
@@ -188,7 +186,7 @@ export const useFileUpload = () => {
         body: JSON.stringify({
           files: fileArray.map(file => ({
             fileName: file.name,
-            contentType: file.type
+            contentType: inferContentType(file.name, file.type)
           })),
           courseId: metadata.courseId,
           courseName: metadata.courseName,
@@ -213,29 +211,29 @@ export const useFileUpload = () => {
       for (let i = 0; i < fileArray.length; i++) {
         const file = fileArray[i]
         const presignedInfo = presignedData.data[i]
+        const signedContentType = presignedInfo.contentType || inferContentType(file.name, file.type)
+        const rangeStart = 30 + Math.round((i / totalFiles) * 70)
+        const rangeEnd = 30 + Math.round(((i + 1) / totalFiles) * 70)
 
-        const uploadResponse = await fetch(presignedInfo.presignedUrl, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': file.type
-          },
-          body: file
-        })
-
-        if (!uploadResponse.ok) {
-          throw new Error(`Failed to upload file ${file.name} to S3`)
-        }
+        await uploadFileWithProgress(
+          file,
+          presignedInfo.presignedUrl,
+          signedContentType,
+          (filePercent) => {
+            const overall = rangeStart + Math.round((filePercent / 100) * (rangeEnd - rangeStart))
+            setProgress(overall)
+          }
+        )
 
         uploadedFiles.push({
           url: presignedInfo.fileUrl,
           key: presignedInfo.key,
           fileName: presignedInfo.originalFileName,
-          contentType: file.type
+          contentType: signedContentType
         })
-
-        // Update progress
-        setProgress(30 + Math.round(((i + 1) / totalFiles) * 70))
       }
+
+      setProgress(100)
 
       toast.success(SUCCESS_MESSAGES.UPLOAD_MULTIPLE_SUCCESS(uploadedFiles.length))
       

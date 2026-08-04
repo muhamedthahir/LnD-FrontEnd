@@ -4,6 +4,7 @@ import { useApi } from '../../../../contexts/ApiContext'
 import { toast } from 'react-toastify'
 import Button from '../../../../components/Button/Button'
 import CodeEditor from '../../../CodeEditor/CodeEditor'
+import { useAssessmentClipboardGuard } from '../../../../hooks/useAssessmentClipboardGuard'
 import styles from './AssessmentTake.module.css'
 
 const isConfigFlagEnabled = (value, defaultEnabled = true) => {
@@ -174,7 +175,18 @@ function AssessmentTake() {
       }
 
       const data = await response.json()
+
+      if (data.auto_submitted) {
+        toast.info(data.message || 'Assessment time expired and was submitted automatically.')
+        navigate(`/user/assessments/${mappingId}/results`)
+        return
+      }
+
       const loadedQuestions = data.questions || []
+      if (loadedQuestions.length === 0) {
+        throw new Error('No questions available for this segment. Please contact your administrator.')
+      }
+
       const safeQuestionIndex = loadedQuestions.length > 0
         ? Math.min(Math.max(0, data.current_question_index || 0), loadedQuestions.length - 1)
         : 0
@@ -462,37 +474,22 @@ function AssessmentTake() {
     return () => document.removeEventListener('keydown', handleKeyDown, true)
   }, [assessmentData, isFullScreen])
 
-  // Proctoring: Copy/Paste prevention
+  const disableCopyPaste = isConfigFlagEnabled(assessmentData?.proctoring?.disable_copy_paste, false)
+  const disableRightClick = isConfigFlagEnabled(assessmentData?.proctoring?.disable_right_click, false)
+
+  useAssessmentClipboardGuard(disableCopyPaste)
+
+  // Proctoring: Right-click prevention (when copy/paste guard is off)
   useEffect(() => {
-    if (!assessmentData?.proctoring?.disable_copy_paste) return
-
-    const preventDefault = (e) => {
-      e.preventDefault()
-      toast.warning('Copy/Paste is disabled for this assessment')
-    }
-
-    document.addEventListener('copy', preventDefault)
-    document.addEventListener('paste', preventDefault)
-    document.addEventListener('cut', preventDefault)
-
-    return () => {
-      document.removeEventListener('copy', preventDefault)
-      document.removeEventListener('paste', preventDefault)
-      document.removeEventListener('cut', preventDefault)
-    }
-  }, [assessmentData])
-
-  // Proctoring: Right-click prevention
-  useEffect(() => {
-    if (!assessmentData?.proctoring?.disable_right_click) return
+    if (!disableRightClick || disableCopyPaste) return
 
     const preventContextMenu = (e) => {
       e.preventDefault()
     }
 
-    document.addEventListener('contextmenu', preventContextMenu)
-    return () => document.removeEventListener('contextmenu', preventContextMenu)
-  }, [assessmentData])
+    document.addEventListener('contextmenu', preventContextMenu, true)
+    return () => document.removeEventListener('contextmenu', preventContextMenu, true)
+  }, [disableRightClick, disableCopyPaste])
 
   // When the blocking dialog appears, drop focus from any active field so the test
   // cannot be edited via keyboard while it is blurred behind the overlay.
@@ -952,9 +949,7 @@ function AssessmentTake() {
       setSubmitting(true)
       exitingRef.current = true
 
-      if (isAutoSubmit && isProgrammingQuestion) {
-        await submitSavedProgrammingAnswers()
-      }
+      await submitSavedProgrammingAnswers()
 
       const response = await fetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/submit`, {
         method: 'POST',
@@ -1336,6 +1331,7 @@ function AssessmentTake() {
                     <CodeEditor
                       key={`code-q-${currentQuestion.id}`}
                       questionId={currentQuestion.id}
+                      disableCopyPaste={disableCopyPaste}
                       initialCode={(() => {
                         const code = getQuestionAnswerValue(answers, currentQuestion.id)
                         return typeof code === 'string' ? code : (currentQuestion.boilerplate_code || '')

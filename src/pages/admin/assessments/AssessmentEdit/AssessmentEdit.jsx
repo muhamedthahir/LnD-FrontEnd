@@ -6,7 +6,9 @@ import { toast } from 'react-toastify'
 import Button from '../../../../components/Button/Button'
 import Toggle from '../../../../components/Toggle/Toggle'
 import ConfirmModal from '../../../../components/ConfirmModal/ConfirmModal'
+import Dropdown from '../../../../components/Dropdown/Dropdown'
 import { useConfirmModal } from '../../../../hooks/useConfirmModal'
+import { useAutoLoadMasterData } from '../../../../hooks/useMasterData'
 import Table from '../../../../components/Table/Table'
 import styles from './AssessmentEdit.module.css'
 
@@ -15,7 +17,8 @@ function AssessmentEdit() {
   const navigate = useNavigate()
   const { apiBaseUrl, accessToken } = useApi()
   const { confirm, ConfirmDialog } = useConfirmModal()
-  const { questionTypes } = useSelector(state => state.masterData);
+  const { questionTypes, languages } = useSelector(state => state.masterData);
+  useAutoLoadMasterData()
   const [assessment, setAssessment] = useState(null)
   const [segments, setSegments] = useState([])
   const [loading, setLoading] = useState(true)
@@ -47,7 +50,8 @@ function AssessmentEdit() {
     is_locked: false,
     negative_marking_enabled: null,
     question_source: 'POOL',
-    question_bank_id: ''
+    question_bank_id: '',
+    allowed_language_ids: []
   })
   
   // Question selection (inline in segment)
@@ -79,6 +83,16 @@ function AssessmentEdit() {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
   })
+
+  const isProgrammingOnlySegment = (segment, questionSource = segment?.question_source) => {
+    if (!segment) return false
+    const mcq = Number(segment.mcq_question_count ?? segment.mcq_questions?.length ?? 0)
+    const programming = Number(segment.programming_question_count ?? segment.programming_questions?.length ?? 0)
+    return mcq === 0 && (programming > 0 || questionSource === 'BANK')
+  }
+
+  const showProgrammingLanguageRestriction = editingSegment
+    && isProgrammingOnlySegment(editingSegment, segmentForm.question_source)
 
   const fetchAssessment = useCallback(async () => {
     if (!apiBaseUrl || !id) return
@@ -245,7 +259,8 @@ function AssessmentEdit() {
       is_locked: false,
       negative_marking_enabled: null,
       question_source: 'POOL',
-      question_bank_id: ''
+      question_bank_id: '',
+      allowed_language_ids: []
     })
     fetchQuestionBanks()
     setShowSegmentModal(true)
@@ -261,7 +276,8 @@ function AssessmentEdit() {
       is_locked: segment.is_locked,
       negative_marking_enabled: segment.negative_marking_enabled ?? null,
       question_source: segment.question_source || 'POOL',
-      question_bank_id: segment.question_bank_id || ''
+      question_bank_id: segment.question_bank_id || '',
+      allowed_language_ids: Array.isArray(segment.allowed_language_ids) ? segment.allowed_language_ids : []
     })
     fetchQuestionBanks()
     setShowSegmentModal(true)
@@ -294,7 +310,10 @@ function AssessmentEdit() {
             is_locked: segmentForm.is_locked,
             negative_marking_enabled: segmentForm.negative_marking_enabled ?? null,
             question_source: segmentForm.question_source,
-            question_bank_id: segmentForm.question_source === 'BANK' ? (segmentForm.question_bank_id || null) : null
+            question_bank_id: segmentForm.question_source === 'BANK' ? (segmentForm.question_bank_id || null) : null,
+            ...(showProgrammingLanguageRestriction && {
+              allowed_language_ids: segmentForm.allowed_language_ids || []
+            })
           })
         })
         if (!response.ok) {
@@ -1923,6 +1942,23 @@ function AssessmentEdit() {
                 />
                 <span className={styles.helpText}>Used when the configuration's timing mode is segment-wise</span>
               </div>
+
+              {showProgrammingLanguageRestriction && (
+                <div className={styles.formGroup}>
+                  <Dropdown
+                    label="Programming Language Restriction (optional)"
+                    options={languages}
+                    value={segmentForm.allowed_language_ids}
+                    onChange={(value) => setSegmentForm({ ...segmentForm, allowed_language_ids: value || [] })}
+                    placeholder="All languages allowed (no restriction)"
+                    multiple
+                    searchable
+                  />
+                  <span className={styles.helpText}>
+                    Limit which languages candidates can use for coding questions in this segment. Leave empty to allow all languages configured on each question.
+                  </span>
+                </div>
+              )}
 
               <div className={styles.formGroup}>
                 <label>Question Source</label>

@@ -4,6 +4,7 @@ import { useApi } from '../../../../contexts/ApiContext'
 import { toast } from 'react-toastify'
 import Button from '../../../../components/Button/Button'
 import { useConfirmModal } from '../../../../hooks/useConfirmModal'
+import { formatConfigDateTime, withNoCache } from '../../../../utils/apiFetch'
 import styles from './ConfigurationsList.module.css'
 
 function ConfigurationsList() {
@@ -27,9 +28,7 @@ function ConfigurationsList() {
       setLoading(true)
       
       // Fetch all assessments first
-      const assessmentsRes = await fetch(`${apiBaseUrl}/api/assessment/assessments`, {
-        headers: getAuthHeader()
-      })
+      const assessmentsRes = await fetch(`${apiBaseUrl}/api/assessment/assessments`, withNoCache(getAuthHeader()))
       if (assessmentsRes.ok) {
         const assessmentsData = await assessmentsRes.json()
         const assessmentsMap = {}
@@ -50,9 +49,10 @@ function ConfigurationsList() {
         
         for (const assessmentId of assessmentIds) {
           try {
-            const configsRes = await fetch(`${apiBaseUrl}/api/assessment/assessments/${assessmentId}/administrators`, {
-              headers: getAuthHeader()
-            })
+            const configsRes = await fetch(
+              `${apiBaseUrl}/api/assessment/assessments/${assessmentId}/administrators`,
+              withNoCache(getAuthHeader())
+            )
             if (configsRes.ok) {
               const configsData = await configsRes.json()
               const configs = Array.isArray(configsData) ? configsData : []
@@ -78,7 +78,7 @@ function ConfigurationsList() {
     } finally {
       setLoading(false)
     }
-  }, [apiBaseUrl, accessToken])
+  }, [apiBaseUrl])
 
   useEffect(() => {
     fetchAllConfigurations()
@@ -120,10 +120,7 @@ function ConfigurationsList() {
     return classes[status] || ''
   }
 
-  const formatDateTime = (dateStr) => {
-    if (!dateStr) return '-'
-    return new Date(dateStr).toLocaleString()
-  }
+  const formatDateTime = formatConfigDateTime
 
   if (loading) {
     return (

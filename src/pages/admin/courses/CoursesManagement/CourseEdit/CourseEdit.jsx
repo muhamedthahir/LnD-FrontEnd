@@ -6,6 +6,7 @@ import LessonModal from '../../../../../components/LessonModal/LessonModal'
 import ConfirmModal from '../../../../../components/ConfirmModal/ConfirmModal'
 import { useApi } from '../../../../../contexts/ApiContext'
 import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES, VALIDATION_MESSAGES } from '../../../../../constants/constants'
+import { uploadLessonMediaFiles } from '../../../../../utils/uploadUtils'
 import './CourseEdit.css'
 
 function CourseEdit() {
@@ -55,6 +56,8 @@ function CourseEdit() {
   const [selectedSectionId, setSelectedSectionId] = useState(null)
   const [editingLesson, setEditingLesson] = useState(null)
   const [savingLesson, setSavingLesson] = useState(false)
+  const [lessonSaveProgress, setLessonSaveProgress] = useState(0)
+  const [lessonSaveStatus, setLessonSaveStatus] = useState('')
   
   // Lesson deletion state
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -73,6 +76,18 @@ function CourseEdit() {
     fetchCourse()
     fetchSections()
   }, [id])
+
+  useEffect(() => {
+    if (!savingLesson) return undefined
+
+    const handleBeforeUnload = (event) => {
+      event.preventDefault()
+      event.returnValue = ''
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [savingLesson])
 
   const fetchCourse = async () => {
     try {
@@ -1147,6 +1162,8 @@ function CourseEdit() {
         isOpen={showLessonModal}
         editingLesson={editingLesson}
         isSaving={savingLesson}
+        saveProgress={lessonSaveProgress}
+        saveStatus={lessonSaveStatus}
         onClose={() => {
           if (!savingLesson) {
             setShowLessonModal(false)
@@ -1169,6 +1186,8 @@ function CourseEdit() {
           }
           
           setSavingLesson(true)
+          setLessonSaveProgress(0)
+          setLessonSaveStatus('Starting…')
           try {
             let segmentType = 'articles'
             if (lessonData.contentType === 'article') {
@@ -1188,67 +1207,34 @@ function CourseEdit() {
             )
 
             if (hasFiles) {
-              // Use presigned URL for direct S3 upload
               const filesToUpload = lessonData.content.file 
                 ? [lessonData.content.file] 
                 : lessonData.content.files
 
-              // Get section info for folder path
               const section = sections.find(s => s.id === selectedSectionId)
-              
-              // Step 1: Get presigned URL(s) from backend
-              const presignedResponse = await fetch(`${apiBaseUrl}${API_ENDPOINTS.UPLOAD.PRESIGNED_URLS}`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
-                },
-                body: JSON.stringify({
-                  files: filesToUpload.map(file => ({
-                    fileName: file.name,
-                    contentType: file.type
-                  })),
+
+              const uploadedFiles = await uploadLessonMediaFiles({
+                apiBaseUrl,
+                accessToken: accessToken || localStorage.getItem('accessToken'),
+                presignedUrlsEndpoint: API_ENDPOINTS.UPLOAD.PRESIGNED_URLS,
+                files: filesToUpload,
+                metadata: {
                   courseId: course?.id,
                   courseName: course?.name,
                   sectionId: selectedSectionId,
                   sectionName: section?.name,
                   lessonName: lessonData.name
-                })
+                },
+                onProgress: (percent, status) => {
+                  setLessonSaveProgress(percent)
+                  setLessonSaveStatus(status)
+                }
               })
 
-              if (!presignedResponse.ok) {
-                throw new Error('Failed to get presigned URL for upload')
-              }
+              setLessonSaveProgress(96)
+              setLessonSaveStatus('Saving lesson…')
 
-              const presignedData = await presignedResponse.json()
-
-              // Step 2: Upload files directly to S3 using presigned URLs
-              const uploadedFiles = []
-              for (let i = 0; i < filesToUpload.length; i++) {
-                const file = filesToUpload[i]
-                const presignedInfo = presignedData.data[i]
-
-                const uploadResponse = await fetch(presignedInfo.presignedUrl, {
-                  method: 'PUT',
-                  headers: {
-                    'Content-Type': file.type
-                  },
-                  body: file
-                })
-
-                if (!uploadResponse.ok) {
-                  throw new Error(`Failed to upload file ${file.name} to S3`)
-                }
-
-                uploadedFiles.push({
-                  url: presignedInfo.fileUrl,
-                  key: presignedInfo.key,
-                  fileName: presignedInfo.originalFileName,
-                  contentType: file.type
-                })
-              }
-
-              // Step 3: Create/update segment with S3 URLs (no file upload to backend)
+              // Create/update segment with S3 URLs (no file upload to backend)
               let content
               if (segmentType === 'lesson_video' || segmentType === 'lesson_audio') {
                 content = {
@@ -1288,8 +1274,12 @@ function CourseEdit() {
               })
 
               if (!segmentResponse.ok) throw new Error(lessonData.lessonId ? 'Failed to update lesson' : 'Failed to create lesson')
+              setLessonSaveProgress(100)
+              setLessonSaveStatus('Done')
               toast.success(lessonData.lessonId ? SUCCESS_MESSAGES.LESSON_UPDATED : SUCCESS_MESSAGES.LESSON_CREATED)
             } else {
+              setLessonSaveProgress(40)
+              setLessonSaveStatus('Saving lesson…')
               // Use JSON for non-file content (article, embedded URLs)
               if (lessonData.lessonId) {
                 // Update existing lesson
@@ -1310,6 +1300,7 @@ function CourseEdit() {
                 })
 
                 if (!response.ok) throw new Error('Failed to update lesson')
+                setLessonSaveProgress(100)
                 toast.success(SUCCESS_MESSAGES.LESSON_UPDATED)
               } else {
                 // Create new lesson
@@ -1331,6 +1322,7 @@ function CourseEdit() {
                 })
 
                 if (!response.ok) throw new Error('Failed to create lesson')
+                setLessonSaveProgress(100)
                 toast.success(SUCCESS_MESSAGES.LESSON_CREATED)
               }
             }
@@ -1343,9 +1335,11 @@ function CourseEdit() {
             setEditingLesson(null)
           } catch (error) {
             console.error('Error saving lesson:', error)
-            toast.error(lessonData.lessonId ? ERROR_MESSAGES.LESSON_UPDATE_FAILED : ERROR_MESSAGES.LESSON_CREATE_FAILED)
+            toast.error(error.message || (lessonData.lessonId ? ERROR_MESSAGES.LESSON_UPDATE_FAILED : ERROR_MESSAGES.LESSON_CREATE_FAILED))
           } finally {
             setSavingLesson(false)
+            setLessonSaveProgress(0)
+            setLessonSaveStatus('')
           }
         }}
         sectionId={selectedSectionId}

@@ -607,11 +607,60 @@
 
 .footer {
   display: flex;
-  justify-content: flex-end;
+  flex-direction: column;
   gap: var(--spacing-md);
   padding: var(--spacing-lg);
   border-top: var(--border-sm) solid var(--border-color);
   background: var(--bg-secondary);
+}
+
+.footerActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-md);
+}
+
+.saveProgressBlock {
+  width: 100%;
+}
+
+.saveProgressHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.saveProgressStatus {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-primary);
+}
+
+.saveProgressPct {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--accent-primary);
+}
+
+.saveProgressTrack {
+  height: 6px;
+  background: var(--bg-primary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.saveProgressFill {
+  height: 100%;
+  background: var(--gradient-accent);
+  border-radius: var(--radius-full);
+  transition: width 0.2s ease-out;
 }
 
 @media (max-width: 768px) {
@@ -642,7 +691,11 @@
     flex-direction: column;
   }
 
-  .footer button {
+  .footerActions {
+    flex-direction: column;
+  }
+
+  .footerActions button {
     width: 100%;
   }
 }
@@ -804,7 +857,7 @@
 }
 
 /* Disabled button styles */
-.footer button:disabled {
+.footerActions button:disabled {
   opacity: 0.7;
   cursor: not-allowed;
 }
