@@ -949,9 +949,7 @@ function AssessmentTake() {
       setSubmitting(true)
       exitingRef.current = true
 
-      if (isAutoSubmit && isProgrammingQuestion) {
-        await submitSavedProgrammingAnswers()
-      }
+      await submitSavedProgrammingAnswers()
 
       const response = await fetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/submit`, {
         method: 'POST',
