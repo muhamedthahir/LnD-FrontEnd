@@ -271,20 +271,12 @@ function Login() {
         <div className={styles.loginBranding}>
           <div className={styles.brandContent}>
             <div className={styles.logoWrapper}>
-              <div className={styles.logoIcon}>
-                <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="4" y="8" width="32" height="24" rx="2" stroke="currentColor" strokeWidth="2"/>
-                  <path d="M12 18L16 22L12 26" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <line x1="20" y1="26" x2="28" y2="26" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                </svg>
-              </div>
-              <h1 className={styles.brandName}>
-                <span className={styles.brandCode}>&lt;</span>
-                Skillvantix
-                <span className={styles.brandCode}>/&gt;</span>
-              </h1>
+              <img
+                src="/logo-campuszen.png"
+                alt="CampusZen — Learn, Practice, Get Placed"
+                className={styles.brandLogo}
+              />
             </div>
-            <p className={styles.brandTagline}>Master Your Code. Prove Your Skills.</p>
             
             <div className={styles.featuresList}>
               <div className={styles.featureItem}>

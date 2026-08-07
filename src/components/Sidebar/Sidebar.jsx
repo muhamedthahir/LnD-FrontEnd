@@ -25,7 +25,18 @@ function Sidebar({ user, isCollapsed, isOpen = false }) {
   return (
     <aside className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ''} ${isOpen ? styles.open : ''}`}>
       <div className={styles.header}>
-        <h2>Menu</h2>
+        <Link to="/dashboard" className={styles.brandLink} title="CampusZen">
+          <img
+            src="/logo-campuszen.png"
+            alt="CampusZen — Learn, Practice, Get Placed"
+            className={styles.brandLogoFull}
+          />
+          <img
+            src="/icon-campuszen.png"
+            alt="CampusZen"
+            className={styles.brandLogoIcon}
+          />
+        </Link>
         <div className={styles.headerActions}>
           <div className={styles.themeToggle}>
             <ThemeToggle />

@@ -34,20 +34,46 @@
   gap: var(--spacing-xs);
 }
 
-.header h2 {
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--accent-primary);
-  margin: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  transition: opacity var(--transition-normal);
+.brandLink {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  flex: 1;
+  text-decoration: none;
 }
 
-.sidebar.collapsed .header h2 {
-  opacity: 0;
-  width: 0;
+.brandLogoFull {
+  height: 2.25rem;
+  width: auto;
+  max-width: 100%;
+  display: block;
+  object-fit: contain;
+}
+
+.brandLogoIcon {
+  display: none;
+  width: 2rem;
+  height: 2rem;
+  object-fit: contain;
+}
+
+.sidebar.collapsed .header {
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+}
+
+.sidebar.collapsed .brandLink {
+  justify-content: center;
+  flex: 0;
+}
+
+.sidebar.collapsed .brandLogoFull {
+  display: none;
+}
+
+.sidebar.collapsed .brandLogoIcon {
+  display: block;
 }
 
 .themeToggle {

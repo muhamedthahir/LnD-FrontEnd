@@ -208,7 +208,7 @@ function MailerTemplateForm({
             name="default_sender_name"
             value={formData.default_sender_name}
             onChange={handleChange}
-            placeholder="LnD Platform"
+            placeholder="CampusZen"
           />
         </div>
         <div className="form-group">
