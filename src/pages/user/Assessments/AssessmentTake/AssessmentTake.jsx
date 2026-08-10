@@ -99,6 +99,7 @@ function AssessmentTake() {
   const timerRef = useRef(null)
   const progressSaveRef = useRef(null)
   const segmentAnswersCacheRef = useRef({})
+  const initialLoadRef = useRef(true)
   
   // Progress save interval in seconds (configurable - default 10 seconds)
   const PROGRESS_SAVE_INTERVAL = 10
@@ -161,9 +162,10 @@ function AssessmentTake() {
   // Fetch assessment data
   const fetchAssessmentData = useCallback(async () => {
     if (!apiBaseUrl || !mappingId) return
-    
+
+    const showLoading = initialLoadRef.current
     try {
-      setLoading(true)
+      if (showLoading) setLoading(true)
       const response = await fetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/take`, {
         headers: getAuthHeader()
       })
@@ -223,11 +225,15 @@ function AssessmentTake() {
       toast.error('Failed to load assessment')
       navigate('/user/assessments')
     } finally {
-      setLoading(false)
+      if (showLoading) {
+        setLoading(false)
+        initialLoadRef.current = false
+      }
     }
-  }, [apiBaseUrl, mappingId, accessToken, navigate])
+  }, [apiBaseUrl, mappingId, navigate])
 
   useEffect(() => {
+    initialLoadRef.current = true
     fetchAssessmentData()
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
@@ -1342,6 +1348,17 @@ function AssessmentTake() {
                       assessmentMode={true}
                       assessmentMappingId={mappingId}
                       assessmentSegmentId={currentSegment?.id}
+                      onCodeChange={(code, language) => {
+                        setAnswers(prev => {
+                          const next = {
+                            ...prev,
+                            [currentQuestion.id]: code,
+                            [`${currentQuestion.id}_lang`]: language
+                          }
+                          updateSegmentAnswerCache(next)
+                          return next
+                        })
+                      }}
                       onSaveCode={async ({ code, language }) => {
                         setAnswers(prev => ({
                           ...prev,

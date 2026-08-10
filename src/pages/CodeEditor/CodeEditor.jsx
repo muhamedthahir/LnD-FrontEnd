@@ -14,6 +14,7 @@ function CodeEditor({
   testCases = [],
   onSubmit,
   onSaveCode,
+  onCodeChange,
   onRunComplete,
   assessmentMode = false,  // Assessment-specific display rules for test results/history
   assessmentMappingId = null,  // For assessment-specific submissions
@@ -187,7 +188,7 @@ function CodeEditor({
     }
     
     initializeEditor()
-  }, [questionId, assessmentMappingId, assessmentSegmentId, apiBaseUrl, accessToken])
+  }, [questionId, assessmentMappingId, assessmentSegmentId, apiBaseUrl])
 
   // Give the results panel more space when viewing test cases or submissions
   useEffect(() => {
@@ -214,10 +215,12 @@ function CodeEditor({
       LANGUAGE_KEY_MAP[t.language_name] === newLanguage
     )
     
-    if (template && template.template_code) {
-      setCode(template.template_code)
-    } else {
-      setCode(CODE_SNIPPETS[newLanguage] || '')
+    const nextCode = template?.template_code
+      ? template.template_code
+      : (CODE_SNIPPETS[newLanguage] || '')
+    setCode(nextCode)
+    if (onCodeChange) {
+      onCodeChange(nextCode, newLanguage)
     }
   }
 
@@ -238,7 +241,11 @@ function CodeEditor({
 
   // Monaco Editor change handler
   const handleEditorChange = (value) => {
-    setCode(value || '')
+    const nextCode = value || ''
+    setCode(nextCode)
+    if (onCodeChange && language) {
+      onCodeChange(nextCode, language)
+    }
   }
 
   const handleMouseDown = useCallback((e) => {
