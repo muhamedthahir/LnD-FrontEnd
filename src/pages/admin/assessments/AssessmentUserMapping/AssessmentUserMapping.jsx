@@ -35,6 +35,7 @@ function AssessmentUserMapping() {
   
   // Filters
   const [statusFilter, setStatusFilter] = useState('all')
+  const [mappedUserSearch, setMappedUserSearch] = useState('')
   const [showAddSection, setShowAddSection] = useState(false)
   const [addingUsers, setAddingUsers] = useState(false)
   const [confirmModal, setConfirmModal] = useState({
@@ -44,6 +45,30 @@ function AssessmentUserMapping() {
   })
   const [confirmLoading, setConfirmLoading] = useState(false)
   const [selectedAttemptByUser, setSelectedAttemptByUser] = useState({})
+  const [extendModal, setExtendModal] = useState({
+    isOpen: false,
+    mapping: null,
+    minutes: 5
+  })
+  const [extendLoading, setExtendLoading] = useState(false)
+
+  const timingMode = configData?.timing_config?.timing_mode || 'OVERALL'
+
+  const getExtendTimeLabel = () => {
+    if (timingMode === 'SEGMENT_WISE') return 'Extend segment time'
+    if (timingMode === 'BOTH') return 'Extend overall & segment time'
+    return 'Extend overall time'
+  }
+
+  const getExtendTimeDescription = () => {
+    if (timingMode === 'SEGMENT_WISE') {
+      return 'Adds minutes to the current segment timer only (segment-wise timing mode).'
+    }
+    if (timingMode === 'BOTH') {
+      return 'Adds minutes to both the overall assessment timer and the current segment timer (both timing mode).'
+    }
+    return 'Adds minutes to the overall assessment timer only (overall timing mode).'
+  }
 
   const getAuthHeader = () => ({
     'Content-Type': 'application/json',
@@ -487,6 +512,50 @@ function AssessmentUserMapping() {
     }
   }
 
+  const openExtendModal = (mapping) => {
+    setExtendModal({ isOpen: true, mapping, minutes: 5 })
+  }
+
+  const closeExtendModal = () => {
+    if (extendLoading) return
+    setExtendModal({ isOpen: false, mapping: null, minutes: 5 })
+  }
+
+  const handleExtendTime = async () => {
+    const { mapping, minutes } = extendModal
+    if (!mapping) return
+
+    const parsedMinutes = Number(minutes)
+    if (!Number.isFinite(parsedMinutes) || parsedMinutes <= 0 || parsedMinutes > 180) {
+      toast.error('Enter a valid duration between 1 and 180 minutes')
+      return
+    }
+
+    setExtendLoading(true)
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/assessment/user-mappings/${mapping.id}/extend-time`, {
+        method: 'POST',
+        headers: getAuthHeader(),
+        body: JSON.stringify({ minutes: parsedMinutes })
+      })
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}))
+        throw new Error(error.error || 'Failed to extend time')
+      }
+
+      const data = await response.json()
+      toast.success(data.message || `Added ${parsedMinutes} minute(s)`)
+      setExtendModal({ isOpen: false, mapping: null, minutes: 5 })
+      fetchData()
+    } catch (error) {
+      console.error('Error extending time:', error)
+      toast.error(error.message || 'Failed to extend time')
+    } finally {
+      setExtendLoading(false)
+    }
+  }
+
   const openConfirmModal = (type, mapping) => {
     setConfirmModal({ isOpen: true, type, mapping })
   }
@@ -552,7 +621,8 @@ function AssessmentUserMapping() {
     if (statusFilter === 'all') return true
     if (statusFilter === 'pending') return m.status === 'NOT_STARTED'
     if (statusFilter === 'inprogress') return m.status === 'IN_PROGRESS'
-    if (statusFilter === 'completed') return ['COMPLETED', 'SUBMITTED'].includes(m.status)
+    if (statusFilter === 'disqualified') return m.status === 'DISQUALIFIED'
+    if (statusFilter === 'completed') return ['COMPLETED', 'SUBMITTED', 'DISQUALIFIED'].includes(m.status)
     return true
   })
 
@@ -598,6 +668,15 @@ function AssessmentUserMapping() {
   const latestAttemptByUser = useMemo(() => {
     return groupedUsers.map((group) => group.attempts[0]).filter(Boolean)
   }, [groupedUsers])
+
+  const displayedGroups = useMemo(() => {
+    const query = mappedUserSearch.trim().toLowerCase()
+    if (!query) return groupedUsers
+    return groupedUsers.filter((group) =>
+      (group.user_name && group.user_name.toLowerCase().includes(query)) ||
+      (group.user_email && group.user_email.toLowerCase().includes(query))
+    )
+  }, [groupedUsers, mappedUserSearch])
 
   const filteredGroups = useMemo(() => {
     return availableGroups.filter(group => 
@@ -1022,21 +1101,29 @@ function AssessmentUserMapping() {
           <span className="stat-label">In Progress</span>
         </div>
         <div className="stat">
-          <span className="stat-value">{latestAttemptByUser.filter(m => m && ['COMPLETED', 'SUBMITTED'].includes(m.status)).length}</span>
+          <span className="stat-value">{latestAttemptByUser.filter(m => m && ['COMPLETED', 'SUBMITTED', 'DISQUALIFIED'].includes(m.status)).length}</span>
           <span className="stat-label">Completed</span>
         </div>
       </div>
 
       <div className="filter-bar">
+        <input
+          type="search"
+          className="filter-search"
+          placeholder="Search by name or email..."
+          value={mappedUserSearch}
+          onChange={(e) => setMappedUserSearch(e.target.value)}
+        />
         <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
           <option value="all">All Status</option>
           <option value="pending">Pending</option>
           <option value="inprogress">In Progress</option>
           <option value="completed">Completed</option>
+          <option value="disqualified">Disqualified</option>
         </select>
       </div>
 
-      {groupedUsers.length === 0 ? (
+      {displayedGroups.length === 0 ? (
         <div className="empty-state">
           <h3>No users found</h3>
           <p>Add users to this assessment configuration.</p>
@@ -1060,7 +1147,7 @@ function AssessmentUserMapping() {
               </tr>
             </thead>
             <tbody>
-              {groupedUsers.map(group => {
+              {displayedGroups.map(group => {
                 const mapping = group.selectedAttempt
                 if (!mapping) return null
                 return (
@@ -1157,7 +1244,7 @@ function AssessmentUserMapping() {
                           </svg>
                         </button>
                       )}
-                      {['COMPLETED', 'SUBMITTED'].includes(mapping.status) && (
+                      {['COMPLETED', 'SUBMITTED', 'DISQUALIFIED'].includes(mapping.status) && (
                         <button 
                           className="action-btn view"
                           onClick={() => navigate(`/admin/assessments/results/${mapping.id}`)}
@@ -1166,6 +1253,20 @@ function AssessmentUserMapping() {
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                             <circle cx="12" cy="12" r="3"/>
+                          </svg>
+                        </button>
+                      )}
+                      {mapping.status === 'IN_PROGRESS' && (
+                        <button
+                          className="action-btn extend-time"
+                          onClick={() => openExtendModal(mapping)}
+                          title={getExtendTimeLabel()}
+                        >
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                            <line x1="12" y1="8" x2="12" y2="16"/>
+                            <line x1="8" y1="12" x2="16" y2="12"/>
                           </svg>
                         </button>
                       )}
@@ -1224,6 +1325,38 @@ function AssessmentUserMapping() {
         cancelText="Cancel"
         disabled={confirmLoading}
       />
+
+      {extendModal.isOpen && (
+        <div className="extend-time-overlay" onClick={closeExtendModal}>
+          <div className="extend-time-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>{getExtendTimeLabel()}</h3>
+            <p className="extend-time-user">
+              {extendModal.mapping?.user_name || extendModal.mapping?.user_email}
+            </p>
+            <p className="extend-time-desc">{getExtendTimeDescription()}</p>
+            <label className="extend-time-label" htmlFor="extend-minutes">
+              Minutes to add
+            </label>
+            <input
+              id="extend-minutes"
+              type="number"
+              min="1"
+              max="180"
+              value={extendModal.minutes}
+              onChange={(e) => setExtendModal((prev) => ({ ...prev, minutes: e.target.value }))}
+              className="extend-time-input"
+            />
+            <div className="extend-time-actions">
+              <Button variant="secondary" onClick={closeExtendModal} disabled={extendLoading}>
+                Cancel
+              </Button>
+              <Button variant="primary" onClick={handleExtendTime} disabled={extendLoading}>
+                {extendLoading ? 'Saving...' : 'Extend Time'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
