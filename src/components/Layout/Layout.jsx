@@ -51,9 +51,12 @@ function Layout() {
 
   useEffect(() => {
     if (apiBaseUrl) {
+      if (user && (accessToken || localStorage.getItem('accessToken'))) {
+        return
+      }
       checkAuth()
     }
-  }, [apiBaseUrl, accessToken]) // Also check when access token changes
+  }, [apiBaseUrl, accessToken]) // Re-check only when session is missing, not on token rotation
 
   const logout = async () => {
     try {

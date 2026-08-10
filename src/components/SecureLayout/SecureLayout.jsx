@@ -1,5 +1,5 @@
 import { Outlet } from 'react-router-dom'
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApi } from '../../contexts/ApiContext'
 import { API_ENDPOINTS } from '../../constants/constants'
@@ -14,8 +14,13 @@ function SecureLayout() {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
+  const sessionReadyRef = useRef(false)
 
   const checkAuth = useCallback(async () => {
+    if (sessionReadyRef.current) {
+      return
+    }
+
     // Wait for API context to finish loading
     if (apiLoading || !apiBaseUrl) {
       return
@@ -61,6 +66,7 @@ function SecureLayout() {
       if (data.authenticated && data.user) {
         setUser(data.user)
         localStorage.setItem('user', JSON.stringify(data.user))
+        sessionReadyRef.current = true
         setLoading(false)
         return
       }
@@ -85,6 +91,7 @@ function SecureLayout() {
                 localStorage.setItem('user', JSON.stringify(refreshData.user))
                 setUser(refreshData.user)
               }
+              sessionReadyRef.current = true
               setLoading(false)
               return
             }
@@ -98,6 +105,7 @@ function SecureLayout() {
       if (storedUser) {
         try {
           setUser(JSON.parse(storedUser))
+          sessionReadyRef.current = true
           setLoading(false)
           return
         } catch (e) {
@@ -108,6 +116,7 @@ function SecureLayout() {
       clearTokens()
       localStorage.removeItem('user')
       setUser(null)
+      sessionReadyRef.current = false
       setLoading(false)
     } catch (error) {
       console.error('Auth check failed:', error)
@@ -117,6 +126,7 @@ function SecureLayout() {
       if (storedUser) {
         try {
           setUser(JSON.parse(storedUser))
+          sessionReadyRef.current = true
           setLoading(false)
           return
         } catch (e) {
@@ -127,6 +137,7 @@ function SecureLayout() {
       clearTokens()
       localStorage.removeItem('user')
       setUser(null)
+      sessionReadyRef.current = false
       setLoading(false)
     }
   }, [apiBaseUrl, accessToken, refreshToken, clearTokens, setTokens, apiLoading])

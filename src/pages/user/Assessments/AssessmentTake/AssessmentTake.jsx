@@ -5,6 +5,7 @@ import { toast } from 'react-toastify'
 import Button from '../../../../components/Button/Button'
 import CodeEditor from '../../../CodeEditor/CodeEditor'
 import { useAssessmentClipboardGuard } from '../../../../hooks/useAssessmentClipboardGuard'
+import { saveAssessmentDraft, clearAssessmentDraft } from '../../../../utils/assessmentDraftStorage'
 import styles from './AssessmentTake.module.css'
 
 const isConfigFlagEnabled = (value, defaultEnabled = true) => {
@@ -100,6 +101,13 @@ function AssessmentTake() {
   const progressSaveRef = useRef(null)
   const segmentAnswersCacheRef = useRef({})
   const initialLoadRef = useRef(true)
+  const hasFetchedRef = useRef(false)
+  const navigateRef = useRef(navigate)
+  const draftSaveTimersRef = useRef({})
+
+  useEffect(() => {
+    navigateRef.current = navigate
+  }, [navigate])
   
   // Progress save interval in seconds (configurable - default 10 seconds)
   const PROGRESS_SAVE_INTERVAL = 10
@@ -159,9 +167,10 @@ function AssessmentTake() {
     'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
   })
 
-  // Fetch assessment data
+  // Fetch assessment data once per mapping — never refetch on token refresh.
   const fetchAssessmentData = useCallback(async () => {
     if (!apiBaseUrl || !mappingId) return
+    if (hasFetchedRef.current) return
 
     const showLoading = initialLoadRef.current
     try {
@@ -180,7 +189,7 @@ function AssessmentTake() {
 
       if (data.auto_submitted) {
         toast.info(data.message || 'Assessment time expired and was submitted automatically.')
-        navigate(`/user/assessments/${mappingId}/results`)
+        navigateRef.current(`/user/assessments/${mappingId}/results`)
         return
       }
 
@@ -223,24 +232,29 @@ function AssessmentTake() {
     } catch (error) {
       console.error('Error fetching assessment:', error)
       toast.error('Failed to load assessment')
-      navigate('/user/assessments')
+      navigateRef.current('/user/assessments')
     } finally {
       if (showLoading) {
         setLoading(false)
         initialLoadRef.current = false
       }
+      hasFetchedRef.current = true
     }
-  }, [apiBaseUrl, mappingId, navigate])
+  }, [apiBaseUrl, mappingId])
 
   useEffect(() => {
+    if (!apiBaseUrl || !mappingId) return
+    hasFetchedRef.current = false
     initialLoadRef.current = true
     fetchAssessmentData()
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
       if (progressSaveRef.current) clearInterval(progressSaveRef.current)
       if (countdownTimerRef.current) clearInterval(countdownTimerRef.current)
+      Object.values(draftSaveTimersRef.current).forEach(clearTimeout)
+      draftSaveTimersRef.current = {}
     }
-  }, [fetchAssessmentData])
+  }, [apiBaseUrl, mappingId, fetchAssessmentData])
 
   // Secure Window Mode: Auto fullscreen and window close prevention
   useEffect(() => {
@@ -679,6 +693,33 @@ function AssessmentTake() {
       segmentAnswersCacheRef.current[segId] = { ...nextAnswers }
     }
   }
+
+  const scheduleProgrammingDraftSave = useCallback((questionId, code, language) => {
+    if (!apiBaseUrl || !mappingId || !questionId || !language || !code?.trim()) return
+
+    saveAssessmentDraft(mappingId, questionId, code, language)
+
+    if (draftSaveTimersRef.current[questionId]) {
+      clearTimeout(draftSaveTimersRef.current[questionId])
+    }
+
+    draftSaveTimersRef.current[questionId] = setTimeout(async () => {
+      try {
+        await fetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/save-answer`, {
+          method: 'POST',
+          headers: getAuthHeader(),
+          body: JSON.stringify({
+            question_id: questionId,
+            question_type: 'PROGRAMMING',
+            answer: code,
+            language
+          })
+        })
+      } catch (error) {
+        console.error('Failed to auto-save programming draft:', error)
+      }
+    }, 3000)
+  }, [apiBaseUrl, mappingId])
 
   const normalizeMcqAnswer = (answer) => {
     if (Array.isArray(answer)) {
@@ -1342,6 +1383,7 @@ function AssessmentTake() {
                         const code = getQuestionAnswerValue(answers, currentQuestion.id)
                         return typeof code === 'string' ? code : (currentQuestion.boilerplate_code || '')
                       })()}
+                      initialLanguage={answers[`${currentQuestion.id}_lang`] || ''}
                       allowedLanguages={currentQuestion.allowed_languages || []}
                       codeTemplates={currentQuestion.code_templates || []}
                       testCases={currentQuestion.test_cases || []}
@@ -1358,8 +1400,10 @@ function AssessmentTake() {
                           updateSegmentAnswerCache(next)
                           return next
                         })
+                        scheduleProgrammingDraftSave(currentQuestion.id, code, language)
                       }}
                       onSaveCode={async ({ code, language }) => {
+                        clearAssessmentDraft(mappingId, currentQuestion.id)
                         setAnswers(prev => ({
                           ...prev,
                           [currentQuestion.id]: code,

@@ -111,8 +111,11 @@ export const ApiProvider = ({ children }) => {
   useEffect(() => {
     if (!apiBaseUrl) return
 
-    const getStoredRefresh = () => refreshToken || localStorage.getItem('refreshToken')
-    const getStoredAccess = () => accessToken || localStorage.getItem('accessToken')
+    const accessTokenRef = { current: accessToken || localStorage.getItem('accessToken') }
+    const refreshTokenRef = { current: refreshToken || localStorage.getItem('refreshToken') }
+
+    const getStoredRefresh = () => refreshTokenRef.current || localStorage.getItem('refreshToken')
+    const getStoredAccess = () => accessTokenRef.current || localStorage.getItem('accessToken')
 
     const refreshAccessToken = async () => {
       const rt = getStoredRefresh()
@@ -136,6 +139,7 @@ export const ApiProvider = ({ children }) => {
         const data = await response.json()
 
         if (data.accessToken) {
+          accessTokenRef.current = data.accessToken
           setAccessToken(data.accessToken)
           if (data.user) {
             localStorage.setItem('user', JSON.stringify(data.user))
@@ -149,6 +153,9 @@ export const ApiProvider = ({ children }) => {
     }
 
     const checkAndRefresh = async () => {
+      refreshTokenRef.current = refreshToken || localStorage.getItem('refreshToken')
+      accessTokenRef.current = accessToken || localStorage.getItem('accessToken')
+
       const at = getStoredAccess()
       const rt = getStoredRefresh()
 
@@ -174,7 +181,7 @@ export const ApiProvider = ({ children }) => {
     const interval = setInterval(checkAndRefresh, 60 * 1000)
 
     return () => clearInterval(interval)
-  }, [apiBaseUrl, accessToken, refreshToken, clearTokens])
+  }, [apiBaseUrl, clearTokens])
 
   return (
     <ApiContext.Provider value={{ 

@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import Editor from '@monaco-editor/react'
 import { useApi } from '../../contexts/ApiContext'
 import { CODE_SNIPPETS, LANGUAGE_KEY_MAP } from '../../constants/constants'
+import { loadAssessmentDraft, saveAssessmentDraft } from '../../utils/assessmentDraftStorage'
 import { outputsMatch } from '../../utils/outputCompare'
 import { configureMonacoClipboardBlock } from '../../hooks/useAssessmentClipboardGuard'
 import styles from './CodeEditor.module.css'
@@ -9,6 +10,7 @@ import styles from './CodeEditor.module.css'
 function CodeEditor({ 
   questionId,
   initialCode,
+  initialLanguage = '',
   allowedLanguages = [],
   codeTemplates = [],
   testCases = [],
@@ -145,11 +147,28 @@ function CodeEditor({
       // Fetch submission history
       const previousSubmission = await fetchSubmissionHistory(questionId)
       
-      // Determine the language to use
+      // Determine the language to use — prefer local/parent drafts over stale server history
       let selectedLanguage = ''
       let selectedCode = ''
-      
-      if (previousSubmission && previousSubmission.last_submitted_code) {
+
+      const sessionDraft = assessmentMappingId
+        ? loadAssessmentDraft(assessmentMappingId, questionId)
+        : null
+      const parentDraft = typeof initialCode === 'string' && initialCode.trim() ? initialCode : ''
+      const draftCode = sessionDraft?.code?.trim() ? sessionDraft.code : parentDraft
+      const draftLanguage = sessionDraft?.language || initialLanguage || ''
+
+      if (draftCode) {
+        selectedCode = draftCode
+        if (draftLanguage) {
+          const langObj = languages.find(l =>
+            l.key === draftLanguage ||
+            LANGUAGE_KEY_MAP[l.name] === draftLanguage ||
+            l.name.toLowerCase() === draftLanguage.toLowerCase()
+          )
+          selectedLanguage = langObj?.key || LANGUAGE_KEY_MAP[langObj?.name] || draftLanguage
+        }
+      } else if (previousSubmission && previousSubmission.last_submitted_code) {
         const prevLangKey = previousSubmission.language_used || ''
         const langObj = languages.find(l => 
           l.key === prevLangKey || 
@@ -163,22 +182,23 @@ function CodeEditor({
         }
       }
       
-      // Fall back to template or default if no previous submission
+      // Fall back to template or default if no language/code resolved yet
       if (!selectedLanguage && languages.length > 0) {
         const firstLang = languages[0]
         selectedLanguage = firstLang.key || LANGUAGE_KEY_MAP[firstLang.name] || 'javascript'
         
-        // Set code from template
-        const template = codeTemplates.find(t => 
-          t.language_id === firstLang.id || 
-          LANGUAGE_KEY_MAP[t.language_name] === selectedLanguage
-        )
-        if (template && template.template_code) {
-          selectedCode = template.template_code
-        } else if (initialCode) {
-          selectedCode = initialCode
-        } else {
-          selectedCode = CODE_SNIPPETS[selectedLanguage] || ''
+        if (!selectedCode) {
+          const template = codeTemplates.find(t => 
+            t.language_id === firstLang.id || 
+            LANGUAGE_KEY_MAP[t.language_name] === selectedLanguage
+          )
+          if (template && template.template_code) {
+            selectedCode = template.template_code
+          } else if (initialCode) {
+            selectedCode = initialCode
+          } else {
+            selectedCode = CODE_SNIPPETS[selectedLanguage] || ''
+          }
         }
       }
       
@@ -219,6 +239,9 @@ function CodeEditor({
       ? template.template_code
       : (CODE_SNIPPETS[newLanguage] || '')
     setCode(nextCode)
+    if (assessmentMappingId && questionId) {
+      saveAssessmentDraft(assessmentMappingId, questionId, nextCode, newLanguage)
+    }
     if (onCodeChange) {
       onCodeChange(nextCode, newLanguage)
     }
@@ -243,6 +266,9 @@ function CodeEditor({
   const handleEditorChange = (value) => {
     const nextCode = value || ''
     setCode(nextCode)
+    if (assessmentMappingId && questionId) {
+      saveAssessmentDraft(assessmentMappingId, questionId, nextCode, language)
+    }
     if (onCodeChange && language) {
       onCodeChange(nextCode, language)
     }
