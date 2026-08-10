@@ -92,34 +92,44 @@ function AssessmentUserMapping() {
   }, [apiBaseUrl, adminId, accessToken])
 
   const fetchMappings = useCallback(async () => {
-    if (!apiBaseUrl || !adminId) return
-
-    const params = new URLSearchParams({
-      page: String(mappingsPage),
-      pageSize: String(mappingsPageSize)
-    })
-    if (debouncedMappedUserSearch.trim()) {
-      params.set('search', debouncedMappedUserSearch.trim())
-    }
-    if (statusFilter !== 'all') {
-      params.set('status', statusFilter)
+    if (!apiBaseUrl || !adminId) {
+      setLoading(false)
+      return
     }
 
-    const mappingsRes = await fetch(
-      `${apiBaseUrl}/api/assessment/administrators/${adminId}/users?${params}`,
-      { headers: getAuthHeader() }
-    )
-    if (mappingsRes.ok) {
-      const data = await mappingsRes.json()
-      const mappings = data.mappings || (Array.isArray(data) ? data : [])
-      setUserMappings(mappings)
-      setMappingsTotal(data.total ?? mappings.length)
-    } else {
-      const errorData = await mappingsRes.json().catch(() => ({}))
-      console.error('Error fetching mappings:', errorData)
-      toast.error(`Failed to load user mappings: ${errorData.error || 'Unknown error'}`)
-      setUserMappings([])
-      setMappingsTotal(0)
+    try {
+      const params = new URLSearchParams({
+        page: String(mappingsPage),
+        pageSize: String(mappingsPageSize)
+      })
+      if (debouncedMappedUserSearch.trim()) {
+        params.set('search', debouncedMappedUserSearch.trim())
+      }
+      if (statusFilter !== 'all') {
+        params.set('status', statusFilter)
+      }
+
+      const mappingsRes = await fetch(
+        `${apiBaseUrl}/api/assessment/administrators/${adminId}/users?${params}`,
+        { headers: getAuthHeader() }
+      )
+      if (mappingsRes.ok) {
+        const data = await mappingsRes.json()
+        const mappings = data.mappings || (Array.isArray(data) ? data : [])
+        setUserMappings(mappings)
+        setMappingsTotal(data.total ?? mappings.length)
+      } else {
+        const errorData = await mappingsRes.json().catch(() => ({}))
+        console.error('Error fetching mappings:', errorData)
+        toast.error(`Failed to load user mappings: ${errorData.error || 'Unknown error'}`)
+        setUserMappings([])
+        setMappingsTotal(0)
+      }
+    } catch (error) {
+      console.error('Error fetching mappings:', error)
+      toast.error('Failed to load user mappings')
+    } finally {
+      setLoading(false)
     }
   }, [apiBaseUrl, adminId, accessToken, mappingsPage, mappingsPageSize, debouncedMappedUserSearch, statusFilter])
 
