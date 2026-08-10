@@ -4,8 +4,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts'
 import { useApi } from '../../../contexts/ApiContext'
 import { 
-  fetchDashboardCourses, 
-  fetchDashboardAdministrations,
+  fetchAdminDashboardStats,
   selectCourses,
   selectCoursesLoading,
   selectCourseStats,
@@ -83,8 +82,7 @@ function Dashboard() {
   // Fetch dashboard data for admins (non-blocking)
   useEffect(() => {
     if (isAdmin && apiBaseUrl && accessToken) {
-      dispatch(fetchDashboardCourses({ apiBaseUrl, accessToken }))
-      dispatch(fetchDashboardAdministrations({ apiBaseUrl, accessToken }))
+      dispatch(fetchAdminDashboardStats({ apiBaseUrl, accessToken }))
     }
   }, [isAdmin, apiBaseUrl, accessToken, dispatch])
 
@@ -107,11 +105,11 @@ function Dashboard() {
   }
 
   const handleRefreshCourses = () => {
-    dispatch(fetchDashboardCourses({ apiBaseUrl, accessToken, forceRefresh: true }))
+    dispatch(fetchAdminDashboardStats({ apiBaseUrl, accessToken, forceRefresh: true }))
   }
 
   const handleRefreshAdministrations = () => {
-    dispatch(fetchDashboardAdministrations({ apiBaseUrl, accessToken, forceRefresh: true }))
+    dispatch(fetchAdminDashboardStats({ apiBaseUrl, accessToken, forceRefresh: true }))
   }
 
   // Prepare pie chart data for courses
@@ -237,7 +235,7 @@ function Dashboard() {
                   </div>
                   
                   <div className={styles.sectionContent}>
-                    {coursesLoading && courses.length === 0 ? (
+                    {coursesLoading && courseStats.total === 0 ? (
                       <div className={styles.sectionLoader}>
                         <div className={styles.loaderSpinner}></div>
                         <p>Loading courses...</p>

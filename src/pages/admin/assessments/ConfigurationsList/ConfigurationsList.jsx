@@ -43,34 +43,31 @@ function ConfigurationsList() {
         }
         setAssessments(assessmentsMap)
         
-        // Fetch configurations for each assessment
-        const allConfigs = []
         const assessmentIds = Object.keys(assessmentsMap)
-        
-        for (const assessmentId of assessmentIds) {
-          try {
-            const configsRes = await fetch(
-              `${apiBaseUrl}/api/assessment/assessments/${assessmentId}/administrators`,
-              withNoCache(getAuthHeader())
-            )
-            if (configsRes.ok) {
+
+        const configResponses = await Promise.all(
+          assessmentIds.map(async (assessmentId) => {
+            try {
+              const configsRes = await fetch(
+                `${apiBaseUrl}/api/assessment/assessments/${assessmentId}/administrators`,
+                withNoCache(getAuthHeader())
+              )
+              if (!configsRes.ok) return []
               const configsData = await configsRes.json()
               const configs = Array.isArray(configsData) ? configsData : []
-              // Add assessment info to each config
-              configs.forEach(config => {
-                allConfigs.push({
-                  ...config,
-                  assessment_id: assessmentId,
-                  assessment_title: assessmentsMap[assessmentId]?.title || 'Unknown Assessment'
-                })
-              })
+              return configs.map((config) => ({
+                ...config,
+                assessment_id: assessmentId,
+                assessment_title: assessmentsMap[assessmentId]?.title || 'Unknown Assessment'
+              }))
+            } catch (error) {
+              console.error(`Error fetching configs for assessment ${assessmentId}:`, error)
+              return []
             }
-          } catch (error) {
-            console.error(`Error fetching configs for assessment ${assessmentId}:`, error)
-          }
-        }
-        
-        setConfigurations(allConfigs)
+          })
+        )
+
+        setConfigurations(configResponses.flat())
       }
     } catch (error) {
       console.error('Error fetching configurations:', error)

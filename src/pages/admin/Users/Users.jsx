@@ -96,29 +96,35 @@ function Users() {
     loadCatalog()
   }, [apiBaseUrl, accessToken])
 
-  // Fetch users when filters change
-  useEffect(() => {
-    fetchUsers()
-  }, [selectedCollege, currentPage, pageSize])
+  const [debouncedSearch, setDebouncedSearch] = useState('')
 
-  const fetchUsers = async () => {
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 300)
+    return () => clearTimeout(timer)
+  }, [search])
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [debouncedSearch, selectedCollege])
+
+  const fetchUsers = useCallback(async () => {
+    if (!apiBaseUrl) return
     try {
       setLoading(true)
       const url = new URL(`${apiBaseUrl}${API_ENDPOINTS.USERS.LIST}`)
       if (selectedCollege) url.searchParams.append('college', selectedCollege)
-      if (search) url.searchParams.append('search', search)
+      if (debouncedSearch) url.searchParams.append('search', debouncedSearch)
       url.searchParams.append('limit', pageSize.toString())
       url.searchParams.append('offset', ((currentPage - 1) * pageSize).toString())
-      
-      // Get token from context or localStorage as fallback
+
       const token = accessToken || localStorage.getItem('accessToken')
       const headers = {
         'Content-Type': 'application/json',
-        ...(token && { 'Authorization': `Bearer ${token}` })
+        ...(token && { Authorization: `Bearer ${token}` })
       }
-      
+
       const response = await fetch(url, { headers })
-      
+
       if (response.ok) {
         const data = await response.json()
         setUsers(data.users || [])
@@ -132,19 +138,11 @@ function Users() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [apiBaseUrl, accessToken, selectedCollege, debouncedSearch, currentPage, pageSize])
 
-  // Search effect with debounce
   useEffect(() => {
-    // Debounce search and reset to page 1
-    const timer = setTimeout(() => {
-      if (search !== undefined) {
-        setCurrentPage(1)
-        fetchUsers()
-      }
-    }, 300)
-    return () => clearTimeout(timer)
-  }, [search])
+    fetchUsers()
+  }, [fetchUsers])
 
   const handleChange = (e) => {
     const { name, value } = e.target

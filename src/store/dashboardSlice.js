@@ -1,90 +1,80 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { API_ENDPOINTS } from '../constants/constants'
 
-// Async thunk to fetch courses
-export const fetchDashboardCourses = createAsyncThunk(
-  'dashboard/fetchCourses',
+export const fetchAdminDashboardStats = createAsyncThunk(
+  'dashboard/fetchAdminStats',
   async ({ apiBaseUrl, accessToken, forceRefresh = false }, { getState, rejectWithValue }) => {
-    // Check if already loaded and not forcing refresh
     const state = getState()
-    if (!forceRefresh && state.dashboard.coursesLoaded && state.dashboard.courses.length > 0) {
-      return { courses: state.dashboard.courses, fromCache: true }
+    if (!forceRefresh && state.dashboard.statsLoaded) {
+      return { fromCache: true }
     }
 
     try {
-      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.COURSES.LIST}?limit=1000`, {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.DASHBOARD.ADMIN_STATS}`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
         }
       })
-      
+
       if (!response.ok) {
-        throw new Error('Failed to fetch courses')
+        throw new Error('Failed to fetch dashboard stats')
       }
-      
+
       const data = await response.json()
-      return { courses: data.courses || [], fromCache: false }
+      return {
+        courseStats: data.courseStats || { total: 0, published: 0, draft: 0, inProgress: 0 },
+        adminStats: data.adminStats || { total: 0, published: 0, draft: 0 },
+        recentAdministrations: data.recentAdministrations || [],
+        fromCache: false
+      }
     } catch (error) {
       return rejectWithValue(error.message)
     }
   }
 )
 
-// Async thunk to fetch administrations
+// Legacy thunks kept for callers that still refresh individual sections
+export const fetchDashboardCourses = createAsyncThunk(
+  'dashboard/fetchCourses',
+  async (params, { dispatch }) => {
+    await dispatch(fetchAdminDashboardStats(params))
+    return { fromCache: true }
+  }
+)
+
 export const fetchDashboardAdministrations = createAsyncThunk(
   'dashboard/fetchAdministrations',
-  async ({ apiBaseUrl, accessToken, forceRefresh = false }, { getState, rejectWithValue }) => {
-    // Check if already loaded and not forcing refresh
-    const state = getState()
-    if (!forceRefresh && state.dashboard.administrationsLoaded && state.dashboard.administrations.length > 0) {
-      return { administrations: state.dashboard.administrations, fromCache: true }
-    }
-
-    try {
-      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.ADMINISTRATIONS.LIST}?limit=1000`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
-        }
-      })
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch administrations')
-      }
-      
-      const data = await response.json()
-      return { administrations: data.administrations || [], fromCache: false }
-    } catch (error) {
-      return rejectWithValue(error.message)
-    }
+  async (params, { dispatch }) => {
+    await dispatch(fetchAdminDashboardStats(params))
+    return { fromCache: true }
   }
 )
 
 const initialState = {
-  // Courses data
   courses: [],
   coursesLoading: false,
   coursesError: null,
   coursesLoaded: false,
   coursesLastFetched: null,
-  
-  // Administrations data
+
   administrations: [],
   administrationsLoading: false,
   administrationsError: null,
   administrationsLoaded: false,
   administrationsLastFetched: null,
-  
-  // Course stats (calculated from courses)
+
+  statsLoading: false,
+  statsLoaded: false,
+  statsError: null,
+
   courseStats: {
     total: 0,
     published: 0,
     draft: 0,
     inProgress: 0
   },
-  
-  // Administration stats
+
   adminStats: {
     total: 0,
     published: 0,
@@ -92,119 +82,68 @@ const initialState = {
   }
 }
 
-// Helper function to calculate course stats
-const calculateCourseStats = (courses) => {
-  const stats = {
-    total: courses.length,
-    published: 0,
-    draft: 0,
-    inProgress: 0
-  }
-  
-  courses.forEach(course => {
-    if (course.status === 'published') {
-      stats.published++
-    } else if (course.status === 'draft') {
-      stats.draft++
-    } else if (course.status === 'in_progress') {
-      stats.inProgress++
-    }
-  })
-  
-  return stats
-}
-
-// Helper function to calculate administration stats
-const calculateAdminStats = (administrations) => {
-  const stats = {
-    total: administrations.length,
-    published: 0,
-    draft: 0
-  }
-  
-  administrations.forEach(admin => {
-    if (admin.status === 'published') {
-      stats.published++
-    } else if (admin.status === 'draft') {
-      stats.draft++
-    }
-  })
-  
-  return stats
-}
-
 const dashboardSlice = createSlice({
   name: 'dashboard',
   initialState,
   reducers: {
-    // Clear dashboard data (on logout)
-    clearDashboardData: (state) => {
-      return initialState
-    },
-    // Invalidate courses cache
+    clearDashboardData: () => initialState,
     invalidateCoursesCache: (state) => {
       state.coursesLoaded = false
+      state.statsLoaded = false
     },
-    // Invalidate administrations cache
     invalidateAdministrationsCache: (state) => {
       state.administrationsLoaded = false
+      state.statsLoaded = false
     },
-    // Invalidate all cache
     invalidateAllCache: (state) => {
       state.coursesLoaded = false
       state.administrationsLoaded = false
+      state.statsLoaded = false
     }
   },
   extraReducers: (builder) => {
     builder
-      // Fetch Courses
-      .addCase(fetchDashboardCourses.pending, (state) => {
+      .addCase(fetchAdminDashboardStats.pending, (state) => {
+        state.statsLoading = true
         state.coursesLoading = true
-        state.coursesError = null
-      })
-      .addCase(fetchDashboardCourses.fulfilled, (state, action) => {
-        state.coursesLoading = false
-        if (!action.payload.fromCache) {
-          state.courses = action.payload.courses
-          state.courseStats = calculateCourseStats(action.payload.courses)
-          state.coursesLastFetched = Date.now()
-        }
-        state.coursesLoaded = true
-      })
-      .addCase(fetchDashboardCourses.rejected, (state, action) => {
-        state.coursesLoading = false
-        state.coursesError = action.payload
-      })
-      
-      // Fetch Administrations
-      .addCase(fetchDashboardAdministrations.pending, (state) => {
         state.administrationsLoading = true
-        state.administrationsError = null
+        state.statsError = null
       })
-      .addCase(fetchDashboardAdministrations.fulfilled, (state, action) => {
+      .addCase(fetchAdminDashboardStats.fulfilled, (state, action) => {
+        state.statsLoading = false
+        state.coursesLoading = false
         state.administrationsLoading = false
+
         if (!action.payload.fromCache) {
-          state.administrations = action.payload.administrations
-          state.adminStats = calculateAdminStats(action.payload.administrations)
+          state.courseStats = action.payload.courseStats
+          state.adminStats = action.payload.adminStats
+          state.administrations = action.payload.recentAdministrations
+          state.coursesLastFetched = Date.now()
           state.administrationsLastFetched = Date.now()
         }
+
+        state.statsLoaded = true
+        state.coursesLoaded = true
         state.administrationsLoaded = true
       })
-      .addCase(fetchDashboardAdministrations.rejected, (state, action) => {
+      .addCase(fetchAdminDashboardStats.rejected, (state, action) => {
+        state.statsLoading = false
+        state.coursesLoading = false
         state.administrationsLoading = false
+        state.statsError = action.payload
+        state.coursesError = action.payload
         state.administrationsError = action.payload
       })
   }
 })
 
-export const { 
-  clearDashboardData, 
-  invalidateCoursesCache, 
+export const {
+  clearDashboardData,
+  invalidateCoursesCache,
   invalidateAdministrationsCache,
   invalidateAllCache
 } = dashboardSlice.actions
 
-// Selectors
 export const selectCourses = (state) => state.dashboard.courses
 export const selectCoursesLoading = (state) => state.dashboard.coursesLoading
 export const selectCoursesLoaded = (state) => state.dashboard.coursesLoaded
@@ -216,4 +155,3 @@ export const selectAdministrationsLoaded = (state) => state.dashboard.administra
 export const selectAdminStats = (state) => state.dashboard.adminStats
 
 export default dashboardSlice.reducer
-

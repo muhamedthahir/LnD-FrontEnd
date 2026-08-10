@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
+import { lazy, Suspense } from 'react'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { ThemeProvider } from './contexts/ThemeContext'
@@ -7,61 +8,68 @@ import Layout from './components/Layout/Layout'
 import SecureLayout from './components/SecureLayout/SecureLayout'
 import Login from './pages/Login/Login'
 import ResetPassword from './pages/ResetPassword/ResetPassword'
-import Dashboard from './pages/user/Dashboard/Dashboard'
-import UserCourses from './pages/user/Courses/UserCourses/UserCourses'
-import CourseOverview from './pages/user/Courses/CourseOverview/CourseOverview'
-import CurrentCourse from './pages/user/Courses/CurrentCourse/CurrentCourse'
-import PracticeExercise from './pages/user/Courses/PracticeExercise/PracticeExercise'
-import CourseAssessment from './pages/user/Courses/CourseAssessment/CourseAssessment'
-import Quiz from './pages/user/Quiz/Quiz'
-import Assessments from './pages/user/Assessments/Assessments'
-import CoursesManagement from './pages/admin/courses/CoursesManagement/CoursesManagement'
-import CourseEdit from './pages/admin/courses/CoursesManagement/CourseEdit/CourseEdit'
-import PracticeSegmentManager from './pages/admin/courses/PracticeSegmentManager/PracticeSegmentManager'
-import CourseAdministrations from './pages/admin/courses/CourseAdministrations/CourseAdministrations'
-import Users from './pages/admin/Users/Users'
-import UserDetail from './pages/admin/Users/UserDetail/UserDetail'
-import CreateUser from './pages/admin/Users/CreateUser/CreateUser'
-import AssessmentManagement from './pages/admin/assessments/AssessmentManagement/AssessmentManagement'
-import AssessmentAdministration from './pages/admin/assessments/AssessmentAdministration/AssessmentAdministration'
-import AssessmentEdit from './pages/admin/assessments/AssessmentEdit/AssessmentEdit'
-import AssessmentCreate from './pages/admin/assessments/AssessmentCreate/AssessmentCreate'
-import AssessmentConfigurations from './pages/admin/assessments/AssessmentConfigurations/AssessmentConfigurations'
-import ConfigurationsList from './pages/admin/assessments/ConfigurationsList/ConfigurationsList'
-import ConfigurationCreate from './pages/admin/assessments/ConfigurationCreate/ConfigurationCreate'
-import AssessmentUserMapping from './pages/admin/assessments/AssessmentUserMapping/AssessmentUserMapping'
-import AssessmentResult from './pages/admin/assessments/AssessmentResult/AssessmentResult'
-// User Assessment Pages
-import AssessmentStart from './pages/user/Assessments/AssessmentStart/AssessmentStart'
-import AssessmentTake from './pages/user/Assessments/AssessmentTake/AssessmentTake'
-import AssessmentResults from './pages/user/Assessments/AssessmentResults/AssessmentResults'
-import Groups from './pages/admin/Groups/Groups'
-import CreateGroup from './pages/admin/Groups/CreateGroup/CreateGroup'
-import Institutions from './pages/admin/Institutions/Institutions'
-import CreateInstitution from './pages/admin/Institutions/CreateInstitution/CreateInstitution'
-import InstitutionDetail from './pages/admin/Institutions/InstitutionDetail/InstitutionDetail'
-import MailerTemplates from './pages/admin/MailerTemplates/MailerTemplates'
-import MailerTemplateDetail from './pages/admin/MailerTemplates/MailerTemplateDetail'
-import Settings from './pages/admin/Settings/Settings'
-import CreateAdministration from './pages/admin/courses/CourseAdministrations/CreateAdministration/CreateAdministration'
-import AdministrationDetail from './pages/admin/courses/CourseAdministrations/AdministrationDetail/AdministrationDetail'
-import ProgressReport from './pages/admin/courses/CourseAdministrations/ProgressReport/ProgressReport'
-// Question Bank Pages
-import QuestionBanks from './pages/admin/Questions/QuestionBanks'
-import QuestionBankForm from './pages/admin/Questions/QuestionBankForm'
-import QuestionBankDetail from './pages/admin/Questions/QuestionBankDetail'
-import QuestionList from './pages/admin/Questions/QuestionList'
-import QuestionForm from './pages/admin/Questions/QuestionForm'
-import QuestionDetail from './pages/admin/Questions/QuestionDetail'
-import TestCaseManager from './pages/admin/Questions/TestCaseManager'
 import CodeEditorLayout from './pages/CodeEditor/CodeEditorLayout'
-import Playground from './pages/Playground/Playground'
-import PersonalDetails from './pages/PersonalDetails/PersonalDetails'
 import { hasPersistedSession } from './auth/sessionClient'
 import './App.css'
 
+const Dashboard = lazy(() => import('./pages/user/Dashboard/Dashboard'))
+const UserCourses = lazy(() => import('./pages/user/Courses/UserCourses/UserCourses'))
+const CourseOverview = lazy(() => import('./pages/user/Courses/CourseOverview/CourseOverview'))
+const CurrentCourse = lazy(() => import('./pages/user/Courses/CurrentCourse/CurrentCourse'))
+const PracticeExercise = lazy(() => import('./pages/user/Courses/PracticeExercise/PracticeExercise'))
+const CourseAssessment = lazy(() => import('./pages/user/Courses/CourseAssessment/CourseAssessment'))
+const Quiz = lazy(() => import('./pages/user/Quiz/Quiz'))
+const Assessments = lazy(() => import('./pages/user/Assessments/Assessments'))
+const CoursesManagement = lazy(() => import('./pages/admin/courses/CoursesManagement/CoursesManagement'))
+const CourseEdit = lazy(() => import('./pages/admin/courses/CoursesManagement/CourseEdit/CourseEdit'))
+const PracticeSegmentManager = lazy(() => import('./pages/admin/courses/PracticeSegmentManager/PracticeSegmentManager'))
+const CourseAdministrations = lazy(() => import('./pages/admin/courses/CourseAdministrations/CourseAdministrations'))
+const Users = lazy(() => import('./pages/admin/Users/Users'))
+const UserDetail = lazy(() => import('./pages/admin/Users/UserDetail/UserDetail'))
+const CreateUser = lazy(() => import('./pages/admin/Users/CreateUser/CreateUser'))
+const AssessmentManagement = lazy(() => import('./pages/admin/assessments/AssessmentManagement/AssessmentManagement'))
+const AssessmentAdministration = lazy(() => import('./pages/admin/assessments/AssessmentAdministration/AssessmentAdministration'))
+const AssessmentEdit = lazy(() => import('./pages/admin/assessments/AssessmentEdit/AssessmentEdit'))
+const AssessmentCreate = lazy(() => import('./pages/admin/assessments/AssessmentCreate/AssessmentCreate'))
+const AssessmentConfigurations = lazy(() => import('./pages/admin/assessments/AssessmentConfigurations/AssessmentConfigurations'))
+const ConfigurationsList = lazy(() => import('./pages/admin/assessments/ConfigurationsList/ConfigurationsList'))
+const ConfigurationCreate = lazy(() => import('./pages/admin/assessments/ConfigurationCreate/ConfigurationCreate'))
+const AssessmentUserMapping = lazy(() => import('./pages/admin/assessments/AssessmentUserMapping/AssessmentUserMapping'))
+const AssessmentResult = lazy(() => import('./pages/admin/assessments/AssessmentResult/AssessmentResult'))
+const AssessmentStart = lazy(() => import('./pages/user/Assessments/AssessmentStart/AssessmentStart'))
+const AssessmentTake = lazy(() => import('./pages/user/Assessments/AssessmentTake/AssessmentTake'))
+const AssessmentResults = lazy(() => import('./pages/user/Assessments/AssessmentResults/AssessmentResults'))
+const Groups = lazy(() => import('./pages/admin/Groups/Groups'))
+const CreateGroup = lazy(() => import('./pages/admin/Groups/CreateGroup/CreateGroup'))
+const Institutions = lazy(() => import('./pages/admin/Institutions/Institutions'))
+const CreateInstitution = lazy(() => import('./pages/admin/Institutions/CreateInstitution/CreateInstitution'))
+const InstitutionDetail = lazy(() => import('./pages/admin/Institutions/InstitutionDetail/InstitutionDetail'))
+const MailerTemplates = lazy(() => import('./pages/admin/MailerTemplates/MailerTemplates'))
+const MailerTemplateDetail = lazy(() => import('./pages/admin/MailerTemplates/MailerTemplateDetail'))
+const Settings = lazy(() => import('./pages/admin/Settings/Settings'))
+const CreateAdministration = lazy(() => import('./pages/admin/courses/CourseAdministrations/CreateAdministration/CreateAdministration'))
+const AdministrationDetail = lazy(() => import('./pages/admin/courses/CourseAdministrations/AdministrationDetail/AdministrationDetail'))
+const ProgressReport = lazy(() => import('./pages/admin/courses/CourseAdministrations/ProgressReport/ProgressReport'))
+const QuestionBanks = lazy(() => import('./pages/admin/Questions/QuestionBanks'))
+const QuestionBankForm = lazy(() => import('./pages/admin/Questions/QuestionBankForm'))
+const QuestionBankDetail = lazy(() => import('./pages/admin/Questions/QuestionBankDetail'))
+const QuestionList = lazy(() => import('./pages/admin/Questions/QuestionList'))
+const QuestionForm = lazy(() => import('./pages/admin/Questions/QuestionForm'))
+const QuestionDetail = lazy(() => import('./pages/admin/Questions/QuestionDetail'))
+const TestCaseManager = lazy(() => import('./pages/admin/Questions/TestCaseManager'))
+const Playground = lazy(() => import('./pages/Playground/Playground'))
+const PersonalDetails = lazy(() => import('./pages/PersonalDetails/PersonalDetails'))
+
 function RootEntry() {
   return <Navigate to={hasPersistedSession() ? '/dashboard' : '/login'} replace />
+}
+
+function PageLoader() {
+  return (
+    <div className="page-loader" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '40vh' }}>
+      <div className="spinner" />
+    </div>
+  )
 }
 
 function App() {
@@ -81,6 +89,7 @@ function App() {
         limit={4}
         className="toast-theme"
       />
+      <Suspense fallback={<PageLoader />}>
       <Routes>
         <Route path="/" element={<RootEntry />} />
         <Route path="/login" element={<Login />} />
@@ -153,6 +162,7 @@ function App() {
           <Route path="/admin/questions/list/:id/testcases" element={<TestCaseManager />} />
         </Route>
       </Routes>
+      </Suspense>
     </ThemeProvider>
     </ApiProvider>
   )

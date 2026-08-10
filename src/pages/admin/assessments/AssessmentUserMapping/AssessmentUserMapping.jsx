@@ -6,6 +6,7 @@ import { toast } from 'react-toastify'
 import Button from '../../../../components/Button/Button'
 import Table from '../../../../components/Table/Table'
 import ConfirmModal from '../../../../components/ConfirmModal/ConfirmModal'
+import Pagination from '../../../../components/Pagination/Pagination'
 import './AssessmentUserMapping.css'
 
 function AssessmentUserMapping() {
@@ -36,6 +37,10 @@ function AssessmentUserMapping() {
   // Filters
   const [statusFilter, setStatusFilter] = useState('all')
   const [mappedUserSearch, setMappedUserSearch] = useState('')
+  const [debouncedMappedUserSearch, setDebouncedMappedUserSearch] = useState('')
+  const [mappingsPage, setMappingsPage] = useState(1)
+  const [mappingsPageSize, setMappingsPageSize] = useState(100)
+  const [mappingsTotal, setMappingsTotal] = useState(0)
   const [showAddSection, setShowAddSection] = useState(false)
   const [addingUsers, setAddingUsers] = useState(false)
   const [confirmModal, setConfirmModal] = useState({
@@ -75,49 +80,79 @@ function AssessmentUserMapping() {
     'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
   })
 
+  const fetchConfig = useCallback(async () => {
+    if (!apiBaseUrl || !adminId) return
+    const configRes = await fetch(`${apiBaseUrl}/api/assessment/administrators/${adminId}`, {
+      headers: getAuthHeader()
+    })
+    if (configRes.ok) {
+      const data = await configRes.json()
+      setConfigData(data)
+    }
+  }, [apiBaseUrl, adminId, accessToken])
+
+  const fetchMappings = useCallback(async () => {
+    if (!apiBaseUrl || !adminId) return
+
+    const params = new URLSearchParams({
+      page: String(mappingsPage),
+      pageSize: String(mappingsPageSize)
+    })
+    if (debouncedMappedUserSearch.trim()) {
+      params.set('search', debouncedMappedUserSearch.trim())
+    }
+    if (statusFilter !== 'all') {
+      params.set('status', statusFilter)
+    }
+
+    const mappingsRes = await fetch(
+      `${apiBaseUrl}/api/assessment/administrators/${adminId}/users?${params}`,
+      { headers: getAuthHeader() }
+    )
+    if (mappingsRes.ok) {
+      const data = await mappingsRes.json()
+      const mappings = data.mappings || (Array.isArray(data) ? data : [])
+      setUserMappings(mappings)
+      setMappingsTotal(data.total ?? mappings.length)
+    } else {
+      const errorData = await mappingsRes.json().catch(() => ({}))
+      console.error('Error fetching mappings:', errorData)
+      toast.error(`Failed to load user mappings: ${errorData.error || 'Unknown error'}`)
+      setUserMappings([])
+      setMappingsTotal(0)
+    }
+  }, [apiBaseUrl, adminId, accessToken, mappingsPage, mappingsPageSize, debouncedMappedUserSearch, statusFilter])
+
   const fetchData = useCallback(async () => {
     if (!apiBaseUrl || !adminId) return
-    
     try {
       setLoading(true)
-      
-      // Fetch config details
-      const configRes = await fetch(`${apiBaseUrl}/api/assessment/administrators/${adminId}`, {
-        headers: getAuthHeader()
-      })
-      if (configRes.ok) {
-        const data = await configRes.json()
-        setConfigData(data)
-      }
-
-      // Fetch user mappings
-      const mappingsRes = await fetch(`${apiBaseUrl}/api/assessment/administrators/${adminId}/users?page=1&pageSize=1000`, {
-        headers: getAuthHeader()
-      })
-      if (mappingsRes.ok) {
-        const data = await mappingsRes.json()
-        // Handle both direct mappings array and paginated response
-        const mappings = data.mappings || (Array.isArray(data) ? data : [])
-        console.log('Fetched user mappings:', mappings.length, 'users', mappings)
-        setUserMappings(mappings)
-      } else {
-        const errorData = await mappingsRes.json().catch(() => ({}))
-        console.error('Error fetching mappings:', errorData)
-        toast.error(`Failed to load user mappings: ${errorData.error || 'Unknown error'}`)
-        setUserMappings([])
-      }
+      await Promise.all([fetchConfig(), fetchMappings()])
     } catch (error) {
       console.error('Error fetching data:', error)
       toast.error('Failed to load data')
     } finally {
       setLoading(false)
     }
-  }, [apiBaseUrl, adminId, accessToken])
+  }, [apiBaseUrl, adminId, fetchConfig, fetchMappings])
 
   useEffect(() => {
-    fetchData()
     fetchColleges()
-  }, [fetchData])
+    fetchConfig()
+  }, [fetchConfig])
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedMappedUserSearch(mappedUserSearch), 300)
+    return () => clearTimeout(timer)
+  }, [mappedUserSearch])
+
+  useEffect(() => {
+    setMappingsPage(1)
+  }, [debouncedMappedUserSearch, statusFilter])
+
+  useEffect(() => {
+    fetchMappings()
+  }, [fetchMappings])
 
   useEffect(() => {
     if (selectedCollege && candidateType === 'group') {
@@ -617,18 +652,9 @@ function AssessmentUserMapping() {
     return new Date(dateStr).toLocaleString()
   }
 
-  const filteredUsers = userMappings.filter(m => {
-    if (statusFilter === 'all') return true
-    if (statusFilter === 'pending') return m.status === 'NOT_STARTED'
-    if (statusFilter === 'inprogress') return m.status === 'IN_PROGRESS'
-    if (statusFilter === 'disqualified') return m.status === 'DISQUALIFIED'
-    if (statusFilter === 'completed') return ['COMPLETED', 'SUBMITTED', 'DISQUALIFIED'].includes(m.status)
-    return true
-  })
-
   const groupedUsers = useMemo(() => {
     const groups = new Map()
-    filteredUsers.forEach((mapping) => {
+    userMappings.forEach((mapping) => {
       const key = mapping.user_id
       if (!groups.has(key)) {
         groups.set(key, {
@@ -663,20 +689,13 @@ function AssessmentUserMapping() {
         }
       })
       .sort((a, b) => (a.user_name || '').localeCompare(b.user_name || ''))
-  }, [filteredUsers, selectedAttemptByUser])
+  }, [userMappings, selectedAttemptByUser])
 
   const latestAttemptByUser = useMemo(() => {
     return groupedUsers.map((group) => group.attempts[0]).filter(Boolean)
   }, [groupedUsers])
 
-  const displayedGroups = useMemo(() => {
-    const query = mappedUserSearch.trim().toLowerCase()
-    if (!query) return groupedUsers
-    return groupedUsers.filter((group) =>
-      (group.user_name && group.user_name.toLowerCase().includes(query)) ||
-      (group.user_email && group.user_email.toLowerCase().includes(query))
-    )
-  }, [groupedUsers, mappedUserSearch])
+  const displayedGroups = groupedUsers
 
   const filteredGroups = useMemo(() => {
     return availableGroups.filter(group => 
@@ -1114,7 +1133,13 @@ function AssessmentUserMapping() {
           value={mappedUserSearch}
           onChange={(e) => setMappedUserSearch(e.target.value)}
         />
-        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+        <select
+          value={statusFilter}
+          onChange={(e) => {
+            setStatusFilter(e.target.value)
+            setMappingsPage(1)
+          }}
+        >
           <option value="all">All Status</option>
           <option value="pending">Pending</option>
           <option value="inprogress">In Progress</option>
@@ -1312,6 +1337,16 @@ function AssessmentUserMapping() {
               )})}
             </tbody>
           </Table>
+          <Pagination
+            currentPage={mappingsPage}
+            pageSize={mappingsPageSize}
+            totalCount={mappingsTotal}
+            onPageChange={setMappingsPage}
+            onPageSizeChange={(size) => {
+              setMappingsPageSize(size)
+              setMappingsPage(1)
+            }}
+          />
         </div>
       )}
 

@@ -55,6 +55,11 @@ export const API_ENDPOINTS = {
     DELETE: (id) => `/api/courses/${id}`
   },
   
+  // Dashboard
+  DASHBOARD: {
+    ADMIN_STATS: '/api/dashboard/admin/stats'
+  },
+
   // Administrations
   ADMINISTRATIONS: {
     LIST: '/api/administrations',
