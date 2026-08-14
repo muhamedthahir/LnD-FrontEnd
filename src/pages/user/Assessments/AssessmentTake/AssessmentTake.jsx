@@ -6,6 +6,7 @@ import Button from '../../../../components/Button/Button'
 import CodeEditor from '../../../CodeEditor/CodeEditor'
 import { useAssessmentClipboardGuard } from '../../../../hooks/useAssessmentClipboardGuard'
 import { saveAssessmentDraft, clearAssessmentDraft } from '../../../../utils/assessmentDraftStorage'
+import { LANGUAGE_KEY_MAP } from '../../../../constants/constants'
 import styles from './AssessmentTake.module.css'
 
 const isConfigFlagEnabled = (value, defaultEnabled = true) => {
@@ -970,7 +971,11 @@ function AssessmentTake() {
 
       const code = getQuestionAnswerValue(answers, q.id)
       if (typeof code !== 'string' || !code.trim()) continue
-      const language = answers[`${q.id}_lang`] || 'javascript'
+      const firstLang = q.allowed_languages?.[0]
+      const language = answers[`${q.id}_lang`]
+        || firstLang?.key
+        || LANGUAGE_KEY_MAP[firstLang?.name]
+        || 'python'
 
       try {
         accumulateQuestionTime(q.id)
@@ -983,7 +988,8 @@ function AssessmentTake() {
             code,
             language,
             time_taken_ms: codeTimeMs
-          })
+          }),
+          signal: AbortSignal.timeout(25000)
         })
       } catch (error) {
         console.error('Auto-submit saved code failed for question', q.id, error)
@@ -1005,10 +1011,14 @@ function AssessmentTake() {
           answers,
           is_auto_submit: isAutoSubmit,
           time_taken: (assessmentData?.total_duration || 0) - timeRemaining
-        })
+        }),
+        signal: AbortSignal.timeout(60000)
       })
 
-      if (!response.ok) throw new Error('Failed to submit')
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to submit')
+      }
 
       const data = await response.json()
       
