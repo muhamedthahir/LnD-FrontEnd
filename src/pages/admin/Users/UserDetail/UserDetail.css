@@ -158,7 +158,8 @@
   color: #f59e0b;
 }
 
-.user-identity .role-primary_admin {
+.user-identity .role-primary_admin,
+.user-identity .role-campuszen_admin {
   background: rgba(16, 185, 129, 0.1);
   color: #10b981;
 }

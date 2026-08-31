@@ -58,13 +58,14 @@ function Dashboard() {
   const getRoleDisplay = (role) => {
     const roleMap = {
       'primary_admin': 'Primary Administrator',
+      'campuszen_admin': 'CampusZen Administrator',
       'college_admin': 'College Administrator',
       'student': 'Student'
     }
     return roleMap[role] || role
   }
 
-  const isPrimaryAdmin = user?.role === 'primary_admin'
+  const isPrimaryAdmin = user?.role === 'primary_admin' || user?.role === 'campuszen_admin'
   const isCollegeAdmin = user?.role === 'college_admin'
   const isAdmin = isPrimaryAdmin || isCollegeAdmin
 

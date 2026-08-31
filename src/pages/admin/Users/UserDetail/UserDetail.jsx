@@ -270,6 +270,7 @@ function UserDetail() {
   const getRoleDisplay = (role) => {
     const roleMap = {
       'primary_admin': 'Primary Admin',
+      'campuszen_admin': 'CampusZen Admin',
       'college_admin': 'College Admin',
       'student': 'Student'
     }

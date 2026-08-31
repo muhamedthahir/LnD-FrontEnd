@@ -212,7 +212,7 @@ function Header({ user, logout, onToggleSidebar, isSidebarCollapsed }) {
                 </svg>
                 <span>Personal Details</span>
               </button>
-              {user?.role === 'primary_admin' && (
+              {(user?.role === 'primary_admin' || user?.role === 'campuszen_admin') && (
                 <>
                   <button 
                     className={styles.menuItem}

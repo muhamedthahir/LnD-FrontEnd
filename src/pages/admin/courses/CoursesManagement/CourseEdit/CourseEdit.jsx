@@ -427,7 +427,7 @@ function CourseEdit() {
   }
 
   const isPublished = course?.status === 'published'
-  const canEditPublishedCourse = user?.role === 'primary_admin'
+  const canEditPublishedCourse = user?.role === 'primary_admin' || user?.role === 'campuszen_admin'
   const isEditable = !isPublished ? true : (canEditPublishedCourse && editMode)
   const isViewOnly = isPublished && !editMode // View-only mode for published courses
 

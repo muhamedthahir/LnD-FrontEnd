@@ -16,10 +16,9 @@ function Sidebar({ user, isCollapsed, isOpen = false }) {
     return false
   }
 
-  const adminRoles = ['primary_admin', 'college_admin']
-  const fullAdminRoles = ['primary_admin']
+  const adminRoles = ['primary_admin', 'campuszen_admin', 'college_admin']
+  const fullAdminRoles = ['primary_admin', 'campuszen_admin']
   const isAdmin = adminRoles.includes(user?.role)
-  const isPrimaryAdmin = user?.role === 'primary_admin'
   const isFullAdmin = fullAdminRoles.includes(user?.role)
 
   return (

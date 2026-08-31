@@ -466,7 +466,8 @@ select.user-styled-select option {
   color: #f59e0b;
 }
 
-.role-primary_admin {
+.role-primary_admin,
+.role-campuszen_admin {
   background: rgba(16, 185, 129, 0.1);
   color: var(--success);
 }

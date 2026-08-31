@@ -792,7 +792,8 @@ function Users() {
                       <td>{u.email}</td>
                       <td>
                         {u.role === 'college_admin' ? 'College Admin' : 
-                         u.role === 'primary_admin' ? 'Primary Admin' : 'Student'}
+                         u.role === 'primary_admin' ? 'Primary Admin' :
+                         u.role === 'campuszen_admin' ? 'CampusZen Admin' : 'Student'}
                       </td>
                       <td>
                         {u.status === 'pending' ? 'Pending' : 'Activated'}
@@ -803,9 +804,9 @@ function Users() {
                           className="action-btn delete"
                           type="button"
                           onClick={() => handleDeleteClick(u.id)}
-                          disabled={u.role === 'primary_admin' || u.id === user?.id}
+                          disabled={u.role === 'primary_admin' || u.role === 'campuszen_admin' || u.id === user?.id}
                           title={
-                            u.role === 'primary_admin' || u.id === user?.id
+                            u.role === 'primary_admin' || u.role === 'campuszen_admin' || u.id === user?.id
                               ? 'Cannot delete this user'
                               : 'Delete User'
                           }

@@ -4,7 +4,7 @@ import styles from './CourseCard.module.css'
 function CourseCard({ course, showProgress = false }) {
   const navigate = useNavigate()
   const { user } = useOutletContext() || {}
-  const isAdmin = user?.role === 'primary_admin' || user?.role === 'college_admin'
+  const isAdmin = user?.role === 'primary_admin' || user?.role === 'campuszen_admin' || user?.role === 'college_admin'
   
   // Check if course is expired (for students)
   // Check enrollment_status, user_course_status, or course_status

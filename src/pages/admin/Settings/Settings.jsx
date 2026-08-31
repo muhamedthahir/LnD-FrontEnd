@@ -137,8 +137,8 @@ function Settings() {
   const [actionLoading, setActionLoading] = useState(false)
 
   useEffect(() => {
-    if (user && user.role !== 'primary_admin') {
-      toast.error('Access denied. Primary admin only.')
+    if (user && user.role !== 'primary_admin' && user.role !== 'campuszen_admin') {
+      toast.error('Access denied. Platform admin only.')
       navigate('/dashboard')
     }
   }, [user, navigate])
@@ -294,7 +294,7 @@ function Settings() {
 
   const renderTableRow = (item) => {
     const config = MASTER_DATA_CONFIG[activeTab]
-    const isCoreRole = activeTab === 'userRoles' && ['primary_admin', 'college_admin', 'student'].includes(item.name)
+    const isCoreRole = activeTab === 'userRoles' && ['primary_admin', 'campuszen_admin', 'college_admin', 'student'].includes(item.name)
     
     return (
       <tr key={item.id}>
