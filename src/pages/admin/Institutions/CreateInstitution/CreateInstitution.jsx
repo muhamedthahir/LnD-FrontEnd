@@ -3,24 +3,21 @@ import { useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { toast } from 'react-toastify'
 import { useApi } from '../../../../contexts/ApiContext'
-import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES, VALIDATION_MESSAGES } from '../../../../constants/constants'
+import { SUCCESS_MESSAGES, ERROR_MESSAGES } from '../../../../constants/constants'
 import { invalidateInstitutions } from '../../../../store/masterDataSlice'
+import {
+  INSTITUTIONS_LIST_ROUTE,
+  emptyCreateInstitutionForm,
+  validateCreateInstitutionForm,
+  getCreateInstitutionRequest
+} from '../createInstitutionLogic.js'
 import './CreateInstitution.css'
 
 function CreateInstitution() {
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const { apiBaseUrl, accessToken } = useApi()
-  const [formData, setFormData] = useState({
-    name: '',
-    admin_name: '',
-    admin_email: '',
-    address: '',
-    spoc_contact_number: '',
-    alternate_contact: '',
-    alternate_email: '',
-    status: 'active'
-  })
+  const [formData, setFormData] = useState(() => emptyCreateInstitutionForm())
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
 
@@ -39,25 +36,9 @@ function CreateInstitution() {
   }
 
   const validateForm = () => {
-    const newErrors = {}
-
-    if (!formData.name || !formData.name.trim()) {
-      newErrors.name = VALIDATION_MESSAGES.INSTITUTION_NAME_REQUIRED
-    }
-    if (!formData.admin_name || !formData.admin_name.trim()) {
-      newErrors.admin_name = VALIDATION_MESSAGES.INSTITUTION_ADMIN_NAME_REQUIRED
-    }
-    if (!formData.admin_email || !formData.admin_email.trim()) {
-      newErrors.admin_email = VALIDATION_MESSAGES.INSTITUTION_ADMIN_EMAIL_REQUIRED
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.admin_email)) {
-      newErrors.admin_email = VALIDATION_MESSAGES.INSTITUTION_ADMIN_EMAIL_INVALID
-    }
-    if (formData.alternate_email?.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.alternate_email.trim())) {
-      newErrors.alternate_email = VALIDATION_MESSAGES.INSTITUTION_ALTERNATE_EMAIL_INVALID
-    }
-
+    const { ok, errors: newErrors } = validateCreateInstitutionForm(formData)
     setErrors(newErrors)
-    if (Object.keys(newErrors).length) {
+    if (!ok) {
       Object.values(newErrors).forEach((msg) => toast.error(msg))
       return false
     }
@@ -71,30 +52,20 @@ function CreateInstitution() {
 
     setLoading(true)
     try {
-      const body = {
-        name: formData.name.trim(),
-        admin_name: formData.admin_name.trim(),
-        admin_email: formData.admin_email.trim(),
-        address: formData.address.trim() || null,
-        spoc_contact_number: formData.spoc_contact_number.trim() || null,
-        alternate_contact: formData.alternate_contact.trim() || null,
-        alternate_email: formData.alternate_email.trim() || null,
-        status: formData.status === 'inactive' ? 'inactive' : 'active'
-      }
-
-      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.INSTITUTIONS.CREATE}`, {
-        method: 'POST',
+      const request = getCreateInstitutionRequest(apiBaseUrl, formData)
+      const response = await fetch(request.url, {
+        method: request.method,
         headers: {
           'Content-Type': 'application/json',
           ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
         },
-        body: JSON.stringify(body)
+        body: JSON.stringify(request.body)
       })
 
       if (response.ok) {
         toast.success(SUCCESS_MESSAGES.INSTITUTION_CREATED)
         dispatch(invalidateInstitutions())
-        navigate('/admin/institutions')
+        navigate(INSTITUTIONS_LIST_ROUTE)
       } else {
         const data = await response.json()
         toast.error(data.error || ERROR_MESSAGES.INSTITUTION_CREATE_FAILED)
@@ -112,7 +83,7 @@ function CreateInstitution() {
       <div className="create-page-header">
         <button
           className="btn-back"
-          onClick={() => navigate('/admin/institutions')}
+          onClick={() => navigate(INSTITUTIONS_LIST_ROUTE)}
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <polyline points="15 18 9 12 15 6"></polyline>
@@ -243,7 +214,7 @@ function CreateInstitution() {
             <button
               type="button"
               className="btn-secondary"
-              onClick={() => navigate('/admin/institutions')}
+              onClick={() => navigate(INSTITUTIONS_LIST_ROUTE)}
               disabled={loading}
             >
               Cancel

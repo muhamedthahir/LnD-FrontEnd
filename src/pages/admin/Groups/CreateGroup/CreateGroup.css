@@ -231,6 +231,14 @@
   border-color: var(--error);
 }
 
+.info-text,
+.help-inline {
+  display: block;
+  margin-top: var(--spacing-xs);
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
 .error-text {
   display: block;
   margin-top: var(--spacing-xs);

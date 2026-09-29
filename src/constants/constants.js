@@ -43,6 +43,7 @@ export const API_ENDPOINTS = {
     UPDATE: (id) => `/api/groups/${id}`,
     DELETE: (id) => `/api/groups/${id}`,
     ADD_MEMBERS: (id) => `/api/groups/${id}/members`,
+    EDIT_DATA: (id) => `/api/groups/${id}/edit-data`,
     REMOVE_MEMBER: (groupId, userId) => `/api/groups/${groupId}/members/${userId}`
   },
   

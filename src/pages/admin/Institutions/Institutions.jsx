@@ -1,17 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useDispatch } from 'react-redux'
 import { toast } from 'react-toastify'
 import Pagination from '../../../components/Pagination/Pagination'
 import Table from '../../../components/Table/Table'
 import { useApi } from '../../../contexts/ApiContext'
-import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES, VALIDATION_MESSAGES } from '../../../constants/constants'
-import { invalidateInstitutions } from '../../../store/masterDataSlice'
+import { API_ENDPOINTS, ERROR_MESSAGES } from '../../../constants/constants'
+import { CREATE_INSTITUTION_ROUTE } from './createInstitutionLogic.js'
 import '../Users/Users.css'
 import './Institutions.css'
 
 function Institutions() {
-  const dispatch = useDispatch()
   const navigate = useNavigate()
   const { apiBaseUrl, accessToken } = useApi()
   const [institutions, setInstitutions] = useState([])
@@ -24,18 +22,6 @@ function Institutions() {
   const fetchingRef = useRef(false)
   const abortControllerRef = useRef(null)
   const isMountedRef = useRef(true)
-  const [showForm, setShowForm] = useState(false)
-  const [formData, setFormData] = useState({
-    name: '',
-    admin_name: '',
-    admin_email: '',
-    address: '',
-    spoc_contact_number: '',
-    alternate_contact: '',
-    alternate_email: '',
-    status: 'active'
-  })
-  const [errors, setErrors] = useState({})
 
   const fetchInstitutions = useCallback(async (signal) => {
     if (fetchingRef.current || !apiBaseUrl) return
@@ -92,112 +78,6 @@ function Institutions() {
     }
   }, [fetchInstitutions])
 
-  const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }))
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }))
-    }
-  }
-
-  const validateForm = () => {
-    const newErrors = {}
-
-    if (!formData.name || !formData.name.trim()) {
-      newErrors.name = VALIDATION_MESSAGES.INSTITUTION_NAME_REQUIRED
-      toast.error(VALIDATION_MESSAGES.INSTITUTION_NAME_REQUIRED)
-    }
-    if (!formData.admin_name || !formData.admin_name.trim()) {
-      newErrors.admin_name = VALIDATION_MESSAGES.INSTITUTION_ADMIN_NAME_REQUIRED
-      toast.error(VALIDATION_MESSAGES.INSTITUTION_ADMIN_NAME_REQUIRED)
-    }
-    if (!formData.admin_email || !formData.admin_email.trim()) {
-      newErrors.admin_email = VALIDATION_MESSAGES.INSTITUTION_ADMIN_EMAIL_REQUIRED
-      toast.error(VALIDATION_MESSAGES.INSTITUTION_ADMIN_EMAIL_REQUIRED)
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.admin_email)) {
-      newErrors.admin_email = VALIDATION_MESSAGES.INSTITUTION_ADMIN_EMAIL_INVALID
-      toast.error(VALIDATION_MESSAGES.INSTITUTION_ADMIN_EMAIL_INVALID)
-    }
-    if (formData.alternate_email?.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.alternate_email.trim())) {
-      newErrors.alternate_email = VALIDATION_MESSAGES.INSTITUTION_ALTERNATE_EMAIL_INVALID
-      toast.error(VALIDATION_MESSAGES.INSTITUTION_ALTERNATE_EMAIL_INVALID)
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-
-    if (!validateForm()) return
-
-    try {
-      const body = {
-        name: formData.name.trim(),
-        admin_name: formData.admin_name.trim(),
-        admin_email: formData.admin_email.trim(),
-        address: formData.address.trim() || null,
-        spoc_contact_number: formData.spoc_contact_number.trim() || null,
-        alternate_contact: formData.alternate_contact.trim() || null,
-        alternate_email: formData.alternate_email.trim() || null,
-        status: formData.status === 'inactive' ? 'inactive' : 'active'
-      }
-
-      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.INSTITUTIONS.CREATE}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
-        },
-        body: JSON.stringify(body)
-      })
-
-      if (response.ok) {
-        setShowForm(false)
-        setFormData({
-          name: '',
-          admin_name: '',
-          admin_email: '',
-          address: '',
-          spoc_contact_number: '',
-          alternate_contact: '',
-          alternate_email: '',
-          status: 'active'
-        })
-        setErrors({})
-        toast.success(SUCCESS_MESSAGES.INSTITUTION_CREATED)
-        dispatch(invalidateInstitutions())
-        if (abortControllerRef.current) {
-          fetchInstitutions(abortControllerRef.current.signal)
-        }
-      } else {
-        const data = await response.json()
-        toast.error(data.error || ERROR_MESSAGES.INSTITUTION_CREATE_FAILED)
-      }
-    } catch (error) {
-      console.error('Error saving institution:', error)
-      toast.error(ERROR_MESSAGES.INSTITUTION_CREATE_FAILED)
-    }
-  }
-
-  const resetCreateForm = () => ({
-    name: '',
-    admin_name: '',
-    admin_email: '',
-    address: '',
-    spoc_contact_number: '',
-    alternate_contact: '',
-    alternate_email: '',
-    status: 'active'
-  })
-
   return (
     <div className="user-admin-page">
       <div className="user-admin-header">
@@ -207,141 +87,12 @@ function Institutions() {
         </div>
         <button
           className="btn-primary"
-          onClick={() => {
-            setShowForm(!showForm)
-            setFormData(resetCreateForm())
-            setErrors({})
-          }}
+          type="button"
+          onClick={() => navigate(CREATE_INSTITUTION_ROUTE)}
         >
-          {showForm ? 'Cancel' : '+ Create Institution'}
+          + Create Institution
         </button>
       </div>
-
-      {showForm && (
-        <div className="user-form-card">
-          <h2>Create New Institution</h2>
-          <form onSubmit={handleSubmit}>
-            <div className="form-row">
-              <div className="form-group">
-                <label>Institution Name *</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className={errors.name ? 'error' : ''}
-                  placeholder="e.g., Maharishi University"
-                />
-                {errors.name && <span className="error-text">{errors.name}</span>}
-              </div>
-              <div className="form-group">
-                <label>Status</label>
-                <select name="status" value={formData.status} onChange={handleChange}>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-                <label>Address</label>
-                <textarea
-                  name="address"
-                  value={formData.address}
-                  onChange={handleChange}
-                  rows={2}
-                  placeholder="Optional"
-                  style={{ width: '100%', minHeight: '4rem', resize: 'vertical' }}
-                />
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label>SPOC contact number</label>
-                <input
-                  type="text"
-                  name="spoc_contact_number"
-                  value={formData.spoc_contact_number}
-                  onChange={handleChange}
-                  placeholder="Optional"
-                />
-              </div>
-              <div className="form-group">
-                <label>Alternate contact</label>
-                <input
-                  type="text"
-                  name="alternate_contact"
-                  value={formData.alternate_contact}
-                  onChange={handleChange}
-                  placeholder="Optional"
-                />
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label>Alternate email</label>
-                <input
-                  type="email"
-                  name="alternate_email"
-                  value={formData.alternate_email}
-                  onChange={handleChange}
-                  className={errors.alternate_email ? 'error' : ''}
-                  placeholder="Optional"
-                />
-                {errors.alternate_email && <span className="error-text">{errors.alternate_email}</span>}
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label>College Admin Name *</label>
-                <input
-                  type="text"
-                  name="admin_name"
-                  value={formData.admin_name}
-                  onChange={handleChange}
-                  className={errors.admin_name ? 'error' : ''}
-                  placeholder="Admin full name"
-                />
-                {errors.admin_name && <span className="error-text">{errors.admin_name}</span>}
-              </div>
-
-              <div className="form-group">
-                <label>College Admin Email *</label>
-                <input
-                  type="email"
-                  name="admin_email"
-                  value={formData.admin_email}
-                  onChange={handleChange}
-                  className={errors.admin_email ? 'error' : ''}
-                  placeholder="admin@college.edu"
-                />
-                {errors.admin_email && <span className="error-text">{errors.admin_email}</span>}
-              </div>
-            </div>
-
-            <div style={{ padding: 'var(--spacing-md)', background: 'var(--accent-subtle)', borderRadius: 'var(--radius-md)', marginBottom: 'var(--spacing-lg)', gridColumn: '1 / -1' }}>
-              <p style={{ margin: 0, fontSize: 'var(--font-size-sm)', color: 'var(--accent-primary)' }}>
-                An OTP will be sent to the admin&apos;s email. If the user already exists, they will be promoted to college_admin role.
-              </p>
-            </div>
-
-            <div className="form-actions">
-              <button type="submit" className="btn-primary">Create Institution</button>
-              <button type="button" className="btn-secondary" onClick={() => {
-                setShowForm(false)
-                setFormData(resetCreateForm())
-                setErrors({})
-              }}>
-                Cancel
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
 
       <div className="users-table-card">
         <div className="table-container">

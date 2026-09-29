@@ -8,11 +8,12 @@ import Layout from './components/Layout/Layout'
 import SecureLayout from './components/SecureLayout/SecureLayout'
 import Login from './pages/Login/Login'
 import ResetPassword from './pages/ResetPassword/ResetPassword'
-import CodeEditorLayout from './pages/CodeEditor/CodeEditorLayout'
 import { hasPersistedSession } from './auth/sessionClient'
+import { CREATE_INSTITUTION_ROUTE } from './pages/admin/Institutions/createInstitutionLogic.js'
 import './App.css'
 
 const Dashboard = lazy(() => import('./pages/user/Dashboard/Dashboard'))
+const CodeEditorLayout = lazy(() => import('./pages/CodeEditor/CodeEditorLayout'))
 const UserCourses = lazy(() => import('./pages/user/Courses/UserCourses/UserCourses'))
 const CourseOverview = lazy(() => import('./pages/user/Courses/CourseOverview/CourseOverview'))
 const CurrentCourse = lazy(() => import('./pages/user/Courses/CurrentCourse/CurrentCourse'))
@@ -66,7 +67,7 @@ function RootEntry() {
 
 function PageLoader() {
   return (
-    <div className="page-loader" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '40vh' }}>
+    <div className="page-loader" role="status" aria-label="Loading page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '40vh' }}>
       <div className="spinner" />
     </div>
   )
@@ -120,7 +121,7 @@ function App() {
           <Route path="/user/assessments/:mappingId/take" element={<AssessmentTake />} />
           <Route path="/user/assessments/:mappingId/results" element={<AssessmentResults />} />
           <Route path="/admin/institutions" element={<Institutions />} />
-          <Route path="/admin/institutions/create" element={<CreateInstitution />} />
+          <Route path={CREATE_INSTITUTION_ROUTE} element={<CreateInstitution />} />
           <Route path="/admin/institutions/:id" element={<InstitutionDetail />} />
           <Route path="/admin/mailer-templates/:id/edit" element={<MailerTemplateDetail />} />
           <Route path="/admin/mailer-templates/:id" element={<MailerTemplateDetail />} />
@@ -142,6 +143,7 @@ function App() {
           <Route path="/admin/assessments/progress/:mappingId" element={<AssessmentResult />} />
           <Route path="/admin/groups" element={<Groups />} />
           <Route path="/admin/groups/create" element={<CreateGroup />} />
+          <Route path="/admin/groups/:id/edit" element={<CreateGroup />} />
           <Route path="/admin/courses/management" element={<CoursesManagement />} />
           <Route path="/admin/courses/management/:id/edit" element={<CourseEdit />} />
           <Route path="/admin/courses/:courseId/topics/:topicId/practice" element={<PracticeSegmentManager />} />

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
+import Pagination from '../../../../components/Pagination/Pagination'
 import { useApi } from '../../../../contexts/ApiContext'
 import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES, VALIDATION_MESSAGES } from '../../../../constants/constants'
 import ThemedSelect from '../../../../components/ThemedSelect/ThemedSelect'
@@ -9,6 +10,8 @@ import './CreateGroup.css'
 
 function CreateGroup() {
   const navigate = useNavigate()
+  const { id } = useParams()
+  const isEditing = Boolean(id)
   const { apiBaseUrl, accessToken } = useApi()
   const [institutions, setInstitutions] = useState([])
   const [formPage, setFormPage] = useState(1)
@@ -23,6 +26,7 @@ function CreateGroup() {
   const [selectedStudentIds, setSelectedStudentIds] = useState([])
   const [availableStudents, setAvailableStudents] = useState([])
   const [groupStudents, setGroupStudents] = useState([])
+  const [initialMemberIds, setInitialMemberIds] = useState([])
   const [searchLeft, setSearchLeft] = useState('')
   const [searchRight, setSearchRight] = useState('')
   const [leftPage, setLeftPage] = useState(1)
@@ -30,25 +34,28 @@ function CreateGroup() {
   const [leftPageSize, setLeftPageSize] = useState(10)
   const [rightPageSize, setRightPageSize] = useState(10)
   const [loading, setLoading] = useState(false)
+  const [pageLoading, setPageLoading] = useState(isEditing)
   const [catalogDepartments, setCatalogDepartments] = useState([])
   const [catalogDegrees, setCatalogDegrees] = useState([])
 
+  const authHeaders = () => ({
+    'Content-Type': 'application/json',
+    ...((accessToken || localStorage.getItem('accessToken')) && {
+      Authorization: `Bearer ${accessToken || localStorage.getItem('accessToken')}`
+    })
+  })
+
   useEffect(() => {
     fetchInstitutions()
-  }, [])
+  }, [apiBaseUrl, accessToken])
 
   useEffect(() => {
     if (!apiBaseUrl) return
     const loadCatalog = async () => {
-      const token = accessToken || localStorage.getItem('accessToken')
-      const headers = {
-        'Content-Type': 'application/json',
-        ...(token && { Authorization: `Bearer ${token}` })
-      }
       try {
         const [dRes, gRes] = await Promise.all([
-          fetch(`${apiBaseUrl}${API_ENDPOINTS.MASTER_DATA.DEPARTMENTS}`, { headers }),
-          fetch(`${apiBaseUrl}${API_ENDPOINTS.MASTER_DATA.DEGREES}`, { headers })
+          fetch(`${apiBaseUrl}${API_ENDPOINTS.MASTER_DATA.DEPARTMENTS}`, { headers: authHeaders() }),
+          fetch(`${apiBaseUrl}${API_ENDPOINTS.MASTER_DATA.DEGREES}`, { headers: authHeaders() })
         ])
         if (dRes.ok) {
           const data = await dRes.json()
@@ -66,23 +73,56 @@ function CreateGroup() {
   }, [apiBaseUrl, accessToken])
 
   useEffect(() => {
-    if (formData.college_name && formPage === 2) {
-      fetchStudentsForCollege(formData.college_name)
+    if (!isEditing || !id || !apiBaseUrl) return
+
+    const loadGroup = async () => {
+      try {
+        setPageLoading(true)
+        const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.GROUPS.EDIT_DATA(id)}`, {
+          headers: authHeaders()
+        })
+        if (!response.ok) {
+          toast.error(ERROR_MESSAGES.GROUP_FETCH_FAILED)
+          navigate('/admin/groups')
+          return
+        }
+        const data = await response.json()
+        const group = data.group
+        setFormData({
+          name: group.name || '',
+          college_name: group.college_name || '',
+          degree: group.degree || '',
+          department: group.department || '',
+          passout_year: group.passout_year || ''
+        })
+        setGroupStudents(data.members || [])
+        setAvailableStudents(data.availableUsers || [])
+        setInitialMemberIds((data.members || []).map((m) => m.id))
+      } catch (error) {
+        console.error('Error loading group:', error)
+        toast.error(ERROR_MESSAGES.GROUP_FETCH_FAILED)
+        navigate('/admin/groups')
+      } finally {
+        setPageLoading(false)
+      }
     }
-  }, [formData.college_name, formPage])
+
+    loadGroup()
+  }, [id, isEditing, apiBaseUrl, accessToken, navigate])
 
   const fetchInstitutions = async () => {
     try {
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.INSTITUTIONS.ALL}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
-        }
+        headers: authHeaders()
       })
-      
+
       if (response.ok) {
         const data = await response.json()
-        setInstitutions((data.institutions || []).map(inst => typeof inst === 'string' ? inst : inst.name))
+        setInstitutions(
+          (data.institutions || []).map((inst) =>
+            typeof inst === 'string' ? { id: inst, name: inst } : { id: inst.id, name: inst.name }
+          )
+        )
       }
     } catch (error) {
       console.error('Error fetching institutions:', error)
@@ -91,16 +131,14 @@ function CreateGroup() {
 
   const fetchStudentsForCollege = async (collegeName) => {
     try {
-      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.USERS.LIST}?college=${encodeURIComponent(collegeName)}&limit=1000`, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
-        }
-      })
-      
+      const response = await fetch(
+        `${apiBaseUrl}${API_ENDPOINTS.USERS.LIST}?college=${encodeURIComponent(collegeName)}&limit=1000`,
+        { headers: authHeaders() }
+      )
+
       if (response.ok) {
         const data = await response.json()
-        const students = (data.users || []).filter(u => u.role === 'student')
+        const students = (data.users || []).filter((u) => u.role === 'student')
         setAvailableStudents(students)
         setGroupStudents([])
         setSelectedStudentIds([])
@@ -112,12 +150,12 @@ function CreateGroup() {
 
   const handleChange = (e) => {
     const { name, value } = e.target
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value
     }))
     if (errors[name]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
         [name]: ''
       }))
@@ -127,18 +165,24 @@ function CreateGroup() {
   const validateForm = () => {
     const newErrors = {}
     if (!formData.name || !formData.name.trim()) {
-      newErrors.name = 'Group name is required'
+      newErrors.name = VALIDATION_MESSAGES.GROUP_NAME_REQUIRED || 'Group name is required'
     }
     if (!formData.college_name || !formData.college_name.trim()) {
-      newErrors.college_name = 'College name is required'
+      newErrors.college_name = VALIDATION_MESSAGES.GROUP_COLLEGE_REQUIRED || 'College name is required'
     }
     setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
+    if (Object.keys(newErrors).length) {
+      Object.values(newErrors).forEach((msg) => toast.error(msg))
+      return false
+    }
+    return true
   }
 
   const handleNextPage = () => {
     if (!validateForm()) return
-    fetchStudentsForCollege(formData.college_name)
+    if (!isEditing) {
+      fetchStudentsForCollege(formData.college_name)
+    }
     setFormPage(2)
   }
 
@@ -150,39 +194,59 @@ function CreateGroup() {
   }
 
   const handleMoveToRight = () => {
-    const selected = availableStudents.filter(s => selectedStudentIds.includes(s.id))
-    setGroupStudents(prev => [...prev, ...selected])
-    setAvailableStudents(prev => prev.filter(s => !selectedStudentIds.includes(s.id)))
+    const selected = availableStudents.filter((s) => selectedStudentIds.includes(s.id))
+    const remainingCount = availableStudents.length - selected.length
+    setGroupStudents((prev) => [...prev, ...selected])
+    setAvailableStudents((prev) => prev.filter((s) => !selectedStudentIds.includes(s.id)))
     setSelectedStudentIds([])
+    if (remainingCount > 0) {
+      const maxPage = Math.ceil(remainingCount / leftPageSize)
+      if (leftPage > maxPage) {
+        setLeftPage(Math.max(1, maxPage))
+      }
+    } else {
+      setLeftPage(1)
+    }
   }
 
   const handleMoveToLeft = () => {
-    const selected = groupStudents.filter(s => selectedStudentIds.includes(s.id))
-    setAvailableStudents(prev => [...prev, ...selected])
-    setGroupStudents(prev => prev.filter(s => !selectedStudentIds.includes(s.id)))
+    const selected = groupStudents.filter((s) => selectedStudentIds.includes(s.id))
+    const remainingCount = groupStudents.length - selected.length
+    setAvailableStudents((prev) => [...prev, ...selected])
+    setGroupStudents((prev) => prev.filter((s) => !selectedStudentIds.includes(s.id)))
     setSelectedStudentIds([])
+    if (remainingCount > 0) {
+      const maxPage = Math.ceil(remainingCount / rightPageSize)
+      if (rightPage > maxPage) {
+        setRightPage(Math.max(1, maxPage))
+      }
+    } else {
+      setRightPage(1)
+    }
   }
 
   const toggleStudentSelection = (studentId) => {
-    setSelectedStudentIds(prev => 
-      prev.includes(studentId) 
-        ? prev.filter(id => id !== studentId)
-        : [...prev, studentId]
+    setSelectedStudentIds((prev) =>
+      prev.includes(studentId) ? prev.filter((sid) => sid !== studentId) : [...prev, studentId]
     )
   }
 
-  const filteredLeftStudents = availableStudents.filter(s => {
+  const filteredLeftStudents = availableStudents.filter((s) => {
     const search = searchLeft.toLowerCase()
-    return s.name.toLowerCase().includes(search) || 
-           s.email.toLowerCase().includes(search) ||
-           (s.roll_number && s.roll_number.toLowerCase().includes(search))
+    return (
+      s.name.toLowerCase().includes(search) ||
+      s.email.toLowerCase().includes(search) ||
+      (s.roll_number && s.roll_number.toLowerCase().includes(search))
+    )
   })
 
-  const filteredRightStudents = groupStudents.filter(s => {
+  const filteredRightStudents = groupStudents.filter((s) => {
     const search = searchRight.toLowerCase()
-    return s.name.toLowerCase().includes(search) || 
-           s.email.toLowerCase().includes(search) ||
-           (s.roll_number && s.roll_number.toLowerCase().includes(search))
+    return (
+      s.name.toLowerCase().includes(search) ||
+      s.email.toLowerCase().includes(search) ||
+      (s.roll_number && s.roll_number.toLowerCase().includes(search))
+    )
   })
 
   const paginatedLeftStudents = filteredLeftStudents.slice(
@@ -195,6 +259,41 @@ function CreateGroup() {
     rightPage * rightPageSize
   )
 
+  const handleSelectAllLeft = () => {
+    const allFilteredIds = filteredLeftStudents.map((s) => s.id)
+    const allSelected = allFilteredIds.every((sid) => selectedStudentIds.includes(sid))
+    if (allSelected) {
+      setSelectedStudentIds((prev) => prev.filter((sid) => !allFilteredIds.includes(sid)))
+    } else {
+      setSelectedStudentIds((prev) => [...prev, ...allFilteredIds.filter((sid) => !prev.includes(sid))])
+    }
+  }
+
+  const handleSelectAllRight = () => {
+    const allFilteredIds = filteredRightStudents.map((s) => s.id)
+    const allSelected = allFilteredIds.every((sid) => selectedStudentIds.includes(sid))
+    if (allSelected) {
+      setSelectedStudentIds((prev) => prev.filter((sid) => !allFilteredIds.includes(sid)))
+    } else {
+      setSelectedStudentIds((prev) => [...prev, ...allFilteredIds.filter((sid) => !prev.includes(sid))])
+    }
+  }
+
+  const allLeftSelected =
+    filteredLeftStudents.length > 0 && filteredLeftStudents.every((s) => selectedStudentIds.includes(s.id))
+  const allRightSelected =
+    filteredRightStudents.length > 0 && filteredRightStudents.every((s) => selectedStudentIds.includes(s.id))
+  const someLeftSelected = filteredLeftStudents.some((s) => selectedStudentIds.includes(s.id)) && !allLeftSelected
+  const someRightSelected = filteredRightStudents.some((s) => selectedStudentIds.includes(s.id)) && !allRightSelected
+
+  useEffect(() => {
+    setLeftPage(1)
+  }, [searchLeft])
+
+  useEffect(() => {
+    setRightPage(1)
+  }, [searchRight])
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (formPage === 1) {
@@ -204,70 +303,81 @@ function CreateGroup() {
 
     setLoading(true)
     try {
-      let groupId
+      let groupId = id
 
-      // Create new group
-      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.GROUPS.CREATE}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
-        },
-        body: JSON.stringify(formData)
-      })
-      
-      if (!response.ok) {
+      if (isEditing) {
+        const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.GROUPS.UPDATE(id)}`, {
+          method: 'PUT',
+          headers: authHeaders(),
+          body: JSON.stringify(formData)
+        })
+        if (!response.ok) {
+          const data = await response.json()
+          toast.error(data.error || ERROR_MESSAGES.GROUP_UPDATE_FAILED)
+          return
+        }
+      } else {
+        const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.GROUPS.CREATE}`, {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify(formData)
+        })
+        if (!response.ok) {
+          const data = await response.json()
+          toast.error(data.error || ERROR_MESSAGES.GROUP_CREATE_FAILED)
+          return
+        }
         const data = await response.json()
-        toast.error(data.error || ERROR_MESSAGES.GROUP_CREATE_FAILED)
-        return
+        groupId = data.group.id
       }
 
-      const data = await response.json()
-      groupId = data.group.id
+      const previousMemberIds = isEditing ? initialMemberIds : []
+      const currentMemberIds = groupStudents.map((s) => s.id)
+      const addUserIds = currentMemberIds.filter((sid) => !previousMemberIds.includes(sid))
+      const removeUserIds = previousMemberIds.filter((sid) => !currentMemberIds.includes(sid))
 
-      // Update group members
-      const currentMemberIds = groupStudents.map(s => s.id)
-      if (currentMemberIds.length > 0) {
+      if (addUserIds.length > 0 || removeUserIds.length > 0) {
         const memberResponse = await fetch(`${apiBaseUrl}${API_ENDPOINTS.GROUPS.ADD_MEMBERS(groupId)}`, {
           method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            ...((accessToken || localStorage.getItem('accessToken')) && { 'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}` })
-          },
-          body: JSON.stringify({
-            addUserIds: currentMemberIds,
-            removeUserIds: []
-          })
+          headers: authHeaders(),
+          body: JSON.stringify({ addUserIds, removeUserIds })
         })
-
         if (!memberResponse.ok) {
           console.error('Failed to update group members')
         }
       }
 
-      toast.success(SUCCESS_MESSAGES.GROUP_CREATED)
+      toast.success(isEditing ? SUCCESS_MESSAGES.GROUP_UPDATED : SUCCESS_MESSAGES.GROUP_CREATED)
       navigate('/admin/groups')
     } catch (error) {
       console.error('Error saving group:', error)
-      toast.error(ERROR_MESSAGES.GROUP_CREATE_FAILED)
+      toast.error(isEditing ? ERROR_MESSAGES.GROUP_UPDATE_FAILED : ERROR_MESSAGES.GROUP_CREATE_FAILED)
     } finally {
       setLoading(false)
     }
   }
 
+  if (pageLoading) {
+    return (
+      <div className="create-page">
+        <div className="create-page-header">
+          <h1>{isEditing ? 'Edit Group' : 'Create New Group'}</h1>
+        </div>
+        <div className="create-page-content">Loading group…</div>
+      </div>
+    )
+  }
+
   return (
     <div className="create-page">
       <div className="create-page-header">
-        <button 
-          className="btn-back"
-          onClick={() => navigate('/admin/groups')}
-        >
+        <button className="btn-back" type="button" onClick={() => navigate('/admin/groups')}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <polyline points="15 18 9 12 15 6"></polyline>
           </svg>
           Back
         </button>
-        <h1>Create New Group</h1>
+        <h1>{isEditing ? 'Edit Group' : 'Create New Group'}</h1>
       </div>
 
       <div className="create-page-content">
@@ -276,9 +386,11 @@ function CreateGroup() {
             <>
               <div className="form-section">
                 <h2>Group Details</h2>
-                
+
                 <div className="form-group">
-                  <label>Group Name <span className="required">*</span></label>
+                  <label>
+                    Group Name <span className="required">*</span>
+                  </label>
                   <input
                     type="text"
                     name="name"
@@ -291,19 +403,28 @@ function CreateGroup() {
                 </div>
 
                 <div className="form-group">
-                  <label>College Name <span className="required">*</span></label>
+                  <label>
+                    College Name <span className="required">*</span>
+                  </label>
                   <select
                     name="college_name"
                     value={formData.college_name}
                     onChange={handleChange}
                     className={errors.college_name ? 'error' : ''}
+                    disabled={isEditing}
                   >
                     <option value="">Select College</option>
-                    {institutions.map((inst, index) => (
-                      <option key={index} value={inst}>{inst}</option>
+                    {institutions.map((inst) => (
+                      <option key={inst.id || inst.name} value={inst.name}>
+                        {inst.name}
+                      </option>
                     ))}
                   </select>
                   {errors.college_name && <span className="error-text">{errors.college_name}</span>}
+                  {isEditing && <span className="info-text">College cannot be changed in edit mode</span>}
+                  {institutions.length === 0 && (
+                    <small className="help-inline">No institutions available. Please create an institution first.</small>
+                  )}
                 </div>
 
                 <div className="form-group">
@@ -315,6 +436,9 @@ function CreateGroup() {
                     className="user-styled-select"
                     options={[
                       { value: '', label: 'Select Degree (optional)' },
+                      ...(formData.degree && !catalogDegrees.some((d) => d.name === formData.degree)
+                        ? [{ value: formData.degree, label: `${formData.degree} (current)` }]
+                        : []),
                       ...catalogDegrees.map((d) => ({ value: d.name, label: d.name }))
                     ]}
                   />
@@ -329,6 +453,9 @@ function CreateGroup() {
                     className="user-styled-select"
                     options={[
                       { value: '', label: 'Select Department (optional)' },
+                      ...(formData.department && !catalogDepartments.some((d) => d.name === formData.department)
+                        ? [{ value: formData.department, label: `${formData.department} (current)` }]
+                        : []),
                       ...catalogDepartments.map((d) => ({ value: d.name, label: d.name }))
                     ]}
                   />
@@ -349,11 +476,7 @@ function CreateGroup() {
               </div>
 
               <div className="form-actions">
-                <button 
-                  type="button" 
-                  className="btn-secondary"
-                  onClick={() => navigate('/admin/groups')}
-                >
+                <button type="button" className="btn-secondary" onClick={() => navigate('/admin/groups')}>
                   Cancel
                 </button>
                 <button type="submit" className="btn-primary">
@@ -365,12 +488,29 @@ function CreateGroup() {
             <>
               <div className="form-section">
                 <h2>Select Students for Group</h2>
-                <p className="group-info"><strong>Group:</strong> {formData.name} | <strong>College:</strong> {formData.college_name}</p>
+                <p className="group-info">
+                  <strong>Group:</strong> {formData.name} | <strong>College:</strong> {formData.college_name}
+                </p>
               </div>
 
               <div className="student-selection-container">
                 <div className="student-list-panel">
-                  <h3>Available Students</h3>
+                  <div className="student-list-header">
+                    <h3>Available Students ({filteredLeftStudents.length})</h3>
+                    {filteredLeftStudents.length > 0 && (
+                      <label className="select-all-checkbox">
+                        <input
+                          type="checkbox"
+                          checked={allLeftSelected}
+                          ref={(input) => {
+                            if (input) input.indeterminate = someLeftSelected
+                          }}
+                          onChange={handleSelectAllLeft}
+                        />
+                        <span>Select All</span>
+                      </label>
+                    )}
+                  </div>
                   <input
                     type="text"
                     placeholder="Search students..."
@@ -379,7 +519,7 @@ function CreateGroup() {
                     className="search-input"
                   />
                   <div className="student-list">
-                    {paginatedLeftStudents.map(student => (
+                    {paginatedLeftStudents.map((student) => (
                       <div
                         key={student.id}
                         className={`student-item ${selectedStudentIds.includes(student.id) ? 'selected' : ''}`}
@@ -397,10 +537,21 @@ function CreateGroup() {
                         </div>
                       </div>
                     ))}
-                    {paginatedLeftStudents.length === 0 && (
-                      <div className="empty-state">No students available</div>
-                    )}
+                    {paginatedLeftStudents.length === 0 && <div className="empty-state">No students available</div>}
                   </div>
+                  {filteredLeftStudents.length > 0 && (
+                    <div className="student-list-pagination">
+                      <Pagination
+                        currentPage={leftPage}
+                        pageSize={leftPageSize}
+                        totalCount={filteredLeftStudents.length}
+                        itemName="students"
+                        onPageChange={setLeftPage}
+                        onPageSizeChange={setLeftPageSize}
+                        pageSizeOptions={[5, 10, 20, 50]}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div className="transfer-buttons">
@@ -408,7 +559,7 @@ function CreateGroup() {
                     type="button"
                     className="btn-transfer"
                     onClick={handleMoveToRight}
-                    disabled={selectedStudentIds.filter(id => availableStudents.some(s => s.id === id)).length === 0}
+                    disabled={selectedStudentIds.filter((sid) => availableStudents.some((s) => s.id === sid)).length === 0}
                   >
                     →
                   </button>
@@ -416,14 +567,29 @@ function CreateGroup() {
                     type="button"
                     className="btn-transfer"
                     onClick={handleMoveToLeft}
-                    disabled={selectedStudentIds.filter(id => groupStudents.some(s => s.id === id)).length === 0}
+                    disabled={selectedStudentIds.filter((sid) => groupStudents.some((s) => s.id === sid)).length === 0}
                   >
                     ←
                   </button>
                 </div>
 
                 <div className="student-list-panel">
-                  <h3>Selected Students ({groupStudents.length})</h3>
+                  <div className="student-list-header">
+                    <h3>Selected Students ({filteredRightStudents.length})</h3>
+                    {filteredRightStudents.length > 0 && (
+                      <label className="select-all-checkbox">
+                        <input
+                          type="checkbox"
+                          checked={allRightSelected}
+                          ref={(input) => {
+                            if (input) input.indeterminate = someRightSelected
+                          }}
+                          onChange={handleSelectAllRight}
+                        />
+                        <span>Select All</span>
+                      </label>
+                    )}
+                  </div>
                   <input
                     type="text"
                     placeholder="Search students..."
@@ -432,7 +598,7 @@ function CreateGroup() {
                     className="search-input"
                   />
                   <div className="student-list">
-                    {paginatedRightStudents.map(student => (
+                    {paginatedRightStudents.map((student) => (
                       <div
                         key={student.id}
                         className={`student-item ${selectedStudentIds.includes(student.id) ? 'selected' : ''}`}
@@ -454,23 +620,34 @@ function CreateGroup() {
                       <div className="empty-state">No students selected</div>
                     )}
                   </div>
+                  {filteredRightStudents.length > 0 && (
+                    <div className="student-list-pagination">
+                      <Pagination
+                        currentPage={rightPage}
+                        pageSize={rightPageSize}
+                        totalCount={filteredRightStudents.length}
+                        itemName="students"
+                        onPageChange={setRightPage}
+                        onPageSizeChange={setRightPageSize}
+                        pageSizeOptions={[5, 10, 20, 50]}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
 
               <div className="form-actions">
-                <button 
-                  type="button" 
-                  className="btn-secondary"
-                  onClick={handleBackToPage1}
-                >
+                <button type="button" className="btn-secondary" onClick={handleBackToPage1}>
                   Back
                 </button>
-                <button 
-                  type="submit" 
-                  className="btn-primary"
-                  disabled={loading}
-                >
-                  {loading ? 'Creating...' : 'Create Group'}
+                <button type="submit" className="btn-primary" disabled={loading}>
+                  {loading
+                    ? isEditing
+                      ? 'Updating...'
+                      : 'Creating...'
+                    : isEditing
+                      ? 'Update Group'
+                      : 'Create Group'}
                 </button>
               </div>
             </>
@@ -482,4 +659,3 @@ function CreateGroup() {
 }
 
 export default CreateGroup
-
