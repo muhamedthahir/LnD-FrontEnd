@@ -8,6 +8,10 @@ import { useApi } from '../../../contexts/ApiContext'
 import { useAutoLoadMasterData } from '../../../hooks/useMasterData'
 import { API_ENDPOINTS, SUCCESS_MESSAGES, ERROR_MESSAGES, VALIDATION_MESSAGES } from '../../../constants/constants'
 import ThemedSelect from '../../../components/ThemedSelect/ThemedSelect'
+import BulkResetModal from './BulkResetModal'
+import useBulkUploadJob from './useBulkUploadJob'
+import { readUploadResponse } from './bulkUploadResponse'
+import { buildStudentBatches } from './bulkUploadBatches'
 import './Users.css'
 
 function Users() {
@@ -36,6 +40,7 @@ function Users() {
   const [showBulkUploadModal, setShowBulkUploadModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showResetModal, setShowResetModal] = useState(false)
+  const [showBulkResetModal, setShowBulkResetModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [selectedUser, setSelectedUser] = useState(null)
   const [userToDelete, setUserToDelete] = useState(null)
@@ -60,6 +65,7 @@ function Users() {
   const [bulkUploadLoading, setBulkUploadLoading] = useState(false)
   const [bulkUploadResult, setBulkUploadResult] = useState(null)
   const fileInputRef = useRef(null)
+  const usersRequestRef = useRef(null)
   const [catalogDepartments, setCatalogDepartments] = useState([])
   const [catalogDegrees, setCatalogDegrees] = useState([])
 
@@ -69,7 +75,7 @@ function Users() {
   }, [loadInstitutions])
 
   useEffect(() => {
-    if (!apiBaseUrl) return
+    if (!apiBaseUrl || (!showForm && !showEditModal)) return
     const loadCatalog = async () => {
       const token = accessToken || localStorage.getItem('accessToken')
       const headers = {
@@ -94,7 +100,7 @@ function Users() {
       }
     }
     loadCatalog()
-  }, [apiBaseUrl, accessToken])
+  }, [apiBaseUrl, accessToken, showForm, showEditModal])
 
   const [debouncedSearch, setDebouncedSearch] = useState('')
 
@@ -109,6 +115,9 @@ function Users() {
 
   const fetchUsers = useCallback(async () => {
     if (!apiBaseUrl) return
+    usersRequestRef.current?.abort()
+    const controller = new AbortController()
+    usersRequestRef.current = controller
     try {
       setLoading(true)
       const url = new URL(`${apiBaseUrl}${API_ENDPOINTS.USERS.LIST}`)
@@ -123,25 +132,40 @@ function Users() {
         ...(token && { Authorization: `Bearer ${token}` })
       }
 
-      const response = await fetch(url, { headers })
+      const response = await fetch(url, { headers, signal: controller.signal })
 
       if (response.ok) {
         const data = await response.json()
+        if (controller.signal.aborted) return
         setUsers(data.users || [])
         setTotalCount(data.total || 0)
       } else {
         toast.error(ERROR_MESSAGES.USER_FETCH_FAILED)
       }
     } catch (error) {
+      if (controller.signal.aborted) return
       console.error('Error fetching users:', error)
       toast.error(ERROR_MESSAGES.USER_FETCH_FAILED)
     } finally {
-      setLoading(false)
+      if (!controller.signal.aborted) setLoading(false)
     }
   }, [apiBaseUrl, accessToken, selectedCollege, debouncedSearch, currentPage, pageSize])
 
+  const onUploadCompleted = useCallback(data => {
+    setShowBulkUploadModal(true)
+    setBulkUploadResult({ success: data.status === 'completed', created: data.created, total: data.total,
+      errors: data.errors, emailWarnings: data.emailWarnings, error: data.error })
+    if (data.status === 'completed') {
+      if (data.created > 0) toast.success(SUCCESS_MESSAGES.USER_BULK_UPLOAD_SUCCESS(data.created, data.total))
+      else toast.warning('No students were created. Review the row errors.')
+    } else toast.error(data.error || 'Student import failed. Check the results before retrying.')
+    fetchUsers()
+  }, [fetchUsers])
+  const uploadJob = useBulkUploadJob({ apiBaseUrl, accessToken, userId: user?.id, onCompleted: onUploadCompleted })
+
   useEffect(() => {
     fetchUsers()
+    return () => usersRequestRef.current?.abort()
   }, [fetchUsers])
 
   const handleChange = (e) => {
@@ -449,6 +473,7 @@ function Users() {
 
   const handleBulkUpload = async (e) => {
     e.preventDefault()
+    if (bulkUploadLoading || uploadJob.jobId) return
     
     if (!bulkUploadData.college_name || !bulkUploadData.college_name.trim()) {
       toast.error(VALIDATION_MESSAGES.COLLEGE_REQUIRED)
@@ -459,53 +484,42 @@ function Users() {
       toast.error(VALIDATION_MESSAGES.FILE_REQUIRED)
       return
     }
+    if (bulkUploadData.file.size > 10 * 1024 * 1024) {
+      toast.error('Upload an Excel file smaller than 10 MB.')
+      return
+    }
     
     setBulkUploadLoading(true)
     setBulkUploadResult(null)
     
     try {
-      const formData = new FormData()
-      formData.append('file', bulkUploadData.file)
-      formData.append('college_name', bulkUploadData.college_name)
-      
-      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.USERS.BULK_UPLOAD}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': accessToken ? `Bearer ${accessToken}` : undefined
-        },
-        body: formData
-      })
-      
-      const data = await response.json()
-      
-      if (response.ok) {
-        setBulkUploadResult({
-          success: true,
-          created: data.created,
-          total: data.total,
-          errors: data.errors
+      const XLSX = await import('xlsx')
+      const workbook = XLSX.read(await bulkUploadData.file.arrayBuffer(), { type: 'array', sheetRows: 5002 })
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]]
+      if (!worksheet) throw new Error('No worksheet found. Upload the Excel template.')
+      const rows = XLSX.utils.sheet_to_json(worksheet, { defval: '', raw: false })
+      const batches = buildStudentBatches(rows, bulkUploadData.college_name)
+      let data
+      for (const batch of batches) {
+        const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.USERS.BULK_UPLOAD}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken || localStorage.getItem('accessToken') || localStorage.getItem('token') || ''}` },
+          body: JSON.stringify({ college_name: bulkUploadData.college_name, total: rows.length, ...batch, ...(data?.jobId && { jobId: data.jobId }) })
         })
-        toast.success(SUCCESS_MESSAGES.USER_BULK_UPLOAD_SUCCESS(data.created, data.total))
-        fetchUsers()
-        // Reset form data and file input
-        setBulkUploadData({ college_name: '', file: null })
-        if (fileInputRef.current) {
-          fileInputRef.current.value = ''
-        }
-      } else {
-        setBulkUploadResult({
-          success: false,
-          error: data.error || ERROR_MESSAGES.USER_BULK_UPLOAD_FAILED
-        })
-        toast.error(data.error || ERROR_MESSAGES.USER_BULK_UPLOAD_FAILED)
+        data = await readUploadResponse(response)
       }
+      if (!data?.jobId || !['queued', 'running', 'completed'].includes(data.status)) throw new Error('The server did not accept the complete upload. Please try again.')
+      uploadJob.startJob(data)
+      setBulkUploadData(prev => ({ ...prev, file: null }))
+      if (fileInputRef.current) fileInputRef.current.value = ''
     } catch (error) {
       console.error('Error uploading users:', error)
       setBulkUploadResult({
         success: false,
-        error: ERROR_MESSAGES.USER_BULK_UPLOAD_FAILED
+        error: error.message || ERROR_MESSAGES.USER_BULK_UPLOAD_FAILED
       })
-      toast.error(ERROR_MESSAGES.USER_BULK_UPLOAD_FAILED)
+      toast.error(error.message || ERROR_MESSAGES.USER_BULK_UPLOAD_FAILED)
     } finally {
       setBulkUploadLoading(false)
     }
@@ -547,7 +561,8 @@ function Users() {
         <div>
           <h1>User Administration</h1>
         </div>
-        <div style={{ display: 'flex', gap: 'var(--spacing-md)' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--spacing-md)' }}>
+          <button className="btn-secondary" onClick={() => setShowBulkResetModal(true)}>Bulk reset passwords</button>
           <button 
             className="btn-secondary"
             onClick={() => setShowBulkUploadModal(true)}
@@ -562,6 +577,17 @@ function Users() {
           </button>
         </div>
       </div>
+
+      {showBulkResetModal && <BulkResetModal
+        apiBaseUrl={apiBaseUrl}
+        accessToken={accessToken}
+        onClose={() => setShowBulkResetModal(false)}
+        onSuccess={result => {
+          setShowBulkResetModal(false)
+          toast.success(`Passwords reset for ${result.updatedCount} users in ${result.groupName}.`)
+          fetchUsers()
+        }}
+      />}
 
       {showForm && (
         <div className="user-form-card">
@@ -791,12 +817,16 @@ function Users() {
                       </td>
                       <td>{u.email}</td>
                       <td>
-                        {u.role === 'college_admin' ? 'College Admin' : 
-                         u.role === 'primary_admin' ? 'Primary Admin' :
-                         u.role === 'campuszen_admin' ? 'CampusZen Admin' : 'Student'}
+                        <span className={`role-badge role-${u.role}`}>
+                          {u.role === 'college_admin' ? 'College Admin' :
+                           u.role === 'primary_admin' ? 'Primary Admin' :
+                           u.role === 'campuszen_admin' ? 'CampusZen Admin' : 'Student'}
+                        </span>
                       </td>
                       <td>
-                        {u.status === 'pending' ? 'Pending' : 'Activated'}
+                        <span className={`status-badge ${u.status === 'pending' ? 'status-pending' : 'status-activated'}`}>
+                          {u.status === 'pending' ? 'Pending' : 'Activated'}
+                        </span>
                       </td>
                       <td>{new Date(u.created_at).toLocaleDateString()}</td>
                       <td>
@@ -1019,13 +1049,15 @@ function Users() {
           }
         }}>
           <div className="modal-content bulk-upload-modal" onClick={(e) => e.stopPropagation()}>
-            <h2>Add Users in Bulk</h2>
-            
+            <div className="modal-header">
+              <h2>Add Users in Bulk</h2>
+            </div>
+            <form onSubmit={handleBulkUpload}>
+            <div className="modal-body">
             <div className="bulk-upload-info">
               <p>All the users will be added to the selected college. Please use the template provided here.</p>
+              <p>Up to 5,000 students and 10 MB per file. Accepted uploads continue in the background.</p>
             </div>
-
-            <form onSubmit={handleBulkUpload}>
               <div className="form-group">
                 <label>Download Template</label>
                 <button 
@@ -1084,9 +1116,15 @@ function Users() {
                 )}
               </div>
 
+              {uploadJob.jobId && <div role="status" aria-live="polite" style={{ marginBottom: '1rem' }}>
+                <p>Importing students: {uploadJob.progress?.processed || 0} of {uploadJob.progress?.total || '…'} processed; {uploadJob.progress?.created || 0} created.</p>
+                <p>You can close this window and return to Users to check progress.</p>
+                {uploadJob.error && <p role="alert">{uploadJob.error} <button type="button" className="btn-secondary" onClick={uploadJob.retry}>Check progress</button></p>}
+              </div>}
               {bulkUploadResult && (
                 <div className={`bulk-upload-result ${bulkUploadResult.success ? 'success' : 'error'}`}>
                   <button
+                    type="button"
                     className="bulk-upload-close"
                     onClick={() => setBulkUploadResult(null)}
                     title="Close"
@@ -1099,6 +1137,7 @@ function Users() {
                   {bulkUploadResult.success ? (
                     <>
                       <p>✓ Successfully created {bulkUploadResult.created} out of {bulkUploadResult.total} users</p>
+                      {bulkUploadResult.emailWarnings > 0 && <p>{bulkUploadResult.emailWarnings} invitation emails could not be sent. Students were created; use Resend OTP for those accounts and check Mail Status for details.</p>}
                       {bulkUploadResult.errors && bulkUploadResult.errors.length > 0 && (
                         <div className="bulk-upload-errors">
                           <p>Errors:</p>
@@ -1114,7 +1153,7 @@ function Users() {
                       )}
                     </>
                   ) : (
-                    <p>✗ {bulkUploadResult.error}</p>
+                    <div><p>✗ {bulkUploadResult.error}</p><p>{bulkUploadResult.created || 0} students were created before the import stopped.</p></div>
                   )}
                 </div>
               )}
@@ -1137,11 +1176,12 @@ function Users() {
                 <button
                   type="submit"
                   className="btn-primary"
-                  disabled={bulkUploadLoading}
+                  disabled={bulkUploadLoading || !!uploadJob.jobId}
                 >
-                  {bulkUploadLoading ? 'Uploading...' : 'Upload Users'}
+                  {uploadJob.jobId ? 'Import in progress…' : bulkUploadLoading ? 'Uploading...' : 'Upload Users'}
                 </button>
               </div>
+            </div>
             </form>
           </div>
         </div>

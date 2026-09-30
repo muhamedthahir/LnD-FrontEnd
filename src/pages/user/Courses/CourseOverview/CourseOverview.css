@@ -1,51 +1,10 @@
 .course-overview-page {
   padding: var(--spacing-lg);
-  max-width: 1200px;
+  max-width: 75rem;
   margin: 0 auto;
 }
 
-.btn-back {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-sm) var(--spacing-md);
-  background: var(--bg-secondary);
-  border: var(--border-sm) solid var(--border-color);
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  margin-bottom: var(--spacing-lg);
-  font-family: inherit;
-}
-
-.btn-back:hover {
-  background: var(--bg-tertiary);
-  border-color: var(--accent-primary);
-  color: var(--accent-primary);
-}
-
-.btn-back svg {
-  width: 1rem;
-  height: 1rem;
-}
-
 /* Loading and Empty States */
-.loading,
-.empty-state {
-  text-align: center;
-  padding: var(--spacing-4xl);
-  color: var(--text-secondary);
-}
-
-.empty-state h3 {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: var(--spacing-lg);
-}
 
 /* Course Header */
 .course-header {
@@ -58,8 +17,8 @@
 
 .course-thumbnail-large {
   flex-shrink: 0;
-  width: 300px;
-  height: 200px;
+  width: 18.75rem;
+  height: 12.5rem;
   border-radius: var(--radius-md);
   overflow: hidden;
   background: var(--bg-tertiary);
@@ -108,13 +67,13 @@
 }
 
 .competency-badge.beginner {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  background: color-mix(in srgb, var(--accent-primary) 10%, transparent);
+  color: var(--accent-primary);
 }
 
 .competency-badge.proficient {
-  background: rgba(16, 185, 129, 0.1);
-  color: #10b981;
+  background: color-mix(in srgb, var(--success) 10%, transparent);
+  color: var(--success);
 }
 
 .competency-badge.advanced {
@@ -128,8 +87,8 @@
 }
 
 .competency-badge.competency {
-  background: rgba(245, 158, 11, 0.1);
-  color: #f59e0b;
+  background: color-mix(in srgb, var(--warning) 10%, transparent);
+  color: var(--warning);
 }
 
 .course-title-row {
@@ -147,7 +106,7 @@
   margin: 0;
   line-height: 1.2;
   flex: 1;
-  min-width: 200px;
+  min-width: 12.5rem;
 }
 
 .btn-start-course {
@@ -225,13 +184,13 @@
 }
 
 .stat-icon.lessons-icon {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  background: color-mix(in srgb, var(--accent-primary) 10%, transparent);
+  color: var(--accent-primary);
 }
 
 .stat-icon.exercises-icon {
-  background: rgba(16, 185, 129, 0.1);
-  color: #10b981;
+  background: color-mix(in srgb, var(--success) 10%, transparent);
+  color: var(--success);
 }
 
 .stat-icon.assessments-icon {
@@ -399,13 +358,13 @@
 }
 
 .count-badge.lessons-badge {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  background: color-mix(in srgb, var(--accent-primary) 10%, transparent);
+  color: var(--accent-primary);
 }
 
 .count-badge.practice-badge {
-  background: rgba(16, 185, 129, 0.1);
-  color: #10b981;
+  background: color-mix(in srgb, var(--success) 10%, transparent);
+  color: var(--success);
 }
 
 .count-badge.assessment-badge {
@@ -487,8 +446,8 @@
   height: 1.75rem;
   border-radius: var(--radius-sm);
   flex-shrink: 0;
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  background: color-mix(in srgb, var(--accent-primary) 10%, transparent);
+  color: var(--accent-primary);
 }
 
 .lesson-icon svg {
@@ -497,8 +456,8 @@
 }
 
 .lesson-icon.practice-icon {
-  background: rgba(16, 185, 129, 0.1);
-  color: #10b981;
+  background: color-mix(in srgb, var(--success) 10%, transparent);
+  color: var(--success);
 }
 
 .lesson-icon.assessment-icon {
@@ -523,13 +482,13 @@
 }
 
 .item-type-tag.lesson-tag {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  background: color-mix(in srgb, var(--accent-primary) 10%, transparent);
+  color: var(--accent-primary);
 }
 
 .item-type-tag.practice-tag {
-  background: rgba(16, 185, 129, 0.1);
-  color: #10b981;
+  background: color-mix(in srgb, var(--success) 10%, transparent);
+  color: var(--success);
 }
 
 .item-type-tag.assessment-tag {
@@ -538,7 +497,7 @@
 }
 
 .lesson-item.practice-item:hover {
-  border-color: #10b981;
+  border-color: var(--success);
 }
 
 .lesson-item.assessment-item:hover {
@@ -579,7 +538,7 @@
 
   .course-thumbnail-large {
     width: 100%;
-    height: 200px;
+    height: 12.5rem;
   }
 
   .course-title-row {
@@ -626,7 +585,7 @@
   }
 
   .section-progress-bar {
-    width: 60px;
+    width: 3.75rem;
   }
 
   .lessons-list {
@@ -663,9 +622,9 @@
 }
 
 .course-progress-badge.completed {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, var(--success) 0%, var(--success) 100%);
   color: white;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--success) 30%, transparent);
 }
 
 .course-progress-badge .badge-icon {
@@ -685,16 +644,16 @@
 
 /* Resume Button Style */
 .btn-start-course.resume {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, var(--success) 0%, var(--success) 100%);
 }
 
 .btn-start-course.resume:hover {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  background: linear-gradient(135deg, var(--success) 0%, #047857 100%);
 }
 
 /* Section Number Completed */
 .section-number.completed {
-  background: #10b981;
+  background: var(--success);
   color: white;
 }
 
@@ -719,12 +678,12 @@
 }
 
 .section-progress.completed {
-  background: rgba(16, 185, 129, 0.08);
+  background: color-mix(in srgb, var(--success) 8%, transparent);
 }
 
 .section-progress-bar {
-  width: 80px;
-  height: 6px;
+  width: 5rem;
+  height: 0.375rem;
   background: var(--bg-card);
   border-radius: var(--radius-sm);
   overflow: hidden;
@@ -736,7 +695,7 @@
 }
 
 .section-progress.completed .section-progress-bar {
-  border-color: rgba(16, 185, 129, 0.3);
+  border-color: color-mix(in srgb, var(--success) 30%, transparent);
 }
 
 .section-progress-fill {
@@ -747,14 +706,14 @@
 }
 
 .section-progress-fill.completed {
-  background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(90deg, var(--success) 0%, var(--success) 100%);
 }
 
 .section-progress-text {
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--text-secondary);
-  min-width: 36px;
+  min-width: 2.25rem;
   text-align: right;
 }
 
@@ -763,7 +722,7 @@
 }
 
 .section-progress-text.completed {
-  color: #10b981;
+  color: var(--success);
 }
 
 /* Lesson Status Area */
@@ -782,27 +741,10 @@
   border-radius: var(--radius-sm);
 }
 
-.segment-status-badge {
-  font-size: 0.625rem;
-  font-weight: 600;
-  padding: 0.125rem 0.375rem;
-  border-radius: var(--radius-sm);
-}
-
-.segment-status-badge.completed {
-  background: rgba(16, 185, 129, 0.1);
-  color: #10b981;
-}
-
-.segment-status-badge.in-progress {
-  background: rgba(245, 158, 11, 0.1);
-  color: #f59e0b;
-}
-
 /* Completed Lesson Styles */
 .lesson-item.completed {
-  background: rgba(16, 185, 129, 0.05);
-  border-color: rgba(16, 185, 129, 0.3);
+  background: color-mix(in srgb, var(--success) 5%, transparent);
+  border-color: color-mix(in srgb, var(--success) 30%, transparent);
 }
 
 .lesson-item.completed .lesson-title {
@@ -810,20 +752,20 @@
 }
 
 .lesson-item.in-progress {
-  border-color: rgba(245, 158, 11, 0.3);
+  border-color: color-mix(in srgb, var(--warning) 30%, transparent);
 }
 
 .lesson-icon.completed {
-  background: rgba(16, 185, 129, 0.2);
-  color: #10b981;
+  background: color-mix(in srgb, var(--success) 20%, transparent);
+  color: var(--success);
 }
 
 /* Section Status Classes */
 .section-item.status-completed .section-header {
-  border-left: 3px solid #10b981;
+  border-left: 3px solid var(--success);
 }
 
 .section-item.status-in-progress .section-header {
-  border-left: 3px solid #f59e0b;
+  border-left: 3px solid var(--warning);
 }
 

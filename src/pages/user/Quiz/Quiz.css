@@ -1,7 +1,8 @@
 .quiz-page {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  min-height: calc(100dvh - var(--layout-header-height));
+  height: calc(100dvh - var(--layout-header-height));
   overflow: hidden;
   background: var(--bg-primary);
 }
@@ -50,7 +51,7 @@
   border: var(--border-sm) solid var(--border-color);
   border-radius: var(--radius-xl);
   padding: var(--spacing-2xl);
-  max-width: 400px;
+  max-width: 25rem;
   width: 90%;
   text-align: center;
   box-shadow: var(--shadow-lg);
@@ -60,7 +61,7 @@
   width: 4rem;
   height: 4rem;
   margin: 0 auto var(--spacing-lg);
-  background: rgba(245, 158, 11, 0.1);
+  background: color-mix(in srgb, var(--warning) 10%, transparent);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -70,15 +71,15 @@
 .confirm-modal-icon svg {
   width: 2rem;
   height: 2rem;
-  color: #f59e0b;
+  color: var(--warning);
 }
 
 .confirm-modal-icon.reset {
-  background: rgba(59, 130, 246, 0.1);
+  background: color-mix(in srgb, var(--accent-primary) 10%, transparent);
 }
 
 .confirm-modal-icon.reset svg {
-  color: #3b82f6;
+  color: var(--accent-primary);
 }
 
 .confirm-modal h3 {
@@ -115,33 +116,12 @@
   font-family: inherit;
 }
 
-.btn-cancel {
-  background: var(--bg-secondary);
-  border: var(--border-sm) solid var(--border-color);
-  color: var(--text-primary);
-}
-
-.btn-cancel:hover {
-  background: var(--bg-tertiary);
-  border-color: var(--accent-primary);
-}
-
-.btn-confirm {
-  background: var(--accent-primary);
-  border: none;
-  color: var(--bg-primary);
-}
-
-.btn-confirm:hover {
-  background: var(--accent-secondary);
-}
-
 .btn-confirm.reset {
-  background: #3b82f6;
+  background: var(--accent-primary);
 }
 
 .btn-confirm.reset:hover {
-  background: #2563eb;
+  background: var(--accent-primary);
 }
 
 /* ==================== INTRO SCREEN ==================== */
@@ -186,7 +166,7 @@
 }
 
 .intro-card {
-  max-width: 600px;
+  max-width: 37.5rem;
   width: 100%;
   background: var(--bg-card);
   border: var(--border-sm) solid var(--border-color);
@@ -361,7 +341,7 @@
 }
 
 .results-card {
-  max-width: 600px;
+  max-width: 37.5rem;
   width: 100%;
   background: var(--bg-card);
   border: var(--border-sm) solid var(--border-color);
@@ -373,8 +353,8 @@
 
 .results-score-circle {
   position: relative;
-  width: 140px;
-  height: 140px;
+  width: 8.75rem;
+  height: 8.75rem;
   margin: 0 auto var(--spacing-xl);
 }
 
@@ -414,11 +394,11 @@
 }
 
 .results-score-circle.pass .score-content .score-value {
-  color: #10b981;
+  color: var(--success);
 }
 
 .results-score-circle.fail .score-content .score-value {
-  color: #ef4444;
+  color: var(--error);
 }
 
 .score-content .score-label {
@@ -464,11 +444,11 @@
 }
 
 .breakdown-item.correct svg {
-  color: #10b981;
+  color: var(--success);
 }
 
 .breakdown-item.incorrect svg {
-  color: #ef4444;
+  color: var(--error);
 }
 
 .breakdown-item.skipped svg {
@@ -524,13 +504,13 @@
 }
 
 .summary-item.correct {
-  background: rgba(16, 185, 129, 0.1);
-  border-color: #10b981;
+  background: color-mix(in srgb, var(--success) 10%, transparent);
+  border-color: var(--success);
 }
 
 .summary-item.incorrect {
-  background: rgba(239, 68, 68, 0.1);
-  border-color: #ef4444;
+  background: color-mix(in srgb, var(--error) 10%, transparent);
+  border-color: var(--error);
 }
 
 .summary-item.skipped {
@@ -550,11 +530,11 @@
 }
 
 .summary-item.correct svg {
-  color: #10b981;
+  color: var(--success);
 }
 
 .summary-item.incorrect svg {
-  color: #ef4444;
+  color: var(--error);
 }
 
 .summary-item.skipped svg {
@@ -567,7 +547,6 @@
   gap: var(--spacing-md);
 }
 
-.btn-review,
 .btn-finish {
   display: flex;
   align-items: center;
@@ -581,17 +560,6 @@
   font-family: inherit;
 }
 
-.btn-review {
-  background: var(--bg-secondary);
-  border: var(--border-sm) solid var(--border-color);
-  color: var(--text-primary);
-}
-
-.btn-review:hover {
-  background: var(--bg-tertiary);
-  border-color: var(--accent-primary);
-}
-
 .btn-finish {
   background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
   border: none;
@@ -603,7 +571,6 @@
   box-shadow: var(--shadow-md);
 }
 
-.btn-review svg,
 .btn-finish svg {
   width: 1.125rem;
   height: 1.125rem;
@@ -662,7 +629,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 200px;
+  max-width: 12.5rem;
 }
 
 /* Header Navigation - Clear SVG for all themes */
@@ -701,8 +668,8 @@
 }
 
 .header-nav .nav-btn svg {
-  width: 20px;
-  height: 20px;
+  width: 1.25rem;
+  height: 1.25rem;
   flex-shrink: 0;
 }
 
@@ -770,7 +737,7 @@
 /* Question Main Panel - Full Width */
 .question-main {
   flex: 1;
-  max-width: 900px;
+  max-width: 56.25rem;
   overflow-y: auto;
   padding: var(--spacing-xl);
   display: flex;
@@ -778,7 +745,7 @@
 }
 
 .question-main.full-width {
-  max-width: 900px;
+  max-width: 56.25rem;
 }
 
 .question-card {
@@ -844,10 +811,10 @@
   gap: var(--spacing-sm);
   margin-bottom: var(--spacing-lg);
   padding: var(--spacing-sm) var(--spacing-md);
-  background: rgba(245, 158, 11, 0.1);
+  background: color-mix(in srgb, var(--warning) 10%, transparent);
   border-radius: var(--radius-md);
   font-size: 0.875rem;
-  color: #f59e0b;
+  color: var(--warning);
 }
 
 .question-hint svg {
@@ -887,14 +854,14 @@
 }
 
 .option-item.correct {
-  background: rgba(16, 185, 129, 0.1);
-  border-color: #10b981;
+  background: color-mix(in srgb, var(--success) 10%, transparent);
+  border-color: var(--success);
   cursor: default;
 }
 
 .option-item.wrong {
-  background: rgba(239, 68, 68, 0.1);
-  border-color: #ef4444;
+  background: color-mix(in srgb, var(--error) 10%, transparent);
+  border-color: var(--error);
   cursor: default;
 }
 
@@ -924,13 +891,13 @@
 }
 
 .option-item.correct .option-selector {
-  border-color: #10b981;
-  background: #10b981;
+  border-color: var(--success);
+  background: var(--success);
 }
 
 .option-item.wrong .option-selector {
-  border-color: #ef4444;
-  background: #ef4444;
+  border-color: var(--error);
+  background: var(--error);
 }
 
 .option-selector .radio-dot {
@@ -968,14 +935,14 @@
 }
 
 .option-item.correct .option-letter {
-  background: #10b981;
-  border-color: #10b981;
+  background: var(--success);
+  border-color: var(--success);
   color: white;
 }
 
 .option-item.wrong .option-letter {
-  background: #ef4444;
-  border-color: #ef4444;
+  background: var(--error);
+  border-color: var(--error);
   color: white;
 }
 
@@ -996,11 +963,11 @@
 }
 
 .status-icon.correct {
-  color: #10b981;
+  color: var(--success);
 }
 
 .status-icon.wrong {
-  color: #ef4444;
+  color: var(--error);
 }
 
 /* Question Actions Container */
@@ -1044,9 +1011,9 @@
 }
 
 .btn-try-again:hover {
-  background: rgba(59, 130, 246, 0.1);
-  border-color: #3b82f6;
-  color: #3b82f6;
+  background: color-mix(in srgb, var(--accent-primary) 10%, transparent);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
 }
 
 .btn-try-again svg {
@@ -1096,7 +1063,7 @@
 /* ==================== RESPONSIVE - TABLET ==================== */
 @media (max-width: 900px) {
   .header-left h2 {
-    max-width: 150px;
+    max-width: 9.375rem;
   }
 }
 
@@ -1195,7 +1162,7 @@
   
   .stat-item {
     flex: 1;
-    min-width: 80px;
+    min-width: 5rem;
   }
   
   .results-breakdown {
@@ -1207,7 +1174,6 @@
     flex-direction: column;
   }
   
-  .btn-review,
   .btn-finish {
     width: 100%;
     justify-content: center;

@@ -2,7 +2,7 @@
 
 .question-form-page {
   padding: var(--spacing-lg);
-  max-width: 1000px;
+  max-width: 62.5rem;
   margin: 0 auto;
 }
 
@@ -49,8 +49,8 @@
 }
 
 .meta-item svg {
-  width: 16px;
-  height: 16px;
+  width: 1rem;
+  height: 1rem;
 }
 
 /* Back control: wide horizontal padding + flex-shrink 0 so row layout cannot compress label */
@@ -74,8 +74,8 @@
 }
 
 .question-form-page .btn-secondary.back-btn svg {
-  width: 18px;
-  height: 18px;
+  width: 1.125rem;
+  height: 1.125rem;
   flex-shrink: 0;
 }
 
@@ -86,25 +86,6 @@
   border-radius: var(--radius-lg);
   padding: var(--spacing-xl);
   margin-bottom: var(--spacing-lg);
-}
-
-.form-section {
-  margin-bottom: var(--spacing-xl);
-  padding-bottom: var(--spacing-xl);
-  border-bottom: var(--border-sm) solid var(--border-color);
-}
-
-.form-section:last-child {
-  margin-bottom: 0;
-  padding-bottom: 0;
-  border-bottom: none;
-}
-
-.form-section h2 {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0 0 var(--spacing-lg);
 }
 
 .section-header {
@@ -125,21 +106,6 @@
 }
 
 /* Form Elements */
-.form-group {
-  margin-bottom: var(--spacing-md);
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: var(--spacing-xs);
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-}
-
-.form-group .required {
-  color: var(--error);
-}
 
 .form-input {
   width: 100%;
@@ -164,18 +130,12 @@
 
 textarea.form-input {
   resize: vertical;
-  min-height: 80px;
+  min-height: 5rem;
 }
 
 .code-input {
   font-family: var(--font-mono);
   font-size: 0.8rem;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--spacing-md);
 }
 
 .form-row-3 {
@@ -237,9 +197,9 @@ textarea.form-input {
 
 .type-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(11.25rem, 1fr));
   gap: var(--spacing-lg);
-  max-width: 700px;
+  max-width: 43.75rem;
   margin: 0 auto;
 }
 
@@ -262,8 +222,8 @@ textarea.form-input {
 }
 
 .type-icon {
-  width: 56px;
-  height: 56px;
+  width: 3.5rem;
+  height: 3.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -273,8 +233,8 @@ textarea.form-input {
 }
 
 .type-icon svg {
-  width: 28px;
-  height: 28px;
+  width: 1.75rem;
+  height: 1.75rem;
   color: white;
 }
 
@@ -319,19 +279,11 @@ textarea.form-input {
 
 .form-actions-bar .btn-primary svg,
 .form-actions-bar .btn-secondary svg {
-  width: 18px;
-  height: 18px;
+  width: 1.125rem;
+  height: 1.125rem;
 }
 
 /* Form Actions (legacy) */
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--spacing-sm);
-  margin-top: var(--spacing-lg);
-  padding-top: var(--spacing-lg);
-  border-top: var(--border-sm) solid var(--border-color);
-}
 
 /* Detail Card */
 .detail-card {
@@ -367,8 +319,8 @@ textarea.form-input {
 }
 
 .detail-card .card-header .btn-primary svg {
-  width: 18px;
-  height: 18px;
+  width: 1.125rem;
+  height: 1.125rem;
 }
 
 .description-content {
@@ -402,8 +354,8 @@ textarea.form-input {
 }
 
 .tag-color {
-  width: 12px;
-  height: 12px;
+  width: 0.75rem;
+  height: 0.75rem;
   border-radius: var(--radius-full);
 }
 
@@ -430,8 +382,8 @@ textarea.form-input {
 }
 
 .question-number {
-  width: 32px;
-  height: 32px;
+  width: 2rem;
+  height: 2rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -476,8 +428,8 @@ textarea.form-input {
 }
 
 .arrow-icon {
-  width: 20px;
-  height: 20px;
+  width: 1.25rem;
+  height: 1.25rem;
   color: var(--text-muted);
   flex-shrink: 0;
 }
@@ -499,7 +451,7 @@ textarea.form-input {
 
 .option-item.correct {
   border-color: var(--success);
-  background: rgba(34, 197, 94, 0.05);
+  background: color-mix(in srgb, var(--success) 5%, transparent);
 }
 
 .option-header {
@@ -512,12 +464,12 @@ textarea.form-input {
 }
 
 .option-item.correct .option-header {
-  background: rgba(34, 197, 94, 0.1);
+  background: color-mix(in srgb, var(--success) 10%, transparent);
 }
 
 .option-letter {
-  width: 28px;
-  height: 28px;
+  width: 1.75rem;
+  height: 1.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -536,8 +488,8 @@ textarea.form-input {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 1.75rem;
+  height: 1.75rem;
   padding: 0;
   background: transparent;
   border: none;
@@ -553,8 +505,8 @@ textarea.form-input {
 }
 
 .option-remove svg {
-  width: 16px;
-  height: 16px;
+  width: 1rem;
+  height: 1rem;
 }
 
 .option-content {
@@ -585,7 +537,7 @@ textarea.form-input {
 
 .option-display-item.correct {
   border-color: var(--success);
-  background: rgba(34, 197, 94, 0.05);
+  background: color-mix(in srgb, var(--success) 5%, transparent);
 }
 
 .option-display-item .option-letter {
@@ -605,8 +557,8 @@ textarea.form-input {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 1.5rem;
+  height: 1.5rem;
   background: var(--success);
   border-radius: var(--radius-full);
   color: white;
@@ -614,48 +566,14 @@ textarea.form-input {
 }
 
 .correct-indicator svg {
-  width: 14px;
-  height: 14px;
+  width: 0.875rem;
+  height: 0.875rem;
 }
 
 /* Loading & Empty States */
-.loading-state {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--spacing-xxl);
-  color: var(--text-secondary);
-}
-
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--spacing-xxl);
-  text-align: center;
-  color: var(--text-secondary);
-}
 
 .empty-state.small {
   padding: var(--spacing-xl);
-}
-
-.empty-state svg {
-  width: 48px;
-  height: 48px;
-  margin-bottom: var(--spacing-md);
-  opacity: 0.5;
-}
-
-.empty-state h3 {
-  margin: 0 0 var(--spacing-xs);
-  color: var(--text-primary);
-}
-
-.empty-state p {
-  margin: 0;
-  font-size: 0.875rem;
 }
 
 /* Buttons */
@@ -665,14 +583,14 @@ textarea.form-input {
 }
 
 .btn-sm svg {
-  width: 14px;
-  height: 14px;
+  width: 0.875rem;
+  height: 0.875rem;
 }
 
 /* Info Grid */
 .info-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(9.375rem, 1fr));
   gap: var(--spacing-md);
   margin-bottom: var(--spacing-md);
 }
@@ -778,15 +696,15 @@ textarea.form-input {
   align-items: center;
   gap: var(--spacing-sm);
   padding: var(--spacing-md);
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  background: color-mix(in srgb, var(--warning) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--warning) 30%, transparent);
   border-radius: var(--radius-md);
-  color: #f59e0b;
+  color: var(--warning);
 }
 
 .warning-banner svg {
-  width: 20px;
-  height: 20px;
+  width: 1.25rem;
+  height: 1.25rem;
   flex-shrink: 0;
 }
 
@@ -831,7 +749,7 @@ textarea.form-input {
 }
 
 .badge {
-  padding: 2px 6px;
+  padding: 0.125rem 0.375rem;
   border-radius: var(--radius-sm);
   font-size: 0.65rem;
   font-weight: 600;
@@ -845,7 +763,7 @@ textarea.form-input {
 
 .badge.inactive {
   background: rgba(107, 114, 128, 0.15);
-  color: #9ca3af;
+  color: var(--text-muted);
 }
 
 .testcase-io {
@@ -878,7 +796,7 @@ textarea.form-input {
   font-size: 0.8rem;
   white-space: pre-wrap;
   word-break: break-all;
-  max-height: 100px;
+  max-height: 6.25rem;
   overflow-y: auto;
 }
 
@@ -916,8 +834,8 @@ textarea.form-input {
 }
 
 .link-icon {
-  width: 40px;
-  height: 40px;
+  width: 2.5rem;
+  height: 2.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -928,15 +846,15 @@ textarea.form-input {
 }
 
 .link-icon svg {
-  width: 20px;
-  height: 20px;
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 .link-content {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0.125rem;
 }
 
 .link-label {
@@ -963,8 +881,8 @@ textarea.form-input {
 }
 
 .empty-templates-message svg {
-  width: 48px;
-  height: 48px;
+  width: 3rem;
+  height: 3rem;
   color: var(--text-muted);
   margin-bottom: var(--spacing-md);
   opacity: 0.5;
@@ -1022,8 +940,8 @@ textarea.form-input {
 }
 
 .template-language svg {
-  width: 18px;
-  height: 18px;
+  width: 1.125rem;
+  height: 1.125rem;
   color: var(--accent-primary);
 }
 
@@ -1031,7 +949,7 @@ textarea.form-input {
   font-size: 0.75rem;
   color: var(--text-muted);
   background: var(--bg-tertiary);
-  padding: 2px 8px;
+  padding: 0.125rem 0.5rem;
   border-radius: var(--radius-sm);
 }
 
@@ -1045,8 +963,8 @@ textarea.form-input {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 1.75rem;
+  height: 1.75rem;
   padding: 0;
   background: var(--bg-tertiary);
   border: var(--border-sm) solid var(--border-color);
@@ -1063,13 +981,13 @@ textarea.form-input {
 }
 
 .btn-reset svg {
-  width: 14px;
-  height: 14px;
+  width: 0.875rem;
+  height: 0.875rem;
 }
 
 .template-actions .expand-icon {
-  width: 20px;
-  height: 20px;
+  width: 1.25rem;
+  height: 1.25rem;
   color: var(--text-muted);
   transition: transform var(--transition-fast);
 }
@@ -1109,7 +1027,6 @@ textarea.form-input {
     padding: var(--spacing-md);
   }
 
-  .form-row,
   .form-row-3 {
     grid-template-columns: 1fr;
   }
@@ -1205,45 +1122,10 @@ textarea.form-input {
 }
 
 /* Modal Styles */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  backdrop-filter: blur(4px);
-}
-
-.modal-content {
-  background: var(--bg-card);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-xl);
-  max-width: 30rem;
-  width: 90%;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: var(--shadow-lg);
-}
-
-.modal-content h2 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: var(--spacing-md);
-}
-
-.modal-actions {
-  display: flex;
-  gap: var(--spacing-md);
-  justify-content: flex-end;
-  margin-top: var(--spacing-lg);
-}
 
 /* Bulk Upload Modal */
 .bulk-upload-modal {
-  max-width: 600px;
+  max-width: 37.5rem;
   width: 90%;
 }
 
@@ -1267,7 +1149,7 @@ textarea.form-input {
 
 .bulk-upload-modal .file-input-wrapper input[type="file"] {
   position: absolute;
-  left: -9999px;
+  left: -624.9375rem;
   opacity: 0;
   width: 0;
   height: 0;
@@ -1332,20 +1214,20 @@ textarea.form-input {
 }
 
 .bulk-upload-result.success {
-  background: rgba(76, 175, 80, 0.1);
-  border: 1px solid rgba(76, 175, 80, 0.3);
-  color: #4caf50;
+  background: color-mix(in srgb, var(--success) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--success) 30%, transparent);
+  color: var(--success);
 }
 
 .bulk-upload-result.error {
-  background: rgba(244, 67, 54, 0.1);
-  border: 1px solid rgba(244, 67, 54, 0.3);
-  color: #f44336;
+  background: color-mix(in srgb, var(--error) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--error) 30%, transparent);
+  color: var(--error);
 }
 
 .bulk-upload-errors {
   margin-top: var(--spacing-sm);
-  max-height: 200px;
+  max-height: 12.5rem;
   overflow-y: auto;
 }
 

@@ -1,5 +1,5 @@
-import { Outlet } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { Outlet, useLocation } from 'react-router-dom'
+import { Suspense, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Sidebar from '../Sidebar/Sidebar'
 import Header from '../Header/Header'
@@ -13,10 +13,31 @@ function Layout() {
   const [loading, setLoading] = useState(true)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
     const saved = localStorage.getItem('sidebarCollapsed')
-    return saved ? JSON.parse(saved) : false
+    return saved === 'true'
   })
   const [isSidebarOpen, setIsSidebarOpen] = useState(false) // For small screens
   const navigate = useNavigate()
+  const { pathname } = useLocation()
+
+  useEffect(() => {
+    setIsSidebarOpen(false)
+  }, [pathname])
+
+  useEffect(() => {
+    if (!isSidebarOpen) return
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') setIsSidebarOpen(false)
+    }
+    const closeOnResize = () => {
+      if (window.innerWidth > 600) setIsSidebarOpen(false)
+    }
+    document.addEventListener('keydown', closeOnEscape)
+    window.addEventListener('resize', closeOnResize)
+    return () => {
+      document.removeEventListener('keydown', closeOnEscape)
+      window.removeEventListener('resize', closeOnResize)
+    }
+  }, [isSidebarOpen])
 
   useEffect(() => {
     localStorage.setItem('sidebarCollapsed', JSON.stringify(isSidebarCollapsed))
@@ -208,11 +229,12 @@ function Layout() {
         isSidebarCollapsed={isSidebarCollapsed}
       />
       <main className={styles.main}>
-        <Outlet context={{ user, logout }} />
+        <Suspense fallback={<div className={styles.loadingPage} role="status" aria-label="Loading page"><div className="spinner" /></div>}>
+          <Outlet context={{ user, logout }} />
+        </Suspense>
       </main>
     </div>
   )
 }
 
 export default Layout
-

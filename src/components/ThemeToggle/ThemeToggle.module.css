@@ -1,8 +1,8 @@
 .toggle {
   position: relative;
-  width: 30px;
-  height: 30px;
-  padding: 5px;
+  width: 1.875rem;
+  height: 1.875rem;
+  padding: 0.3125rem;
   border-radius: 50%;
   border: none;
   background: var(--theme-toggle-bg);
@@ -26,8 +26,8 @@
 }
 
 .toggle svg {
-  width: 24px;
-  height: 24px;
+  width: 1.5rem;
+  height: 1.5rem;
   transition: transform var(--transition-normal);
 }
 

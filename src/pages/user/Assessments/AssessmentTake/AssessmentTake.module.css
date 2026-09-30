@@ -19,12 +19,12 @@
 .error {
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 1rem;
 }
 
 .spinner {
-  width: 40px;
-  height: 40px;
+  width: 2.5rem;
+  height: 2.5rem;
   border: 3px solid var(--border-color);
   border-top-color: var(--accent-primary);
   border-radius: 50%;
@@ -45,12 +45,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 8px 24px;
-  background: var(--error);
-  color: white;
+  gap: 0.5rem;
+  padding: 0.5rem 1.5rem;
+  background: color-mix(in srgb, var(--error) 82%, #1a0508);
+  color: #ffffff;
   font-size: 0.875rem;
   animation: slideDown 0.3s ease;
+  flex-wrap: wrap;
 }
 
 @keyframes slideDown {
@@ -59,12 +60,18 @@
 }
 
 .proctoringWarning button {
-  background: transparent;
-  border: none;
-  color: white;
-  font-size: 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: var(--radius-sm);
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 650;
   cursor: pointer;
-  padding: 0 8px;
+  padding: 0 0.65rem;
 }
 
 /* Header */
@@ -72,7 +79,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 24px;
+  padding: 1rem 1.5rem;
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-color);
   flex-shrink: 0;
@@ -81,7 +88,7 @@
 .headerLeft {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 1rem;
 }
 
 .headerLeft h1 {
@@ -92,10 +99,10 @@
 }
 
 .segmentBadge {
-  padding: 4px 10px;
+  padding: 0.25rem 0.625rem;
   background: var(--accent-subtle);
   color: var(--accent-primary);
-  border-radius: 9999px;
+  border-radius: 624.9375rem;
   font-size: 0.75rem;
   font-weight: 500;
 }
@@ -103,16 +110,16 @@
 .headerCenter {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 1.5rem;
 }
 
 .timer {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 16px;
+  gap: 0.25rem;
+  padding: 0.25rem 1rem;
   background: var(--bg-tertiary);
-  border-radius: 8px;
+  border-radius: 0.5rem;
   font-size: 1rem;
   font-weight: 600;
   font-family: var(--font-mono);
@@ -140,13 +147,13 @@
 .timerLabel {
   font-weight: 400;
   color: var(--text-tertiary);
-  margin-right: 4px;
+  margin-right: 0.25rem;
 }
 
 .headerRight {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 1rem;
 }
 
 .progressText {
@@ -158,11 +165,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 2.25rem;
+  height: 2.25rem;
   border: 1px solid var(--border-color);
   background: var(--bg-primary);
-  border-radius: 8px;
+  border-radius: 0.5rem;
   cursor: pointer;
   color: var(--text-secondary);
   transition: all 0.15s;
@@ -186,24 +193,24 @@
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  padding: 32px;
+  padding: 2rem;
 }
 
 .questionContainer {
   flex: 1;
   background: var(--bg-secondary);
   border-radius: var(--radius-lg);
-  padding: 32px;
-  margin-bottom: 24px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
   border: 1px solid var(--border-color);
 }
 
 .questionHeader {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -214,7 +221,7 @@
 }
 
 .questionType {
-  padding: 4px 12px;
+  padding: 0.25rem 0.75rem;
   background: var(--bg-tertiary);
   border-radius: var(--radius-sm);
   font-size: 0.75rem;
@@ -232,11 +239,11 @@
   font-size: 1rem;
   line-height: 1.7;
   color: var(--text-primary);
-  margin-bottom: 24px;
+  margin-bottom: 1.5rem;
 }
 
 .questionText p {
-  margin: 0 0 12px;
+  margin: 0 0 0.75rem;
 }
 
 .questionText p:last-child {
@@ -247,12 +254,12 @@
   max-width: 100%;
   height: auto;
   border-radius: var(--radius-md);
-  margin: 12px 0;
+  margin: 0.75rem 0;
 }
 
 .questionText code {
   background: var(--bg-tertiary);
-  padding: 2px 8px;
+  padding: 0.125rem 0.5rem;
   border-radius: var(--radius-sm);
   font-family: var(--font-mono);
   font-size: 0.9em;
@@ -261,36 +268,36 @@
 
 .questionText pre {
   background: var(--bg-tertiary);
-  padding: 16px;
+  padding: 1rem;
   border-radius: var(--radius-md);
   overflow-x: auto;
   font-family: var(--font-mono);
   font-size: 0.875rem;
-  margin: 12px 0;
+  margin: 0.75rem 0;
   border: 1px solid var(--border-color);
 }
 
 .questionText ul,
 .questionText ol {
-  margin: 12px 0;
-  padding-left: 24px;
+  margin: 0.75rem 0;
+  padding-left: 1.5rem;
 }
 
 .questionText li {
-  margin-bottom: 8px;
+  margin-bottom: 0.5rem;
 }
 
 .optionsList {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0.75rem;
 }
 
 .optionItem {
   display: flex;
   align-items: flex-start;
-  gap: 16px;
-  padding: 16px;
+  gap: 1rem;
+  padding: 1rem;
   background: var(--bg-primary);
   border: 2px solid var(--border-color);
   border-radius: var(--radius-md);
@@ -313,8 +320,8 @@
 }
 
 .optionMarker {
-  width: 32px;
-  height: 32px;
+  width: 2rem;
+  height: 2rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -335,7 +342,7 @@
   flex: 1;
   font-size: 0.9375rem;
   color: var(--text-primary);
-  padding-top: 6px;
+  padding-top: 0.375rem;
   line-height: 1.5;
 }
 
@@ -350,7 +357,7 @@
 
 .optionText code {
   background: var(--bg-tertiary);
-  padding: 2px 6px;
+  padding: 0.125rem 0.375rem;
   border-radius: var(--radius-sm);
   font-family: var(--font-mono);
   font-size: 0.875em;
@@ -359,7 +366,7 @@
 .noOptions {
   text-align: center;
   color: var(--text-tertiary);
-  padding: 24px;
+  padding: 1.5rem;
   background: var(--bg-tertiary);
   border-radius: var(--radius-md);
   font-style: italic;
@@ -368,7 +375,7 @@
 /* Programming layout — prevent editor panel from stretching the page */
 .questionAreaProgramming {
   overflow: hidden;
-  padding: 20px 24px;
+  padding: 1.25rem 1.5rem;
 }
 
 .questionContainerProgramming {
@@ -377,14 +384,14 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  margin-bottom: 16px;
-  padding: 20px 24px;
+  margin-bottom: 1rem;
+  padding: 1.25rem 1.5rem;
 }
 
 .questionContainerProgramming .questionHeader {
   flex-shrink: 0;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
 }
 
 /* Programming Question */
@@ -392,7 +399,7 @@
   width: 100%;
   display: flex;
   flex-direction: row;
-  gap: 16px;
+  gap: 1rem;
   flex: 1;
   min-height: 0;
   overflow: hidden;
@@ -401,8 +408,8 @@
 /* Problem Panel - Left side with scrollable content */
 .problemPanel {
   flex: 0 0 40%;
-  max-width: 500px;
-  min-width: 320px;
+  max-width: 31.25rem;
+  min-width: 20rem;
   min-height: 0;
   display: flex;
   flex-direction: column;
@@ -415,7 +422,7 @@
 .problemContent {
   flex: 1;
   overflow-y: auto;
-  padding: 20px;
+  padding: 1.25rem;
 }
 
 /* Section Titles */
@@ -425,14 +432,14 @@
   color: var(--accent-primary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin: 0 0 12px;
-  padding-bottom: 8px;
+  margin: 0 0 0.75rem;
+  padding-bottom: 0.5rem;
   border-bottom: 1px solid var(--border-color);
 }
 
 /* Problem Description */
 .problemDescription {
-  margin-bottom: 20px;
+  margin-bottom: 1.25rem;
 }
 
 .descriptionContent {
@@ -442,13 +449,13 @@
 }
 
 .descriptionContent p {
-  margin: 0 0 12px;
+  margin: 0 0 0.75rem;
 }
 
 .descriptionContent code {
   background: rgba(110, 118, 129, 0.2);
-  padding: 2px 6px;
-  border-radius: 4px;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
   font-family: 'Fira Code', 'Consolas', monospace;
   font-size: 0.85em;
   color: var(--accent-primary);
@@ -456,20 +463,20 @@
 
 .descriptionContent pre {
   background: var(--bg-tertiary);
-  padding: 12px;
+  padding: 0.75rem;
   border-radius: var(--radius-sm);
   overflow-x: auto;
   font-size: 0.85rem;
-  margin: 12px 0;
+  margin: 0.75rem 0;
 }
 
 /* Input/Output Format */
 .formatSection {
-  margin-bottom: 20px;
+  margin-bottom: 1.25rem;
 }
 
 .formatBlock {
-  margin-bottom: 16px;
+  margin-bottom: 1rem;
 }
 
 .formatContent {
@@ -480,7 +487,7 @@
 
 /* Constraints */
 .constraintsSection {
-  margin-bottom: 20px;
+  margin-bottom: 1.25rem;
 }
 
 .constraintsContent {
@@ -491,17 +498,17 @@
 
 .constraintsContent ul {
   margin: 0;
-  padding-left: 20px;
+  padding-left: 1.25rem;
 }
 
 .constraintsContent li {
-  margin-bottom: 6px;
+  margin-bottom: 0.375rem;
 }
 
 .constraintsContent code {
   background: rgba(110, 118, 129, 0.2);
-  padding: 2px 6px;
-  border-radius: 4px;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
   font-family: 'Fira Code', 'Consolas', monospace;
   font-size: 0.85em;
   color: var(--accent-primary);
@@ -509,19 +516,19 @@
 
 /* Examples Section */
 .examplesSection {
-  margin-bottom: 20px;
+  margin-bottom: 1.25rem;
 }
 
 .exampleItem {
   background: var(--bg-tertiary);
   border-radius: var(--radius-md);
-  margin-bottom: 12px;
+  margin-bottom: 0.75rem;
   overflow: hidden;
   border: 1px solid var(--border-color);
 }
 
 .exampleHeader {
-  padding: 8px 12px;
+  padding: 0.5rem 0.75rem;
   background: var(--bg-primary);
   font-size: 0.75rem;
   font-weight: 600;
@@ -530,16 +537,16 @@
 }
 
 .exampleIo {
-  padding: 12px;
+  padding: 0.75rem;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0.75rem;
 }
 
 .ioBlock {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 0.375rem;
 }
 
 .ioLabel {
@@ -552,7 +559,7 @@
 
 .ioContent {
   background: var(--bg-primary);
-  padding: 10px 12px;
+  padding: 0.625rem 0.75rem;
   border-radius: var(--radius-sm);
   font-family: 'Fira Code', 'Consolas', monospace;
   font-size: 0.8rem;
@@ -564,25 +571,25 @@
 }
 
 .exampleExplanation {
-  padding: 0 12px 12px;
+  padding: 0 0.75rem 0.75rem;
   font-size: 0.85rem;
   color: var(--text-secondary);
 }
 
 .exampleExplanation p {
-  margin: 6px 0 0;
+  margin: 0.375rem 0 0;
   font-style: italic;
 }
 
 /* Test Cases Section */
 .testCasesSection {
-  margin-bottom: 20px;
+  margin-bottom: 1.25rem;
 }
 
 .testCasesList {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0.75rem;
 }
 
 .testCaseItem {
@@ -595,8 +602,8 @@
 .testCaseHeader {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px 12px;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
   background: var(--bg-primary);
   border-bottom: 1px solid var(--border-color);
 }
@@ -613,18 +620,18 @@
 }
 
 .testCaseIo {
-  padding: 12px;
+  padding: 0.75rem;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0.75rem;
 }
 
 .hiddenTestsNote {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 12px;
-  padding: 10px 12px;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding: 0.625rem 0.75rem;
   background: rgba(var(--accent-primary-rgb, 59, 130, 246), 0.1);
   border-radius: var(--radius-sm);
   font-size: 0.75rem;
@@ -656,13 +663,13 @@
   max-height: 35vh;
   overflow-y: auto;
   background: var(--bg-primary);
-  padding: 20px;
+  padding: 1.25rem;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
 }
 
 .problemSection .questionText {
-  margin-bottom: 16px;
+  margin-bottom: 1rem;
 }
 
 .programmingQuestion .questionText {
@@ -687,13 +694,13 @@
   }
 
   .codeEditorWrapper {
-    min-height: 350px;
+    min-height: 21.875rem;
   }
 }
 
 .exampleIo pre {
   margin: 0;
-  padding: 12px;
+  padding: 0.75rem;
   background: var(--bg-secondary);
   border-radius: var(--radius-sm);
   font-size: 0.8125rem;
@@ -704,13 +711,13 @@
 }
 
 .exampleExplanation {
-  margin-top: 16px;
-  padding-top: 16px;
+  margin-top: 1rem;
+  padding-top: 1rem;
   border-top: 1px solid var(--border-color);
 }
 
 .exampleExplanation p {
-  margin: 8px 0 0;
+  margin: 0.5rem 0 0;
   font-size: 0.875rem;
   color: var(--text-secondary);
 }
@@ -725,13 +732,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
+  padding: 0.75rem 1rem;
   background: var(--bg-tertiary);
   border-bottom: 1px solid var(--border-color);
 }
 
 .languageSelect {
-  padding: 8px 12px;
+  padding: 0.5rem 0.75rem;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   background: var(--bg-primary);
@@ -741,8 +748,8 @@
 
 .codeEditor {
   width: 100%;
-  min-height: 300px;
-  padding: 16px;
+  min-height: 18.75rem;
+  padding: 1rem;
   border: none;
   background: var(--bg-primary);
   color: var(--text-primary);
@@ -766,7 +773,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 200px;
+  height: 12.5rem;
   color: var(--text-tertiary);
 }
 
@@ -774,26 +781,26 @@
 .navigationButtons {
   display: flex;
   justify-content: space-between;
-  gap: 16px;
+  gap: 1rem;
   margin-top: auto;
 }
 
 /* Question Navigation Panel */
 .questionNav {
-  width: 320px;
+  width: 20rem;
   background: var(--bg-secondary);
   border-left: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
-  padding: 24px;
+  padding: 1.5rem;
   flex-shrink: 0;
   overflow-y: auto;
 }
 
 /* Segments Section */
 .segmentsSection {
-  margin-bottom: 24px;
-  padding-bottom: 24px;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -801,20 +808,20 @@
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--text-primary);
-  margin: 0 0 12px;
+  margin: 0 0 0.75rem;
 }
 
 .segmentsList {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0.5rem;
 }
 
 .segmentItem {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
   background: var(--bg-primary);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
@@ -849,8 +856,8 @@
 }
 
 .segmentNumber {
-  width: 28px;
-  height: 28px;
+  width: 1.75rem;
+  height: 1.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -888,8 +895,8 @@
   text-transform: uppercase;
   color: var(--accent-primary);
   background: var(--accent-subtle);
-  padding: 3px 8px;
-  border-radius: 9999px;
+  padding: 0.1875rem 0.5rem;
+  border-radius: 624.9375rem;
 }
 
 .checkIcon {
@@ -898,19 +905,19 @@
 }
 
 .navHeader {
-  margin-bottom: 16px;
+  margin-bottom: 1rem;
 }
 
 .navHeader h3 {
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--text-primary);
-  margin: 0 0 8px;
+  margin: 0 0 0.5rem;
 }
 
 .navStats {
   display: flex;
-  gap: 16px;
+  gap: 1rem;
 }
 
 .stat {
@@ -925,8 +932,8 @@
 .navGrid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
-  margin-bottom: 16px;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
   flex: 1;
   overflow-y: auto;
   align-content: flex-start;
@@ -978,24 +985,24 @@
 .navLegend {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 16px;
-  margin-bottom: 16px;
-  padding-top: 16px;
+  gap: 0.5rem 1rem;
+  margin-bottom: 1rem;
+  padding-top: 1rem;
   border-top: 1px solid var(--border-color);
 }
 
 .legendItem {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 0.375rem;
   font-size: 0.7rem;
   color: var(--text-tertiary);
 }
 
 .dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 3px;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 0.1875rem;
   background: var(--bg-tertiary);
   border: 1px solid var(--border-color);
 }
@@ -1017,7 +1024,7 @@
 
 .submitBtn {
   width: 100%;
-  padding: 12px 24px;
+  padding: 0.75rem 1.5rem;
   background: var(--accent-primary);
   color: white;
   border: none;
@@ -1041,7 +1048,7 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 24px;
+  padding: 1.5rem;
 }
 
 /* Blocking fullscreen-required overlay: blurs the test behind it and, by covering the
@@ -1057,14 +1064,14 @@
   align-items: center;
   justify-content: center;
   z-index: 3000;
-  padding: 24px;
+  padding: 1.5rem;
 }
 
 .modalContent {
   background: var(--bg-secondary);
   border-radius: var(--radius-lg);
-  padding: 32px;
-  max-width: 450px;
+  padding: 2rem;
+  max-width: 28.125rem;
   width: 100%;
   box-shadow: var(--shadow-lg);
   border: 1px solid var(--border-color);
@@ -1074,18 +1081,18 @@
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--text-primary);
-  margin: 0 0 24px;
+  margin: 0 0 1.5rem;
 }
 
 .submitSummary {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .summaryItem {
-  padding: 16px;
+  padding: 1rem;
   background: var(--bg-tertiary);
   border-radius: var(--radius-md);
 }
@@ -1094,7 +1101,7 @@
   display: block;
   font-size: 0.75rem;
   color: var(--text-tertiary);
-  margin-bottom: 4px;
+  margin-bottom: 0.25rem;
 }
 
 .summaryValue {
@@ -1116,26 +1123,26 @@
   font-size: 0.875rem;
   color: var(--warning);
   background: rgba(214, 158, 46, 0.15);
-  padding: 16px;
+  padding: 1rem;
   border-radius: var(--radius-md);
-  margin-bottom: 24px;
+  margin-bottom: 1.5rem;
   border: 1px solid rgba(214, 158, 46, 0.3);
 }
 
 .note {
   font-size: 0.8125rem;
   color: var(--text-tertiary);
-  margin-top: 12px;
+  margin-top: 0.75rem;
 }
 
 .modalActions {
   display: flex;
-  gap: 16px;
+  gap: 1rem;
   justify-content: flex-end;
 }
 
 .modalBtn {
-  padding: 12px 24px;
+  padding: 0.75rem 1.5rem;
   border-radius: var(--radius-md);
   font-size: 0.875rem;
   font-weight: 600;
@@ -1177,7 +1184,7 @@
     top: 0;
     bottom: 0;
     z-index: 50;
-    width: 320px;
+    width: 20rem;
     transform: translateX(100%);
     transition: transform 0.3s ease;
     box-shadow: var(--shadow-lg);
@@ -1189,19 +1196,19 @@
 
   .headerCenter {
     flex-direction: column;
-    gap: 4px;
+    gap: 0.25rem;
   }
 }
 
 /* Tab Switch Modal Styles */
 .tabSwitchModal {
   text-align: center;
-  max-width: 450px;
+  max-width: 28.125rem;
 }
 
 .warningIcon {
   font-size: 4rem;
-  margin-bottom: 16px;
+  margin-bottom: 1rem;
   animation: pulse 1s ease-in-out infinite;
 }
 
@@ -1213,19 +1220,19 @@
 .errorTitle {
   color: var(--error) !important;
   font-size: 1.5rem;
-  margin-bottom: 16px;
+  margin-bottom: 1rem;
 }
 
 .warningTitle {
   color: var(--warning) !important;
   font-size: 1.5rem;
-  margin-bottom: 16px;
+  margin-bottom: 1rem;
 }
 
 .tabSwitchInfo {
   font-size: 1rem;
   color: var(--text-secondary);
-  margin-bottom: 12px;
+  margin-bottom: 0.75rem;
 }
 
 .tabSwitchInfo strong {
@@ -1236,41 +1243,41 @@
 .tabSwitchWarning {
   color: var(--error);
   font-size: 0.875rem;
-  background: rgba(239, 68, 68, 0.1);
-  padding: 12px 16px;
+  background: color-mix(in srgb, var(--error) 10%, transparent);
+  padding: 0.75rem 1rem;
   border-radius: var(--radius-md);
-  margin-bottom: 24px;
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  margin-bottom: 1.5rem;
+  border: 1px solid color-mix(in srgb, var(--error) 30%, transparent);
 }
 
 .countdownContainer {
-  margin: 24px 0;
+  margin: 1.5rem 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 1rem;
 }
 
 .countdownCircle {
-  width: 100px;
-  height: 100px;
+  width: 6.25rem;
+  height: 6.25rem;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--error) 0%, #b91c1c 100%);
+  background: linear-gradient(135deg, var(--error) 0%, var(--error) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
+  box-shadow: 0 4px 20px color-mix(in srgb, var(--error) 40%, transparent);
   animation: countdownPulse 1s ease-in-out infinite;
 }
 
 @keyframes countdownPulse {
   0%, 100% { 
     transform: scale(1);
-    box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
+    box-shadow: 0 4px 20px color-mix(in srgb, var(--error) 40%, transparent);
   }
   50% { 
     transform: scale(1.05);
-    box-shadow: 0 4px 30px rgba(239, 68, 68, 0.6);
+    box-shadow: 0 4px 30px color-mix(in srgb, var(--error) 60%, transparent);
   }
 }
 
@@ -1290,14 +1297,14 @@
   font-size: 0.875rem;
   color: var(--text-tertiary);
   font-style: italic;
-  margin-top: 16px;
+  margin-top: 1rem;
 }
 
 @media (max-width: 768px) {
   .assessmentHeader {
     flex-wrap: wrap;
-    gap: 8px;
-    padding: 12px 16px;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
   }
 
   .headerLeft h1 {
@@ -1305,11 +1312,11 @@
   }
 
   .questionArea {
-    padding: 16px;
+    padding: 1rem;
   }
 
   .questionContainer {
-    padding: 20px;
+    padding: 1.25rem;
   }
 
   .exampleIo {
@@ -1329,8 +1336,8 @@
   }
   
   .countdownCircle {
-    width: 80px;
-    height: 80px;
+    width: 5rem;
+    height: 5rem;
   }
   
   .countdownNumber {

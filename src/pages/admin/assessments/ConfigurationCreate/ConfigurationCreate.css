@@ -1,6 +1,6 @@
 .config-create-page {
   padding: var(--spacing-lg);
-  max-width: 1200px;
+  max-width: 75rem;
   margin: 0 auto;
 }
 
@@ -22,8 +22,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 2.5rem;
+  height: 2.5rem;
   border: none;
   background: var(--bg-secondary);
   border-radius: var(--radius-md);
@@ -46,13 +46,13 @@
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--text-primary);
-  margin: 4px 0 0;
+  margin: 0.25rem 0 0;
 }
 
 /* Layout */
 .config-layout {
   display: grid;
-  grid-template-columns: 240px 1fr;
+  grid-template-columns: 15rem 1fr;
   gap: var(--spacing-xl);
 }
 
@@ -112,7 +112,7 @@
   margin-left: auto;
   display: inline-flex;
   align-items: center;
-  color: #28a745;
+  color: var(--success);
 }
 
 /* Form Content */
@@ -146,59 +146,12 @@
 }
 
 /* Form Groups */
-.form-group {
-  margin-bottom: var(--spacing-lg);
-}
-
-.form-group label {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text-primary);
-  margin-bottom: var(--spacing-xs);
-}
-
-.form-group .required {
-  color: #dc3545;
-}
-
-.form-group input,
-.form-group textarea,
-.form-group select {
-  width: 100%;
-  padding: var(--spacing-sm) var(--spacing-md);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  font-size: 0.875rem;
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.form-group input:focus,
-.form-group textarea:focus,
-.form-group select:focus {
-  outline: none;
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
-}
-
-.form-group textarea {
-  resize: vertical;
-  min-height: 80px;
-}
 
 .form-group .help-text {
   display: block;
   font-size: 0.75rem;
   color: var(--text-tertiary);
   margin-top: var(--spacing-xs);
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-lg);
 }
 
 /* Toggle Group */
@@ -231,9 +184,9 @@
 }
 
 .toggle-item input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  margin-top: 2px;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0.125rem;
   accent-color: var(--accent-primary);
   flex-shrink: 0;
 }
@@ -249,7 +202,7 @@
   display: block;
   font-size: 0.75rem;
   color: var(--text-tertiary);
-  margin-top: 2px;
+  margin-top: 0.125rem;
 }
 
 /* Radio Group */
@@ -278,8 +231,8 @@
 }
 
 .radio-item input[type="radio"] {
-  width: 18px;
-  height: 18px;
+  width: 1.125rem;
+  height: 1.125rem;
   accent-color: var(--accent-primary);
   flex-shrink: 0;
   cursor: pointer;
@@ -310,22 +263,6 @@
 }
 
 /* Loading State */
-.loading-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--spacing-3xl);
-}
-
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid var(--border-color);
-  border-top-color: var(--accent-primary);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
 
 @keyframes spin {
   to { transform: rotate(360deg); }
@@ -356,10 +293,6 @@
 
   .step-check {
     display: none;
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
   }
 }
 

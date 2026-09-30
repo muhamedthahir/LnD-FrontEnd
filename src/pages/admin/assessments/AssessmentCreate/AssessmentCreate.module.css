@@ -1,6 +1,6 @@
 .assessmentCreatePage {
   padding: var(--spacing-lg);
-  max-width: 900px;
+  max-width: 56.25rem;
   margin: 0 auto;
 }
 
@@ -22,8 +22,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 2.5rem;
+  height: 2.5rem;
   border: none;
   background: var(--bg-secondary);
   border-radius: var(--radius-md);
@@ -47,7 +47,7 @@
 .pageHeader p {
   font-size: 0.875rem;
   color: var(--text-secondary);
-  margin: 4px 0 0;
+  margin: 0.25rem 0 0;
 }
 
 /* Form Card */
@@ -98,7 +98,7 @@
 }
 
 .formGroup .required {
-  color: #dc3545;
+  color: var(--error);
 }
 
 .formGroup input,
@@ -123,19 +123,19 @@
 }
 
 .formGroup input.error {
-  border-color: #dc3545;
+  border-color: var(--error);
 }
 
 .formGroup textarea {
   resize: vertical;
-  min-height: 100px;
+  min-height: 6.25rem;
   line-height: 1.5;
 }
 
 .formGroup .errorText {
   display: block;
   font-size: 0.75rem;
-  color: #dc3545;
+  color: var(--error);
   margin-top: var(--spacing-xs);
 }
 
@@ -160,8 +160,8 @@
 }
 
 .infoIcon {
-  width: 48px;
-  height: 48px;
+  width: 3rem;
+  height: 3rem;
   display: flex;
   align-items: center;
   justify-content: center;

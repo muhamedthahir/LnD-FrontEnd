@@ -1038,7 +1038,7 @@ function CourseEdit() {
                   <div className="thumbnail-preview">
                     <img src={thumbnail} alt="Course thumbnail" />
                     {isEditable && (
-                      <button onClick={() => setThumbnail(null)}>Remove</button>
+                      <button type="button" className="btn-danger" onClick={() => setThumbnail(null)}>Remove</button>
                     )}
                   </div>
                 ) : (
@@ -1106,7 +1106,7 @@ function CourseEdit() {
                     {tags.map(tag => (
                       <span key={tag} className="tag">
                         {tag}
-                        <button onClick={() => handleRemoveTag(tag)}>×</button>
+                        <button type="button" className="tag-remove" onClick={() => handleRemoveTag(tag)} aria-label={`Remove ${tag}`}>×</button>
                       </span>
                     ))}
                   </div>

@@ -27,52 +27,6 @@
   margin: 0;
 }
 
-.empty-state {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--spacing-4xl) var(--spacing-lg);
-  text-align: center;
-  background: var(--bg-card);
-  border-radius: var(--radius-lg);
-  border: var(--border-sm) solid var(--border-color);
-  box-shadow: var(--shadow-sm);
-  min-height: 300px;
-}
-
-.empty-state-icon {
-  width: 80px;
-  height: 80px;
-  margin-bottom: var(--spacing-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--gradient-accent-soft);
-  border-radius: 50%;
-  color: var(--accent-primary);
-}
-
-.empty-state-icon svg {
-  width: 40px;
-  height: 40px;
-}
-
-.empty-state h3 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0 0 var(--spacing-sm) 0;
-}
-
-.empty-state p {
-  font-size: 0.9375rem;
-  color: var(--text-secondary);
-  margin: 0;
-  max-width: 400px;
-}
-
 .filters-left {
   display: flex;
   gap: var(--spacing-md);
@@ -88,77 +42,13 @@
   flex-wrap: wrap;
 }
 
-.filter-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.filter-group label {
-  font-size: 0.6875rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.search-input {
-  padding: 0.625rem var(--spacing-md);
-  border: var(--border-sm) solid var(--border-color);
-  border-radius: var(--radius-md);
-  font-size: 0.875rem;
-  font-family: inherit;
-  transition: all var(--transition-fast);
-  min-width: 14rem;
-  height: 2.5rem;
-  box-sizing: border-box;
-  background: var(--bg-input);
-  color: var(--text-primary);
-}
-
-.search-input::placeholder {
-  color: var(--text-muted);
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px var(--accent-subtle);
-}
-
-.filter-select {
-  padding: 0.625rem 2.25rem 0.625rem var(--spacing-md);
-  border: var(--border-sm) solid var(--border-color);
-  border-radius: var(--radius-md);
-  font-size: 0.875rem;
-  font-family: inherit;
-  transition: all var(--transition-fast);
-  min-width: 10rem;
-  height: 2.5rem;
-  box-sizing: border-box;
-  background: var(--bg-input);
-  color: var(--text-primary);
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5 8l5 5 5-5' stroke='%232f5d8a' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0.65rem center;
-  background-size: 1rem;
-}
-
 [data-theme="dark"] .filter-select {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5 8l5 5 5-5' stroke='%236ba3d4' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
 
-.filter-select:focus {
-  outline: none;
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px var(--accent-subtle);
-}
-
 .course-admin-page .courses-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
   gap: var(--spacing-lg);
   margin-bottom: var(--spacing-md);
 }
@@ -179,19 +69,6 @@
   box-shadow: var(--shadow-sm);
 }
 
-.loading {
-  text-align: center;
-  padding: var(--spacing-4xl);
-  color: var(--text-secondary);
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--bg-card);
-  border-radius: var(--radius-lg);
-  border: var(--border-sm) solid var(--border-color);
-}
-
 .course-admin-page .pagination-wrapper {
   padding: var(--spacing-md) var(--spacing-lg);
   margin-top: var(--spacing-md);
@@ -203,17 +80,6 @@
 }
 
 /* Modal Styles */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: var(--overlay-bg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  backdrop-filter: blur(6px);
-  animation: fadeIn 0.2s ease-out;
-}
 
 .create-course-modal {
   background: var(--bg-card);
@@ -235,38 +101,6 @@
   margin-bottom: var(--spacing-lg);
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xs);
-  margin-bottom: var(--spacing-md);
-}
-
-.form-group label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-}
-
-.required {
-  color: var(--error);
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-  padding: 0.625rem var(--spacing-md);
-  background: var(--bg-input);
-  border: var(--border-sm) solid var(--border-color);
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
-  font-size: 0.875rem;
-  transition: all var(--transition-fast);
-  font-family: inherit;
-  box-sizing: border-box;
-  width: 100%;
-}
-
 .filter-select.create-course {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5 8l5 5 5-5' stroke='%232f5d8a' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
@@ -277,48 +111,19 @@
   cursor: pointer;
 }
 
-.form-group select:hover {
-  border-color: var(--accent-primary);
-}
-
-.form-group textarea {
-  resize: vertical;
-  min-height: 80px;
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-  outline: none;
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px var(--accent-subtle);
-}
-
 .form-group input.error,
 .form-group select.error,
 .form-group textarea.error {
   border-color: var(--error);
 }
 
-.error-text {
-  font-size: 0.75rem;
-  color: var(--error);
-}
-
 .new-category-input {
   margin-top: var(--spacing-xs);
 }
 
-.modal-actions {
-  display: flex;
-  gap: var(--spacing-md);
-  margin-top: var(--spacing-xl);
-  justify-content: flex-end;
-}
-
 @media (max-width: 1024px) {
   .course-admin-page .courses-grid {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(12.5rem, 1fr));
   }
 }
 
@@ -347,23 +152,8 @@
     width: 100%;
   }
 
-  .filter-group,
-  .search-input,
-  .filter-select {
-    width: 100%;
-    min-width: unset;
-  }
-
   .course-admin-page .courses-grid {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
     gap: var(--spacing-md);
-  }
-
-  .modal-actions {
-    flex-direction: column;
-  }
-
-  .modal-actions button {
-    width: 100%;
   }
 }

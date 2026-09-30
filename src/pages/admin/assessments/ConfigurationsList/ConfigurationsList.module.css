@@ -1,6 +1,6 @@
 .configurationsPage {
   padding: var(--spacing-lg);
-  max-width: 1400px;
+  max-width: 87.5rem;
   margin: 0 auto;
 }
 
@@ -28,7 +28,7 @@
 .headerLeft p {
   font-size: 0.875rem;
   color: var(--text-secondary);
-  margin: 4px 0 0;
+  margin: 0.25rem 0 0;
 }
 
 /* Loading State */
@@ -38,12 +38,12 @@
   align-items: center;
   justify-content: center;
   padding: var(--spacing-3xl);
-  min-height: 400px;
+  min-height: 25rem;
 }
 
 .spinner {
-  width: 40px;
-  height: 40px;
+  width: 2.5rem;
+  height: 2.5rem;
   border: 3px solid var(--border-color);
   border-top-color: var(--accent-primary);
   border-radius: 50%;
@@ -68,8 +68,8 @@
 }
 
 .emptyIcon {
-  width: 80px;
-  height: 80px;
+  width: 5rem;
+  height: 5rem;
   margin: 0 auto var(--spacing-lg);
   color: var(--text-tertiary);
 }
@@ -89,7 +89,7 @@
 /* Configs Grid */
 .configsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(21.875rem, 1fr));
   gap: var(--spacing-lg);
 }
 
@@ -121,20 +121,20 @@
   color: var(--text-tertiary);
   font-family: monospace;
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: 0.25rem;
 }
 
 .configHeader h3 {
   font-size: 1.125rem;
   font-weight: 600;
   color: var(--text-primary);
-  margin: 0 0 4px 0;
+  margin: 0 0 0.25rem 0;
 }
 
 .assessmentName {
   font-size: 0.875rem;
   color: var(--text-secondary);
-  margin: 0 0 4px 0;
+  margin: 0 0 0.25rem 0;
   font-style: italic;
 }
 
@@ -145,7 +145,7 @@
 }
 
 .statusBadge {
-  padding: 4px 12px;
+  padding: 0.25rem 0.75rem;
   border-radius: var(--radius-sm);
   font-size: 0.75rem;
   font-weight: 600;
@@ -154,33 +154,33 @@
 }
 
 .statusBadge.draft {
-  background: rgba(255, 193, 7, 0.15);
-  color: #d39e00;
+  background: color-mix(in srgb, var(--warning) 15%, transparent);
+  color: var(--warning);
 }
 
 .statusBadge.scheduled {
-  background: rgba(0, 123, 255, 0.15);
+  background: color-mix(in srgb, var(--accent-primary) 15%, transparent);
   color: #0056b3;
 }
 
 .statusBadge.active {
-  background: rgba(40, 167, 69, 0.15);
-  color: #28a745;
+  background: color-mix(in srgb, var(--success) 15%, transparent);
+  color: var(--success);
 }
 
 .statusBadge.paused {
   background: rgba(255, 152, 0, 0.15);
-  color: #f57c00;
+  color: var(--warning);
 }
 
 .statusBadge.completed {
   background: rgba(108, 117, 125, 0.15);
-  color: #6c757d;
+  color: var(--text-muted);
 }
 
 .statusBadge.archived {
   background: rgba(108, 117, 125, 0.15);
-  color: #6c757d;
+  color: var(--text-muted);
 }
 
 /* Config Details */
@@ -217,8 +217,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 2.25rem;
+  height: 2.25rem;
   border: none;
   background: var(--bg-tertiary);
   border-radius: var(--radius-md);
@@ -233,18 +233,18 @@
 }
 
 .actionBtn.activate:hover {
-  background: rgba(40, 167, 69, 0.15);
-  color: #28a745;
+  background: color-mix(in srgb, var(--success) 15%, transparent);
+  color: var(--success);
 }
 
 .actionBtn.pause:hover {
   background: rgba(255, 152, 0, 0.15);
-  color: #f57c00;
+  color: var(--warning);
 }
 
 .actionBtn.delete:hover {
-  background: rgba(220, 53, 69, 0.15);
-  color: #dc3545;
+  background: color-mix(in srgb, var(--error) 15%, transparent);
+  color: var(--error);
 }
 
 @media (max-width: 768px) {

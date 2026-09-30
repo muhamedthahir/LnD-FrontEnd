@@ -1,16 +1,11 @@
-let configCache = null;
+let configPromise = null;
 
 export async function getConfig() {
-  // Always reload config in development to pick up changes
+  // Share concurrent requests and keep config stable for the lifetime of the page.
+  // A reload picks up local edits; failures can be retried by the next caller.
+  if (configPromise) return configPromise;
   const hostname = window.location.hostname;
-  const isLocalhost = hostname.includes('localhost') || hostname === '127.0.0.1';
-  
-  // Clear cache for localhost to allow config changes
-  if (isLocalhost) {
-    configCache = null;
-  }
-  
-  if (configCache) return configCache;
+  const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]';
   
   let configFile = '';  
 
@@ -21,9 +16,14 @@ export async function getConfig() {
     configFile = '/config.dev.json';
   }
 
-  const res = await fetch(configFile);
-  if (!res.ok) throw new Error(`Failed to load config: ${res.status}`);
-  configCache = await res.json();
-
-  return configCache;
+  configPromise = fetch(configFile)
+    .then(res => {
+      if (!res.ok) throw new Error(`Failed to load config: ${res.status}`);
+      return res.json();
+    })
+    .catch(error => {
+      configPromise = null;
+      throw error;
+    });
+  return configPromise;
 }

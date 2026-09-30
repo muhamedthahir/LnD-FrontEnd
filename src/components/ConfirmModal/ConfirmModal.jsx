@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import styles from './ConfirmModal.module.css'
 
 function ConfirmModal({ isOpen, onClose, onConfirm, title, message, confirmText = 'Confirm', cancelText = 'Cancel', errorMessage = null, disabled = false }) {
@@ -5,9 +6,9 @@ function ConfirmModal({ isOpen, onClose, onConfirm, title, message, confirmText 
 
   const renderedMessage = typeof message === 'string' ? <p>{message}</p> : message
 
-  return (
+  return createPortal(
     <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+      <div className={styles.modal} role="dialog" aria-modal="true" aria-label={title} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
           <h3>{title}</h3>
         </div>
@@ -32,7 +33,7 @@ function ConfirmModal({ isOpen, onClose, onConfirm, title, message, confirmText 
           </button>
         </div>
       </div>
-    </div>
+    </div>, document.body
   )
 }
 

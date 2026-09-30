@@ -244,7 +244,7 @@
 }
 
 .brandLogo {
-  width: min(300px, 100%);
+  width: min(18.75rem, 100%);
   height: auto;
   display: block;
 }
@@ -446,7 +446,7 @@
 }
 
 [data-theme="light"] .loginFormSection .submitBtn {
-  color: var(--bg-primary);
+  color: var(--text-on-accent);
 }
 
 .formWrapper {
@@ -671,14 +671,14 @@
   font-family: var(--font-display);
   font-size: 1.0625rem;
   font-weight: 600;
-  color: var(--bg-primary);
+  color: var(--text-on-accent);
   background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
   border: none;
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all var(--transition-normal);
   box-shadow: 0 var(--spacing-sm) var(--spacing-xl) var(--accent-glow);
-  max-height: 3rem;
+  min-height: var(--control-height-lg);
   box-sizing: border-box;
 }
 
@@ -882,7 +882,7 @@
   }
 
   .brandLogo {
-    width: min(240px, 100%);
+    width: min(15rem, 100%);
   }
   
   .formHeader h2 {

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import styles from './InputModal.module.css'
 
 function InputModal({ 
@@ -39,9 +40,9 @@ function InputModal({
 
   if (!isOpen) return null
 
-  return (
+  return createPortal(
     <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+      <div className={styles.modal} role="dialog" aria-modal="true" aria-label={title} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
           <h3>{title}</h3>
         </div>
@@ -65,9 +66,8 @@ function InputModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>, document.body
   )
 }
 
 export default InputModal
-

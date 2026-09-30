@@ -1,11 +1,11 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--overlay-bg);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 3000;
+  z-index: var(--z-modal-top, 3000);
   backdrop-filter: blur(4px);
   animation: fadeIn 0.2s ease-out;
 }
@@ -21,12 +21,14 @@
 
 .modal {
   background: var(--bg-card);
-  border-radius: var(--radius-lg);
-  width: 90%;
+  border-radius: var(--radius-xl);
+  width: calc(100% - 2rem);
   max-width: 30rem;
   box-shadow: var(--shadow-lg);
   animation: slideUp 0.3s ease-out;
-  overflow: hidden;
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  overflow-wrap: anywhere;
 }
 
 @keyframes slideUp {

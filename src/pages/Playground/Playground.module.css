@@ -10,7 +10,7 @@
 .sidebar {
   display: flex;
   flex-direction: column;
-  width: 260px;
+  width: 16.25rem;
   flex-shrink: 0;
   background: var(--bg-secondary, #161b22);
   border-right: 1px solid var(--border-color, #30363d);
@@ -19,14 +19,14 @@
 }
 
 .sidebarCollapsed {
-  width: 44px;
+  width: 2.75rem;
 }
 
 .sidebarHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 14px 10px;
+  padding: 0.875rem 0.875rem 0.625rem;
 }
 
 .sidebarTitle {
@@ -41,8 +41,8 @@
   color: var(--text-secondary, #8b949e);
   font-size: 1.1rem;
   cursor: pointer;
-  padding: 2px 6px;
-  border-radius: 6px;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.375rem;
 }
 
 .iconBtn:hover {
@@ -51,15 +51,15 @@
 }
 
 .expandBtn {
-  margin: 12px auto;
+  margin: 0.75rem auto;
   background: transparent;
   border: 1px solid var(--border-color, #30363d);
   color: var(--text-secondary, #8b949e);
   font-size: 1rem;
   cursor: pointer;
-  border-radius: 6px;
-  width: 28px;
-  height: 28px;
+  border-radius: 0.375rem;
+  width: 1.75rem;
+  height: 1.75rem;
 }
 
 .expandBtn:hover {
@@ -67,12 +67,12 @@
 }
 
 .newBtn {
-  margin: 0 12px 10px;
-  padding: 9px 12px;
+  margin: 0 0.75rem 0.625rem;
+  padding: 0.5625rem 0.75rem;
   background: #2f81f7;
   color: #fff;
   border: none;
-  border-radius: 8px;
+  border-radius: 0.5rem;
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
@@ -83,11 +83,11 @@
 }
 
 .searchInput {
-  margin: 0 12px 10px;
-  padding: 8px 10px;
+  margin: 0 0.75rem 0.625rem;
+  padding: 0.5rem 0.625rem;
   background: var(--bg-primary, #0d1117);
   border: 1px solid var(--border-color, #30363d);
-  border-radius: 8px;
+  border-radius: 0.5rem;
   color: var(--text-primary, #e6edf3);
   font-size: 0.82rem;
   outline: none;
@@ -100,13 +100,13 @@
 .projectList {
   flex: 1;
   overflow-y: auto;
-  padding: 0 8px 12px;
+  padding: 0 0.5rem 0.75rem;
 }
 
 .emptyNote {
   color: var(--text-secondary, #8b949e);
   font-size: 0.8rem;
-  padding: 12px;
+  padding: 0.75rem;
   text-align: center;
   line-height: 1.5;
 }
@@ -115,11 +115,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
-  padding: 9px 10px;
-  border-radius: 8px;
+  gap: 0.375rem;
+  padding: 0.5625rem 0.625rem;
+  border-radius: 0.5rem;
   cursor: pointer;
-  margin-bottom: 2px;
+  margin-bottom: 0.125rem;
 }
 
 .projectItem:hover {
@@ -147,7 +147,7 @@
 .projectDate {
   color: var(--text-secondary, #8b949e);
   font-size: 0.72rem;
-  margin-top: 2px;
+  margin-top: 0.125rem;
 }
 
 .deleteBtn {
@@ -157,8 +157,8 @@
   cursor: pointer;
   font-size: 0.8rem;
   opacity: 0;
-  padding: 4px 6px;
-  border-radius: 6px;
+  padding: 0.25rem 0.375rem;
+  border-radius: 0.375rem;
   flex-shrink: 0;
 }
 
@@ -183,8 +183,8 @@
 .toolbar {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px 14px;
+  gap: 0.75rem;
+  padding: 0.5rem 0.875rem;
   background: var(--bg-tertiary, #1c2128);
   border-bottom: 1px solid var(--border-color, #30363d);
   flex-shrink: 0;
@@ -192,11 +192,11 @@
 
 .titleInput {
   flex: 1;
-  max-width: 360px;
-  padding: 7px 10px;
+  max-width: 22.5rem;
+  padding: 0.4375rem 0.625rem;
   background: var(--bg-primary, #0d1117);
   border: 1px solid var(--border-color, #30363d);
-  border-radius: 8px;
+  border-radius: 0.5rem;
   color: var(--text-primary, #e6edf3);
   font-size: 0.88rem;
   font-weight: 600;
@@ -211,21 +211,21 @@
   font-size: 0.75rem;
   color: #e3b341;
   background: rgba(227, 179, 65, 0.12);
-  padding: 5px 10px;
-  border-radius: 6px;
+  padding: 0.3125rem 0.625rem;
+  border-radius: 0.375rem;
   white-space: nowrap;
 }
 
 .toolbarActions {
   margin-left: auto;
   display: flex;
-  gap: 8px;
+  gap: 0.5rem;
 }
 
 .saveBtn,
 .shareBtn {
-  padding: 7px 16px;
-  border-radius: 8px;
+  padding: 0.4375rem 1rem;
+  border-radius: 0.5rem;
   font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
@@ -275,15 +275,15 @@
 
 .tabBar {
   display: flex;
-  gap: 2px;
+  gap: 0.125rem;
   background: var(--bg-tertiary, #1c2128);
   border-bottom: 1px solid var(--border-color, #30363d);
-  padding: 0 8px;
+  padding: 0 0.5rem;
   flex-shrink: 0;
 }
 
 .tab {
-  padding: 10px 18px;
+  padding: 0.625rem 1.125rem;
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
@@ -310,7 +310,7 @@
 
 /* ----- Resizer ----- */
 .resizer {
-  width: 6px;
+  width: 0.375rem;
   flex-shrink: 0;
   cursor: col-resize;
   background: var(--bg-tertiary, #1c2128);
@@ -329,9 +329,9 @@
 }
 
 .resizerGrip {
-  width: 2px;
-  height: 36px;
-  border-radius: 2px;
+  width: 0.125rem;
+  height: 2.25rem;
+  border-radius: 0.125rem;
   background: var(--border-color, #30363d);
   transition: background 0.15s ease;
 }
@@ -347,7 +347,7 @@
 }
 
 .previewHeader {
-  padding: 10px 18px;
+  padding: 0.625rem 1.125rem;
   background: var(--bg-tertiary, #1c2128);
   border-bottom: 1px solid var(--border-color, #30363d);
   color: var(--text-secondary, #8b949e);
@@ -368,8 +368,8 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  padding: 8px 18px;
-  border-radius: 8px;
+  padding: 0.5rem 1.125rem;
+  border-radius: 0.5rem;
   background: rgba(15, 20, 25, 0.55);
   backdrop-filter: blur(4px);
   color: #fff;
@@ -398,15 +398,15 @@
 }
 
 .consoleOpen {
-  height: 180px;
+  height: 11.25rem;
 }
 
 .consoleHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 12px;
-  height: 34px;
+  padding: 0 0.75rem;
+  height: 2.125rem;
   flex-shrink: 0;
   background: var(--bg-tertiary, #1c2128);
 }
@@ -414,7 +414,7 @@
 .consoleToggle {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.5rem;
   background: transparent;
   border: none;
   color: var(--text-primary, #e6edf3);
@@ -436,8 +436,8 @@
 .logBadge {
   background: #2f81f7;
   color: #fff;
-  border-radius: 10px;
-  padding: 1px 7px;
+  border-radius: 0.625rem;
+  padding: 1px 0.4375rem;
   font-size: 0.7rem;
   font-weight: 700;
 }
@@ -446,8 +446,8 @@
   background: transparent;
   border: 1px solid var(--border-color, #30363d);
   color: var(--text-secondary, #8b949e);
-  border-radius: 6px;
-  padding: 3px 10px;
+  border-radius: 0.375rem;
+  padding: 0.1875rem 0.625rem;
   font-size: 0.72rem;
   cursor: pointer;
 }
@@ -460,7 +460,7 @@
 .consoleBody {
   flex: 1;
   overflow-y: auto;
-  padding: 6px 12px;
+  padding: 0.375rem 0.75rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 0.8rem;
   line-height: 1.5;
@@ -472,7 +472,7 @@
 }
 
 .logLine {
-  padding: 2px 0;
+  padding: 0.125rem 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
   color: var(--text-primary, #e6edf3);
   white-space: pre-wrap;

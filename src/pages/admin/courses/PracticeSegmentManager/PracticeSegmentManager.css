@@ -1,6 +1,6 @@
 .practice-manager-page {
   padding: var(--spacing-lg);
-  max-width: 1400px;
+  max-width: 87.5rem;
   margin: 0 auto;
 }
 
@@ -28,9 +28,9 @@
 /* Content Layout */
 .practice-manager-page .content-layout {
   display: grid;
-  grid-template-columns: 280px 1fr;
+  grid-template-columns: 17.5rem 1fr;
   gap: var(--spacing-lg);
-  min-height: 600px;
+  min-height: 37.5rem;
 }
 
 /* Segments Sidebar */
@@ -54,7 +54,7 @@
 }
 
 .segments-list {
-  max-height: 500px;
+  max-height: 31.25rem;
   overflow-y: auto;
 }
 
@@ -99,7 +99,7 @@
 
 .segment-item-actions {
   display: flex;
-  gap: 4px;
+  gap: 0.25rem;
   opacity: 0;
   transition: opacity var(--transition-fast);
 }
@@ -112,8 +112,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 1.75rem;
+  height: 1.75rem;
   padding: 0;
   background: var(--bg-tertiary);
   border: none;
@@ -129,13 +129,13 @@
 }
 
 .segment-item-actions .icon-btn.delete:hover {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  background: color-mix(in srgb, var(--error) 10%, transparent);
+  color: var(--error);
 }
 
 .segment-item-actions .icon-btn svg {
-  width: 14px;
-  height: 14px;
+  width: 0.875rem;
+  height: 0.875rem;
 }
 
 .empty-sidebar {
@@ -163,8 +163,8 @@
 }
 
 .select-segment-message svg {
-  width: 64px;
-  height: 64px;
+  width: 4rem;
+  height: 4rem;
   color: var(--text-muted);
   opacity: 0.5;
   margin-bottom: var(--spacing-md);
@@ -208,7 +208,7 @@
   font-size: 0.75rem;
   color: var(--accent-primary);
   background: var(--accent-subtle);
-  padding: 2px 8px;
+  padding: 0.125rem 0.5rem;
   border-radius: var(--radius-sm);
 }
 
@@ -248,11 +248,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.375rem;
   background: var(--bg-tertiary);
-  border-radius: 10px;
+  border-radius: 0.625rem;
   font-size: 0.7rem;
   font-weight: 600;
 }
@@ -288,7 +288,7 @@
   padding: var(--spacing-md);
   display: flex;
   flex-direction: column;
-  max-height: 500px;
+  max-height: 31.25rem;
   overflow: hidden;
 }
 
@@ -306,12 +306,12 @@
   background: var(--bg-input);
   border: var(--border-sm) solid var(--border-color);
   border-radius: var(--radius-md);
-  min-width: 200px;
+  min-width: 12.5rem;
 }
 
 .search-box svg {
-  width: 16px;
-  height: 16px;
+  width: 1rem;
+  height: 1rem;
   color: var(--text-muted);
   flex-shrink: 0;
 }
@@ -368,7 +368,7 @@
   font-size: 0.7rem;
   color: var(--text-muted);
   background: var(--bg-tertiary);
-  padding: 2px 6px;
+  padding: 0.125rem 0.375rem;
   border-radius: var(--radius-sm);
 }
 
@@ -377,7 +377,7 @@
   font-size: 0.75rem;
   color: var(--accent-primary);
   background: var(--accent-subtle);
-  padding: 2px 6px;
+  padding: 0.125rem 0.375rem;
   border-radius: var(--radius-sm);
   flex-shrink: 0;
 }
@@ -400,7 +400,7 @@
 }
 
 .question-item .badge {
-  padding: 2px 8px;
+  padding: 0.125rem 0.5rem;
   border-radius: var(--radius-sm);
   font-size: 0.65rem;
   font-weight: 600;
@@ -408,21 +408,21 @@
 }
 
 .question-item .badge.level {
-  background: rgba(34, 197, 94, 0.1);
-  color: #22c55e;
+  background: color-mix(in srgb, var(--success) 10%, transparent);
+  color: var(--success);
 }
 
 .question-item .badge.bank {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  background: color-mix(in srgb, var(--accent-primary) 10%, transparent);
+  color: var(--accent-primary);
 }
 
 .btn-remove {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 1.75rem;
+  height: 1.75rem;
   padding: 0;
   background: var(--bg-tertiary);
   border: none;
@@ -433,19 +433,19 @@
 }
 
 .btn-remove:hover {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  background: color-mix(in srgb, var(--error) 10%, transparent);
+  color: var(--error);
 }
 
 .btn-remove svg {
-  width: 14px;
-  height: 14px;
+  width: 0.875rem;
+  height: 0.875rem;
 }
 
 .btn-add {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 0.25rem;
   padding: var(--spacing-xs) var(--spacing-sm);
   background: var(--accent-primary);
   border: none;
@@ -464,8 +464,8 @@
 }
 
 .btn-add svg {
-  width: 14px;
-  height: 14px;
+  width: 0.875rem;
+  height: 0.875rem;
 }
 
 .empty-questions {
@@ -490,7 +490,7 @@
 }
 
 .available-list {
-  max-height: 400px;
+  max-height: 25rem;
   overflow-y: auto;
   overflow-x: hidden;
   flex: 1;
@@ -581,8 +581,8 @@
 }
 
 .practice-manager-page .back-btn svg {
-  width: 18px;
-  height: 18px;
+  width: 1.125rem;
+  height: 1.125rem;
 }
 
 .practice-manager-page .btn-primary,
@@ -625,8 +625,8 @@
 
 .practice-manager-page .btn-primary svg,
 .practice-manager-page .btn-secondary svg {
-  width: 18px;
-  height: 18px;
+  width: 1.125rem;
+  height: 1.125rem;
 }
 
 .practice-manager-page .loading-state {
@@ -643,11 +643,11 @@
   }
 
   .segments-sidebar {
-    max-height: 200px;
+    max-height: 12.5rem;
   }
 
   .segments-list {
-    max-height: 150px;
+    max-height: 9.375rem;
   }
 }
 

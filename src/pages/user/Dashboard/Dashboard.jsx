@@ -16,14 +16,14 @@ import styles from './Dashboard.module.css'
 
 // Pie chart colors — theme-aligned
 const COURSE_COLORS = {
-  published: '#3d8a6a',
-  draft: '#b8862e',
-  inProgress: '#2f5d8a'
+  published: 'var(--success)',
+  draft: 'var(--warning)',
+  inProgress: 'var(--accent-primary)'
 }
 
 const ADMIN_COLORS = {
-  published: '#3d8a6a',
-  draft: '#b8862e'
+  published: 'var(--success)',
+  draft: 'var(--warning)'
 }
 
 const ChartTooltip = ({ active, payload }) => {

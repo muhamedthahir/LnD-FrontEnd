@@ -89,7 +89,7 @@
 }
 
 .course-edit-content {
-  min-height: 400px;
+  min-height: 25rem;
 }
 
 .sections-tab {
@@ -111,8 +111,8 @@
 }
 
 .empty-sections .empty-state-icon {
-  width: 80px;
-  height: 80px;
+  width: 5rem;
+  height: 5rem;
   margin-bottom: var(--spacing-lg);
   color: var(--text-secondary);
   opacity: 0.5;
@@ -149,13 +149,6 @@
   font-weight: 600;
   color: var(--text-primary);
   margin-bottom: var(--spacing-md);
-}
-
-.form-actions {
-  display: flex;
-  gap: var(--spacing-md);
-  margin-top: var(--spacing-md);
-  justify-content: flex-end;
 }
 
 .sections-list {
@@ -370,48 +363,6 @@
   margin: 0;
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xs);
-}
-
-.form-group label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-}
-
-.required {
-  color: var(--error);
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-  padding: var(--spacing-sm) var(--spacing-md);
-  background: var(--bg-input);
-  border: var(--border-sm) solid var(--border-color);
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
-  font-size: 0.875rem;
-  transition: all var(--transition-fast);
-  font-family: inherit;
-}
-
-.form-group textarea {
-  resize: vertical;
-  min-height: 80px;
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-  outline: none;
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 var(--spacing-xs) var(--accent-subtle);
-}
-
 .settings-tab {
   background: var(--bg-card);
   border: var(--border-sm) solid var(--border-color);
@@ -443,7 +394,7 @@
 .thumbnail-preview {
   position: relative;
   width: 100%;
-  max-width: 300px;
+  max-width: 18.75rem;
   border-radius: var(--radius-md);
   overflow: hidden;
 }
@@ -535,7 +486,8 @@
   color: var(--text-primary);
 }
 
-.tag button {
+.tag button,
+.tag-remove {
   background: transparent;
   border: none;
   color: var(--text-secondary);
@@ -543,15 +495,20 @@
   font-size: 1rem;
   line-height: 1;
   padding: 0;
-  width: 1rem;
-  height: 1rem;
+  width: 1.25rem;
+  height: 1.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: var(--radius-sm);
+  min-height: 0;
+  box-shadow: none;
 }
 
-.tag button:hover {
+.tag button:hover,
+.tag-remove:hover {
   color: var(--error);
+  background: var(--error-glow);
 }
 
 /* Content Type Tabs within Section */
@@ -590,31 +547,31 @@
 }
 
 .content-tab svg {
-  width: 16px;
-  height: 16px;
+  width: 1rem;
+  height: 1rem;
 }
 
 .content-tab .tab-count {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
+  min-width: 1.125rem;
+  height: 1.125rem;
+  padding: 0 0.3125rem;
   background: var(--bg-tertiary);
-  border-radius: 9px;
+  border-radius: 0.5625rem;
   font-size: 0.65rem;
   font-weight: 600;
 }
 
 .content-tab.active .tab-count {
   background: var(--accent-primary);
-  color: white;
+  color: var(--text-on-accent);
 }
 
 /* Tab Content Area */
 .tab-content {
-  min-height: 100px;
+  min-height: 6.25rem;
 }
 
 .tab-action-bar {
@@ -630,8 +587,8 @@
 }
 
 .tab-action-bar button svg {
-  width: 16px;
-  height: 16px;
+  width: 1rem;
+  height: 1rem;
 }
 
 /* Practice Segments List */
@@ -679,7 +636,7 @@
   font-size: 0.65rem;
   color: var(--accent-primary);
   background: var(--accent-subtle);
-  padding: 2px 6px;
+  padding: 0.125rem 0.375rem;
   border-radius: var(--radius-sm);
 }
 
@@ -703,8 +660,8 @@
 }
 
 .segment-stats .stat svg {
-  width: 14px;
-  height: 14px;
+  width: 0.875rem;
+  height: 0.875rem;
 }
 
 .practice-segment-actions {
@@ -720,9 +677,9 @@
 }
 
 .icon-btn.delete:hover {
-  background: rgba(239, 68, 68, 0.1);
-  border-color: #ef4444;
-  color: #ef4444;
+  background: color-mix(in srgb, var(--error) 10%, transparent);
+  border-color: var(--error);
+  color: var(--error);
 }
 
 /* Empty Message Enhancement */
@@ -768,8 +725,8 @@
 .toggle-switch {
   position: relative;
   display: inline-block;
-  width: 48px;
-  height: 26px;
+  width: 3rem;
+  height: 1.625rem;
   flex-shrink: 0;
 }
 
@@ -788,18 +745,18 @@
   bottom: 0;
   background-color: var(--bg-tertiary);
   transition: 0.3s;
-  border-radius: 26px;
+  border-radius: 1.625rem;
   border: 1px solid var(--border-color);
 }
 
 .toggle-slider:before {
   position: absolute;
   content: "";
-  height: 20px;
-  width: 20px;
-  left: 2px;
-  bottom: 2px;
-  background-color: white;
+  height: 1.25rem;
+  width: 1.25rem;
+  left: 0.125rem;
+  bottom: 0.125rem;
+  background-color: var(--bg-card);
   transition: 0.3s;
   border-radius: 50%;
   box-shadow: var(--shadow-sm);

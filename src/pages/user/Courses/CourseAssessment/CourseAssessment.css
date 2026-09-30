@@ -1,48 +1,15 @@
 .course-assessment-page {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  min-height: calc(100dvh - var(--layout-header-height));
+  height: calc(100dvh - var(--layout-header-height));
   overflow: hidden;
   background: var(--bg-primary);
 }
 
 /* Loading */
-.loading {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1rem;
-  color: var(--text-secondary);
-}
 
 /* Back Button */
-.btn-back {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-sm) var(--spacing-md);
-  background: var(--bg-secondary);
-  border: var(--border-sm) solid var(--border-color);
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  font-family: inherit;
-}
-
-.btn-back:hover {
-  background: var(--bg-tertiary);
-  border-color: var(--accent-primary);
-  color: var(--accent-primary);
-}
-
-.btn-back svg {
-  width: 1rem;
-  height: 1rem;
-}
 
 /* Assessment Intro */
 .assessment-intro {
@@ -54,7 +21,7 @@
 }
 
 .intro-card {
-  max-width: 600px;
+  max-width: 37.5rem;
   margin: var(--spacing-4xl) auto;
   background: var(--bg-card);
   border: var(--border-sm) solid var(--border-color);
@@ -67,12 +34,12 @@
   width: 4rem;
   height: 4rem;
   margin: 0 auto var(--spacing-xl);
-  background: rgba(139, 92, 246, 0.1);
+  background: var(--accent-subtle);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #8b5cf6;
+  color: var(--accent-primary);
 }
 
 .intro-icon svg {
@@ -206,8 +173,8 @@
 }
 
 .timer.warning {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  background: color-mix(in srgb, var(--error) 10%, transparent);
+  color: var(--error);
 }
 
 .timer svg {
@@ -308,7 +275,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
-  max-width: 700px;
+  max-width: 43.75rem;
 }
 
 .option-btn {
@@ -337,13 +304,13 @@
 }
 
 .option-btn.correct {
-  background: rgba(16, 185, 129, 0.1);
-  border-color: #10b981;
+  background: color-mix(in srgb, var(--success) 10%, transparent);
+  border-color: var(--success);
 }
 
 .option-btn.wrong {
-  background: rgba(239, 68, 68, 0.1);
-  border-color: #ef4444;
+  background: color-mix(in srgb, var(--error) 10%, transparent);
+  border-color: var(--error);
 }
 
 .option-btn:disabled {
@@ -371,14 +338,14 @@
 }
 
 .option-btn.correct .option-letter {
-  background: #10b981;
-  border-color: #10b981;
+  background: var(--success);
+  border-color: var(--success);
   color: white;
 }
 
 .option-btn.wrong .option-letter {
-  background: #ef4444;
-  border-color: #ef4444;
+  background: var(--error);
+  border-color: var(--error);
   color: white;
 }
 
@@ -394,11 +361,11 @@
 }
 
 .option-btn.correct .option-icon {
-  color: #10b981;
+  color: var(--success);
 }
 
 .option-btn.wrong .option-icon {
-  color: #ef4444;
+  color: var(--error);
 }
 
 .question-explanation {
@@ -407,7 +374,7 @@
   background: var(--bg-secondary);
   border-radius: var(--radius-md);
   border-left: 4px solid #8b5cf6;
-  max-width: 700px;
+  max-width: 43.75rem;
 }
 
 .question-explanation h4 {
@@ -463,7 +430,7 @@
 
 /* Question Palette */
 .question-palette {
-  width: 250px;
+  width: 15.625rem;
   background: var(--bg-card);
   border-left: var(--border-sm) solid var(--border-color);
   padding: var(--spacing-lg);
@@ -520,15 +487,15 @@
 }
 
 .palette-item.correct {
-  background: rgba(16, 185, 129, 0.1);
-  border-color: #10b981;
-  color: #10b981;
+  background: color-mix(in srgb, var(--success) 10%, transparent);
+  border-color: var(--success);
+  color: var(--success);
 }
 
 .palette-item.incorrect {
-  background: rgba(239, 68, 68, 0.1);
-  border-color: #ef4444;
-  color: #ef4444;
+  background: color-mix(in srgb, var(--error) 10%, transparent);
+  border-color: var(--error);
+  color: var(--error);
 }
 
 .palette-legend {
@@ -578,7 +545,7 @@
 }
 
 .results-card {
-  max-width: 700px;
+  max-width: 43.75rem;
   margin: var(--spacing-4xl) auto;
   background: var(--bg-card);
   border: var(--border-sm) solid var(--border-color);
@@ -604,13 +571,13 @@
 }
 
 .results-score.pass .score-circle {
-  border-color: #10b981;
-  background: rgba(16, 185, 129, 0.1);
+  border-color: var(--success);
+  background: color-mix(in srgb, var(--success) 10%, transparent);
 }
 
 .results-score.fail .score-circle {
-  border-color: #ef4444;
-  background: rgba(239, 68, 68, 0.1);
+  border-color: var(--error);
+  background: color-mix(in srgb, var(--error) 10%, transparent);
 }
 
 .score-value {
@@ -620,11 +587,11 @@
 }
 
 .results-score.pass .score-value {
-  color: #10b981;
+  color: var(--success);
 }
 
 .results-score.fail .score-value {
-  color: #ef4444;
+  color: var(--error);
 }
 
 .score-label {
@@ -686,13 +653,13 @@
 }
 
 .summary-item.correct {
-  background: rgba(16, 185, 129, 0.1);
-  color: #10b981;
+  background: color-mix(in srgb, var(--success) 10%, transparent);
+  color: var(--success);
 }
 
 .summary-item.incorrect {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  background: color-mix(in srgb, var(--error) 10%, transparent);
+  color: var(--error);
 }
 
 .summary-item:hover {
@@ -708,24 +675,6 @@
   display: flex;
   gap: var(--spacing-md);
   justify-content: center;
-}
-
-.btn-review {
-  padding: var(--spacing-sm) var(--spacing-lg);
-  background: var(--bg-secondary);
-  border: var(--border-sm) solid var(--border-color);
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  font-family: inherit;
-}
-
-.btn-review:hover {
-  background: var(--bg-tertiary);
-  border-color: var(--accent-primary);
 }
 
 .btn-finish {
@@ -748,7 +697,7 @@
 /* Responsive */
 @media (max-width: 1024px) {
   .question-palette {
-    width: 200px;
+    width: 12.5rem;
   }
   
   .palette-grid {
@@ -783,7 +732,7 @@
   
   .question-palette {
     width: 100%;
-    max-height: 200px;
+    max-height: 12.5rem;
     border-left: none;
     border-top: var(--border-sm) solid var(--border-color);
     order: 1;
@@ -808,7 +757,6 @@
     flex-direction: column;
   }
   
-  .btn-review,
   .btn-finish {
     width: 100%;
     text-align: center;
