@@ -1,0 +1,1105 @@
+{
+  "date": "2026-10-12",
+  "routes": [
+    "/",
+    "/login",
+    "/reset-password",
+    "/codeeditor",
+    "/playground",
+    "/playground/share/:shareId",
+    "/secure/assessment/:mappingId/take",
+    "/dashboard",
+    "/personal-details",
+    "/courses",
+    "/courses/user-courses",
+    "/courses/:id",
+    "/courses/:id/current",
+    "/courses/:courseId/practice/:practiceId",
+    "/courses/:courseId/quiz/:practiceId",
+    "/courses/:courseId/assessment/:segmentId",
+    "/assessments",
+    "/user/assessments",
+    "/user/assessments/:mappingId/start",
+    "/user/assessments/:mappingId/take",
+    "/user/assessments/:mappingId/results",
+    "/admin/institutions",
+    "CREATE_INSTITUTION_ROUTE",
+    "/admin/institutions/:id",
+    "/admin/mailer-templates/:id/edit",
+    "/admin/mailer-templates/:id",
+    "/admin/mailer-templates",
+    "/admin/settings",
+    "/admin/users",
+    "/admin/users/create",
+    "/admin/users/:id",
+    "/admin/assessments/management",
+    "/admin/assessments/create",
+    "/admin/assessments/:id/edit",
+    "/admin/assessments/configurations",
+    "/admin/assessments/:id/configurations",
+    "/admin/assessments/:id/configurations/create",
+    "/admin/assessments/administrations",
+    "/admin/assessments/administrators/:adminId/users",
+    "/admin/assessments/results/:mappingId",
+    "/admin/assessments/progress/:mappingId",
+    "/admin/groups",
+    "/admin/groups/create",
+    "/admin/groups/:id/edit",
+    "/admin/courses/management",
+    "/admin/courses/management/:id/edit",
+    "/admin/courses/:courseId/topics/:topicId/practice",
+    "/admin/courses/administrations",
+    "/admin/courses/administrations/create",
+    "/admin/courses/administrations/:id",
+    "/admin/courses/administrations/:id/users/:userId/progress",
+    "/admin/questions",
+    "/admin/questions/banks",
+    "/admin/questions/banks/create",
+    "/admin/questions/banks/:id",
+    "/admin/questions/banks/:id/edit",
+    "/admin/questions/list",
+    "/admin/questions/list/create",
+    "/admin/questions/list/:id",
+    "/admin/questions/list/:id/edit",
+    "/admin/questions/list/:id/testcases"
+  ],
+  "files": [
+    {
+      "file": "src/pages/admin/assessments/AssessmentAdministration/AssessmentAdministration.jsx",
+      "lines": 18,
+      "headings": [],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 0,
+      "forms": 0
+    },
+    {
+      "file": "src/pages/admin/assessments/AssessmentConfigurations/AssessmentConfigurations.jsx",
+      "lines": 222,
+      "headings": [
+        "Configurations",
+        "No Configurations"
+      ],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 3,
+      "forms": 0
+    },
+    {
+      "file": "src/pages/admin/assessments/AssessmentCreate/AssessmentCreate.jsx",
+      "lines": 192,
+      "headings": [
+        "Create New Assessment",
+        "Basic Information",
+        "Classification"
+      ],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 2,
+      "forms": 0
+    },
+    {
+      "file": "src/pages/admin/assessments/AssessmentEdit/AssessmentEdit.jsx",
+      "lines": 2058,
+      "headings": [
+        "Assessment not found",
+        "Assessment Segments",
+        "Add Questions to Segment"
+      ],
+      "modalStates": [
+        "showQuestionModal",
+        "showSegmentModal"
+      ],
+      "inlineStyles": 12,
+      "themeLiterals": 0,
+      "apiCalls": 23,
+      "forms": 0
+    },
+    {
+      "file": "src/pages/admin/assessments/AssessmentManagement/AssessmentManagement.jsx",
+      "lines": 239,
+      "headings": [
+        "Assessment Management",
+        "No Assessments Found",
+        "No Assessments Match Your Filters"
+      ],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 1,
+      "forms": 0
+    },
+    {
+      "file": "src/pages/admin/assessments/AssessmentResult/AssessmentResult.jsx",
+      "lines": 561,
+      "headings": [
+        "Assessment Progress Report",
+        "Student Information",
+        "Assessment & Configuration Details",
+        "Assessment Performance Overview",
+        "Segment-wise Performance",
+        "Proctoring Summary",
+        "Proctoring Logs"
+      ],
+      "modalStates": [],
+      "inlineStyles": 2,
+      "themeLiterals": 5,
+      "apiCalls": 2,
+      "forms": 0
+    },
+    {
+      "file": "src/pages/admin/assessments/AssessmentUserMapping/AssessmentUserMapping.jsx",
+      "lines": 1410,
+      "headings": [
+        "User Management",
+        "Add Users to Assessment",
+        "No users found"
+      ],
+      "modalStates": [
+        "openExtendModal",
+        "openConfirmModal"
+      ],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 16,
+      "forms": 0
+    },
+    {
+      "file": "src/pages/admin/assessments/ConfigurationCreate/ConfigurationCreate.jsx",
+      "lines": 1633,
+      "headings": [
+        "Basic Information",
+        "Timing Configuration",
+        "Proctoring Settings",
+        "Scoring Configuration",
+        "Question Settings",
+        "Access Control"
+      ],
+      "modalStates": [],
+      "inlineStyles": 30,
+      "themeLiterals": 0,
+      "apiCalls": 14,
+      "forms": 0
+    },
+    {
+      "file": "src/pages/admin/assessments/ConfigurationsList/ConfigurationsList.jsx",
+      "lines": 246,
+      "headings": [
+        "Configurations",
+        "No Configurations"
+      ],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 3,
+      "forms": 0
+    },
+    {
+      "file": "src/pages/admin/courses/CourseAdministrations/AdministrationDetail/AdministrationDetail.jsx",
+      "lines": 1698,
+      "headings": [
+        "Administration Details",
+        "Invite Candidates",
+        "Enrolled Users",
+        "Add Users",
+        "Delete Administration",
+        "Force Expire Course"
+      ],
+      "modalStates": [],
+      "inlineStyles": 1,
+      "themeLiterals": 2,
+      "apiCalls": 15,
+      "forms": 0
+    },
+    {
+      "file": "src/pages/admin/courses/CourseAdministrations/CourseAdministrations.jsx",
+      "lines": 1120,
+      "headings": [
+        "Course Administration",
+        "No Course Administrations Found",
+        "No Administrations Match Your Filters",
+        "Administration Details",
+        "Course Details",
+        "Invite and Share"
+      ],
+      "modalStates": [
+        "showCreateModal"
+      ],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 8,
+      "forms": 0
+    },
+    {
+      "file": "src/pages/admin/courses/CourseAdministrations/CreateAdministration/CreateAdministration.jsx",
+      "lines": 640,
+      "headings": [
+        "Administration Details",
+        "Course Details",
+        "Invite and Share"
+      ],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 5,
+      "forms": 2
+    },
+    {
+      "file": "src/pages/admin/courses/CourseAdministrations/ProgressReport/ProgressReport.jsx",
+      "lines": 543,
+      "headings": [
+        "Progress Report",
+        "Student Information",
+        "Course & Administration Details",
+        "Course Progress Overview",
+        "Topic-wise Progress"
+      ],
+      "modalStates": [],
+      "inlineStyles": 3,
+      "themeLiterals": 5,
+      "apiCalls": 1,
+      "forms": 0
+    },
+    {
+      "file": "src/pages/admin/courses/CoursesManagement/CourseEdit/CourseEdit.jsx",
+      "lines": 1366,
+      "headings": [
+        "No Sections Added",
+        "Edit Course Details",
+        "Thumbnail",
+        "Course Progression",
+        "Tags"
+      ],
+      "modalStates": [
+        "showLessonModal"
+      ],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 16,
+      "forms": 0
+    },
+    {
+      "file": "src/pages/admin/courses/CoursesManagement/CoursesManagement.jsx",
+      "lines": 478,
+      "headings": [
+        "Course Management",
+        "No Courses Found",
+        "Create New Course"
+      ],
+      "modalStates": [
+        "showCreateModal"
+      ],
+      "inlineStyles": 1,
+      "themeLiterals": 0,
+      "apiCalls": 3,
+      "forms": 0
+    },
+    {
+      "file": "src/pages/admin/courses/PracticeSegmentManager/PracticeSegmentManager.jsx",
+      "lines": 712,
+      "headings": [
+        "Practice Problems",
+        "Practice Segments",
+        "Select a Practice Segment",
+        "Current Questions",
+        "Add Questions"
+      ],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 9,
+      "forms": 0
+    },
+    {
+      "file": "src/pages/admin/Groups/CreateGroup/CreateGroup.jsx",
+      "lines": 662,
+      "headings": [
+        "Group Details",
+        "Select Students for Group"
+      ],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 8,
+      "forms": 1
+    },
+    {
+      "file": "src/pages/admin/Groups/Groups.jsx",
+      "lines": 298,
+      "headings": [
+        "Group Management",
+        "No Groups Found"
+      ],
+      "modalStates": [
+        "showDeleteModal"
+      ],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 3,
+      "forms": 0
+    },
+    {
+      "file": "src/pages/admin/Institutions/CreateInstitution/CreateInstitution.jsx",
+      "lines": 230,
+      "headings": [
+        "Create New Institution",
+        "Institution Details",
+        "College Admin Details"
+      ],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 1,
+      "forms": 1
+    },
+    {
+      "file": "src/pages/admin/Institutions/InstitutionDetail/InstitutionDetail.jsx",
+      "lines": 393,
+      "headings": [
+        "Institution",
+        "College admin",
+        "Institution",
+        "College admins"
+      ],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 2,
+      "forms": 1
+    },
+    {
+      "file": "src/pages/admin/Institutions/Institutions.jsx",
+      "lines": 197,
+      "headings": [
+        "Institutions Management",
+        "No Institutions Found"
+      ],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 1,
+      "forms": 0
+    },
+    {
+      "file": "src/pages/admin/MailerTemplates/MailerTemplateDetail.jsx",
+      "lines": 251,
+      "headings": [
+        "Edit template"
+      ],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 2,
+      "forms": 0
+    },
+    {
+      "file": "src/pages/admin/MailerTemplates/MailerTemplateForm.jsx",
+      "lines": 249,
+      "headings": [],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 0,
+      "forms": 1
+    },
+    {
+      "file": "src/pages/admin/MailerTemplates/MailerTemplates.jsx",
+      "lines": 566,
+      "headings": [
+        "Mailer Templates",
+        "Create New Template",
+        "No Templates Found",
+        "Preview Template"
+      ],
+      "modalStates": [
+        "showPreviewModal"
+      ],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 5,
+      "forms": 0
+    },
+    {
+      "file": "src/pages/admin/Questions/QuestionBankDetail.jsx",
+      "lines": 404,
+      "headings": [
+        "Description",
+        "Tags"
+      ],
+      "modalStates": [],
+      "inlineStyles": 1,
+      "themeLiterals": 0,
+      "apiCalls": 2,
+      "forms": 0
+    },
+    {
+      "file": "src/pages/admin/Questions/QuestionBankForm.jsx",
+      "lines": 340,
+      "headings": [
+        "Basic Information",
+        "Settings"
+      ],
+      "modalStates": [],
+      "inlineStyles": 1,
+      "themeLiterals": 1,
+      "apiCalls": 4,
+      "forms": 1
+    },
+    {
+      "file": "src/pages/admin/Questions/QuestionBanks.jsx",
+      "lines": 231,
+      "headings": [
+        "Question Banks",
+        "No Question Banks Found"
+      ],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 1,
+      "forms": 0
+    },
+    {
+      "file": "src/pages/admin/Questions/QuestionDetail.jsx",
+      "lines": 380,
+      "headings": [
+        "Problem Description",
+        "Scoring & Time",
+        "Tags",
+        "Help & Explanation",
+        "Hint",
+        "Explanation",
+        "Programming Configuration",
+        "Allowed Languages",
+        "Sample Input/Output",
+        "Sample Input",
+        "Sample Output",
+        "Constraints"
+      ],
+      "modalStates": [],
+      "inlineStyles": 1,
+      "themeLiterals": 0,
+      "apiCalls": 1,
+      "forms": 0
+    },
+    {
+      "file": "src/pages/admin/Questions/QuestionForm.jsx",
+      "lines": 1404,
+      "headings": [
+        "Select Question Type",
+        "Bulk Upload MCQ Questions",
+        "Bulk Upload Programming Questions",
+        "Basic Information",
+        "Classification",
+        "Scoring & Time",
+        "Additional Information",
+        "Programming Configuration",
+        "Sample I/O & Constraints",
+        "Code Templates (Starter Code)",
+        "Answer Options"
+      ],
+      "modalStates": [
+        "showBulkUploadModal",
+        "openBulkUploadModal"
+      ],
+      "inlineStyles": 3,
+      "themeLiterals": 1,
+      "apiCalls": 5,
+      "forms": 2
+    },
+    {
+      "file": "src/pages/admin/Questions/QuestionList.jsx",
+      "lines": 302,
+      "headings": [
+        "Questions",
+        "No Questions Found"
+      ],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 1,
+      "forms": 0
+    },
+    {
+      "file": "src/pages/admin/Questions/TestCaseManager.jsx",
+      "lines": 817,
+      "headings": [
+        "Manage Test Cases",
+        "No Test Cases Yet",
+        "Bulk Upload Test Cases"
+      ],
+      "modalStates": [
+        "showBulkUploadModal",
+        "openBulkUploadModal"
+      ],
+      "inlineStyles": 1,
+      "themeLiterals": 0,
+      "apiCalls": 7,
+      "forms": 2
+    },
+    {
+      "file": "src/pages/admin/Settings/Settings.jsx",
+      "lines": 512,
+      "headings": [
+        ""
+      ],
+      "modalStates": [
+        "showModal",
+        "showDeleteModal"
+      ],
+      "inlineStyles": 1,
+      "themeLiterals": 5,
+      "apiCalls": 3,
+      "forms": 1
+    },
+    {
+      "file": "src/pages/admin/Users/BulkResetModal.jsx",
+      "lines": 144,
+      "headings": [
+        "Bulk reset passwords"
+      ],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 0,
+      "forms": 1
+    },
+    {
+      "file": "src/pages/admin/Users/CreateUser/CreateUser.jsx",
+      "lines": 315,
+      "headings": [
+        "Create New User",
+        "User Details",
+        "Student Details"
+      ],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 4,
+      "forms": 1
+    },
+    {
+      "file": "src/pages/admin/Users/UserDetail/UserDetail.jsx",
+      "lines": 858,
+      "headings": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "modalStates": [
+        "showEditModal",
+        "showResetModal"
+      ],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 7,
+      "forms": 2
+    },
+    {
+      "file": "src/pages/admin/Users/Users.jsx",
+      "lines": 1213,
+      "headings": [
+        "User Administration",
+        "Create New User",
+        "No Users Found",
+        "Edit User Details",
+        "Reset Password",
+        "Add Users in Bulk"
+      ],
+      "modalStates": [
+        "showBulkUploadModal",
+        "showEditModal",
+        "showResetModal",
+        "showBulkResetModal",
+        "showDeleteModal"
+      ],
+      "inlineStyles": 6,
+      "themeLiterals": 0,
+      "apiCalls": 10,
+      "forms": 4
+    },
+    {
+      "file": "src/pages/CodeEditor/CodeEditor.jsx",
+      "lines": 1176,
+      "headings": [],
+      "modalStates": [],
+      "inlineStyles": 2,
+      "themeLiterals": 0,
+      "apiCalls": 3,
+      "forms": 1
+    },
+    {
+      "file": "src/pages/CodeEditor/CodeEditorLayout.jsx",
+      "lines": 123,
+      "headings": [
+        "Problem Description"
+      ],
+      "modalStates": [],
+      "inlineStyles": 2,
+      "themeLiterals": 0,
+      "apiCalls": 0,
+      "forms": 0
+    },
+    {
+      "file": "src/pages/Login/Login.jsx",
+      "lines": 480,
+      "headings": [
+        "Real-time Assessment",
+        "Track Progress",
+        "Skill Certification",
+        "Welcome Back"
+      ],
+      "modalStates": [
+        "showForgotPasswordModal"
+      ],
+      "inlineStyles": 2,
+      "themeLiterals": 0,
+      "apiCalls": 2,
+      "forms": 1
+    },
+    {
+      "file": "src/pages/PersonalDetails/PersonalDetails.jsx",
+      "lines": 415,
+      "headings": [
+        "Personal Details",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 2,
+      "forms": 1
+    },
+    {
+      "file": "src/pages/Playground/Playground.jsx",
+      "lines": 544,
+      "headings": [
+        "Hello Playground"
+      ],
+      "modalStates": [],
+      "inlineStyles": 2,
+      "themeLiterals": 6,
+      "apiCalls": 1,
+      "forms": 0
+    },
+    {
+      "file": "src/pages/ResetPassword/ResetPassword.jsx",
+      "lines": 132,
+      "headings": [
+        "Reset Password"
+      ],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 1,
+      "forms": 1
+    },
+    {
+      "file": "src/pages/user/Assessments/AssessmentResults/AssessmentResults.jsx",
+      "lines": 375,
+      "headings": [
+        "Results not available",
+        "Segment-wise Performance",
+        "Answer Review",
+        "How was your experience?"
+      ],
+      "modalStates": [
+        "showFeedbackModal"
+      ],
+      "inlineStyles": 1,
+      "themeLiterals": 0,
+      "apiCalls": 2,
+      "forms": 0
+    },
+    {
+      "file": "src/pages/user/Assessments/Assessments.jsx",
+      "lines": 428,
+      "headings": [
+        "My Assessments"
+      ],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 2,
+      "apiCalls": 3,
+      "forms": 0
+    },
+    {
+      "file": "src/pages/user/Assessments/AssessmentStart/AssessmentStart.jsx",
+      "lines": 496,
+      "headings": [
+        "Assessment not found",
+        "Instructions",
+        "Important Rules",
+        "Assessment Structure"
+      ],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 2,
+      "forms": 0
+    },
+    {
+      "file": "src/pages/user/Assessments/AssessmentTake/AssessmentTake.jsx",
+      "lines": 1814,
+      "headings": [
+        "Could not load assessment",
+        "No questions available for this segment",
+        "⛶ Fullscreen Required",
+        "Segments",
+        "Questions",
+        "⚠️ Exit Fullscreen?",
+        "Submit Assessment?",
+        "Submit Segment?",
+        "Segment Complete",
+        "⛔ Cannot Close Window",
+        "Tab Switch Limit Exceeded!",
+        "Tab Switch Detected!"
+      ],
+      "modalStates": [
+        "showSubmitModal",
+        "showSegmentEndModal",
+        "showSegmentSubmitModal",
+        "showFullscreenExitModal",
+        "showFullscreenRequiredModal",
+        "showTabSwitchModal"
+      ],
+      "inlineStyles": 4,
+      "themeLiterals": 0,
+      "apiCalls": 13,
+      "forms": 0
+    },
+    {
+      "file": "src/pages/user/Courses/CourseAssessment/CourseAssessment.jsx",
+      "lines": 518,
+      "headings": [
+        "Instructions",
+        "Assessment Complete",
+        "Question Summary",
+        "Questions"
+      ],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 2,
+      "forms": 0
+    },
+    {
+      "file": "src/pages/user/Courses/CourseOverview/CourseOverview.jsx",
+      "lines": 734,
+      "headings": [
+        "Course not found",
+        "Course Outcomes",
+        "Course Content"
+      ],
+      "modalStates": [],
+      "inlineStyles": 1,
+      "themeLiterals": 0,
+      "apiCalls": 6,
+      "forms": 0
+    },
+    {
+      "file": "src/pages/user/Courses/CurrentCourse/CurrentCourse.jsx",
+      "lines": 1049,
+      "headings": [
+        "Course not found",
+        "Course Content",
+        "Practice Exercise",
+        "Assessment"
+      ],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 12,
+      "forms": 0
+    },
+    {
+      "file": "src/pages/user/Courses/PracticeExercise/PracticeExercise.jsx",
+      "lines": 552,
+      "headings": [
+        "No questions available"
+      ],
+      "modalStates": [],
+      "inlineStyles": 2,
+      "themeLiterals": 0,
+      "apiCalls": 7,
+      "forms": 0
+    },
+    {
+      "file": "src/pages/user/Courses/UserCourses/UserCourses.jsx",
+      "lines": 285,
+      "headings": [
+        "My Courses",
+        "No Courses Found"
+      ],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 1,
+      "forms": 0
+    },
+    {
+      "file": "src/pages/user/Dashboard/Dashboard.jsx",
+      "lines": 463,
+      "headings": [
+        "",
+        "",
+        "Dashboard"
+      ],
+      "modalStates": [],
+      "inlineStyles": 1,
+      "themeLiterals": 2,
+      "apiCalls": 1,
+      "forms": 0
+    },
+    {
+      "file": "src/pages/user/Quiz/Quiz.jsx",
+      "lines": 914,
+      "headings": [
+        "Instructions",
+        "Quiz Completed!",
+        "Question Summary",
+        "Quiz Not Complete"
+      ],
+      "modalStates": [
+        "showConfirmModal"
+      ],
+      "inlineStyles": 1,
+      "themeLiterals": 2,
+      "apiCalls": 6,
+      "forms": 0
+    },
+    {
+      "file": "src/components/Button/Button.jsx",
+      "lines": 30,
+      "headings": [],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 0,
+      "forms": 0
+    },
+    {
+      "file": "src/components/ConfirmModal/ConfirmModal.jsx",
+      "lines": 42,
+      "headings": [],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 0,
+      "forms": 0
+    },
+    {
+      "file": "src/components/CourseCard/CourseCard.jsx",
+      "lines": 103,
+      "headings": [],
+      "modalStates": [],
+      "inlineStyles": 1,
+      "themeLiterals": 0,
+      "apiCalls": 0,
+      "forms": 0
+    },
+    {
+      "file": "src/components/DoubleInputModal/DoubleInputModal.jsx",
+      "lines": 93,
+      "headings": [],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 0,
+      "forms": 0
+    },
+    {
+      "file": "src/components/Dropdown/Dropdown.jsx",
+      "lines": 244,
+      "headings": [],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 0,
+      "forms": 0
+    },
+    {
+      "file": "src/components/Header/Header.jsx",
+      "lines": 252,
+      "headings": [],
+      "modalStates": [],
+      "inlineStyles": 1,
+      "themeLiterals": 0,
+      "apiCalls": 2,
+      "forms": 0
+    },
+    {
+      "file": "src/components/InputModal/InputModal.jsx",
+      "lines": 74,
+      "headings": [],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 0,
+      "forms": 0
+    },
+    {
+      "file": "src/components/Layout/Layout.jsx",
+      "lines": 241,
+      "headings": [],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 3,
+      "forms": 0
+    },
+    {
+      "file": "src/components/LessonModal/LessonModal.jsx",
+      "lines": 1121,
+      "headings": [],
+      "modalStates": [
+        "showLinkModal",
+        "showImageModal",
+        "showVideoModal"
+      ],
+      "inlineStyles": 3,
+      "themeLiterals": 4,
+      "apiCalls": 0,
+      "forms": 0
+    },
+    {
+      "file": "src/components/MediaPlayer/AudioPlayer.jsx",
+      "lines": 275,
+      "headings": [],
+      "modalStates": [],
+      "inlineStyles": 1,
+      "themeLiterals": 0,
+      "apiCalls": 0,
+      "forms": 0
+    },
+    {
+      "file": "src/components/MediaPlayer/DocumentViewer.jsx",
+      "lines": 637,
+      "headings": [],
+      "modalStates": [],
+      "inlineStyles": 1,
+      "themeLiterals": 0,
+      "apiCalls": 2,
+      "forms": 0
+    },
+    {
+      "file": "src/components/MediaPlayer/VideoPlayer.jsx",
+      "lines": 319,
+      "headings": [],
+      "modalStates": [],
+      "inlineStyles": 2,
+      "themeLiterals": 0,
+      "apiCalls": 0,
+      "forms": 0
+    },
+    {
+      "file": "src/components/Pagination/Pagination.jsx",
+      "lines": 132,
+      "headings": [],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 0,
+      "forms": 0
+    },
+    {
+      "file": "src/components/PasswordSetup/PasswordSetup.jsx",
+      "lines": 128,
+      "headings": [
+        "Set Your Password"
+      ],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 1,
+      "forms": 1
+    },
+    {
+      "file": "src/components/RichTextEditor/RichTextEditor.jsx",
+      "lines": 73,
+      "headings": [],
+      "modalStates": [],
+      "inlineStyles": 1,
+      "themeLiterals": 0,
+      "apiCalls": 0,
+      "forms": 0
+    },
+    {
+      "file": "src/components/SecureLayout/SecureLayout.jsx",
+      "lines": 182,
+      "headings": [
+        "Session Expired"
+      ],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 2,
+      "forms": 0
+    },
+    {
+      "file": "src/components/Sidebar/Sidebar.jsx",
+      "lines": 255,
+      "headings": [],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 0,
+      "forms": 0
+    },
+    {
+      "file": "src/components/Table/Table.jsx",
+      "lines": 19,
+      "headings": [],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 0,
+      "forms": 0
+    },
+    {
+      "file": "src/components/ThemedSelect/ThemedSelect.jsx",
+      "lines": 263,
+      "headings": [],
+      "modalStates": [],
+      "inlineStyles": 2,
+      "themeLiterals": 0,
+      "apiCalls": 0,
+      "forms": 0
+    },
+    {
+      "file": "src/components/ThemeToggle/ThemeToggle.jsx",
+      "lines": 36,
+      "headings": [],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 0,
+      "forms": 0
+    },
+    {
+      "file": "src/components/Toggle/Toggle.jsx",
+      "lines": 37,
+      "headings": [],
+      "modalStates": [],
+      "inlineStyles": 0,
+      "themeLiterals": 0,
+      "apiCalls": 0,
+      "forms": 0
+    }
+  ]
+}
