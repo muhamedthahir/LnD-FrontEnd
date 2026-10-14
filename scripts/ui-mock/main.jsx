@@ -27,6 +27,11 @@ localStorage.setItem('theme', theme)
 localStorage.setItem('accessToken', 'mock.' + btoa(JSON.stringify({ exp: 4102444800 })) + '.sig')
 localStorage.setItem('refreshToken', 'mock-refresh')
 localStorage.setItem('user', JSON.stringify(user))
+if (role === 'anonymous') {
+  localStorage.removeItem('accessToken')
+  localStorage.removeItem('refreshToken')
+  localStorage.removeItem('user')
+}
 if (params.get('sidebar')) localStorage.setItem('sidebarCollapsed', params.get('sidebar') === 'collapsed' ? 'true' : 'false')
 
 const json = (body, status = 200) =>
@@ -41,8 +46,25 @@ const paged = (list, url, key) => {
 function route$(method, path, url) {
   const p = path.replace(/^\/api/, '')
   let m
+  if (p === '/questions/bulk-upload/file') return {presignedUrl:BASE+'/test-storage-workbook',contentType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',importTicket:'synthetic-ticket'}
+  if (p === '/test-storage-workbook') return {}
+  if (/^\/questions\/bulk-upload\/(mcq|programming)$/.test(p)) return {created:3,createdQuestions:d.questions.slice(0,3),errors:[]}
+  if (/^\/test-cases\/bulk-upload\/\d+$/.test(p)) return {created:2,errors:[]}
+  const mcqs = d.questions.slice(0,3).map(q => ({...q, question_type:'MCQ', body:'Which statement best describes this concept?', options:[{id:1,text:'First option'},{id:2,text:'Second option'},{id:3,text:'Third option'}]}))
+  if (/^\/segments\/\d+$/.test(p)) return {id:1,name:'Core concepts assessment',segment_type:'assessment',content:JSON.stringify({questions:mcqs.map(q=>({...q,correct_answer:0,options:['First option','Second option','Third option']})),duration:20})}
+  if (/^\/test-cases\/question\/\d+$/.test(p)) return [{id:1,input:'campus',expected_output:'supmac',is_sample:true},{id:2,input:'zen',expected_output:'nez',is_sample:false}]
+  if (p === '/admin/users/bulk-reset/groups') return {groups:d.groups,total:d.groups.length}
+  if (/^\/practice-segments\/\d+\/(available-)?mcq-questions$/.test(p)) return mcqs
+  if (/^\/practice-segments\/\d+\/(available-)?programming-questions$/.test(p)) return d.questions.slice(0,2).map(q=>({...q,question_type:'PROGRAMMING'}))
+  if (/^\/practice-segments\/\d+$/.test(p)) return {id:1,name:'Core concepts practice',description:'Apply what you have learned.'}
+  if (/^\/questions\/\d+\/programming-details$/.test(p)) return {languages:d.languages,problem_statement:'Write a function that returns a reversed string.',test_cases:[],starter_code:'def reverse_string(value):\n    pass'}
+  if (/^\/assessment\/user\/assessments\/\d+\/results$/.test(p)) return {display_name:'Campus screening',assessment_title:'Programming foundations',score:75,passed:true,threshold_for_pass:60,correct_answers:3,total_questions:4,attempted:4,marks_obtained:75,total_marks:100,time_taken:900,segments:[{id:1,name:'Core concepts',score:75,percentage:75,total_questions:4}],show_feedback:false}
+  if (p === '/courses/my-courses') return d.courses.slice(0,4).map((c,i) => ({ ...c, course_id:c.id, course_name:c.name, course_description:c.short_description, status:i === 3 ? 'completed' : 'in_progress', progress_percentage: i === 3 ? 100 : 25 + i * 20 }))
+  if (p === '/assessment/my-assessments') return d.assessments.map(a => ({ ...a, mapping_id:a.id, assessment_title:a.title, status:'INVITED', total_duration:3600 }))
+  if (/^\/assessment\/user\/assessments\/\d+\/start-info$/.test(p)) return { assessment_title:'Programming foundations', total_duration:3600, total_questions:3, segment_count:1, threshold_for_pass:60, allow_back_navigation:true, max_attempts:2, instruction_page:'<p>Read each question carefully. Save your answers before submitting.</p>', segments:[{id:1,name:'Core concepts',question_count:3,duration:3600}] }
+  if (/^\/assessment\/user\/assessments\/\d+\/take$/.test(p)) return { display_name:'Campus screening', assessment_title:'Programming foundations', time_remaining:3600, total_duration:3600, current_segment_index:0, current_question_index:0, timing_mode:'OVERALL', proctoring:{}, questions:mcqs, segments:[{id:1,name:'Core concepts',segment_type:'MCQ',duration:3600,questions:d.questions.slice(0,3).map(q => ({...q,question_type:'MCQ',options:[{id:1,text:'First option'},{id:2,text:'Second option'},{id:3,text:'Third option'}]}))}], saved_answers:{} }
 
-  if (p.startsWith('/auth/check')) return { authenticated: true, user }
+  if (p.startsWith('/auth/check')) return { authenticated: role !== 'anonymous', user: role === 'anonymous' ? null : user }
   if (p.startsWith('/auth/refresh')) return { accessToken: localStorage.getItem('accessToken'), user }
 
   if (p === '/master-data/all') return { levels: d.levels, statuses: d.statuses, questionTypes: d.questionTypes, languages: d.languages, categories: d.categories, tags: d.tags }
@@ -139,7 +161,7 @@ function route$(method, path, url) {
   if (p === '/question-banks') return paged(d.questionBanks, url, 'questionBanks')
   if ((m = p.match(/^\/question-banks\/(\d+)/))) return { questionBank: d.questionBanks[0], questions: d.questions.slice(0, 6), total: 6 }
   if (p === '/questions') return paged(d.questions, url, 'questions')
-  if ((m = p.match(/^\/questions\/(\d+)/))) return { question: d.questions[0], programmingQuestion: null, options: [{ id: 1, text: 'Option A', is_correct: true }, { id: 2, text: 'Option B', is_correct: false }], testCases: [] }
+  if ((m = p.match(/^\/questions\/(\d+)/))) return { question: d.questions.find(q => q.id === Number(m[1])) || d.questions[0], programmingQuestion: Number(m[1]) === 2 ? {id:2,problem_statement:'Return a reversed string',allowed_languages:['python','javascript'],time_limit:1000,memory_limit:256} : null, options: [{ id: 1, text: 'Option A', is_correct: true }, { id: 2, text: 'Option B', is_correct: false }], testCases: [] }
 
   if (p === '/mailer-templates') return { templates: d.mailerTemplates, total: d.mailerTemplates.length }
   if ((m = p.match(/^\/mailer-templates\/(\d+)/))) return { template: d.mailerTemplates[0], ...d.mailerTemplates[0] }

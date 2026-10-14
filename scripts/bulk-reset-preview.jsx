@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { ThemeProvider } from '../src/contexts/ThemeContext'
 import ThemeToggle from '../src/components/ThemeToggle/ThemeToggle'
-import BulkResetModal from '../src/pages/admin/Users/BulkResetModal'
+import BulkResetModal from '../src/features/admin/Users/BulkResetModal'
 import '../src/index.css'
 import '../src/pages/admin/Users/Users.css'
 

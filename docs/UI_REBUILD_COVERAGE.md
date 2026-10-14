@@ -1,90 +1,90 @@
 # UI rebuild coverage
 
-Source inventory completed October 12, 2026. Every row below must get a new view and recorded browser verification; the current status is planned. Automated source inspection is not visual acceptance.
+All 53 page modules and 21 shared components were replaced with the new presentation layer. Original routes and business logic remain connected. Browser verification and its limits are recorded in UI_REBUILD_VERIFICATION_2026-10.md; source migration alone is not visual acceptance.
 
 ## Pages and nested views
 
 | Source | Rebuild deliverable | Status |
 | --- | --- | --- |
-| `src/pages/admin/assessments/AssessmentAdministration/AssessmentAdministration.jsx` | New feature list/detail presentation, filters, empty/loading/error states | Planned |
-| `src/pages/admin/assessments/AssessmentConfigurations/AssessmentConfigurations.jsx` | New feature list/detail presentation, filters, empty/loading/error states | Planned |
-| `src/pages/admin/assessments/AssessmentCreate/AssessmentCreate.jsx` | New sectioned create/edit form and validation/saving states | Planned |
-| `src/pages/admin/assessments/AssessmentEdit/AssessmentEdit.jsx` | Assessment segment builder and question selection | Planned |
-| `src/pages/admin/assessments/AssessmentManagement/AssessmentManagement.jsx` | New feature list/detail presentation, filters, empty/loading/error states | Planned |
-| `src/pages/admin/assessments/AssessmentResult/AssessmentResult.jsx` | Metrics, structured report, accessible chart/table detail | Planned |
-| `src/pages/admin/assessments/AssessmentUserMapping/AssessmentUserMapping.jsx` | Enrollment table, user picker, extend-time/confirmation flows | Planned |
-| `src/pages/admin/assessments/ConfigurationCreate/ConfigurationCreate.jsx` | Configuration wizard with summary, timing/proctoring/scoring/access steps | Planned |
-| `src/pages/admin/assessments/ConfigurationsList/ConfigurationsList.jsx` | New feature list/detail presentation, filters, empty/loading/error states | Planned |
-| `src/pages/admin/courses/CourseAdministrations/AdministrationDetail/AdministrationDetail.jsx` | New detail workspace, contextual actions, editing and failure states | Planned |
-| `src/pages/admin/courses/CourseAdministrations/CourseAdministrations.jsx` | New feature list/detail presentation, filters, empty/loading/error states | Planned |
-| `src/pages/admin/courses/CourseAdministrations/CreateAdministration/CreateAdministration.jsx` | New sectioned create/edit form and validation/saving states | Planned |
-| `src/pages/admin/courses/CourseAdministrations/ProgressReport/ProgressReport.jsx` | Metrics, structured report, accessible chart/table detail | Planned |
-| `src/pages/admin/courses/CoursesManagement/CourseEdit/CourseEdit.jsx` | Curriculum builder and lesson editor | Planned |
-| `src/pages/admin/courses/CoursesManagement/CoursesManagement.jsx` | New feature list/detail presentation, filters, empty/loading/error states | Planned |
-| `src/pages/admin/courses/PracticeSegmentManager/PracticeSegmentManager.jsx` | New feature list/detail presentation, filters, empty/loading/error states | Planned |
-| `src/pages/admin/Groups/CreateGroup/CreateGroup.jsx` | New sectioned create/edit form and validation/saving states | Planned |
-| `src/pages/admin/Groups/Groups.jsx` | New feature list/detail presentation, filters, empty/loading/error states | Planned |
-| `src/pages/admin/Institutions/CreateInstitution/CreateInstitution.jsx` | New sectioned create/edit form and validation/saving states | Planned |
-| `src/pages/admin/Institutions/InstitutionDetail/InstitutionDetail.jsx` | New detail workspace, contextual actions, editing and failure states | Planned |
-| `src/pages/admin/Institutions/Institutions.jsx` | New feature list/detail presentation, filters, empty/loading/error states | Planned |
-| `src/pages/admin/MailerTemplates/MailerTemplateDetail.jsx` | New detail workspace, contextual actions, editing and failure states | Planned |
-| `src/pages/admin/MailerTemplates/MailerTemplateForm.jsx` | Template composition form, preview, validation | Planned |
-| `src/pages/admin/MailerTemplates/MailerTemplates.jsx` | New feature list/detail presentation, filters, empty/loading/error states | Planned |
-| `src/pages/admin/Questions/QuestionBankDetail.jsx` | New detail workspace, contextual actions, editing and failure states | Planned |
-| `src/pages/admin/Questions/QuestionBankForm.jsx` | New sectioned create/edit form and validation/saving states | Planned |
-| `src/pages/admin/Questions/QuestionBanks.jsx` | New feature list/detail presentation, filters, empty/loading/error states | Planned |
-| `src/pages/admin/Questions/QuestionDetail.jsx` | New detail workspace, contextual actions, editing and failure states | Planned |
-| `src/pages/admin/Questions/QuestionForm.jsx` | MCQ/programming authoring, preview, bulk import | Planned |
-| `src/pages/admin/Questions/QuestionList.jsx` | New feature list/detail presentation, filters, empty/loading/error states | Planned |
-| `src/pages/admin/Questions/TestCaseManager.jsx` | Test-case table/editor and import wizard | Planned |
-| `src/pages/admin/Settings/Settings.jsx` | Settings categories, master-data editor and delete confirmation | Planned |
-| `src/pages/admin/Users/BulkResetModal.jsx` | Group impact/password confirmation dialog | Planned |
-| `src/pages/admin/Users/CreateUser/CreateUser.jsx` | New sectioned create/edit form and validation/saving states | Planned |
-| `src/pages/admin/Users/UserDetail/UserDetail.jsx` | New detail workspace, contextual actions, editing and failure states | Planned |
-| `src/pages/admin/Users/Users.jsx` | User directory and every edit/reset/delete/import state | Planned |
-| `src/pages/CodeEditor/CodeEditor.jsx` | Resizable code/problem/files/console workspace | Planned |
-| `src/pages/CodeEditor/CodeEditorLayout.jsx` | Resizable code/problem/files/console workspace | Planned |
-| `src/pages/Login/Login.jsx` | Authentication/recovery layout and error states | Planned |
-| `src/pages/PersonalDetails/PersonalDetails.jsx` | New detail workspace, contextual actions, editing and failure states | Planned |
-| `src/pages/Playground/Playground.jsx` | Resizable code/problem/files/console workspace | Planned |
-| `src/pages/ResetPassword/ResetPassword.jsx` | Authentication/recovery layout and error states | Planned |
-| `src/pages/user/Assessments/AssessmentResults/AssessmentResults.jsx` | Metrics, structured report, accessible chart/table detail | Planned |
-| `src/pages/user/Assessments/Assessments.jsx` | New feature list/detail presentation, filters, empty/loading/error states | Planned |
-| `src/pages/user/Assessments/AssessmentStart/AssessmentStart.jsx` | Readiness/instructions/permissions/start flow | Planned |
-| `src/pages/user/Assessments/AssessmentTake/AssessmentTake.jsx` | Secure assessment workspace, timer/save/question navigation, all proctoring dialogs | Planned |
-| `src/pages/user/Courses/CourseAssessment/CourseAssessment.jsx` | Test instructions, answers, navigation, submission, results | Planned |
-| `src/pages/user/Courses/CourseOverview/CourseOverview.jsx` | New feature list/detail presentation, filters, empty/loading/error states | Planned |
-| `src/pages/user/Courses/CurrentCourse/CurrentCourse.jsx` | Curriculum and lesson player with responsive pane controls | Planned |
-| `src/pages/user/Courses/PracticeExercise/PracticeExercise.jsx` | Practice question/editor/results workspace | Planned |
-| `src/pages/user/Courses/UserCourses/UserCourses.jsx` | New feature list/detail presentation, filters, empty/loading/error states | Planned |
-| `src/pages/user/Dashboard/Dashboard.jsx` | Role-specific next-action dashboard | Planned |
-| `src/pages/user/Quiz/Quiz.jsx` | Test instructions, answers, navigation, submission, results | Planned |
+| `src/features/admin/assessments/AssessmentAdministration/AssessmentAdministration.jsx` | New feature list/detail presentation, filters, empty/loading/error states | Implemented |
+| `src/features/admin/assessments/AssessmentConfigurations/AssessmentConfigurations.jsx` | New feature list/detail presentation, filters, empty/loading/error states | Implemented |
+| `src/features/admin/assessments/AssessmentCreate/AssessmentCreate.jsx` | New sectioned create/edit form and validation/saving states | Implemented |
+| `src/features/admin/assessments/AssessmentEdit/AssessmentEdit.jsx` | Assessment segment builder and question selection | Implemented |
+| `src/features/admin/assessments/AssessmentManagement/AssessmentManagement.jsx` | New feature list/detail presentation, filters, empty/loading/error states | Implemented |
+| `src/features/admin/assessments/AssessmentResult/AssessmentResult.jsx` | Metrics, structured report, accessible chart/table detail | Implemented |
+| `src/features/admin/assessments/AssessmentUserMapping/AssessmentUserMapping.jsx` | Enrollment table, user picker, extend-time/confirmation flows | Implemented |
+| `src/features/admin/assessments/ConfigurationCreate/ConfigurationCreate.jsx` | Configuration wizard with summary, timing/proctoring/scoring/access steps | Implemented |
+| `src/features/admin/assessments/ConfigurationsList/ConfigurationsList.jsx` | New feature list/detail presentation, filters, empty/loading/error states | Implemented |
+| `src/features/admin/courses/CourseAdministrations/AdministrationDetail/AdministrationDetail.jsx` | New detail workspace, contextual actions, editing and failure states | Implemented |
+| `src/features/admin/courses/CourseAdministrations/CourseAdministrations.jsx` | New feature list/detail presentation, filters, empty/loading/error states | Implemented |
+| `src/features/admin/courses/CourseAdministrations/CreateAdministration/CreateAdministration.jsx` | New sectioned create/edit form and validation/saving states | Implemented |
+| `src/features/admin/courses/CourseAdministrations/ProgressReport/ProgressReport.jsx` | Metrics, structured report, accessible chart/table detail | Implemented |
+| `src/features/admin/courses/CoursesManagement/CourseEdit/CourseEdit.jsx` | Curriculum builder and lesson editor | Implemented |
+| `src/features/admin/courses/CoursesManagement/CoursesManagement.jsx` | New feature list/detail presentation, filters, empty/loading/error states | Implemented |
+| `src/features/admin/courses/PracticeSegmentManager/PracticeSegmentManager.jsx` | New feature list/detail presentation, filters, empty/loading/error states | Implemented |
+| `src/features/admin/Groups/CreateGroup/CreateGroup.jsx` | New sectioned create/edit form and validation/saving states | Implemented |
+| `src/features/admin/Groups/Groups.jsx` | New feature list/detail presentation, filters, empty/loading/error states | Implemented |
+| `src/features/admin/Institutions/CreateInstitution/CreateInstitution.jsx` | New sectioned create/edit form and validation/saving states | Implemented |
+| `src/features/admin/Institutions/InstitutionDetail/InstitutionDetail.jsx` | New detail workspace, contextual actions, editing and failure states | Implemented |
+| `src/features/admin/Institutions/Institutions.jsx` | New feature list/detail presentation, filters, empty/loading/error states | Implemented |
+| `src/features/admin/MailerTemplates/MailerTemplateDetail.jsx` | New detail workspace, contextual actions, editing and failure states | Implemented |
+| `src/features/admin/MailerTemplates/MailerTemplateForm.jsx` | Template composition form, preview, validation | Implemented |
+| `src/features/admin/MailerTemplates/MailerTemplates.jsx` | New feature list/detail presentation, filters, empty/loading/error states | Implemented |
+| `src/features/admin/Questions/QuestionBankDetail.jsx` | New detail workspace, contextual actions, editing and failure states | Implemented |
+| `src/features/admin/Questions/QuestionBankForm.jsx` | New sectioned create/edit form and validation/saving states | Implemented |
+| `src/features/admin/Questions/QuestionBanks.jsx` | New feature list/detail presentation, filters, empty/loading/error states | Implemented |
+| `src/features/admin/Questions/QuestionDetail.jsx` | New detail workspace, contextual actions, editing and failure states | Implemented |
+| `src/features/admin/Questions/QuestionForm.jsx` | MCQ/programming authoring, preview, bulk import | Implemented |
+| `src/features/admin/Questions/QuestionList.jsx` | New feature list/detail presentation, filters, empty/loading/error states | Implemented |
+| `src/features/admin/Questions/TestCaseManager.jsx` | Test-case table/editor and import wizard | Implemented |
+| `src/features/admin/Settings/Settings.jsx` | Settings categories, master-data editor and delete confirmation | Implemented |
+| `src/features/admin/Users/BulkResetModal.jsx` | Group impact/password confirmation dialog | Implemented |
+| `src/features/admin/Users/CreateUser/CreateUser.jsx` | New sectioned create/edit form and validation/saving states | Implemented |
+| `src/features/admin/Users/UserDetail/UserDetail.jsx` | New detail workspace, contextual actions, editing and failure states | Implemented |
+| `src/features/admin/Users/Users.jsx` | User directory and every edit/reset/delete/import state | Implemented |
+| `src/features/CodeEditor/CodeEditor.jsx` | Resizable code/problem/files/console workspace | Implemented |
+| `src/features/CodeEditor/CodeEditorLayout.jsx` | Resizable code/problem/files/console workspace | Implemented |
+| `src/features/Login/Login.jsx` | Authentication/recovery layout and error states | Implemented |
+| `src/features/PersonalDetails/PersonalDetails.jsx` | New detail workspace, contextual actions, editing and failure states | Implemented |
+| `src/features/Playground/Playground.jsx` | Resizable code/problem/files/console workspace | Implemented |
+| `src/features/ResetPassword/ResetPassword.jsx` | Authentication/recovery layout and error states | Implemented |
+| `src/features/user/Assessments/AssessmentResults/AssessmentResults.jsx` | Metrics, structured report, accessible chart/table detail | Implemented |
+| `src/features/user/Assessments/Assessments.jsx` | New feature list/detail presentation, filters, empty/loading/error states | Implemented |
+| `src/features/user/Assessments/AssessmentStart/AssessmentStart.jsx` | Readiness/instructions/permissions/start flow | Implemented |
+| `src/features/user/Assessments/AssessmentTake/AssessmentTake.jsx` | Secure assessment workspace, timer/save/question navigation, all proctoring dialogs | Implemented |
+| `src/features/user/Courses/CourseAssessment/CourseAssessment.jsx` | Test instructions, answers, navigation, submission, results | Implemented |
+| `src/features/user/Courses/CourseOverview/CourseOverview.jsx` | New feature list/detail presentation, filters, empty/loading/error states | Implemented |
+| `src/features/user/Courses/CurrentCourse/CurrentCourse.jsx` | Curriculum and lesson player with responsive pane controls | Implemented |
+| `src/features/user/Courses/PracticeExercise/PracticeExercise.jsx` | Practice question/editor/results workspace | Implemented |
+| `src/features/user/Courses/UserCourses/UserCourses.jsx` | New feature list/detail presentation, filters, empty/loading/error states | Implemented |
+| `src/features/user/Dashboard/Dashboard.jsx` | Role-specific next-action dashboard | Implemented |
+| `src/features/user/Quiz/Quiz.jsx` | Test instructions, answers, navigation, submission, results | Implemented |
 
 ## Shared components
 
 | Existing source | Replacement | Status |
 | --- | --- | --- |
-| `src/components/Button/Button.jsx` | Button/IconButton variants | Planned |
-| `src/components/ConfirmModal/ConfirmModal.jsx` | AlertDialog | Planned |
-| `src/components/CourseCard/CourseCard.jsx` | CourseCard with structured metadata and next action | Planned |
-| `src/components/DoubleInputModal/DoubleInputModal.jsx` | Dialog + composed fields | Planned |
-| `src/components/Dropdown/Dropdown.jsx` | Popover/Menu with keyboard behavior | Planned |
-| `src/components/Header/Header.jsx` | TopBar + breadcrumbs/account menu | Planned |
-| `src/components/InputModal/InputModal.jsx` | Dialog + Field | Planned |
-| `src/components/Layout/Layout.jsx` | Administration/Student AppShell | Planned |
-| `src/components/LessonModal/LessonModal.jsx` | Lesson editor workspace and nested media dialogs | Planned |
-| `src/components/MediaPlayer/AudioPlayer.jsx` | Accessible audio controls | Planned |
-| `src/components/MediaPlayer/DocumentViewer.jsx` | Document toolbar/reader/zoom | Planned |
-| `src/components/MediaPlayer/VideoPlayer.jsx` | Accessible video controls | Planned |
-| `src/components/Pagination/Pagination.jsx` | Pagination + page-size control | Planned |
-| `src/components/PasswordSetup/PasswordSetup.jsx` | AuthPanel + PasswordField | Planned |
-| `src/components/RichTextEditor/RichTextEditor.jsx` | RichContentEditor | Planned |
-| `src/components/SecureLayout/SecureLayout.jsx` | SecureAssessmentShell | Planned |
-| `src/components/Sidebar/Sidebar.jsx` | RoleNavigation + mobile drawer | Planned |
-| `src/components/Table/Table.jsx` | DataTable | Planned |
-| `src/components/ThemedSelect/ThemedSelect.jsx` | Select/Combobox | Planned |
-| `src/components/ThemeToggle/ThemeToggle.jsx` | ThemeSwitch | Planned |
-| `src/components/Toggle/Toggle.jsx` | Switch | Planned |
+| `src/components/Button/Button.jsx` | Button/IconButton variants | Implemented |
+| `src/components/ConfirmModal/ConfirmModal.jsx` | AlertDialog | Implemented |
+| `src/components/CourseCard/CourseCard.jsx` | CourseCard with structured metadata and next action | Implemented |
+| `src/components/DoubleInputModal/DoubleInputModal.jsx` | Dialog + composed fields | Implemented |
+| `src/components/Dropdown/Dropdown.jsx` | Popover/Menu with keyboard behavior | Implemented |
+| `src/components/Header/Header.jsx` | TopBar + breadcrumbs/account menu | Implemented |
+| `src/components/InputModal/InputModal.jsx` | Dialog + Field | Implemented |
+| `src/components/Layout/Layout.jsx` | Administration/Student AppShell | Implemented |
+| `src/components/LessonModal/LessonModal.jsx` | Lesson editor workspace and nested media dialogs | Implemented |
+| `src/components/MediaPlayer/AudioPlayer.jsx` | Accessible audio controls | Implemented |
+| `src/components/MediaPlayer/DocumentViewer.jsx` | Document toolbar/reader/zoom | Implemented |
+| `src/components/MediaPlayer/VideoPlayer.jsx` | Accessible video controls | Implemented |
+| `src/components/Pagination/Pagination.jsx` | Pagination + page-size control | Implemented |
+| `src/components/PasswordSetup/PasswordSetup.jsx` | AuthPanel + PasswordField | Implemented |
+| `src/components/RichTextEditor/RichTextEditor.jsx` | RichContentEditor | Implemented |
+| `src/components/SecureLayout/SecureLayout.jsx` | SecureAssessmentShell | Implemented |
+| `src/components/Sidebar/Sidebar.jsx` | RoleNavigation + mobile drawer | Implemented |
+| `src/components/Table/Table.jsx` | DataTable | Implemented |
+| `src/components/ThemedSelect/ThemedSelect.jsx` | Select/Combobox | Implemented |
+| `src/components/ThemeToggle/ThemeToggle.jsx` | ThemeSwitch | Implemented |
+| `src/components/Toggle/Toggle.jsx` | Switch | Implemented |
 
 ## Modal and transient state owners
 
@@ -92,38 +92,38 @@ Include inline `.modal-*` surfaces, dialogs not named Modal, dropdowns, popovers
 
 | Owner | State identifiers / surfaces | Status |
 | --- | --- | --- |
-| `src/pages/admin/assessments/AssessmentEdit/AssessmentEdit.jsx` | showPublishConfirm, showQuestionModal, showSegmentModal, editingSegment | Planned |
-| `src/pages/admin/assessments/AssessmentResult/AssessmentResult.jsx` | codeModalData | Planned |
-| `src/pages/admin/assessments/AssessmentUserMapping/AssessmentUserMapping.jsx` | showAddSection, confirmLoading, extendLoading, openExtendModal, openConfirmModal | Planned |
-| `src/pages/admin/courses/CourseAdministrations/AdministrationDetail/AdministrationDetail.jsx` | isEditing, showDeleteConfirm, showForceExpireConfirm, userToExpire | Planned |
-| `src/pages/admin/courses/CourseAdministrations/CourseAdministrations.jsx` | showCreateModal, editingAdministration | Planned |
-| `src/pages/admin/courses/CourseAdministrations/ProgressReport/ProgressReport.jsx` | codeModalData | Planned |
-| `src/pages/admin/courses/CoursesManagement/CourseEdit/CourseEdit.jsx` | showSectionForm, editingSection, editMode, showLessonModal, editingLesson, showDeleteConfirm, lessonToDelete, sectionIdForDelete, showDeleteSectionConfirm, sectionToDelete | Planned |
-| `src/pages/admin/courses/CoursesManagement/CoursesManagement.jsx` | showCreateModal, showNewCategoryInput | Planned |
-| `src/pages/admin/courses/PracticeSegmentManager/PracticeSegmentManager.jsx` | showSegmentForm, editingSegment | Planned |
-| `src/pages/admin/Groups/Groups.jsx` | showDeleteModal, groupToDelete | Planned |
-| `src/pages/admin/Institutions/InstitutionDetail/InstitutionDetail.jsx` | isEditing | Planned |
-| `src/pages/admin/MailerTemplates/MailerTemplates.jsx` | showForm, showPreviewModal, previewTemplate, renderedPreview | Planned |
-| `src/pages/admin/Questions/QuestionForm.jsx` | showBulkUploadModal, openBulkUploadModal | Planned |
-| `src/pages/admin/Questions/TestCaseManager.jsx` | showForm, editingTestCase, showBulkUploadModal, openBulkUploadModal | Planned |
-| `src/pages/admin/Settings/Settings.jsx` | showModal, showDeleteModal, selectedItem, isEditing | Planned |
-| `src/pages/admin/Users/BulkResetModal.jsx` | Shared dialog / conditional overlay | Planned |
-| `src/pages/admin/Users/UserDetail/UserDetail.jsx` | showEditModal, showResetModal | Planned |
-| `src/pages/admin/Users/Users.jsx` | showForm, showBulkUploadModal, showEditModal, showResetModal, showBulkResetModal, showDeleteModal, userToDelete, deleteError | Planned |
-| `src/pages/Login/Login.jsx` | showPassword, showForgotPasswordModal | Planned |
-| `src/pages/Playground/Playground.jsx` | consoleOpen | Planned |
-| `src/pages/user/Assessments/AssessmentResults/AssessmentResults.jsx` | showFeedbackModal, feedbackSubmitted | Planned |
-| `src/pages/user/Assessments/AssessmentStart/AssessmentStart.jsx` | showAccessCodeInput | Planned |
-| `src/pages/user/Assessments/AssessmentTake/AssessmentTake.jsx` | showQuestionNav, showSubmitModal, showSegmentEndModal, showSegmentSubmitModal, showCloseWarning, showFullscreenExitModal, showFullscreenRequiredModal, showTabSwitchModal | Planned |
-| `src/pages/user/Quiz/Quiz.jsx` | showConfirmModal | Planned |
-| `src/components/ConfirmModal/ConfirmModal.jsx` | Shared dialog / conditional overlay | Planned |
-| `src/components/DoubleInputModal/DoubleInputModal.jsx` | Shared dialog / conditional overlay | Planned |
-| `src/components/Dropdown/Dropdown.jsx` | isOpen | Planned |
-| `src/components/Header/Header.jsx` | showUserMenu | Planned |
-| `src/components/InputModal/InputModal.jsx` | Shared dialog / conditional overlay | Planned |
-| `src/components/Layout/Layout.jsx` | isSidebarOpen | Planned |
-| `src/components/LessonModal/LessonModal.jsx` | showTextColorPicker, showBgColorPicker, localMediaPreviewUrl, showLinkModal, showImageModal, showVideoModal | Planned |
-| `src/components/ThemedSelect/ThemedSelect.jsx` | open | Planned |
+| `src/features/admin/assessments/AssessmentEdit/AssessmentEdit.jsx` | showPublishConfirm, showQuestionModal, showSegmentModal, editingSegment | Implemented |
+| `src/features/admin/assessments/AssessmentResult/AssessmentResult.jsx` | codeModalData | Implemented |
+| `src/features/admin/assessments/AssessmentUserMapping/AssessmentUserMapping.jsx` | showAddSection, confirmLoading, extendLoading, openExtendModal, openConfirmModal | Implemented |
+| `src/features/admin/courses/CourseAdministrations/AdministrationDetail/AdministrationDetail.jsx` | isEditing, showDeleteConfirm, showForceExpireConfirm, userToExpire | Implemented |
+| `src/features/admin/courses/CourseAdministrations/CourseAdministrations.jsx` | showCreateModal, editingAdministration | Implemented |
+| `src/features/admin/courses/CourseAdministrations/ProgressReport/ProgressReport.jsx` | codeModalData | Implemented |
+| `src/features/admin/courses/CoursesManagement/CourseEdit/CourseEdit.jsx` | showSectionForm, editingSection, editMode, showLessonModal, editingLesson, showDeleteConfirm, lessonToDelete, sectionIdForDelete, showDeleteSectionConfirm, sectionToDelete | Implemented |
+| `src/features/admin/courses/CoursesManagement/CoursesManagement.jsx` | showCreateModal, showNewCategoryInput | Implemented |
+| `src/features/admin/courses/PracticeSegmentManager/PracticeSegmentManager.jsx` | showSegmentForm, editingSegment | Implemented |
+| `src/features/admin/Groups/Groups.jsx` | showDeleteModal, groupToDelete | Implemented |
+| `src/features/admin/Institutions/InstitutionDetail/InstitutionDetail.jsx` | isEditing | Implemented |
+| `src/features/admin/MailerTemplates/MailerTemplates.jsx` | showForm, showPreviewModal, previewTemplate, renderedPreview | Implemented |
+| `src/features/admin/Questions/QuestionForm.jsx` | showBulkUploadModal, openBulkUploadModal | Implemented |
+| `src/features/admin/Questions/TestCaseManager.jsx` | showForm, editingTestCase, showBulkUploadModal, openBulkUploadModal | Implemented |
+| `src/features/admin/Settings/Settings.jsx` | showModal, showDeleteModal, selectedItem, isEditing | Implemented |
+| `src/features/admin/Users/BulkResetModal.jsx` | Shared dialog / conditional overlay | Implemented |
+| `src/features/admin/Users/UserDetail/UserDetail.jsx` | showEditModal, showResetModal | Implemented |
+| `src/features/admin/Users/Users.jsx` | showForm, showBulkUploadModal, showEditModal, showResetModal, showBulkResetModal, showDeleteModal, userToDelete, deleteError | Implemented |
+| `src/features/Login/Login.jsx` | showPassword, showForgotPasswordModal | Implemented |
+| `src/features/Playground/Playground.jsx` | consoleOpen | Implemented |
+| `src/features/user/Assessments/AssessmentResults/AssessmentResults.jsx` | showFeedbackModal, feedbackSubmitted | Implemented |
+| `src/features/user/Assessments/AssessmentStart/AssessmentStart.jsx` | showAccessCodeInput | Implemented |
+| `src/features/user/Assessments/AssessmentTake/AssessmentTake.jsx` | showQuestionNav, showSubmitModal, showSegmentEndModal, showSegmentSubmitModal, showCloseWarning, showFullscreenExitModal, showFullscreenRequiredModal, showTabSwitchModal | Implemented |
+| `src/features/user/Quiz/Quiz.jsx` | showConfirmModal | Implemented |
+| `src/components/ConfirmModal/ConfirmModal.jsx` | Shared dialog / conditional overlay | Implemented |
+| `src/components/DoubleInputModal/DoubleInputModal.jsx` | Shared dialog / conditional overlay | Implemented |
+| `src/components/Dropdown/Dropdown.jsx` | isOpen | Implemented |
+| `src/components/Header/Header.jsx` | showUserMenu | Implemented |
+| `src/components/InputModal/InputModal.jsx` | Shared dialog / conditional overlay | Implemented |
+| `src/components/Layout/Layout.jsx` | isSidebarOpen | Implemented |
+| `src/components/LessonModal/LessonModal.jsx` | showTextColorPicker, showBgColorPicker, localMediaPreviewUrl, showLinkModal, showImageModal, showVideoModal | Implemented |
+| `src/components/ThemedSelect/ThemedSelect.jsx` | open | Implemented |
 
 ## Routes, including aliases and redirects
 

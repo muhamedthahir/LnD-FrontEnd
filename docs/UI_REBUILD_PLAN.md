@@ -4,6 +4,8 @@ Planning phase — October 12, 2026. This is the implementation specification, n
 
 ## Direction
 
+October 13 update from the user: remove page-purpose headers and their descriptive copy throughout the application. Put list actions beside filters; use a compact toolbar for essential record context, navigation and timers on detail/authoring screens. Restore the supplied CZ symbol on a light square and use that same asset for branding and favicon. These instructions supersede earlier page-heading/hero treatments.
+
 Build a calm, professional learning workspace with strong typography, clear task hierarchy, purposeful whitespace, and precise controls. Use the existing navy, blue, orange, neutral, and semantic colors in both themes. Replace the current shell, page composition, component markup, non-color tokens, CSS, typography scale, icon treatment, chart presentation, and interaction design. A page does not count as rebuilt merely because a shared stylesheet makes it look different.
 
 Start with three complete design prototypes: Users with import and password-reset dialogs; a student dashboard and course player; an assessment configuration wizard and timed assessment. Review these at desktop and mobile sizes in both themes before extending the patterns across all routes. These cover dense administration, content consumption, and high-stakes timed workflows.

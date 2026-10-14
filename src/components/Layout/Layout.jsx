@@ -5,7 +5,7 @@ import Sidebar from '../Sidebar/Sidebar'
 import Header from '../Header/Header'
 import { useApi } from '../../contexts/ApiContext'
 import { API_ENDPOINTS } from '../../constants/constants'
-import styles from './Layout.module.css'
+import { LoadingState } from '../../design/Primitives'
 
 function Layout() {
   const { apiBaseUrl, accessToken, refreshToken, clearTokens, setTokens } = useApi()
@@ -202,17 +202,18 @@ function Layout() {
 
   if (loading) {
     return (
-      <div className={styles.loading}>
+      <div className="cz-loading">
         <div className="spinner"></div>
       </div>
     )
   }
 
   return (
-    <div className={styles.layout}>
+    <div className="cz-shell">
+      <a href="#workspace-content" className="cz-skip-link">Skip to content</a>
       {isSidebarOpen && (
         <div
-          className={styles.sidebarBackdrop}
+          className="cz-shell-backdrop"
           onClick={() => setIsSidebarOpen(false)}
           aria-hidden="true"
         />
@@ -221,6 +222,7 @@ function Layout() {
         user={user} 
         isCollapsed={isSidebarCollapsed} 
         isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
       />
       <Header 
         user={user} 
@@ -228,8 +230,8 @@ function Layout() {
         onToggleSidebar={toggleSidebar}
         isSidebarCollapsed={isSidebarCollapsed}
       />
-      <main className={styles.main}>
-        <Suspense fallback={<div className={styles.loadingPage} role="status" aria-label="Loading page"><div className="spinner" /></div>}>
+      <main className="cz-workspace" id="workspace-content">
+        <Suspense fallback={<div className="cz-loading" role="status" aria-label="Loading page"><div className="spinner" /></div>}>
           <Outlet context={{ user, logout }} />
         </Suspense>
       </main>

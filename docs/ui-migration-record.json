@@ -1,0 +1,556 @@
+[
+  {
+    "old": "pages/admin/assessments/AssessmentAdministration/AssessmentAdministration.jsx",
+    "new": "features/admin/assessments/AssessmentAdministration/AssessmentAdministration.jsx",
+    "primitives": []
+  },
+  {
+    "old": "pages/admin/assessments/AssessmentConfigurations/AssessmentConfigurations.jsx",
+    "new": "features/admin/assessments/AssessmentConfigurations/AssessmentConfigurations.jsx",
+    "primitives": [
+      "PageContent",
+      "ActionButton",
+      "PageHeading"
+    ]
+  },
+  {
+    "old": "pages/admin/assessments/AssessmentCreate/AssessmentCreate.jsx",
+    "new": "features/admin/assessments/AssessmentCreate/AssessmentCreate.jsx",
+    "primitives": [
+      "ActionButton",
+      "PageHeading",
+      "FieldGroup",
+      "FieldRow",
+      "PageContent"
+    ]
+  },
+  {
+    "old": "pages/admin/assessments/AssessmentEdit/AssessmentEdit.jsx",
+    "new": "features/admin/assessments/AssessmentEdit/AssessmentEdit.jsx",
+    "primitives": [
+      "PageContent",
+      "ActionButton",
+      "PageHeading",
+      "FieldGroup",
+      "FieldRow"
+    ]
+  },
+  {
+    "old": "pages/admin/assessments/AssessmentManagement/AssessmentManagement.jsx",
+    "new": "features/admin/assessments/AssessmentManagement/AssessmentManagement.jsx",
+    "primitives": [
+      "PageHeading",
+      "Toolbar",
+      "FieldGroup",
+      "ActionButton",
+      "PageContent"
+    ]
+  },
+  {
+    "old": "pages/admin/assessments/AssessmentResult/AssessmentResult.jsx",
+    "new": "features/admin/assessments/AssessmentResult/AssessmentResult.jsx",
+    "primitives": [
+      "PageContent",
+      "ActionButton",
+      "PageHeading"
+    ]
+  },
+  {
+    "old": "pages/admin/assessments/AssessmentUserMapping/AssessmentUserMapping.jsx",
+    "new": "features/admin/assessments/AssessmentUserMapping/AssessmentUserMapping.jsx",
+    "primitives": [
+      "PageContent",
+      "ActionButton",
+      "PageHeading",
+      "Panel",
+      "FieldGroup",
+      "FieldRow"
+    ]
+  },
+  {
+    "old": "pages/admin/assessments/ConfigurationCreate/ConfigurationCreate.jsx",
+    "new": "features/admin/assessments/ConfigurationCreate/ConfigurationCreate.jsx",
+    "primitives": [
+      "PageContent",
+      "ActionButton",
+      "PageHeading",
+      "Panel",
+      "FieldGroup",
+      "FieldRow"
+    ]
+  },
+  {
+    "old": "pages/admin/assessments/ConfigurationsList/ConfigurationsList.jsx",
+    "new": "features/admin/assessments/ConfigurationsList/ConfigurationsList.jsx",
+    "primitives": [
+      "PageContent",
+      "PageHeading",
+      "ActionButton"
+    ]
+  },
+  {
+    "old": "pages/admin/courses/CourseAdministrations/AdministrationDetail/AdministrationDetail.jsx",
+    "new": "features/admin/courses/CourseAdministrations/AdministrationDetail/AdministrationDetail.jsx",
+    "primitives": [
+      "PageContent",
+      "ActionButton",
+      "Panel",
+      "FieldGroup",
+      "FieldRow",
+      "DialogLayer",
+      "DialogSurface"
+    ]
+  },
+  {
+    "old": "pages/admin/courses/CourseAdministrations/CourseAdministrations.jsx",
+    "new": "features/admin/courses/CourseAdministrations/CourseAdministrations.jsx",
+    "primitives": [
+      "PageHeading",
+      "ActionButton",
+      "Toolbar",
+      "FieldGroup",
+      "DialogLayer",
+      "DialogSurface",
+      "Panel",
+      "FieldRow",
+      "PageContent"
+    ]
+  },
+  {
+    "old": "pages/admin/courses/CourseAdministrations/CreateAdministration/CreateAdministration.jsx",
+    "new": "features/admin/courses/CourseAdministrations/CreateAdministration/CreateAdministration.jsx",
+    "primitives": [
+      "PageHeading",
+      "ActionButton",
+      "Panel",
+      "FieldGroup",
+      "FieldRow",
+      "PageContent"
+    ]
+  },
+  {
+    "old": "pages/admin/courses/CourseAdministrations/ProgressReport/ProgressReport.jsx",
+    "new": "features/admin/courses/CourseAdministrations/ProgressReport/ProgressReport.jsx",
+    "primitives": [
+      "PageContent",
+      "ActionButton",
+      "PageHeading"
+    ]
+  },
+  {
+    "old": "pages/admin/courses/CoursesManagement/CourseEdit/CourseEdit.jsx",
+    "new": "features/admin/courses/CoursesManagement/CourseEdit/CourseEdit.jsx",
+    "primitives": [
+      "PageContent",
+      "ActionButton",
+      "PageHeading",
+      "FieldGroup"
+    ]
+  },
+  {
+    "old": "pages/admin/courses/CoursesManagement/CoursesManagement.jsx",
+    "new": "features/admin/courses/CoursesManagement/CoursesManagement.jsx",
+    "primitives": [
+      "PageHeading",
+      "FieldGroup",
+      "DialogLayer",
+      "DialogSurface",
+      "PageContent"
+    ]
+  },
+  {
+    "old": "pages/admin/courses/PracticeSegmentManager/PracticeSegmentManager.jsx",
+    "new": "features/admin/courses/PracticeSegmentManager/PracticeSegmentManager.jsx",
+    "primitives": [
+      "PageContent",
+      "PageHeading",
+      "ActionButton",
+      "Panel",
+      "FieldGroup"
+    ]
+  },
+  {
+    "old": "pages/admin/Groups/CreateGroup/CreateGroup.jsx",
+    "new": "features/admin/Groups/CreateGroup/CreateGroup.jsx",
+    "primitives": [
+      "PageHeading",
+      "PageContent",
+      "ActionButton",
+      "Panel",
+      "FieldGroup"
+    ]
+  },
+  {
+    "old": "pages/admin/Groups/Groups.jsx",
+    "new": "features/admin/Groups/Groups.jsx",
+    "primitives": [
+      "PageHeading",
+      "ActionButton",
+      "Toolbar",
+      "FieldGroup",
+      "PageContent"
+    ]
+  },
+  {
+    "old": "pages/admin/Institutions/CreateInstitution/CreateInstitution.jsx",
+    "new": "features/admin/Institutions/CreateInstitution/CreateInstitution.jsx",
+    "primitives": [
+      "PageHeading",
+      "ActionButton",
+      "Panel",
+      "FieldGroup",
+      "FieldRow",
+      "PageContent"
+    ]
+  },
+  {
+    "old": "pages/admin/Institutions/InstitutionDetail/InstitutionDetail.jsx",
+    "new": "features/admin/Institutions/InstitutionDetail/InstitutionDetail.jsx",
+    "primitives": [
+      "PageContent",
+      "PageHeading",
+      "ActionButton",
+      "Panel",
+      "FieldGroup",
+      "FieldRow"
+    ]
+  },
+  {
+    "old": "pages/admin/Institutions/Institutions.jsx",
+    "new": "features/admin/Institutions/Institutions.jsx",
+    "primitives": [
+      "PageHeading",
+      "ActionButton",
+      "Toolbar",
+      "FieldGroup",
+      "PageContent"
+    ]
+  },
+  {
+    "old": "pages/admin/MailerTemplates/MailerTemplateDetail.jsx",
+    "new": "features/admin/MailerTemplates/MailerTemplateDetail.jsx",
+    "primitives": [
+      "PageContent",
+      "PageHeading",
+      "ActionButton",
+      "Panel"
+    ]
+  },
+  {
+    "old": "pages/admin/MailerTemplates/MailerTemplateForm.jsx",
+    "new": "features/admin/MailerTemplates/MailerTemplateForm.jsx",
+    "primitives": [
+      "FieldRow",
+      "FieldGroup",
+      "Panel",
+      "ActionButton"
+    ]
+  },
+  {
+    "old": "pages/admin/MailerTemplates/MailerTemplates.jsx",
+    "new": "features/admin/MailerTemplates/MailerTemplates.jsx",
+    "primitives": [
+      "PageHeading",
+      "ActionButton",
+      "Panel",
+      "FieldGroup",
+      "DialogLayer",
+      "DialogSurface",
+      "PageContent"
+    ]
+  },
+  {
+    "old": "pages/admin/Questions/QuestionBankDetail.jsx",
+    "new": "features/admin/Questions/QuestionBankDetail.jsx",
+    "primitives": [
+      "PageContent",
+      "PageHeading",
+      "ActionButton",
+      "Panel"
+    ]
+  },
+  {
+    "old": "pages/admin/Questions/QuestionBankForm.jsx",
+    "new": "features/admin/Questions/QuestionBankForm.jsx",
+    "primitives": [
+      "PageContent",
+      "PageHeading",
+      "ActionButton",
+      "Panel",
+      "FieldGroup",
+      "FieldRow"
+    ]
+  },
+  {
+    "old": "pages/admin/Questions/QuestionBanks.jsx",
+    "new": "features/admin/Questions/QuestionBanks.jsx",
+    "primitives": [
+      "PageHeading",
+      "ActionButton",
+      "FieldGroup",
+      "PageContent"
+    ]
+  },
+  {
+    "old": "pages/admin/Questions/QuestionDetail.jsx",
+    "new": "features/admin/Questions/QuestionDetail.jsx",
+    "primitives": [
+      "PageContent",
+      "PageHeading",
+      "ActionButton",
+      "Panel"
+    ]
+  },
+  {
+    "old": "pages/admin/Questions/QuestionForm.jsx",
+    "new": "features/admin/Questions/QuestionForm.jsx",
+    "primitives": [
+      "PageContent",
+      "PageHeading",
+      "ActionButton",
+      "Panel",
+      "FieldGroup",
+      "FieldRow",
+      "DialogLayer",
+      "DialogSurface"
+    ]
+  },
+  {
+    "old": "pages/admin/Questions/QuestionList.jsx",
+    "new": "features/admin/Questions/QuestionList.jsx",
+    "primitives": [
+      "PageHeading",
+      "ActionButton",
+      "FieldGroup",
+      "PageContent"
+    ]
+  },
+  {
+    "old": "pages/admin/Questions/TestCaseManager.jsx",
+    "new": "features/admin/Questions/TestCaseManager.jsx",
+    "primitives": [
+      "PageContent",
+      "PageHeading",
+      "ActionButton",
+      "Panel",
+      "FieldRow",
+      "FieldGroup",
+      "DialogLayer",
+      "DialogSurface"
+    ]
+  },
+  {
+    "old": "pages/admin/Settings/Settings.jsx",
+    "new": "features/admin/Settings/Settings.jsx",
+    "primitives": [
+      "ActionButton",
+      "PageHeading",
+      "DataTable",
+      "DialogLayer",
+      "DialogSurface",
+      "FieldGroup",
+      "PageContent"
+    ]
+  },
+  {
+    "old": "pages/admin/Users/BulkResetModal.jsx",
+    "new": "features/admin/Users/BulkResetModal.jsx",
+    "primitives": [
+      "ActionButton"
+    ]
+  },
+  {
+    "old": "pages/admin/Users/CreateUser/CreateUser.jsx",
+    "new": "features/admin/Users/CreateUser/CreateUser.jsx",
+    "primitives": [
+      "PageHeading",
+      "ActionButton",
+      "Panel",
+      "FieldGroup",
+      "PageContent"
+    ]
+  },
+  {
+    "old": "pages/admin/Users/UserDetail/UserDetail.jsx",
+    "new": "features/admin/Users/UserDetail/UserDetail.jsx",
+    "primitives": [
+      "PageContent",
+      "ActionButton",
+      "PageHeading",
+      "DialogLayer",
+      "DialogSurface",
+      "FieldRow",
+      "FieldGroup"
+    ]
+  },
+  {
+    "old": "pages/admin/Users/Users.jsx",
+    "new": "features/admin/Users/Users.jsx",
+    "primitives": [
+      "PageHeading",
+      "ActionButton",
+      "Panel",
+      "FieldRow",
+      "FieldGroup",
+      "Toolbar",
+      "DialogLayer",
+      "DialogSurface",
+      "PageContent"
+    ]
+  },
+  {
+    "old": "pages/CodeEditor/CodeEditor.jsx",
+    "new": "features/CodeEditor/CodeEditor.jsx",
+    "primitives": [
+      "ActionButton",
+      "PageContent"
+    ]
+  },
+  {
+    "old": "pages/CodeEditor/CodeEditorLayout.jsx",
+    "new": "features/CodeEditor/CodeEditorLayout.jsx",
+    "primitives": [
+      "PageHeading",
+      "PageContent"
+    ]
+  },
+  {
+    "old": "pages/Login/Login.jsx",
+    "new": "features/Login/Login.jsx",
+    "primitives": [
+      "FieldGroup",
+      "ActionButton",
+      "PageContent"
+    ]
+  },
+  {
+    "old": "pages/PersonalDetails/PersonalDetails.jsx",
+    "new": "features/PersonalDetails/PersonalDetails.jsx",
+    "primitives": [
+      "PageContent",
+      "PageHeading",
+      "ActionButton",
+      "FieldGroup"
+    ]
+  },
+  {
+    "old": "pages/Playground/Playground.jsx",
+    "new": "features/Playground/Playground.jsx",
+    "primitives": [
+      "ActionButton",
+      "PageContent"
+    ]
+  },
+  {
+    "old": "pages/ResetPassword/ResetPassword.jsx",
+    "new": "features/ResetPassword/ResetPassword.jsx",
+    "primitives": [
+      "ActionButton",
+      "PageContent"
+    ]
+  },
+  {
+    "old": "pages/user/Assessments/AssessmentResults/AssessmentResults.jsx",
+    "new": "features/user/Assessments/AssessmentResults/AssessmentResults.jsx",
+    "primitives": [
+      "PageContent",
+      "PageHeading",
+      "ActionButton",
+      "Panel",
+      "DialogLayer",
+      "DialogSurface"
+    ]
+  },
+  {
+    "old": "pages/user/Assessments/Assessments.jsx",
+    "new": "features/user/Assessments/Assessments.jsx",
+    "primitives": [
+      "PageContent",
+      "PageHeading"
+    ]
+  },
+  {
+    "old": "pages/user/Assessments/AssessmentStart/AssessmentStart.jsx",
+    "new": "features/user/Assessments/AssessmentStart/AssessmentStart.jsx",
+    "primitives": [
+      "PageContent",
+      "PageHeading",
+      "ActionButton",
+      "Panel"
+    ]
+  },
+  {
+    "old": "pages/user/Assessments/AssessmentTake/AssessmentTake.jsx",
+    "new": "features/user/Assessments/AssessmentTake/AssessmentTake.jsx",
+    "primitives": [
+      "PageContent",
+      "ActionButton",
+      "PageHeading"
+    ]
+  },
+  {
+    "old": "pages/user/Courses/CourseAssessment/CourseAssessment.jsx",
+    "new": "features/user/Courses/CourseAssessment/CourseAssessment.jsx",
+    "primitives": [
+      "PageContent",
+      "ActionButton",
+      "PageHeading"
+    ]
+  },
+  {
+    "old": "pages/user/Courses/CourseOverview/CourseOverview.jsx",
+    "new": "features/user/Courses/CourseOverview/CourseOverview.jsx",
+    "primitives": [
+      "PageContent",
+      "ActionButton",
+      "PageHeading"
+    ]
+  },
+  {
+    "old": "pages/user/Courses/CurrentCourse/CurrentCourse.jsx",
+    "new": "features/user/Courses/CurrentCourse/CurrentCourse.jsx",
+    "primitives": [
+      "PageContent",
+      "ActionButton"
+    ]
+  },
+  {
+    "old": "pages/user/Courses/PracticeExercise/PracticeExercise.jsx",
+    "new": "features/user/Courses/PracticeExercise/PracticeExercise.jsx",
+    "primitives": [
+      "PageContent",
+      "ActionButton",
+      "PageHeading"
+    ]
+  },
+  {
+    "old": "pages/user/Courses/UserCourses/UserCourses.jsx",
+    "new": "features/user/Courses/UserCourses/UserCourses.jsx",
+    "primitives": [
+      "PageHeading",
+      "Toolbar",
+      "FieldGroup",
+      "ActionButton",
+      "PageContent"
+    ]
+  },
+  {
+    "old": "pages/user/Dashboard/Dashboard.jsx",
+    "new": "features/user/Dashboard/Dashboard.jsx",
+    "primitives": [
+      "PageContent",
+      "ActionButton",
+      "PageHeading"
+    ]
+  },
+  {
+    "old": "pages/user/Quiz/Quiz.jsx",
+    "new": "features/user/Quiz/Quiz.jsx",
+    "primitives": [
+      "PageContent",
+      "ActionButton",
+      "PageHeading",
+      "DialogLayer"
+    ]
+  }
+]

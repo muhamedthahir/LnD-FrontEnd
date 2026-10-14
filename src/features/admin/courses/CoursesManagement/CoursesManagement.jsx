@@ -1,0 +1,407 @@
+import { FieldGroup, PageContent, Toolbar } from "../../../../design/Primitives";
+import { DialogLayer, DialogSurface } from "../../../../design/Dialog";
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useOutletContext, useNavigate } from 'react-router-dom';
+import Pagination from '../../../../components/Pagination/Pagination';
+import Button from '../../../../components/Button/Button';
+import CourseCard from '../../../../components/CourseCard/CourseCard';
+import { toast } from 'react-toastify';
+import { useApi } from '../../../../contexts/ApiContext';
+function CoursesManagement() {
+  const {
+    apiBaseUrl,
+    accessToken
+  } = useApi();
+  const {
+    user
+  } = useOutletContext();
+  const navigate = useNavigate();
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
+  const abortControllerRef = useRef(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [categories] = useState(['Python', 'Java', 'C', 'C++']);
+  const [newCategory, setNewCategory] = useState('');
+  const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    category: '',
+    competency_level: '',
+    short_description: '',
+    course_outcomes: '',
+    status: 'draft'
+  });
+  const [errors, setErrors] = useState({});
+  const fetchCourses = useCallback(async () => {
+    if (!apiBaseUrl) return;
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+    try {
+      setLoading(true);
+      const params = new URLSearchParams({
+        page: currentPage,
+        pageSize: pageSize,
+        ...(search && {
+          search
+        }),
+        ...(selectedCategory && {
+          category: selectedCategory
+        }),
+        ...(selectedStatus !== 'all' && {
+          status: selectedStatus
+        })
+      });
+      const response = await fetch(`${apiBaseUrl}/api/courses?${params}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && {
+            'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
+          })
+        },
+        signal: abortControllerRef.current.signal
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch courses');
+      }
+      const data = await response.json();
+      setCourses(data.courses || []);
+      setTotalCount(data.totalCount || 0);
+    } catch (error) {
+      if (error.name !== 'AbortError') {
+        console.error('Error fetching courses:', error);
+        toast.error('Failed to fetch courses');
+        setCourses([]);
+        setTotalCount(0);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [apiBaseUrl, accessToken, search, selectedCategory, selectedStatus, currentPage, pageSize]);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchCourses();
+    }, search ? 300 : 0);
+    return () => {
+      clearTimeout(timer);
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, [fetchCourses]);
+  const handleClearFilters = () => {
+    setSearch('');
+    setSelectedCategory('');
+    setSelectedStatus('all');
+    setCurrentPage(1);
+  };
+  const handleCreateCourse = () => {
+    setShowCreateModal(true);
+    setFormData({
+      name: '',
+      category: '',
+      competency_level: '',
+      short_description: '',
+      course_outcomes: '',
+      status: 'draft'
+    });
+    setErrors({});
+    setShowNewCategoryInput(false);
+    setNewCategory('');
+  };
+  const handleCategoryChange = e => {
+    const value = e.target.value;
+    if (value === 'other') {
+      setShowNewCategoryInput(true);
+      setFormData({
+        ...formData,
+        category: ''
+      });
+    } else {
+      setShowNewCategoryInput(false);
+      setFormData({
+        ...formData,
+        category: value
+      });
+      setNewCategory('');
+    }
+  };
+  const handleNewCategoryChange = e => {
+    const value = e.target.value;
+    setNewCategory(value);
+    setFormData({
+      ...formData,
+      category: value
+    });
+  };
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.name.trim()) {
+      newErrors.name = 'Course name is required';
+    }
+    if (!formData.category || !formData.category.trim()) {
+      newErrors.category = 'Category is required';
+    }
+    if (!formData.competency_level) {
+      newErrors.competency_level = 'Competency level is required';
+    }
+    if (!formData.short_description.trim()) {
+      newErrors.short_description = 'Short description is required';
+    }
+    if (!formData.course_outcomes.trim()) {
+      newErrors.course_outcomes = 'Course outcomes are required';
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+  const handleSaveAsDraft = async () => {
+    if (!validateForm()) {
+      return;
+    }
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/courses`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && {
+            'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
+          })
+        },
+        body: JSON.stringify({
+          ...formData,
+          status: 'draft'
+        })
+      });
+      if (!response.ok) {
+        throw new Error('Failed to save course as draft');
+      }
+      const data = await response.json();
+      toast.success('Course saved as draft successfully!');
+      setShowCreateModal(false);
+      setFormData({
+        name: '',
+        category: '',
+        competency_level: '',
+        short_description: '',
+        course_outcomes: '',
+        status: 'draft'
+      });
+      setErrors({});
+      setShowNewCategoryInput(false);
+      setNewCategory('');
+      fetchCourses();
+    } catch (error) {
+      console.error('Error saving course:', error);
+      toast.error('Failed to save course as draft');
+    }
+  };
+  const handleContinue = async () => {
+    if (!validateForm()) {
+      return;
+    }
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/courses`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && {
+            'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
+          })
+        },
+        body: JSON.stringify({
+          ...formData,
+          status: 'draft'
+        })
+      });
+      if (!response.ok) {
+        throw new Error('Failed to create course');
+      }
+      const data = await response.json();
+      toast.success('Course created successfully!');
+      setShowCreateModal(false);
+      setFormData({
+        name: '',
+        category: '',
+        competency_level: '',
+        short_description: '',
+        course_outcomes: '',
+        status: 'draft'
+      });
+      setErrors({});
+      setShowNewCategoryInput(false);
+      setNewCategory('');
+      navigate(`/admin/courses/management/${data.course.id}/edit`);
+    } catch (error) {
+      console.error('Error creating course:', error);
+      toast.error('Failed to create course');
+    }
+  };
+  const handleCancel = () => {
+    setShowCreateModal(false);
+    setFormData({
+      name: '',
+      category: '',
+      competency_level: '',
+      short_description: '',
+      course_outcomes: '',
+      status: 'draft'
+    });
+    setErrors({});
+    setShowNewCategoryInput(false);
+    setNewCategory('');
+  };
+  const filteredCourses = courses.filter(course => {
+    const matchesSearch = !search || course.name.toLowerCase().includes(search.toLowerCase());
+    const matchesCategory = !selectedCategory || course.category === selectedCategory;
+    const matchesStatus = selectedStatus === 'all' || course.status === selectedStatus;
+    return matchesSearch && matchesCategory && matchesStatus;
+  });
+  const uniqueCategories = [...new Set(courses.map(c => c.category).filter(Boolean))];
+  return <PageContent className="course-admin-page" view="CoursesManagement">
+      <div className="filters-section"><div className="cz-filter-actions"><Button variant="primary" onClick={handleCreateCourse}>
+          Create Course
+        </Button></div>
+              <div className="filters-left">
+                <FieldGroup className="filter-group">
+                  <label>Search</label>
+                  <input type="text" className="search-input" placeholder="Search by course name..." value={search} onChange={e => setSearch(e.target.value)} />
+                </FieldGroup>
+              </div>
+              <div className="filters-right">
+                <FieldGroup className="filter-group">
+                  <label>Category</label>
+                  <select className="filter-select" value={selectedCategory} onChange={e => setSelectedCategory(e.target.value)}>
+                    <option value="">All Categories</option>
+                    {uniqueCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                  </select>
+                </FieldGroup>
+                <FieldGroup className="filter-group">
+                  <label>Status</label>
+                  <select className="filter-select" value={selectedStatus} onChange={e => setSelectedStatus(e.target.value)}>
+                    <option value="all">All</option>
+                    <option value="published">Published</option>
+                    <option value="draft">Drafted</option>
+                  </select>
+                </FieldGroup>
+                <Button variant="clear-filters" onClick={handleClearFilters} title="Clear Filters">
+                  <svg viewBox="64 64 896 896" focusable="false" width="1em" height="1em" fill="currentColor" aria-hidden="true">
+                    <path d="M899.1 869.6l-53-305.6H864c14.4 0 26-11.6 26-26V346c0-14.4-11.6-26-26-26H618V138c0-14.4-11.6-26-26-26H432c-14.4 0-26 11.6-26 26v182H160c-14.4 0-26 11.6-26 26v192c0 14.4 11.6 26 26 26h17.9l-53 305.6a25.95 25.95 0 0025.6 30.4h723c1.5 0 3-.1 4.4-.4a25.88 25.88 0 0021.2-30zM204 390h272V182h72v208h272v104H204V390zm468 440V674c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v156H416V674c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v156H202.8l45.1-260H776l45.1 260H672z"></path>
+                  </svg>
+                </Button>
+              </div>
+            </div>
+
+
+
+
+
+      {loading ? <div className="loading">Loading courses...</div> : courses.length === 0 && !search && !selectedCategory && selectedStatus === 'all' ? <div className="empty-state">
+          <div className="empty-state-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+              <line x1="8" y1="7" x2="16" y2="7"></line>
+              <line x1="8" y1="11" x2="16" y2="11"></line>
+              <line x1="8" y1="15" x2="12" y2="15"></line>
+            </svg>
+          </div>
+          <h3>No Courses Found</h3>
+          <p>Get started by creating your first course to manage and publish.</p>
+        </div> : <>
+          <div className="courses-grid">
+
+
+              {filteredCourses.map(course => <CourseCard key={course.id} course={course} />)}
+            </div>
+
+            {totalCount > 0 && <div className="pagination-wrapper">
+                <Pagination currentPage={currentPage} pageSize={pageSize} totalCount={totalCount} onPageChange={setCurrentPage} onPageSizeChange={setPageSize} />
+              </div>}
+        </>}
+
+      {}
+      {showCreateModal && <DialogLayer className="modal-overlay" onClick={handleCancel}>
+          <DialogSurface className="modal-content create-course-modal" onClick={e => e.stopPropagation()}>
+            <h2>Create New Course</h2>
+
+            <FieldGroup className="form-group">
+              <label>Course Name <span className="required">*</span></label>
+              <input type="text" value={formData.name} onChange={e => setFormData({
+            ...formData,
+            name: e.target.value
+          })} className={errors.name ? 'error' : ''} placeholder="Enter course name" />
+              {errors.name && <div className="error-text">{errors.name}</div>}
+            </FieldGroup>
+
+            <FieldGroup className="form-group">
+              <label>Category <span className="required">*</span></label>
+              <select value={showNewCategoryInput ? 'other' : formData.category} onChange={handleCategoryChange} className={errors.category ? 'error' : 'filter-select create-course'}>
+                <option value="">Select Category</option>
+                {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                <option value="other">Other</option>
+              </select>
+              {showNewCategoryInput && <div className="new-category-input" style={{
+            marginTop: 'var(--spacing-sm)'
+          }}>
+                  <input type="text" value={newCategory} onChange={handleNewCategoryChange} placeholder="Enter category name" className={errors.category ? 'error' : ''} />
+                </div>}
+              {errors.category && <div className="error-text">{errors.category}</div>}
+            </FieldGroup>
+
+            <FieldGroup className="form-group">
+              <label>Competency Level <span className="required">*</span></label>
+              <select value={formData.competency_level} onChange={e => setFormData({
+            ...formData,
+            competency_level: e.target.value
+          })} className={errors.competency_level ? 'error' : 'filter-select create-course'}>
+                <option value="">Select Competency Level</option>
+                <option value="beginner">Beginner</option>
+                <option value="proficient">Proficient</option>
+                <option value="advanced">Advanced</option>
+                <option value="mastery">Mastery</option>
+                <option value="competency">Competency</option>
+              </select>
+              {errors.competency_level && <div className="error-text">{errors.competency_level}</div>}
+            </FieldGroup>
+
+            <FieldGroup className="form-group">
+              <label>Short Description <span className="required">*</span></label>
+              <textarea value={formData.short_description} onChange={e => setFormData({
+            ...formData,
+            short_description: e.target.value
+          })} className={errors.short_description ? 'error' : ''} placeholder="Enter a brief description of the course" rows="3" />
+              {errors.short_description && <div className="error-text">{errors.short_description}</div>}
+            </FieldGroup>
+
+            <FieldGroup className="form-group">
+              <label>Course Outcomes <span className="required">*</span></label>
+              <textarea value={formData.course_outcomes} onChange={e => setFormData({
+            ...formData,
+            course_outcomes: e.target.value
+          })} className={errors.course_outcomes ? 'error' : ''} placeholder="Describe what students will learn from this course" rows="4" />
+              {errors.course_outcomes && <div className="error-text">{errors.course_outcomes}</div>}
+            </FieldGroup>
+
+            <div className="modal-actions">
+              <Button variant="secondary" onClick={handleCancel}>
+                Cancel
+              </Button>
+              <Button variant="draft" onClick={handleSaveAsDraft}>
+                Save as Draft
+              </Button>
+              <Button variant="primary" onClick={handleContinue}>
+                Continue
+              </Button>
+            </div>
+          </DialogSurface>
+        </DialogLayer>}
+    </PageContent>;
+}
+export default CoursesManagement;
