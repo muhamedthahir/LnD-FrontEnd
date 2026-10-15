@@ -424,7 +424,7 @@ function CreateGroup() {
                   <input type="text" placeholder="Search students..." value={searchLeft} onChange={e => setSearchLeft(e.target.value)} className="search-input" />
                   <div className="student-list">
                     {paginatedLeftStudents.map(student => <div key={student.id} className={`student-item ${selectedStudentIds.includes(student.id) ? 'selected' : ''}`} onClick={() => toggleStudentSelection(student.id)}>
-                        <input type="checkbox" checked={selectedStudentIds.includes(student.id)} onClick={e => e.stopPropagation()} onChange={() => toggleStudentSelection(student.id)} />
+                        <input type="checkbox" aria-label={`Select ${student.name}`} checked={selectedStudentIds.includes(student.id)} onClick={e => e.stopPropagation()} onChange={() => toggleStudentSelection(student.id)} />
                         <div>
                           <div className="student-name">{student.name}</div>
                           <div className="student-email">{student.email}</div>
@@ -438,10 +438,10 @@ function CreateGroup() {
                 </div>
 
                 <div className="transfer-buttons">
-                  <ActionButton type="button" className="btn-transfer" onClick={handleMoveToRight} disabled={selectedStudentIds.filter(sid => availableStudents.some(s => s.id === sid)).length === 0}>
+                  <ActionButton type="button" aria-label="Add selected students" className="btn-transfer" onClick={handleMoveToRight} disabled={selectedStudentIds.filter(sid => availableStudents.some(s => s.id === sid)).length === 0}>
                     →
                   </ActionButton>
-                  <ActionButton type="button" className="btn-transfer" onClick={handleMoveToLeft} disabled={selectedStudentIds.filter(sid => groupStudents.some(s => s.id === sid)).length === 0}>
+                  <ActionButton type="button" aria-label="Remove selected students" className="btn-transfer" onClick={handleMoveToLeft} disabled={selectedStudentIds.filter(sid => groupStudents.some(s => s.id === sid)).length === 0}>
                     ←
                   </ActionButton>
                 </div>
@@ -459,7 +459,7 @@ function CreateGroup() {
                   <input type="text" placeholder="Search students..." value={searchRight} onChange={e => setSearchRight(e.target.value)} className="search-input" />
                   <div className="student-list">
                     {paginatedRightStudents.map(student => <div key={student.id} className={`student-item ${selectedStudentIds.includes(student.id) ? 'selected' : ''}`} onClick={() => toggleStudentSelection(student.id)}>
-                        <input type="checkbox" checked={selectedStudentIds.includes(student.id)} onClick={e => e.stopPropagation()} onChange={() => toggleStudentSelection(student.id)} />
+                        <input type="checkbox" aria-label={`Select ${student.name}`} checked={selectedStudentIds.includes(student.id)} onClick={e => e.stopPropagation()} onChange={() => toggleStudentSelection(student.id)} />
                         <div>
                           <div className="student-name">{student.name}</div>
                           <div className="student-email">{student.email}</div>

@@ -18,12 +18,13 @@ function QuestionForm() {
   const [searchParams] = useSearchParams();
   const isEditing = Boolean(id);
   const returnTo = searchParams.get('returnTo');
+  const initialBankId = Number(searchParams.get('bank')) || null;
   const {
     apiBaseUrl,
     accessToken
   } = useApi();
   const getBackPath = () => {
-    return returnTo ? decodeURIComponent(returnTo) : '/admin/questions/list';
+    return returnTo || (initialBankId ? `/admin/questions/banks/${initialBankId}` : '/admin/questions/list');
   };
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -53,7 +54,7 @@ function QuestionForm() {
     description: '',
     level_id: null,
     question_type_id: null,
-    question_bank_id: searchParams.get('bank') || null,
+    question_bank_id: initialBankId,
     category_id: null,
     status_id: null,
     active: true,
@@ -137,8 +138,8 @@ function QuestionForm() {
           question_bank_id: question.question_bank_id || null,
           category_id: question.category_id || null,
           status_id: question.status_id || null,
-          active: question.active !== false,
-          points: question.points || 1,
+          active: Boolean(question.active),
+          points: question.points ?? 1,
           negative_marks: question.negative_marks || 0,
           time_to_solve: question.time_to_solve || null,
           explanation: question.explanation || '',

@@ -920,7 +920,7 @@ function AssessmentUserMapping() {
           <span className="stat-label">Total Users</span>
         </div>
         <div className="stat">
-          <span className="stat-value">{latestAttemptByUser.filter(m => m?.status === 'NOT_STARTED').length}</span>
+          <span className="stat-value">{latestAttemptByUser.filter(m => ['NOT_STARTED', 'INVITED', 'PENDING'].includes(m?.status)).length}</span>
           <span className="stat-label">Pending</span>
         </div>
         <div className="stat">

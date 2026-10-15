@@ -1,5 +1,7 @@
 import { PageContent, ActionButton, Panel, FieldGroup, FieldRow, Toolbar } from "../../../design/Primitives";
 import { useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { invalidateQuestionBanks } from '../../../store/masterDataSlice';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useApi } from '../../../contexts/ApiContext';
@@ -8,6 +10,7 @@ import Dropdown from '../../../components/Dropdown/Dropdown';
 import Toggle from '../../../components/Toggle/Toggle';
 import RichTextEditor from '../../../components/RichTextEditor/RichTextEditor';
 function QuestionBankForm() {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const {
     id
@@ -109,7 +112,7 @@ function QuestionBankForm() {
           status_id: bank.status_id || null,
           level_id: bank.level_id || null,
           category_id: bank.category_id || null,
-          active: bank.active !== false,
+          active: Boolean(bank.active),
           tags: bank.tags?.map(t => t.id) || []
         });
       } else {
@@ -152,6 +155,7 @@ function QuestionBankForm() {
         body: JSON.stringify(formData)
       });
       if (response.ok) {
+        dispatch(invalidateQuestionBanks());
         toast.success(isEditing ? 'Question bank updated successfully' : 'Question bank created successfully');
         navigate('/admin/questions/banks');
       } else {

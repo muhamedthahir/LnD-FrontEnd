@@ -789,7 +789,7 @@ function AssessmentEdit() {
     }
     const questionsNeedingOverride = allQuestions.filter(q => {
       const overrideKey = `${segmentId}-${q.questionId}-${q.type}`;
-      const isOverrideEnabled = localOverrides[overrideKey] !== undefined ? localOverrides[overrideKey] : q.weightage_override === null || q.weightage_override === undefined;
+      const isOverrideEnabled = localOverrides[overrideKey] !== undefined ? localOverrides[overrideKey] : q.weightage_override !== null && q.weightage_override !== undefined;
       return !isOverrideEnabled;
     });
     for (const q of questionsNeedingOverride) {
@@ -1231,7 +1231,7 @@ function AssessmentEdit() {
                                       <td><code>#{q.programming_question_id}</code></td>
                                       <td className={styles.questionTitleCell}>{q.name || 'N/A'}</td>
                                       <td><span className={styles.questionTypeBadge}>{getQuestionType(q) || 'Programming'}</span></td>
-                                      <td><span className={`${styles.levelBadge} ${styles[(q.level_name || 'easy').toLowerCase()]}`}>{q.level_name || 'Easy'}</span></td>
+                                      <td><span className={`${styles.levelBadge} ${styles[(q.level_name || 'easy').toLowerCase()]}`}>{q.level_name || 'Unclassified'}</span></td>
                                       <td>
                                         <Toggle checked={overrideEnabled} onChange={checked => handleToggleOverrideScore(segment.id, q.programming_question_id, 'PROGRAMMING', checked)} size="small" />
                                       </td>
@@ -1240,7 +1240,7 @@ function AssessmentEdit() {
                                             <input type="number" placeholder="+ve" value={getMarksValue(segment.id, q.programming_question_id, 'PROGRAMMING', 'positive', q)} onChange={e => handleMarksInputChange(segment.id, q.programming_question_id, 'PROGRAMMING', 'positive', e.target.value)} onBlur={e => handleUpdateMarks(segment.id, q.programming_question_id, 'PROGRAMMING', 'positive', e.target.value)} className={styles.markInput} />
                                             <input type="number" placeholder="-ve" value={getMarksValue(segment.id, q.programming_question_id, 'PROGRAMMING', 'negative', q)} onChange={e => handleMarksInputChange(segment.id, q.programming_question_id, 'PROGRAMMING', 'negative', e.target.value)} onBlur={e => handleUpdateMarks(segment.id, q.programming_question_id, 'PROGRAMMING', 'negative', e.target.value)} className={styles.markInput} />
                                             <input type="number" placeholder="Neutral" value={getMarksValue(segment.id, q.programming_question_id, 'PROGRAMMING', 'neutral', q)} onChange={e => handleMarksInputChange(segment.id, q.programming_question_id, 'PROGRAMMING', 'neutral', e.target.value)} onBlur={e => handleUpdateMarks(segment.id, q.programming_question_id, 'PROGRAMMING', 'neutral', e.target.value)} className={styles.markInput} />
-                                          </div> : <span className={styles.defaultMarks}>{q.default_weightage || 1} pts</span>}
+                                          </div> : <span className={styles.defaultMarks}>{q.default_weightage ?? 1} pts</span>}
                                       </td>
                                       <td>
                                         <div className={styles.questionActions}>
@@ -1268,7 +1268,7 @@ function AssessmentEdit() {
                                       <td><code>#{q.mcq_question_id}</code></td>
                                       <td className={styles.questionTitleCell}>{q.name || q.question_text || 'N/A'}</td>
                                       <td><span className={styles.questionTypeBadge}>{getQuestionType(q) || (q.is_multiselect || q.allow_multiple_answers ? 'Multiselect' : 'MCQ')}</span></td>
-                                      <td><span className={`${styles.levelBadge} ${styles[(q.level_name || 'easy').toLowerCase()]}`}>{q.level_name || 'Easy'}</span></td>
+                                      <td><span className={`${styles.levelBadge} ${styles[(q.level_name || 'easy').toLowerCase()]}`}>{q.level_name || 'Unclassified'}</span></td>
                                       <td>
                                         <Toggle checked={overrideEnabled} onChange={checked => handleToggleOverrideScore(segment.id, q.mcq_question_id, 'MCQ', checked)} size="small" />
                                       </td>
@@ -1277,7 +1277,7 @@ function AssessmentEdit() {
                                             <input type="number" placeholder="+ve" value={getMarksValue(segment.id, q.mcq_question_id, 'MCQ', 'positive', q)} onChange={e => handleMarksInputChange(segment.id, q.mcq_question_id, 'MCQ', 'positive', e.target.value)} onBlur={e => handleUpdateMarks(segment.id, q.mcq_question_id, 'MCQ', 'positive', e.target.value)} className={styles.markInput} />
                                             <input type="number" placeholder="-ve" value={getMarksValue(segment.id, q.mcq_question_id, 'MCQ', 'negative', q)} onChange={e => handleMarksInputChange(segment.id, q.mcq_question_id, 'MCQ', 'negative', e.target.value)} onBlur={e => handleUpdateMarks(segment.id, q.mcq_question_id, 'MCQ', 'negative', e.target.value)} className={styles.markInput} />
                                             <input type="number" placeholder="Neutral" value={getMarksValue(segment.id, q.mcq_question_id, 'MCQ', 'neutral', q)} onChange={e => handleMarksInputChange(segment.id, q.mcq_question_id, 'MCQ', 'neutral', e.target.value)} onBlur={e => handleUpdateMarks(segment.id, q.mcq_question_id, 'MCQ', 'neutral', e.target.value)} className={styles.markInput} />
-                                          </div> : <span className={styles.defaultMarks}>{q.default_weightage || 1} pts</span>}
+                                          </div> : <span className={styles.defaultMarks}>{q.default_weightage ?? 1} pts</span>}
                                       </td>
                                       <td>
                                         <div className={styles.questionActions}>
@@ -1462,14 +1462,14 @@ function AssessmentEdit() {
                             </td>
                             <td>
                               <span className={`${styles.levelBadge} ${styles[(q.level_name || 'easy').toLowerCase()]}`}>
-                                {q.level_name || 'Easy'}
+                                {q.level_name || 'Unclassified'}
                               </span>
                             </td>
                             <td className={styles.tagsCell}>
                               {q.tags?.slice(0, 3).map((tag, i) => <span key={i} className={styles.tag}>{tag.name || tag}</span>)}
                               {q.tags?.length > 3 && <span className={`${styles.tag} ${styles.more}`}>+{q.tags.length - 3}</span>}
                             </td>
-                            <td>{q.weightage || 1}</td>
+                            <td>{q.points ?? q.weightage ?? 1}</td>
                           </tr>)}
                       </tbody>
                     </Table>

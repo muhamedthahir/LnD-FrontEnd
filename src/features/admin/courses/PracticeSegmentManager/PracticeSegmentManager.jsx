@@ -265,6 +265,7 @@ function PracticeSegmentManager() {
       });
       if (response.ok) {
         toast.success(SUCCESS_MESSAGES.PRACTICE_QUESTION_ADDED);
+        await fetchPracticeSegments();
         await fetchPracticeSegmentDetails(practiceSegmentId);
         await fetchAvailableQuestions();
       } else {
@@ -289,6 +290,7 @@ function PracticeSegmentManager() {
       });
       if (response.ok) {
         toast.success(SUCCESS_MESSAGES.PRACTICE_QUESTION_REMOVED);
+        await fetchPracticeSegments();
         await fetchPracticeSegmentDetails(practiceSegmentId);
         await fetchAvailableQuestions();
       } else {
@@ -393,7 +395,7 @@ function PracticeSegmentManager() {
                   <div className="segment-item-content">
                     <span className="segment-name">{segment.name}</span>
                     <span className="segment-meta">
-                      {(segment.programming_count || 0) + (segment.mcq_count || 0)} questions
+                      {(Number(segment.programming_count) || 0) + (Number(segment.mcq_count) || 0)} questions
                     </span>
                   </div>
                   <div className="segment-item-actions" onClick={e => e.stopPropagation()}>

@@ -81,6 +81,10 @@ function PersonalDetails() {
   };
   const handleSubmit = async e => {
     e.preventDefault();
+    if (['mobile_number', 'gender', 'city', 'state', 'country'].some(field => !String(formData[field] || '').trim())) {
+      setMessage({type: 'error', text: 'Please complete all required fields.'});
+      return;
+    }
     setSaving(true);
     setMessage({
       type: '',
@@ -157,7 +161,7 @@ function PersonalDetails() {
           <div className={styles.formGrid}>
             <FieldGroup className={styles.formGroup}>
               <label htmlFor="mobile_number">Mobile Number *</label>
-              <input type="tel" id="mobile_number" name="mobile_number" value={formData.mobile_number || ''} onChange={handleChange} placeholder="+1 234 567 8900" />
+              <input type="tel" id="mobile_number" name="mobile_number" required value={formData.mobile_number || ''} onChange={handleChange} placeholder="+1 234 567 8900" />
             </FieldGroup>
             <FieldGroup className={styles.formGroup}>
               <label htmlFor="alternate_mobile">Alternate Mobile</label>
@@ -165,7 +169,7 @@ function PersonalDetails() {
             </FieldGroup>
             <FieldGroup className={styles.formGroup}>
               <label htmlFor="gender">Gender *</label>
-              <select id="gender" name="gender" value={formData.gender || ''} onChange={handleChange}>
+              <select id="gender" name="gender" required value={formData.gender || ''} onChange={handleChange}>
                 <option value="">Select Gender</option>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
@@ -200,15 +204,15 @@ function PersonalDetails() {
             </FieldGroup>
             <FieldGroup className={styles.formGroup}>
               <label htmlFor="city">City *</label>
-              <input type="text" id="city" name="city" value={formData.city || ''} onChange={handleChange} placeholder="City" />
+              <input type="text" id="city" name="city" required value={formData.city || ''} onChange={handleChange} placeholder="City" />
             </FieldGroup>
             <FieldGroup className={styles.formGroup}>
               <label htmlFor="state">State *</label>
-              <input type="text" id="state" name="state" value={formData.state || ''} onChange={handleChange} placeholder="State / Province" />
+              <input type="text" id="state" name="state" required value={formData.state || ''} onChange={handleChange} placeholder="State / Province" />
             </FieldGroup>
             <FieldGroup className={styles.formGroup}>
               <label htmlFor="country">Country *</label>
-              <input type="text" id="country" name="country" value={formData.country || ''} onChange={handleChange} placeholder="Country" />
+              <input type="text" id="country" name="country" required value={formData.country || ''} onChange={handleChange} placeholder="Country" />
             </FieldGroup>
             <FieldGroup className={styles.formGroup}>
               <label htmlFor="postal_code">Postal Code</label>

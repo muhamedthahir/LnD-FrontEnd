@@ -27,7 +27,7 @@ function Users() {
     loadInstitutions
   } = useAutoLoadMasterData();
   const [users, setUsers] = useState([]);
-  const colleges = reduxInstitutions.map(inst => typeof inst === 'string' ? inst : inst.name);
+  const colleges = reduxInstitutions.map(inst => typeof inst === 'string' ? inst : inst.name).filter(name => user?.role !== 'college_admin' || name === user.college_name);
   const institutions = reduxInstitutions.map(inst => {
     if (typeof inst === 'string') {
       return {

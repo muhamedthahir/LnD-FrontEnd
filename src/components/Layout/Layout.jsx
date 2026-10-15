@@ -1,4 +1,4 @@
-import { Outlet, useLocation } from 'react-router-dom'
+import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { Suspense, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Sidebar from '../Sidebar/Sidebar'
@@ -206,6 +206,10 @@ function Layout() {
         <div className="spinner"></div>
       </div>
     )
+  }
+
+  if (pathname.startsWith('/admin/') && !['primary_admin', 'campuszen_admin', 'college_admin', 'admin'].includes(user?.role)) {
+    return <Navigate to="/dashboard" replace />
   }
 
   return (

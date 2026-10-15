@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import * as XLSX from 'xlsx';
 import { useApi } from '../../../../../contexts/ApiContext';
 import { API_ENDPOINTS } from "../../../../../constants/constants.js";
+import { toDateTimeInput } from '../../../../../utils/localDateTime';
 import Button from '../../../../../components/Button/Button';
 import Table from '../../../../../components/Table/Table';
 function AdministrationDetail() {
@@ -133,8 +134,8 @@ function AdministrationDetail() {
           category: data.category || '',
           competencyLevel: data.competency_level || '',
           courseId: data.course_id || '',
-          startTime: data.start_date ? new Date(data.start_date).toISOString().slice(0, 16) : '',
-          endTime: data.end_date ? new Date(data.end_date).toISOString().slice(0, 16) : '',
+          startTime: toDateTimeInput(data.start_date),
+          endTime: toDateTimeInput(data.end_date),
           college: data.college || '',
           candidateType: 'group',
           groupDegree: '',

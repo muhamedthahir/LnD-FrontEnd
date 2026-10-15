@@ -307,7 +307,7 @@ function UserDetail() {
                 {actionLoading ? 'Sending...' : 'Regenerate OTP'}
               </ActionButton>}</div></div></Toolbar>
 
-      <main className="user-detail-main">
+      <section className="user-detail-main">
         <div className="details-grid">
           {}
           <section className="detail-card">
@@ -579,7 +579,7 @@ function UserDetail() {
               </section>
             </>}
         </div>
-      </main>
+      </section>
 
       {}
       {showEditModal && <DialogLayer className="modal-overlay" onClick={() => setShowEditModal(false)} busy={actionLoading}>

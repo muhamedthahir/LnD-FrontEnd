@@ -7,6 +7,7 @@ import Pagination from '../../../../components/Pagination/Pagination';
 import Table from '../../../../components/Table/Table';
 import { useApi } from '../../../../contexts/ApiContext';
 import { API_ENDPOINTS } from "../../../../constants/constants.js";
+import { toDateTimeInput } from '../../../../utils/localDateTime';
 function CourseAdministrations() {
   const {
     user
@@ -287,8 +288,8 @@ function CourseAdministrations() {
       category: admin.category || '',
       competencyLevel: admin.competencyLevel || '',
       courseId: admin.courseId || '',
-      startTime: admin.startDate ? new Date(admin.startDate).toISOString().slice(0, 16) : '',
-      endTime: admin.endDate ? new Date(admin.endDate).toISOString().slice(0, 16) : '',
+      startTime: toDateTimeInput(admin.startDate),
+      endTime: toDateTimeInput(admin.endDate),
       college: admin.college || '',
       candidateType: 'group',
       groupDegree: '',
@@ -544,19 +545,7 @@ function CourseAdministrations() {
   return <PageContent className="groups-page" view="CourseAdministrations">
 
 
-      {loading ? <div className="loading">Loading administrations...</div> : administrations.length === 0 && !filters.courseName && filters.status === 'all' && !filters.college ? <div className="empty-state">
-          <div className="empty-state-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-              <line x1="8" y1="7" x2="16" y2="7"></line>
-              <line x1="8" y1="11" x2="16" y2="11"></line>
-              <line x1="8" y1="15" x2="12" y2="15"></line>
-            </svg>
-          </div>
-          <h3>No Course Administrations Found</h3>
-          <p>Create administration to manage course allocation to students.</p>
-        </div> : <div className="groups-table-card">
+      {loading ? <div className="loading">Loading administrations...</div> : <div className="groups-table-card">
           <div className="table-container">
             <div className="filters-section">
               <Toolbar className="filters"><div className="cz-filter-actions"><ActionButton className="btn-primary" onClick={handleCreateAdministration}>

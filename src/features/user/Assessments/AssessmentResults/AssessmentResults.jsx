@@ -271,7 +271,7 @@ function AssessmentResults() {
 
               <div className="rating-section">
                 <div className="rating-stars">
-                  {[1, 2, 3, 4, 5].map(star => <ActionButton key={star} className={`star-btn ${feedback.rating >= star ? 'active' : ''}`} onClick={() => setFeedback({
+                  {[1, 2, 3, 4, 5].map(star => <ActionButton key={star} aria-label={`Rate ${star} out of 5`} aria-pressed={feedback.rating === star} className={`star-btn ${feedback.rating >= star ? 'active' : ''}`} onClick={() => setFeedback({
                 ...feedback,
                 rating: star
               })}>
@@ -287,7 +287,7 @@ function AssessmentResults() {
 
               <div className="comment-section">
                 <label>Additional Comments (optional)</label>
-                <textarea value={feedback.comment} onChange={e => setFeedback({
+                <textarea aria-label="Additional Comments (optional)" value={feedback.comment} onChange={e => setFeedback({
               ...feedback,
               comment: e.target.value
             })} placeholder="Share your thoughts..." rows="3" />

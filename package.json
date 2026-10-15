@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "test": "node --test src/pages/admin/Institutions/createInstitutionLogic.test.js src/pages/admin/Users/bulkResetValidation.test.js src/pages/admin/Users/bulkUpload.test.js scripts/testConfig.mjs scripts/testDesign.mjs scripts/testSpreadsheetImport.mjs",
+    "test": "node --test src/pages/admin/Institutions/createInstitutionLogic.test.js src/pages/admin/Users/bulkResetValidation.test.js src/pages/admin/Users/bulkUpload.test.js scripts/testConfig.mjs scripts/testDesign.mjs scripts/testSpreadsheetImport.mjs scripts/testLocalDateTime.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

@@ -901,7 +901,7 @@ function AssessmentTake() {
         </div>}
 
       {}
-      <Toolbar className="cz-context-bar"><div className={styles.headerLeft}><strong>{assessmentData.display_name}</strong>{currentSegment && <span className={styles.segmentBadge}>{currentSegment.name}</span>}</div><div className={styles.headerCenter}><div className={styles.timer}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg><span className={timeRemaining < 300 ? styles.timerWarning : ''}>{formatTime(timeRemaining)}</span></div>{assessmentData.timing_mode !== 'OVERALL' && <div className={`${styles.timer} ${styles.segmentTimer}`}>
+      <Toolbar className="cz-context-bar"><div className={styles.headerLeft}><strong>{assessmentData.display_name || assessmentData.administrator_name || assessmentData.assessment_title}</strong>{currentSegment && <span className={styles.segmentBadge}>{currentSegment.name}</span>}</div><div className={styles.headerCenter}><div className={styles.timer}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg><span className={timeRemaining < 300 ? styles.timerWarning : ''}>{formatTime(timeRemaining)}</span></div>{assessmentData.timing_mode !== 'OVERALL' && <div className={`${styles.timer} ${styles.segmentTimer}`}>
               <span className={styles.timerLabel}>Segment:</span>
               <span className={segmentTimeRemaining < 60 ? styles.timerWarning : ''}>
                 {formatTime(segmentTimeRemaining)}

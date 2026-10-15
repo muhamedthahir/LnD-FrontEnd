@@ -1,6 +1,8 @@
 import { ActionButton, DataTable, FieldGroup, PageContent } from "../../../design/Primitives";
 import { DialogLayer, DialogSurface } from "../../../design/Dialog";
 import { useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { invalidateMasterData } from '../../../store/masterDataSlice';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useApi } from '../../../contexts/ApiContext';
@@ -171,7 +173,9 @@ function Settings() {
     accessToken
   } = useApi();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState('levels');
+  const singularName = { levels: 'Level', statuses: 'Status', questionTypes: 'Question Type', languages: 'Language', categories: 'Category', tags: 'Tag', userRoles: 'User Role' }[activeTab];
   const [data, setData] = useState({});
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -194,7 +198,8 @@ function Settings() {
     try {
       setLoading(true);
       const config = MASTER_DATA_CONFIG[activeTab];
-      const response = await fetch(`${apiBaseUrl}${config.endpoint}`, {
+      const includeInactive = activeTab === 'languages' || activeTab === 'categories';
+      const response = await fetch(`${apiBaseUrl}${config.endpoint}${includeInactive ? '?includeInactive=true' : ''}`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${getToken()}`
@@ -259,6 +264,10 @@ function Settings() {
   };
   const handleSubmit = async e => {
     e.preventDefault();
+    if (!formData.name?.trim()) {
+      toast.error('Name is required');
+      return;
+    }
     setActionLoading(true);
     try {
       const config = MASTER_DATA_CONFIG[activeTab];
@@ -269,10 +278,11 @@ function Settings() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${getToken()}`
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({ ...formData, name: formData.name.trim() })
       });
       if (response.ok) {
         toast.success(isEditing ? 'Updated successfully' : 'Created successfully');
+        dispatch(invalidateMasterData());
         setShowModal(false);
         fetchData();
       } else {
@@ -300,6 +310,7 @@ function Settings() {
       });
       if (response.ok) {
         toast.success('Deleted successfully');
+        dispatch(invalidateMasterData());
         setShowDeleteModal(false);
         setSelectedItem(null);
         fetchData();
@@ -379,7 +390,7 @@ function Settings() {
                 <line x1="12" y1="5" x2="12" y2="19" />
                 <line x1="5" y1="12" x2="19" y2="12" />
               </svg>
-              Add {config.name.slice(0, -1)}
+              Add {singularName}
             </ActionButton>
           </div>
 
@@ -390,9 +401,9 @@ function Settings() {
               </div> : currentData.length === 0 ? <div className="empty-state">
                 {config.icon}
                 <h3>No {config.name} Found</h3>
-                <p>Get started by creating your first {config.name.toLowerCase().slice(0, -1)}.</p>
+                <p>Get started by creating your first {singularName.toLowerCase()}.</p>
                 <ActionButton className="btn-primary" onClick={handleCreate}>
-                  Add {config.name.slice(0, -1)}
+                  Add {singularName}
                 </ActionButton>
               </div> : <DataTable className="data-table">
                 <thead>
@@ -409,7 +420,7 @@ function Settings() {
       {}
       {showModal && <DialogLayer className="modal-overlay" onClick={() => setShowModal(false)} busy={actionLoading}>
           <DialogSurface className="modal-content" onClick={e => e.stopPropagation()}>
-            <h2>{isEditing ? 'Edit' : 'Add'} {config.name.slice(0, -1)}</h2>
+            <h2>{isEditing ? 'Edit' : 'Add'} {singularName}</h2>
             <form onSubmit={handleSubmit}>
               {config.fields.map(field => <FieldGroup className="form-group settings" key={field.key}>
                   <label>
@@ -419,12 +430,12 @@ function Settings() {
                       <input type="checkbox" name={field.key} checked={formData[field.key] || false} onChange={handleChange} />
                       <span>{field.label}</span>
                     </label> : field.type === 'color' ? <FieldGroup className="color-input-group">
-                      <input type="color" name={field.key} value={formData[field.key] || '#6366f1'} onChange={handleChange} />
-                      <input type="text" value={formData[field.key] || '#6366f1'} onChange={e => setFormData(prev => ({
+                      <input type="color" aria-label="Color picker" name={field.key} value={formData[field.key] || '#6366f1'} onChange={handleChange} />
+                      <input type="text" aria-label="Color hex code" pattern="#[0-9a-fA-F]{6}" title="Use a six-digit hex color, for example #2457e6" value={formData[field.key] || '#6366f1'} onChange={e => setFormData(prev => ({
                 ...prev,
                 [field.key]: e.target.value
               }))} placeholder="#6366f1" />
-                    </FieldGroup> : <input type={field.type} name={field.key} value={formData[field.key] || ''} onChange={handleChange} required={field.required} />}
+                    </FieldGroup> : <input type={field.type} name={field.key} value={formData[field.key] ?? ''} onChange={handleChange} required={field.required} />}
                 </FieldGroup>)}
               <div className="form-actions">
                 <ActionButton type="submit" className="btn-primary" disabled={actionLoading}>
@@ -442,7 +453,7 @@ function Settings() {
       <ConfirmModal isOpen={showDeleteModal} onClose={() => {
       setShowDeleteModal(false);
       setSelectedItem(null);
-    }} onConfirm={handleDeleteConfirm} title={`Delete ${config.name.slice(0, -1)}`} message={`Are you sure you want to delete "${selectedItem?.name}"? This action cannot be undone.`} confirmText="Delete" cancelText="Cancel" />
+    }} onConfirm={handleDeleteConfirm} title={`Delete ${singularName}`} message={`Are you sure you want to delete "${selectedItem?.name}"? This action cannot be undone.`} confirmText="Delete" cancelText="Cancel" />
     </PageContent>;
 }
 export default Settings;

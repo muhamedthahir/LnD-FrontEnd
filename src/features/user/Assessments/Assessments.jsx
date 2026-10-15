@@ -289,7 +289,7 @@ function Assessments() {
                 </div>
 
                 <div className="card-body">
-                  <h3>{assessment.display_name}</h3>
+                  <h3>{assessment.display_name || assessment.administrator_name || assessment.assessment_title}</h3>
                   <p className="assessment-title">{assessment.assessment_title}</p>
 
                   {assessment.target_audience && <p className="target-audience">{assessment.target_audience}</p>}

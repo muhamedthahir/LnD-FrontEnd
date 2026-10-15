@@ -140,7 +140,7 @@ function Quiz() {
       let hasSubmissions = false;
       for (const question of questions) {
         try {
-          const response = await fetch(`${apiBaseUrl}/api/submissions/mcq/${question.id}/history`, {
+          const response = await fetch(`${apiBaseUrl}/api/submissions/mcq/${question.id}/history?practice_segment_id=${practiceId}`, {
             headers: {
               'Content-Type': 'application/json',
               ...((accessToken || localStorage.getItem('accessToken')) && {
@@ -641,9 +641,9 @@ function Quiz() {
               <div className="options-container">
                 {(currentQuestion.options || []).map((option, index) => {
               const isSelected = currentSelected.includes(option.id);
-              const isCorrect = isSubmitted && option.is_correct;
+              const isCorrect = isSubmitted && Boolean(option.is_correct);
               const isWrong = isSubmitted && isSelected && !option.is_correct;
-              return <div key={option.id} className={`option-item ${isSelected ? 'selected' : ''} ${isCorrect ? 'correct' : ''} ${isWrong ? 'wrong' : ''}`} onClick={() => {
+              return <button type="button" role={isMultiSelect ? 'checkbox' : 'radio'} aria-checked={isSelected} aria-label={`Option ${String.fromCharCode(65 + index)}`} disabled={isSubmitted} key={option.id} className={`option-item ${isSelected ? 'selected' : ''} ${isCorrect ? 'correct' : ''} ${isWrong ? 'wrong' : ''}`} onClick={() => {
                 if (!isSubmitted) {
                   if (isMultiSelect) {
                     handleMultiSelect(currentQuestion.id, option.id);
@@ -670,7 +670,7 @@ function Quiz() {
                               <line x1="6" y1="6" x2="18" y2="18" />
                             </svg>}
                         </div>}
-                    </div>;
+                    </button>;
             })}
               </div>
 

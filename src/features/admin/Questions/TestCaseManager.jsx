@@ -103,7 +103,7 @@ function TestCaseManager() {
       description: testCase.description || '',
       input: testCase.input || '',
       expected_result: testCase.expected_result || '',
-      is_active: testCase.is_active !== false,
+      is_active: Boolean(testCase.is_active),
       is_hidden: testCase.is_hidden || false,
       should_match_exactly: testCase.should_match_exactly !== false,
       percentage_of_match: testCase.percentage_of_match || 100,
@@ -203,7 +203,7 @@ function TestCaseManager() {
   const handleToggleActive = async testCase => {
     try {
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.TEST_CASES.TOGGLE_ACTIVE(testCase.id)}`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
@@ -224,7 +224,7 @@ function TestCaseManager() {
   const handleToggleHidden = async testCase => {
     try {
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.TEST_CASES.TOGGLE_HIDDEN(testCase.id)}`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
@@ -460,7 +460,7 @@ function TestCaseManager() {
                     <span className="testcase-name">{testCase.name}</span>
                   </div>
                   <div className="testcase-badges">
-                    {testCase.is_hidden && <span className="badge hidden" title="Hidden from users">
+                    {Boolean(testCase.is_hidden) && <span className="badge hidden" title="Hidden from users">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
                           <path d="M1 1l22 22" />

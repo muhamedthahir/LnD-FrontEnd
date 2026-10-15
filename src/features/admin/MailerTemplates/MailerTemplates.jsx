@@ -262,11 +262,12 @@ function MailerTemplates() {
     setPreviewData(initialData);
     setRenderedPreview(null);
     setShowPreviewModal(true);
+    await renderPreview(template, initialData);
   };
-  const renderPreview = async () => {
-    if (!previewTemplate) return;
+  const renderPreview = async (template = previewTemplate, variables = previewData) => {
+    if (!template) return;
     try {
-      const response = await fetch(`${apiBaseUrl}/api/mailer-templates/${previewTemplate.id}/preview`, {
+      const response = await fetch(`${apiBaseUrl}/api/mailer-templates/${template.id}/preview`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -274,7 +275,7 @@ function MailerTemplates() {
             'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
           })
         },
-        body: JSON.stringify(previewData)
+        body: JSON.stringify(variables)
       });
       if (response.ok) {
         const data = await response.json();
@@ -454,8 +455,8 @@ function MailerTemplates() {
               }))} placeholder={`Enter ${v}`} />
                     </FieldGroup>)}
                 </div>
-                <ActionButton type="button" className="btn-primary" onClick={renderPreview}>Render Preview</ActionButton>
               </div>}
+            <ActionButton type="button" className="btn-primary" onClick={() => renderPreview()}>Render Preview</ActionButton>
 
             {renderedPreview && <div className="rendered-preview">
                 <div className="preview-section">

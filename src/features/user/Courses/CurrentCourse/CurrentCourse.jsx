@@ -126,6 +126,9 @@ function CurrentCourse() {
       setSectionLessons(lessonsMap);
       setSectionPracticeSegments(practiceSegmentsMap);
       if (firstSegment) {
+        const topicId = firstSegment.topic_id;
+        await startLesson(firstSegment, topicId);
+        setCurrentSegmentTopicId(topicId);
         setSelectedSegment(firstSegment);
       }
     } catch (error) {
@@ -629,7 +632,7 @@ function CurrentCourse() {
         </aside>
 
         {}
-        <main className="course-main-content">
+        <section className="course-main-content">
           {selectedSegment ? <div className="segment-view">
               <div className="segment-header">
                 <h2>{selectedSegment.name || selectedSegment.title || 'Untitled Lesson'}</h2>
@@ -759,7 +762,7 @@ function CurrentCourse() {
             </div> : <div className="no-segment-selected">
               <p>Select a lesson, exercise, or assessment from the sidebar to begin.</p>
             </div>}
-        </main>
+        </section>
       </div>
     </PageContent>;
 }

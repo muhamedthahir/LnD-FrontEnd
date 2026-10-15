@@ -98,7 +98,12 @@ function CourseEdit() {
         course_outcomes: data.course_outcomes || '',
         has_to_go_by_section: data.has_to_go_by_section || false
       });
-      setTags(data.category ? [data.category] : []);
+      let savedTags = data.tags;
+      if (typeof savedTags === 'string') {
+        try { savedTags = JSON.parse(savedTags); }
+        catch { savedTags = savedTags.split(',').map(tag => tag.trim()).filter(Boolean); }
+      }
+      setTags(Array.isArray(savedTags) ? savedTags : data.category ? [data.category] : []);
       setThumbnail(data.thumbnail);
     } catch (error) {
       console.error('Error fetching course:', error);
@@ -217,7 +222,7 @@ function CourseEdit() {
         ...courseForm,
         status,
         thumbnail,
-        tags: tags.join(','),
+        tags,
         has_to_go_by_section: courseForm.has_to_go_by_section
       };
       let response;
@@ -509,7 +514,7 @@ function CourseEdit() {
                         </div>
                         <div className="section-actions">
                           {isEditable && <>
-                              <ActionButton className="icon-btn" onClick={e => {
+                              <ActionButton className="icon-btn" aria-label={`Edit section ${section.name}`} onClick={e => {
                       e.stopPropagation();
                       handleEditSection(section);
                     }}>
@@ -518,7 +523,7 @@ function CourseEdit() {
                                   <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                                 </svg>
                               </ActionButton>
-                              <ActionButton className="icon-btn" onClick={e => {
+                              <ActionButton className="icon-btn" aria-label={`Delete section ${section.name}`} onClick={e => {
                       e.stopPropagation();
                       handleDeleteSection(section.id);
                     }}>
@@ -867,7 +872,7 @@ function CourseEdit() {
                   </p>
                 </div>
                 <label className="toggle-switch">
-                  <input type="checkbox" checked={courseForm.has_to_go_by_section} onChange={e => setCourseForm({
+                  <input type="checkbox" aria-label="Sequential Topic Completion" checked={courseForm.has_to_go_by_section} onChange={e => setCourseForm({
                 ...courseForm,
                 has_to_go_by_section: e.target.checked
               })} disabled={!isEditable} />

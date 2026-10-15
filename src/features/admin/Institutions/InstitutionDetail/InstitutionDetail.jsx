@@ -289,10 +289,10 @@ function InstitutionDetail() {
             <Panel className="form-section">
               <h2>College admins</h2>
               {admins.length > 0 ? <ul className="institution-detail-admin-list">
-                  {admins.map((admin, index) => <li key={admin.id} className="institution-detail-admin-card">
+                  {admins.map(admin => <li key={admin.id} className="institution-detail-admin-card">
                       <div className="admin-name">{admin.name}</div>
                       <div className="admin-email">{admin.email}</div>
-                      {index === 0 && <span className="primary-admin-badge">Primary admin</span>}
+                      <span className="primary-admin-badge">College admin</span>
                     </li>)}
                 </ul> : <p className="no-admins">No admins assigned</p>}
             </Panel>
