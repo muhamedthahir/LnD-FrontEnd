@@ -1,4 +1,4 @@
-import { Toolbar, FieldGroup, ActionButton, PageContent } from "../../../../design/Primitives";
+import { Toolbar, FieldGroup, ActionButton, PageContent, LoadingState } from "../../../../design/Primitives";
 import { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import CourseCard from '../../../../components/CourseCard/CourseCard';
@@ -94,6 +94,7 @@ function UserCourses() {
       });
       const courses = Array.from(courseMap.values());
       setAllCourses(courses);
+      setActiveTab(current => courses.some(course => course.enrollment_status === current) ? current : ['in_progress', 'invited', 'completed', 'expired'].find(status => courses.some(course => course.enrollment_status === status)) || current);
       const uniqueCategories = [...new Set(courses.map(c => c.category).filter(Boolean))];
       setCategories(uniqueCategories);
     } catch (error) {
@@ -152,17 +153,13 @@ function UserCourses() {
     label: 'Expired'
   }];
   return <PageContent className="user-courses-page" view="UserCourses">
-
-
-      {}
-      <div className="courses-tabs">
-        {tabs.map(tab => <button key={tab.id} className={`tab-button ${activeTab === tab.id ? 'active' : ''}`} onClick={() => setActiveTab(tab.id)}>
+      <div className="courses-tabs la-tabs" role="tablist" aria-label="Course status">
+        {tabs.map(tab => <button key={tab.id} type="button" role="tab" aria-selected={activeTab === tab.id} className={`tab-button ${activeTab === tab.id ? 'active' : ''}`} onClick={() => setActiveTab(tab.id)}>
             {tab.label}
             <span className="tab-count">{tabCounts[tab.id] || 0}</span>
           </button>)}
       </div>
 
-      {}
       <div className="filters-section">
         <Toolbar className="filters">
           <FieldGroup className="filter-group">
@@ -187,8 +184,7 @@ function UserCourses() {
         </Toolbar>
       </div>
 
-      {}
-      {loading ? <div className="loading">Loading courses...</div> : filteredCourses.length === 0 ? <div className="empty-state">
+      {loading ? <LoadingState><p>Loading courses...</p></LoadingState> : filteredCourses.length === 0 ? <div className="empty-state">
           <div className="empty-state-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>

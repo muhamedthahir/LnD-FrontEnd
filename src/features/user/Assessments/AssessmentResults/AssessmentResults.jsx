@@ -1,4 +1,4 @@
-import { PageContent, ActionButton, Panel, Toolbar } from "../../../../design/Primitives";
+import { PageContent, ActionButton, Panel, LoadingState, EmptyState } from "../../../../design/Primitives";
 import { DialogLayer, DialogSurface } from "../../../../design/Dialog";
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
@@ -81,30 +81,33 @@ function AssessmentResults() {
   };
   if (loading) {
     return <PageContent className="results-page" view="AssessmentResults">
-        <div className="loading-state">
-          <div className="spinner"></div>
-          <p>Loading results...</p>
-        </div>
+        <LoadingState><p>Loading results...</p></LoadingState>
       </PageContent>;
   }
   if (!results) {
     return <PageContent className="results-page" view="AssessmentResults">
-        <div className="error-state">
+        <EmptyState>
           <h3>Results not available</h3>
-          <Button onClick={() => navigate('/user/assessments')}>Back to Assessments</Button>
-        </div>
+          <ActionButton onClick={() => navigate('/user/assessments')}>Back to Assessments</ActionButton>
+        </EmptyState>
       </PageContent>;
   }
+  const subtitle = results.assessment_title && results.assessment_title !== results.display_name ? results.assessment_title : null;
   return <PageContent className="results-page" view="AssessmentResults">
       <div className="results-container">
-        <Toolbar className="cz-context-bar"><ActionButton className="back-link" onClick={() => navigate('/user/assessments')}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
-              <path d="M19 12H5M12 19l-7-7 7-7" />
-            </svg>
-            Back to Assessments
-          </ActionButton><strong>{results.display_name}</strong><p className="assessment-title">{results.assessment_title}</p></Toolbar>
+        <ActionButton variant="quiet" className="as-back back-link" onClick={() => navigate('/user/assessments')}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+          </svg>
+          Back to Assessments
+        </ActionButton>
 
-        {}
+        <header className="as-hero">
+          <span className="cz-eyebrow">Result</span>
+          <h1>{results.display_name || results.assessment_title}</h1>
+          {subtitle && <p>{subtitle}</p>}
+        </header>
+
         <div className={`score-card ${results.passed ? 'passed' : 'failed'}`}>
           <div className="score-visual">
             <svg viewBox="0 0 120 120" className="score-ring">
@@ -254,7 +257,7 @@ function AssessmentResults() {
           {results.can_retry && results.attempts_remaining > 0 && <Button variant="primary" onClick={() => navigate(`/user/assessments/${mappingId}/start`)}>
               Try Again ({results.attempts_remaining} attempts left)
             </Button>}
-          <Button variant="outline" onClick={() => navigate('/user/assessments')}>
+          <Button variant="secondary" onClick={() => navigate('/user/assessments')}>
             Back to Assessments
           </Button>
         </div>

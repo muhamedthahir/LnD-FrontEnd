@@ -1,0 +1,480 @@
+/* Learner-facing pages. Each block is scoped to its page view so admin screens are unaffected. */
+
+/* Shared learner pieces */
+.cz-page :is(.as-stats, .as-rules, .as-segments, .la-meta) { list-style: none; margin: 0; padding: 0; }
+.cz-page .la-pill { display: inline-flex; align-items: center; gap: .375rem; padding: .25rem .625rem; border-radius: var(--radius-full); font-size: .75rem; font-weight: 600; line-height: 1.3; background: var(--bg-tertiary); color: var(--text-secondary); white-space: nowrap; }
+.cz-page .la-pill[data-tone=accent] { background: var(--accent-subtle); color: var(--accent-primary); }
+.cz-page .la-pill[data-tone=success] { background: var(--success-glow); color: var(--success); }
+.cz-page .la-pill[data-tone=warning] { background: var(--warning-glow); color: var(--warning); }
+.cz-page .la-pill[data-tone=danger] { background: var(--error-glow); color: var(--error); }
+.la-tabs { display: flex; flex-wrap: wrap; gap: .25rem; padding: .25rem; width: fit-content; max-width: 100%; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; }
+.cz-page .la-tabs > button { display: inline-flex; align-items: center; gap: .5rem; min-height: 2.5rem; padding: .5rem .875rem; border: 0; border-radius: 7px; background: transparent; color: var(--text-secondary); font-size: .875rem; font-weight: 600; white-space: nowrap; transition: background var(--transition-fast), color var(--transition-fast); }
+.cz-page .la-tabs > button:hover { color: var(--text-primary); background: var(--bg-hover); }
+.cz-page .la-tabs > button[aria-selected=true] { background: var(--accent-primary); color: var(--text-on-accent); }
+.la-tabs .tab-count { min-width: 1.5rem; padding: .0625rem .4375rem; border-radius: var(--radius-full); background: var(--bg-tertiary); color: var(--text-secondary); font-size: .75rem; font-variant-numeric: tabular-nums; text-align: center; }
+.cz-page .la-tabs > button[aria-selected=true] .tab-count { background: color-mix(in srgb, var(--text-on-accent) 22%, transparent); color: var(--text-on-accent); }
+
+/* Assessment start */
+.cz-page[data-view=AssessmentStart] { gap: 1.25rem; }
+.cz-page[data-view=AssessmentStart] .as-back { align-self: flex-start; min-height: 2.25rem; padding: .375rem .625rem .375rem .375rem; color: var(--text-secondary); }
+.cz-page[data-view=AssessmentStart] .as-back svg { width: 1.125rem; height: 1.125rem; }
+.as-hero { display: flex; flex-direction: column; gap: .375rem; min-width: 0; }
+.as-hero h1 { overflow-wrap: anywhere; }
+.as-hero p { color: var(--text-secondary); font-size: .9375rem; }
+.as-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); gap: .75rem; }
+.as-stat { display: flex; align-items: center; gap: .875rem; min-width: 0; padding: 1rem 1.125rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; }
+.as-stat-icon { display: grid; place-items: center; flex: 0 0 auto; width: 2.5rem; height: 2.5rem; border-radius: 10px; background: var(--accent-subtle); color: var(--accent-primary); }
+.as-stat-icon svg { width: 1.25rem; height: 1.25rem; }
+.as-stat-text { display: flex; flex-direction: column; gap: .125rem; min-width: 0; }
+.as-stat-label { color: var(--text-secondary); font-size: .75rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+.as-stat-text strong { font-size: 1.0625rem; line-height: 1.3; overflow-wrap: anywhere; }
+.as-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(18rem, 24rem); gap: 1.25rem; align-items: start; }
+.as-main, .as-side { display: flex; flex-direction: column; gap: 1.25rem; min-width: 0; }
+.as-side { position: sticky; top: 1rem; }
+.cz-page[data-view=AssessmentStart] .as-section > h2 { margin-bottom: 1rem; font-size: 1.0625rem; }
+.as-instructions { color: var(--text-primary); font-size: .9375rem; line-height: 1.65; overflow-wrap: anywhere; }
+.as-instructions > * + * { margin-top: .75rem; }
+.as-instructions :is(ul, ol) { padding-left: 1.25rem; margin-bottom: 0; }
+.as-instructions li + li { margin-top: .375rem; }
+.as-instructions :is(h1, h2, h3, h4) { font-size: 1rem; }
+.as-rules { display: flex; flex-direction: column; }
+.as-rule { display: flex; align-items: flex-start; gap: .75rem; padding: .75rem 0; color: var(--text-primary); font-size: .9375rem; line-height: 1.5; }
+.as-rule + .as-rule { border-top: 1px solid var(--border-color); }
+.as-rule:first-child { padding-top: 0; }
+.as-rule:last-child { padding-bottom: 0; }
+.as-rule-icon { display: grid; place-items: center; flex: 0 0 auto; width: 1.75rem; height: 1.75rem; margin-top: -.125rem; border-radius: 8px; background: var(--bg-tertiary); color: var(--text-secondary); }
+.as-rule-icon svg { width: 1rem; height: 1rem; }
+.as-rule[data-tone=warning] .as-rule-icon { background: var(--warning-glow); color: var(--warning); }
+.as-rule[data-tone=success] .as-rule-icon { background: var(--success-glow); color: var(--success); }
+.as-segments { display: flex; flex-direction: column; gap: .625rem; }
+.as-segments > li { display: flex; align-items: center; gap: .75rem; padding: .75rem; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-secondary); }
+.as-segment-index { display: grid; place-items: center; flex: 0 0 auto; width: 2rem; height: 2rem; border-radius: 8px; background: var(--accent-primary); color: var(--text-on-accent); font-size: .8125rem; font-weight: 700; }
+.as-segment-text { display: flex; flex-direction: column; gap: .125rem; min-width: 0; }
+.as-segment-text strong { font-size: .9375rem; overflow-wrap: anywhere; }
+.as-segment-text span { color: var(--text-secondary); font-size: .8125rem; }
+.as-confirm { display: flex; flex-direction: column; gap: 1rem; }
+.cz-page[data-view=AssessmentStart] .as-confirm > h2 { margin-bottom: 0; }
+.as-blocked { margin: 0; padding: .75rem .875rem; border-radius: 8px; border-left: 3px solid var(--warning); background: var(--warning-glow); color: var(--text-primary); font-size: .875rem; }
+.as-access-code { margin-bottom: 0; }
+.cz-page[data-view=AssessmentStart] label.as-agree { display: flex; align-items: flex-start; gap: .75rem; padding: .875rem; border: 1px solid var(--border-strong); border-radius: 10px; background: var(--bg-secondary); font-size: .875rem; line-height: 1.5; cursor: pointer; }
+.cz-page[data-view=AssessmentStart] label.as-agree:has(input:checked) { border-color: var(--accent-primary); background: var(--accent-subtle); }
+.as-agree input { flex: 0 0 auto; width: 1.125rem; height: 1.125rem; margin: .125rem 0 0; }
+.as-actions { display: flex; flex-direction: column; gap: .5rem; }
+.as-actions .cz-button { width: 100%; }
+.as-hint { margin: -.25rem 0 0; color: var(--text-tertiary); font-size: .8125rem; text-align: center; }
+@media (max-width: 1100px) {
+  .as-layout { grid-template-columns: minmax(0, 1fr); }
+  .as-side { position: static; }
+}
+
+/* Assessment results */
+.cz-page[data-view=AssessmentResults] .results-container { display: flex; flex-direction: column; gap: 1.25rem; min-width: 0; }
+.cz-page[data-view=AssessmentResults] .as-back { align-self: flex-start; min-height: 2.25rem; padding: .375rem .625rem .375rem .375rem; color: var(--text-secondary); }
+.cz-page[data-view=AssessmentResults] .as-back svg { width: 1.125rem; height: 1.125rem; }
+.cz-page[data-view=AssessmentResults] .score-card { display: flex; flex-wrap: wrap; align-items: center; gap: 1.5rem 2rem; padding: 1.5rem; margin: 0; background: var(--bg-card); border: 1px solid var(--border-color); border-left: 4px solid var(--error); border-radius: 12px; color: var(--error); }
+.cz-page[data-view=AssessmentResults] .score-card.passed { border-left-color: var(--success); color: var(--success); }
+.cz-page[data-view=AssessmentResults] .score-visual { position: relative; width: 7.5rem; height: 7.5rem; flex: 0 0 auto; }
+.cz-page[data-view=AssessmentResults] .score-ring { width: 100%; height: 100%; }
+.cz-page[data-view=AssessmentResults] .score-text { position: absolute; inset: 0; display: flex; align-items: baseline; justify-content: center; padding-top: 2.5rem; gap: .125rem; }
+.cz-page[data-view=AssessmentResults] .score-value { font-size: 2rem; font-weight: 700; line-height: 1; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+.cz-page[data-view=AssessmentResults] .score-percent { font-size: 1rem; font-weight: 650; }
+.cz-page[data-view=AssessmentResults] .score-info { display: flex; flex-direction: column; gap: .5rem; flex: 1 1 16rem; min-width: 0; }
+.cz-page[data-view=AssessmentResults] .result-status { display: flex; align-items: center; gap: .625rem; margin: 0; padding: 0; background: none; border: 0; font-size: 1.375rem; color: inherit; }
+.cz-page[data-view=AssessmentResults] .result-status svg { width: 1.75rem; height: 1.75rem; }
+.cz-page[data-view=AssessmentResults] .result-message { margin: 0; color: var(--text-secondary); font-size: .9375rem; }
+.cz-page[data-view=AssessmentResults] .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); gap: .75rem; }
+.cz-page[data-view=AssessmentResults] .stat-card { display: flex; align-items: center; gap: .875rem; padding: 1rem 1.125rem; border-radius: 12px; }
+.cz-page[data-view=AssessmentResults] .stat-icon { display: grid; place-items: center; flex: 0 0 auto; width: 2.5rem; height: 2.5rem; border-radius: 10px; background: var(--accent-subtle); color: var(--accent-primary); }
+.cz-page[data-view=AssessmentResults] .stat-icon svg { width: 1.25rem; height: 1.25rem; }
+.cz-page[data-view=AssessmentResults] .stat-content { display: flex; flex-direction: column-reverse; gap: .125rem; min-width: 0; }
+.cz-page[data-view=AssessmentResults] .stat-value { font-size: 1.25rem; font-weight: 700; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.cz-page[data-view=AssessmentResults] .stat-label { color: var(--text-secondary); font-size: .75rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+.cz-page[data-view=AssessmentResults] :is(.segments-results, .answers-review) { padding: 1.5rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; }
+.cz-page[data-view=AssessmentResults] :is(.segments-results, .answers-review) > h3 { margin-bottom: 1rem; font-size: 1.0625rem; }
+.cz-page[data-view=AssessmentResults] :is(.segments-list, .answers-list) { display: flex; flex-direction: column; gap: .75rem; }
+.cz-page[data-view=AssessmentResults] .segment-result { display: flex; flex-direction: column; gap: .625rem; padding: 1rem; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-secondary); }
+.cz-page[data-view=AssessmentResults] .segment-header { display: flex; align-items: center; gap: .75rem; margin: 0; padding: 0; border: 0; }
+.cz-page[data-view=AssessmentResults] .segment-number { display: grid; place-items: center; flex: 0 0 auto; width: 1.75rem; height: 1.75rem; border-radius: 7px; background: var(--accent-primary); color: var(--text-on-accent); font-size: .75rem; font-weight: 700; }
+.cz-page[data-view=AssessmentResults] .segment-name { flex: 1 1 auto; min-width: 0; font-weight: 650; overflow-wrap: anywhere; }
+.cz-page[data-view=AssessmentResults] .segment-score { font-weight: 700; font-variant-numeric: tabular-nums; }
+.cz-page[data-view=AssessmentResults] .segment-score.passed { color: var(--success); }
+.cz-page[data-view=AssessmentResults] .segment-score.failed { color: var(--error); }
+.cz-page[data-view=AssessmentResults] .segment-progress { height: .5rem; border-radius: var(--radius-full); background: var(--bg-tertiary); overflow: hidden; }
+.cz-page[data-view=AssessmentResults] .segment-progress .progress-fill { height: 100%; border-radius: inherit; background: var(--accent-primary); }
+.cz-page[data-view=AssessmentResults] .segment-details { display: flex; flex-wrap: wrap; gap: .5rem; color: var(--text-secondary); font-size: .8125rem; }
+.cz-page[data-view=AssessmentResults] .answer-item { color: var(--text-primary); background: var(--bg-card); display: flex; flex-direction: column; gap: .625rem; padding: 1rem; border: 1px solid var(--border-color); border-left: 3px solid var(--error); border-radius: 10px; }
+.cz-page[data-view=AssessmentResults] .answer-item.correct { border-left-color: var(--success); }
+.cz-page[data-view=AssessmentResults] .answer-header { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin: 0; padding: 0; border: 0; }
+.cz-page[data-view=AssessmentResults] .question-number { font-size: .8125rem; font-weight: 700; color: var(--text-secondary); }
+.cz-page[data-view=AssessmentResults] .status-icon { display: grid; place-items: center; width: 1.75rem; height: 1.75rem; border-radius: 50%; background: var(--error-glow); color: var(--error); }
+.cz-page[data-view=AssessmentResults] .status-icon.correct { background: var(--success-glow); color: var(--success); }
+.cz-page[data-view=AssessmentResults] .status-icon svg { width: 1rem; height: 1rem; }
+.cz-page[data-view=AssessmentResults] .question-text { color: var(--text-primary); font-size: .9375rem; font-weight: 550; overflow-wrap: anywhere; }
+.cz-page[data-view=AssessmentResults] .your-answer .value { color: var(--text-primary); }
+.cz-page[data-view=AssessmentResults] .answer-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: .5rem 1rem; font-size: .875rem; }
+.cz-page[data-view=AssessmentResults] :is(.your-answer, .correct-answer) { display: flex; flex-direction: column; gap: .125rem; }
+.cz-page[data-view=AssessmentResults] .answer-details .label { color: var(--text-secondary); font-size: .75rem; font-weight: 600; }
+.cz-page[data-view=AssessmentResults] .correct-answer .value { color: var(--success); font-weight: 600; }
+.cz-page[data-view=AssessmentResults] .results-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .5rem; }
+.feedback-modal .modal-body { display: flex; flex-direction: column; gap: 1.25rem; }
+.feedback-modal :is(.rating-section, .comment-section) { padding: 0; margin: 0; border: 0; background: none; }
+.feedback-modal .rating-section { display: flex; flex-direction: column; align-items: center; gap: .5rem; }
+.feedback-modal .rating-stars { display: flex; gap: .25rem; }
+.feedback-modal .rating-stars .star-btn { min-height: 0; padding: .375rem; border: 0; background: transparent; color: var(--text-tertiary); }
+.feedback-modal .rating-stars .star-btn:hover:not(:disabled) { background: var(--bg-hover); color: var(--warning); }
+.feedback-modal .rating-stars .star-btn.active { color: var(--warning); }
+.feedback-modal .rating-stars svg { width: 2rem; height: 2rem; }
+.feedback-modal .rating-label { color: var(--text-secondary); font-size: .875rem; font-weight: 600; }
+.feedback-modal .comment-section { display: flex; flex-direction: column; gap: .375rem; }
+.feedback-modal .comment-section label { font-size: .8125rem; font-weight: 600; }
+
+/* My courses */
+.cz-page[data-view=UserCourses] { gap: 1.25rem; }
+.cz-page[data-view=UserCourses] .filters-section { padding: 0; margin: 0; border: 0; background: none; }
+.cz-page[data-view=UserCourses] .filters { display: flex; flex-wrap: wrap; align-items: end; gap: .75rem; padding: 0; border: 0; background: none; }
+.cz-page[data-view=UserCourses] .filter-group { flex: 0 1 12rem; margin: 0; }
+.cz-page[data-view=UserCourses] .filter-group:has(.filter-input) { flex: 1 1 15rem; max-width: 28rem; }
+.cz-page[data-view=UserCourses] .filter-group label { color: var(--text-secondary); font-size: .75rem; }
+.cz-page[data-view=UserCourses] .btn-clear-filters { min-height: 2.75rem; }
+.cz-page[data-view=UserCourses] .courses-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr)); gap: 1rem; }
+.cz-page[data-view=UserCourses] .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .625rem; min-height: 16rem; padding: 2rem; text-align: center; color: var(--text-secondary); background: var(--bg-card); border: 1px dashed var(--border-strong); border-radius: 12px; }
+.cz-page[data-view=UserCourses] .empty-state-icon { display: grid; place-items: center; width: 3rem; height: 3rem; border-radius: 12px; background: var(--accent-subtle); color: var(--accent-primary); }
+.cz-page[data-view=UserCourses] .empty-state-icon svg { width: 1.5rem; height: 1.5rem; }
+.cz-page[data-view=UserCourses] .empty-state h3 { color: var(--text-primary); }
+
+/* Course overview */
+.cz-page[data-view=CourseOverview] { gap: 1.25rem; }
+.cz-page[data-view=CourseOverview] > .btn-back { align-self: flex-start; min-height: 2.25rem; padding: .375rem .625rem .375rem .375rem; border-color: transparent; background: transparent; color: var(--text-secondary); }
+.cz-page[data-view=CourseOverview] > .btn-back svg { width: 1.125rem; height: 1.125rem; }
+.cz-page[data-view=CourseOverview] .course-header { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.5rem; padding: 1.5rem; }
+.cz-page[data-view=CourseOverview] .course-header:has(.course-thumbnail-large) { grid-template-columns: minmax(12rem, 18rem) minmax(0, 1fr); }
+.cz-page[data-view=CourseOverview] .course-thumbnail-large { aspect-ratio: 16 / 10; border-radius: 10px; overflow: hidden; background: var(--bg-tertiary); }
+.cz-page[data-view=CourseOverview] .course-thumbnail-large img { width: 100%; height: 100%; }
+.cz-page[data-view=CourseOverview] .course-header-content { display: flex; flex-direction: column; gap: 1rem; min-width: 0; }
+.cz-page[data-view=CourseOverview] .course-meta { display: flex; flex-wrap: wrap; gap: .5rem; }
+.cz-page[data-view=CourseOverview] :is(.course-category-badge, .competency-badge) { display: inline-flex; align-items: center; padding: .25rem .625rem; border-radius: var(--radius-full); background: var(--accent-subtle); color: var(--accent-primary); font-size: .75rem; font-weight: 600; text-transform: capitalize; }
+.cz-page[data-view=CourseOverview] .competency-badge { background: var(--bg-tertiary); color: var(--text-secondary); }
+.cz-page[data-view=CourseOverview] .course-title-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; margin: 0; padding: 0; border: 0; }
+.cz-page[data-view=CourseOverview] .course-title-row h1 { flex: 1 1 16rem; min-width: 0; overflow-wrap: anywhere; }
+.cz-page[data-view=CourseOverview] .btn-start-course { flex: 0 0 auto; }
+.cz-page[data-view=CourseOverview] .btn-start-course svg { width: 1rem; height: 1rem; }
+.cz-page[data-view=CourseOverview] .course-progress-badge { display: inline-flex; align-items: center; gap: .375rem; align-self: flex-start; padding: .25rem .75rem; border-radius: var(--radius-full); background: var(--warning-glow); color: var(--warning); font-size: .8125rem; font-weight: 600; }
+.cz-page[data-view=CourseOverview] .course-progress-badge.completed { background: var(--success-glow); color: var(--success); }
+.cz-page[data-view=CourseOverview] .course-progress-badge svg { width: 1rem; height: 1rem; }
+.cz-page[data-view=CourseOverview] .course-description { margin: 0; color: var(--text-secondary); font-size: .9375rem; line-height: 1.6; }
+.cz-page[data-view=CourseOverview] .course-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr)); gap: .75rem; padding-top: 1rem; border-top: 1px solid var(--border-color); }
+.cz-page[data-view=CourseOverview] .stat-item { display: flex; align-items: center; gap: .75rem; min-width: 0; padding: 0; border: 0; }
+.cz-page[data-view=CourseOverview] .stat-icon { display: grid; place-items: center; flex: 0 0 auto; width: 2.5rem; height: 2.5rem; border-radius: 10px; background: var(--accent-subtle); color: var(--accent-primary); }
+.cz-page[data-view=CourseOverview] .stat-icon.exercises-icon { background: var(--warning-glow); color: var(--warning); }
+.cz-page[data-view=CourseOverview] .stat-icon.assessments-icon { background: var(--success-glow); color: var(--success); }
+.cz-page[data-view=CourseOverview] .stat-icon svg { width: 1.25rem; height: 1.25rem; }
+.cz-page[data-view=CourseOverview] .stat-content { display: flex; flex-direction: column; gap: 0; min-width: 0; padding: 0; }
+.cz-page[data-view=CourseOverview] .stat-value { margin: 0; font-size: 1.25rem; font-weight: 700; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.cz-page[data-view=CourseOverview] .stat-label { margin: 0; color: var(--text-secondary); font-size: .8125rem; line-height: 1.3; }
+.cz-page[data-view=CourseOverview] .course-section { display: flex; flex-direction: column; gap: 1rem; padding: 1.5rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; }
+.cz-page[data-view=CourseOverview] .course-section > h2 { font-size: 1.0625rem; margin: 0; }
+.cz-page[data-view=CourseOverview] .course-outcomes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: .625rem 1.5rem; }
+.cz-page[data-view=CourseOverview] .outcome-item { display: flex; align-items: flex-start; gap: .625rem; padding: 0; border: 0; font-size: .9375rem; }
+.cz-page[data-view=CourseOverview] .outcome-item svg { width: 1.125rem; height: 1.125rem; margin-top: .1875rem; color: var(--success); }
+.cz-page[data-view=CourseOverview] .empty-content { padding: 1.5rem; text-align: center; color: var(--text-secondary); }
+.cz-page[data-view=CourseOverview] .sections-list { display: flex; flex-direction: column; gap: .75rem; }
+.cz-page[data-view=CourseOverview] .section-item { padding: 0; overflow: hidden; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-card); }
+.cz-page[data-view=CourseOverview] .section-item.completed { border-color: color-mix(in srgb, var(--success) 40%, var(--border-color)); }
+.cz-page[data-view=CourseOverview] .section-header.cz-button { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem 1rem; width: 100%; min-height: 0; padding: 1rem 1.125rem; border: 0; border-radius: 0; background: transparent; color: var(--text-primary); text-align: left; font-size: inherit; font-weight: inherit; }
+.cz-page[data-view=CourseOverview] .section-header.cz-button:hover:not(:disabled) { background: var(--bg-hover); }
+.cz-page[data-view=CourseOverview] .section-header-left { display: flex; align-items: flex-start; gap: .75rem; flex: 1 1 16rem; min-width: 0; }
+.cz-page[data-view=CourseOverview] .section-number { display: grid; place-items: center; flex: 0 0 auto; width: 2rem; height: 2rem; border-radius: 8px; background: var(--accent-subtle); color: var(--accent-primary); font-size: .8125rem; font-weight: 700; }
+.cz-page[data-view=CourseOverview] .section-number.completed { background: var(--success); color: var(--text-on-accent); }
+.cz-page[data-view=CourseOverview] .section-number svg { width: 1rem; height: 1rem; }
+.cz-page[data-view=CourseOverview] .section-title-wrapper { display: flex; flex-direction: column; gap: .125rem; min-width: 0; }
+.cz-page[data-view=CourseOverview] .section-title-wrapper h3 { font-size: .9375rem; overflow-wrap: anywhere; }
+.cz-page[data-view=CourseOverview] .section-description { margin: 0; color: var(--text-secondary); font-size: .8125rem; font-weight: 400; }
+.cz-page[data-view=CourseOverview] .section-header-right { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: .75rem; margin-left: auto; }
+.cz-page[data-view=CourseOverview] .section-progress { display: flex; align-items: center; gap: .5rem; }
+.cz-page[data-view=CourseOverview] .section-progress-bar { width: 5rem; height: .375rem; border-radius: var(--radius-full); background: var(--bg-tertiary); overflow: hidden; }
+.cz-page[data-view=CourseOverview] .section-progress-fill.completed { background: var(--success); }
+.cz-page[data-view=CourseOverview] .section-progress-text { color: var(--text-secondary); font-size: .75rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.cz-page[data-view=CourseOverview] .section-progress-text.completed { color: var(--success); }
+.cz-page[data-view=CourseOverview] .section-counts { display: flex; flex-wrap: wrap; gap: .375rem; }
+.cz-page[data-view=CourseOverview] .count-badge { display: inline-flex; align-items: center; padding: .125rem .5rem; border-radius: var(--radius-full); background: var(--bg-tertiary); color: var(--text-secondary); font-size: .6875rem; font-weight: 600; white-space: nowrap; }
+.cz-page[data-view=CourseOverview] .expand-icon { width: 1.125rem; height: 1.125rem; color: var(--text-tertiary); transition: transform var(--transition-fast); }
+.cz-page[data-view=CourseOverview] .expand-icon.expanded { transform: rotate(180deg); }
+.cz-page[data-view=CourseOverview] .lessons-list { display: flex; flex-direction: column; padding: .375rem; border-top: 1px solid var(--border-color); background: var(--bg-secondary); }
+.cz-page[data-view=CourseOverview] .lesson-item.cz-button { display: flex; align-items: center; justify-content: flex-start; gap: .75rem; width: 100%; min-height: 0; padding: .625rem .75rem; border: 0; border-radius: 8px; background: transparent; color: var(--text-primary); text-align: left; font-weight: 500; }
+.cz-page[data-view=CourseOverview] .lesson-item.cz-button:hover:not(:disabled) { background: var(--bg-card); }
+.cz-page[data-view=CourseOverview] .lesson-icon { display: grid; place-items: center; flex: 0 0 auto; width: 1.75rem; height: 1.75rem; border-radius: 7px; background: var(--accent-subtle); color: var(--accent-primary); }
+.cz-page[data-view=CourseOverview] .lesson-icon.practice-icon { background: var(--warning-glow); color: var(--warning); }
+.cz-page[data-view=CourseOverview] .lesson-icon.assessment-icon { background: var(--bg-tertiary); color: var(--text-secondary); }
+.cz-page[data-view=CourseOverview] .lesson-icon.completed { background: var(--success-glow); color: var(--success); }
+.cz-page[data-view=CourseOverview] .lesson-icon svg { width: .9375rem; height: .9375rem; }
+.cz-page[data-view=CourseOverview] .lesson-title { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; font-size: .875rem; }
+.cz-page[data-view=CourseOverview] .lesson-status-area { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: .375rem; }
+.cz-page[data-view=CourseOverview] :is(.segment-progress-badge, .segment-status-badge, .item-type-tag) { display: inline-flex; align-items: center; padding: .125rem .5rem; border-radius: var(--radius-full); background: var(--bg-tertiary); color: var(--text-secondary); font-size: .6875rem; font-weight: 600; white-space: nowrap; }
+.cz-page[data-view=CourseOverview] .segment-status-badge.completed { background: var(--success-glow); color: var(--success); }
+.cz-page[data-view=CourseOverview] :is(.segment-status-badge.in-progress, .segment-progress-badge) { background: var(--warning-glow); color: var(--warning); }
+@media (max-width: 700px) {
+  .cz-page[data-view=CourseOverview] .course-header:has(.course-thumbnail-large) { grid-template-columns: minmax(0, 1fr); }
+  .cz-page[data-view=CourseOverview] .item-type-tag { display: none; }
+}
+
+/* Course player */
+.cz-page[data-view=CurrentCourse] { gap: 1rem; }
+.cz-page[data-view=CurrentCourse] .current-course-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; margin: 0; padding: 0; border: 0; background: none; }
+.cz-page[data-view=CurrentCourse] .current-course-header .btn-back { min-height: 2.25rem; padding: .375rem .625rem .375rem .375rem; border-color: transparent; background: transparent; color: var(--text-secondary); }
+.cz-page[data-view=CurrentCourse] .current-course-header .btn-back svg { width: 1.125rem; height: 1.125rem; }
+.cz-page[data-view=CurrentCourse] .sidebar-toggle { min-height: 2.25rem; padding: .375rem .75rem; }
+.cz-page[data-view=CurrentCourse] .course-sidebar > h2, .cz-page[data-view=CurrentCourse] .course-sidebar > h3 { margin-bottom: .5rem; font-size: 1rem; }
+.cz-page[data-view=CurrentCourse] .sidebar-section + .sidebar-section { border-top: 1px solid var(--border-color); }
+.cz-page[data-view=CurrentCourse] .sidebar-section-header { color: var(--text-primary); font-size: .8125rem; letter-spacing: .02em; }
+.cz-page[data-view=CurrentCourse] .sidebar-section-header .expand-icon { width: 1rem; height: 1rem; margin-left: auto; color: var(--text-tertiary); transition: transform var(--transition-fast); }
+.cz-page[data-view=CurrentCourse] .sidebar-segments { display: flex; flex-direction: column; gap: .125rem; padding-bottom: .75rem; }
+.cz-page[data-view=CurrentCourse] .sidebar-segment.cz-button { display: flex; align-items: center; gap: .625rem; min-height: 2.5rem; margin: 0; color: var(--text-primary); font-size: .8125rem; font-weight: 500; }
+.cz-page[data-view=CurrentCourse] .sidebar-segment.cz-button:hover:not(:disabled) { background: var(--bg-hover); }
+.cz-page[data-view=CurrentCourse] .sidebar-segment.active.cz-button { background: var(--accent-subtle); color: var(--accent-primary); font-weight: 600; }
+.cz-page[data-view=CurrentCourse] .segment-icon { display: grid; place-items: center; flex: 0 0 auto; width: 1.5rem; height: 1.5rem; color: var(--text-tertiary); }
+.cz-page[data-view=CurrentCourse] .segment-icon svg { width: 1rem; height: 1rem; }
+.cz-page[data-view=CurrentCourse] .sidebar-segment.active .segment-icon { color: var(--accent-primary); }
+.cz-page[data-view=CurrentCourse] .section-progress { margin-left: auto; color: var(--text-secondary); font-size: .6875rem; font-weight: 600; }
+.cz-page[data-view=CurrentCourse] .segment-header h2 { font-size: 1.25rem; }
+.cz-page[data-view=CurrentCourse] .segment-description { margin-top: .375rem; color: var(--text-secondary); }
+.cz-page[data-view=CurrentCourse] :is(.practice-exercise-view, .assessment-view) { display: flex; flex-direction: column; align-items: flex-start; gap: 1rem; padding: 1.5rem; border: 1px solid var(--border-color); border-left: 3px solid var(--warning); border-radius: 10px; background: var(--bg-secondary); }
+.cz-page[data-view=CurrentCourse] .assessment-view { border-left-color: var(--accent-primary); }
+.cz-page[data-view=CurrentCourse] :is(.exercise-info, .assessment-info) { display: flex; flex-direction: column; gap: .375rem; }
+.cz-page[data-view=CurrentCourse] :is(.exercise-info, .assessment-info) p { color: var(--text-secondary); }
+.cz-page[data-view=CurrentCourse] :is(.btn-start-exercise, .btn-start-assessment, .btn-mark-complete) svg { width: 1rem; height: 1rem; }
+.cz-page[data-view=CurrentCourse] .btn-mark-complete { margin-top: 1rem; }
+.cz-page[data-view=CurrentCourse] .embedded-video { width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: 10px; background: var(--bg-tertiary); }
+
+/* Course quiz */
+.cz-page[data-view=Quiz] { gap: 1.25rem; max-width: 60rem; }
+.cz-page[data-view=Quiz] :is(.quiz-intro, .quiz-results) { display: flex; flex-direction: column; gap: 1.25rem; }
+.cz-page[data-view=Quiz] :is(.quiz-intro, .quiz-results) > .btn-back { align-self: flex-start; min-height: 2.25rem; padding: .375rem .625rem .375rem .375rem; border-color: transparent; background: transparent; color: var(--text-secondary); }
+.cz-page[data-view=Quiz] .btn-back svg { width: 1.125rem; height: 1.125rem; }
+.cz-page[data-view=Quiz] :is(.intro-card, .results-card) { display: flex; flex-direction: column; align-items: center; gap: 1.25rem; padding: 2rem; text-align: center; }
+.cz-page[data-view=Quiz] .intro-icon { display: grid; place-items: center; width: 3.5rem; height: 3.5rem; border-radius: 14px; background: var(--accent-subtle); color: var(--accent-primary); }
+.cz-page[data-view=Quiz] .intro-icon svg { width: 1.75rem; height: 1.75rem; }
+.cz-page[data-view=Quiz] .intro-description { max-width: 36rem; color: var(--text-secondary); }
+.cz-page[data-view=Quiz] .intro-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; width: 100%; max-width: 30rem; }
+.cz-page[data-view=Quiz] .intro-stats .stat-item { display: flex; flex-direction: column; gap: .125rem; padding: .875rem; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-secondary); }
+.cz-page[data-view=Quiz] .intro-stats .stat-value { font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.cz-page[data-view=Quiz] .intro-stats .stat-label { color: var(--text-secondary); font-size: .75rem; font-weight: 600; }
+.cz-page[data-view=Quiz] .intro-instructions { width: 100%; max-width: 36rem; padding: 1.25rem; border-radius: 10px; background: var(--bg-secondary); text-align: left; }
+.cz-page[data-view=Quiz] .intro-instructions h3 { margin-bottom: .625rem; }
+.cz-page[data-view=Quiz] .intro-instructions ul { margin: 0; padding-left: 1.25rem; color: var(--text-secondary); font-size: .875rem; line-height: 1.7; }
+.cz-page[data-view=Quiz] :is(.btn-start-quiz, .btn-review, .btn-finish) svg { width: 1rem; height: 1rem; }
+.cz-page[data-view=Quiz] .quiz-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem 1rem; margin: 0; padding: .75rem 1rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; }
+.cz-page[data-view=Quiz] .header-left { display: flex; align-items: center; gap: .75rem; flex: 1 1 14rem; min-width: 0; }
+.cz-page[data-view=Quiz] .header-left h2 { font-size: 1rem; overflow-wrap: anywhere; }
+.cz-page[data-view=Quiz] :is(.btn-back-small, .nav-btn).cz-button { width: 2.5rem; min-height: 2.5rem; padding: 0; }
+.cz-page[data-view=Quiz] :is(.btn-back-small, .nav-btn) svg { width: 1.125rem; height: 1.125rem; }
+.cz-page[data-view=Quiz] .header-nav { display: flex; align-items: center; gap: .5rem; }
+.cz-page[data-view=Quiz] .nav-indicator { min-width: 3.5rem; text-align: center; color: var(--text-secondary); font-size: .875rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.cz-page[data-view=Quiz] .btn-text-mobile { display: none; }
+.cz-page[data-view=Quiz] .question-card { display: flex; flex-direction: column; gap: 1.25rem; padding: 1.5rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; }
+.cz-page[data-view=Quiz] .question-text { display: flex; flex-direction: column; align-items: flex-start; gap: .625rem; }
+.cz-page[data-view=Quiz] .question-number-badge { padding: .25rem .625rem; border-radius: var(--radius-full); background: var(--accent-subtle); color: var(--accent-primary); font-size: .75rem; font-weight: 700; }
+.cz-page[data-view=Quiz] .question-text h3 { font-size: 1.0625rem; line-height: 1.5; overflow-wrap: anywhere; }
+.cz-page[data-view=Quiz] .question-description { color: var(--text-secondary); overflow-wrap: anywhere; }
+.cz-page[data-view=Quiz] .question-hint { display: flex; align-items: center; gap: .5rem; color: var(--accent-primary); font-size: .8125rem; font-weight: 600; }
+.cz-page[data-view=Quiz] .question-hint svg { width: 1rem; height: 1rem; }
+.cz-page[data-view=Quiz] .options-container { display: flex; flex-direction: column; gap: .625rem; }
+.cz-page[data-view=Quiz] button.option-item { display: flex; align-items: center; gap: .875rem; width: 100%; min-height: 3.25rem; padding: .75rem 1rem; border: 1px solid var(--border-strong); border-radius: 10px; background: var(--bg-card); color: var(--text-primary); text-align: left; font-size: .9375rem; transition: border-color var(--transition-fast), background var(--transition-fast); }
+.cz-page[data-view=Quiz] button.option-item:hover:not(:disabled) { border-color: var(--accent-primary); background: var(--accent-subtle); }
+.cz-page[data-view=Quiz] button.option-item.selected { border-color: var(--accent-primary); background: var(--accent-subtle); }
+.cz-page[data-view=Quiz] button.option-item.correct { border-color: var(--success); background: var(--success-glow); }
+.cz-page[data-view=Quiz] button.option-item.wrong { border-color: var(--error); background: var(--error-glow); }
+.cz-page[data-view=Quiz] button.option-item:disabled { opacity: 1; cursor: default; }
+.cz-page[data-view=Quiz] .option-selector { display: grid; place-items: center; flex: 0 0 auto; width: 1.25rem; height: 1.25rem; border: 2px solid var(--border-strong); border-radius: 50%; background: var(--bg-card); color: var(--text-on-accent); }
+.cz-page[data-view=Quiz] .option-selector.checkbox { border-radius: 5px; }
+.cz-page[data-view=Quiz] .option-item.selected .option-selector { border-color: var(--accent-primary); background: var(--accent-primary); }
+.cz-page[data-view=Quiz] .option-selector svg { width: .875rem; height: .875rem; }
+.cz-page[data-view=Quiz] .radio-dot { width: .5rem; height: .5rem; border-radius: 50%; background: var(--text-on-accent); }
+.cz-page[data-view=Quiz] .option-letter { display: grid; place-items: center; flex: 0 0 auto; width: 1.75rem; height: 1.75rem; border-radius: 7px; background: var(--bg-tertiary); color: var(--text-secondary); font-size: .8125rem; font-weight: 700; }
+.cz-page[data-view=Quiz] .option-text { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+.cz-page[data-view=Quiz] .option-status { display: flex; flex: 0 0 auto; padding: 0; background: none; }
+.cz-page[data-view=Quiz] .option-status .status-icon { width: 1.25rem; height: 1.25rem; }
+.cz-page[data-view=Quiz] .status-icon.correct { color: var(--success); }
+.cz-page[data-view=Quiz] .status-icon.wrong { color: var(--error); }
+.cz-page[data-view=Quiz] .question-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+.cz-page[data-view=Quiz] .question-actions:empty { display: none; }
+.cz-page[data-view=Quiz] .explanation-box { border-left: 3px solid var(--accent-primary); background: var(--bg-secondary); }
+.cz-page[data-view=Quiz] .explanation-header { justify-content: flex-start; gap: .5rem; margin-bottom: .5rem; color: var(--accent-primary); }
+.cz-page[data-view=Quiz] .explanation-header svg { width: 1.125rem; height: 1.125rem; }
+.cz-page[data-view=Quiz] .explanation-content { color: var(--text-primary); font-size: .9375rem; line-height: 1.6; }
+.cz-page[data-view=Quiz] .results-score-circle { position: relative; width: 8rem; height: 8rem; }
+.cz-page[data-view=Quiz] .score-ring { width: 100%; height: 100%; transform: rotate(-90deg); }
+.cz-page[data-view=Quiz] .ring-bg { fill: none; stroke: var(--bg-tertiary); stroke-width: 8; }
+.cz-page[data-view=Quiz] .ring-progress { fill: none; stroke-width: 8; stroke-linecap: round; }
+.cz-page[data-view=Quiz] .score-content { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.cz-page[data-view=Quiz] .score-content .score-value { font-size: 1.75rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.cz-page[data-view=Quiz] .score-content .score-label { color: var(--text-secondary); font-size: .75rem; }
+.cz-page[data-view=Quiz] .results-summary { color: var(--text-secondary); }
+.cz-page[data-view=Quiz] .results-breakdown { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; width: 100%; max-width: 30rem; }
+.cz-page[data-view=Quiz] .breakdown-item { display: flex; flex-direction: column; align-items: center; gap: .125rem; padding: .875rem; border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-secondary); }
+.cz-page[data-view=Quiz] .breakdown-item svg { width: 1.125rem; height: 1.125rem; }
+.cz-page[data-view=Quiz] .breakdown-item.correct svg { color: var(--success); }
+.cz-page[data-view=Quiz] .breakdown-item.incorrect svg { color: var(--error); }
+.cz-page[data-view=Quiz] .breakdown-value { color: var(--text-primary); font-size: 1.375rem; font-weight: 700; }
+.cz-page[data-view=Quiz] .question-summary-section { width: 100%; }
+.cz-page[data-view=Quiz] .question-summary-section h3 { margin-bottom: .75rem; }
+.cz-page[data-view=Quiz] .question-summary-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; }
+.cz-page[data-view=Quiz] .summary-item { display: inline-flex; align-items: center; gap: .25rem; padding: .375rem .625rem; border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; font-size: .8125rem; font-weight: 600; }
+.cz-page[data-view=Quiz] .summary-item svg { width: .875rem; height: .875rem; }
+.cz-page[data-view=Quiz] .summary-item.correct { border-color: var(--success); background: var(--success-glow); color: var(--success); }
+.cz-page[data-view=Quiz] .summary-item.incorrect { border-color: var(--error); background: var(--error-glow); color: var(--error); }
+.cz-page[data-view=Quiz] .results-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; }
+.confirm-modal { padding: 1.5rem; text-align: center; align-items: center; gap: .75rem; }
+.confirm-modal .confirm-modal-icon { display: grid; place-items: center; width: 3rem; height: 3rem; margin: 0 auto; border-radius: 12px; background: var(--warning-glow); color: var(--warning); }
+.confirm-modal .confirm-modal-icon svg { width: 1.5rem; height: 1.5rem; }
+.confirm-modal p { color: var(--text-secondary); }
+.confirm-modal .confirm-modal-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; margin-top: .5rem; }
+@media (max-width: 600px) {
+  .cz-page[data-view=Quiz] .btn-text { display: none; }
+  .cz-page[data-view=Quiz] .btn-text-mobile { display: inline; }
+  .cz-page[data-view=Quiz] .question-card { padding: 1rem; }
+}
+
+/* Practice exercise and in-course assessment */
+.cz-page:is([data-view=PracticeExercise], [data-view=CourseAssessment]) { gap: 1rem; }
+.cz-page[data-view=PracticeExercise] { max-width: none; }
+.cz-page:is([data-view=PracticeExercise], [data-view=CourseAssessment]) .btn-back { min-height: 2.25rem; padding: .375rem .625rem .375rem .375rem; border-color: transparent; background: transparent; color: var(--text-secondary); }
+.cz-page:is([data-view=PracticeExercise], [data-view=CourseAssessment]) .btn-back svg { width: 1.125rem; height: 1.125rem; }
+.cz-page[data-view=PracticeExercise] .header-top-row { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1rem; width: 100%; }
+.cz-page[data-view=PracticeExercise] .practice-title { flex: 1 1 14rem; min-width: 0; }
+.cz-page[data-view=PracticeExercise] .header-nav-row { display: flex; align-items: center; gap: .5rem; margin-left: auto; }
+.cz-page:is([data-view=PracticeExercise], [data-view=CourseAssessment]) .nav-btn svg { width: 1rem; height: 1rem; }
+.cz-page[data-view=PracticeExercise] .question-counter { color: var(--text-secondary); font-size: .8125rem; font-weight: 600; white-space: nowrap; }
+.cz-page[data-view=PracticeExercise] .no-questions { display: flex; flex-direction: column; align-items: center; gap: .5rem; padding: 3rem 1.5rem; text-align: center; color: var(--text-secondary); background: var(--bg-card); border: 1px dashed var(--border-strong); border-radius: 12px; }
+.cz-page[data-view=PracticeExercise] .programming-question-layout { display: flex; align-items: stretch; height: calc(100dvh - 11rem); min-height: 32rem; }
+.cz-page[data-view=PracticeExercise] .question-panel { flex: 0 0 auto; min-width: 0; overflow: auto; padding: 1.25rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; }
+.cz-page[data-view=PracticeExercise] .question-panel.collapsed { padding: 0; border: 0; }
+.cz-page[data-view=PracticeExercise] .question-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: 1rem; }
+.cz-page[data-view=PracticeExercise] .question-content { display: flex; flex-direction: column; gap: 1rem; font-size: .9375rem; line-height: 1.6; }
+.cz-page[data-view=PracticeExercise] :is(.question-constraints, .question-format, .question-sample) h4 { margin-bottom: .375rem; color: var(--text-secondary); font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; }
+.cz-page[data-view=PracticeExercise] .question-sample pre { margin: 0; white-space: pre-wrap; }
+.cz-page[data-view=PracticeExercise] .collapse-btn.cz-button { align-self: center; width: 1.5rem; min-height: 3rem; margin: 0 .25rem; padding: 0; }
+.cz-page[data-view=PracticeExercise] .collapse-btn svg { width: .875rem; height: .875rem; }
+.cz-page[data-view=PracticeExercise] .vertical-resizer { display: flex; align-items: center; justify-content: center; flex: 0 0 .75rem; cursor: ew-resize; }
+.cz-page[data-view=PracticeExercise] .resizer-handle { display: flex; flex-direction: column; gap: .1875rem; }
+.cz-page[data-view=PracticeExercise] .resizer-handle span { width: .25rem; height: .25rem; border-radius: 50%; background: var(--border-strong); }
+.cz-page[data-view=PracticeExercise] .editor-panel { flex: 1 1 auto; min-width: 0; overflow: hidden; border-radius: 12px; }
+.cz-page:is([data-view=PracticeExercise], [data-view=CourseAssessment]) .difficulty-badge { display: inline-flex; padding: .1875rem .625rem; border-radius: var(--radius-full); background: var(--warning-glow); color: var(--warning); font-size: .75rem; font-weight: 600; text-transform: capitalize; }
+.cz-page[data-view=PracticeExercise] .mcq-question-layout { max-width: 52rem; width: 100%; margin: 0 auto; }
+.cz-page[data-view=PracticeExercise] .mcq-question-card { display: flex; flex-direction: column; gap: 1.25rem; padding: 1.5rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; }
+.cz-page[data-view=PracticeExercise] .mcq-question-header { display: flex; align-items: center; justify-content: space-between; gap: .75rem; }
+.cz-page[data-view=PracticeExercise] .mcq-question-number { padding: .25rem .625rem; border-radius: var(--radius-full); background: var(--accent-subtle); color: var(--accent-primary); font-size: .75rem; font-weight: 700; }
+.cz-page[data-view=PracticeExercise] .mcq-question-text { font-size: 1.0625rem; font-weight: 600; line-height: 1.5; overflow-wrap: anywhere; }
+.cz-page:is([data-view=PracticeExercise], [data-view=CourseAssessment]) :is(.mcq-options, .question-options) { display: flex; flex-direction: column; gap: .625rem; }
+.cz-page:is([data-view=PracticeExercise], [data-view=CourseAssessment]) button:is(.mcq-option, .option-btn) { display: flex; align-items: center; gap: .875rem; width: 100%; min-height: 3.25rem; padding: .75rem 1rem; border: 1px solid var(--border-strong); border-radius: 10px; background: var(--bg-card); color: var(--text-primary); text-align: left; font-size: .9375rem; }
+.cz-page:is([data-view=PracticeExercise], [data-view=CourseAssessment]) button:is(.mcq-option, .option-btn):hover:not(:disabled) { border-color: var(--accent-primary); background: var(--accent-subtle); }
+.cz-page:is([data-view=PracticeExercise], [data-view=CourseAssessment]) button:is(.mcq-option, .option-btn).selected { border-color: var(--accent-primary); background: var(--accent-subtle); }
+.cz-page:is([data-view=PracticeExercise], [data-view=CourseAssessment]) button:is(.mcq-option, .option-btn).correct { border-color: var(--success); background: var(--success-glow); }
+.cz-page:is([data-view=PracticeExercise], [data-view=CourseAssessment]) button:is(.mcq-option, .option-btn).wrong { border-color: var(--error); background: var(--error-glow); }
+.cz-page:is([data-view=PracticeExercise], [data-view=CourseAssessment]) button:is(.mcq-option, .option-btn):disabled { opacity: 1; cursor: default; }
+.cz-page:is([data-view=PracticeExercise], [data-view=CourseAssessment]) .option-letter { display: grid; place-items: center; flex: 0 0 auto; width: 1.75rem; height: 1.75rem; border-radius: 7px; background: var(--bg-tertiary); color: var(--text-secondary); font-size: .8125rem; font-weight: 700; }
+.cz-page:is([data-view=PracticeExercise], [data-view=CourseAssessment]) .selected .option-letter { background: var(--accent-primary); color: var(--text-on-accent); }
+.cz-page:is([data-view=PracticeExercise], [data-view=CourseAssessment]) .option-text { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+.cz-page:is([data-view=PracticeExercise], [data-view=CourseAssessment]) .option-icon { width: 1.25rem; height: 1.25rem; }
+.cz-page:is([data-view=PracticeExercise], [data-view=CourseAssessment]) .correct .option-icon { color: var(--success); }
+.cz-page:is([data-view=PracticeExercise], [data-view=CourseAssessment]) .wrong .option-icon { color: var(--error); }
+.cz-page[data-view=PracticeExercise] .btn-submit-mcq { align-self: flex-start; }
+.cz-page[data-view=PracticeExercise] .mcq-result { display: flex; align-items: center; gap: .5rem; padding: .75rem 1rem; border-radius: 8px; background: var(--error-glow); color: var(--error); font-weight: 600; }
+.cz-page[data-view=PracticeExercise] .mcq-result.correct { background: var(--success-glow); color: var(--success); }
+.cz-page[data-view=PracticeExercise] .mcq-result svg { width: 1.125rem; height: 1.125rem; }
+.cz-page:is([data-view=PracticeExercise], [data-view=CourseAssessment]) :is(.mcq-explanation, .question-explanation) { padding: 1rem 1.25rem; border-left: 3px solid var(--accent-primary); border-radius: 8px; background: var(--bg-secondary); line-height: 1.6; }
+.cz-page:is([data-view=PracticeExercise], [data-view=CourseAssessment]) :is(.mcq-explanation, .question-explanation) h4 { margin-bottom: .375rem; color: var(--accent-primary); }
+@media (max-width: 900px) {
+  .cz-page[data-view=PracticeExercise] .programming-question-layout { flex-direction: column; height: auto; }
+  .cz-page[data-view=PracticeExercise] .question-panel, .cz-page[data-view=PracticeExercise] .editor-panel { width: 100% !important; }
+  .cz-page[data-view=PracticeExercise] .editor-panel { min-height: 36rem; }
+  .cz-page[data-view=PracticeExercise] :is(.vertical-resizer, .collapse-btn) { display: none; }
+}
+
+.cz-page[data-view=CourseAssessment] { max-width: 72rem; }
+.cz-page[data-view=CourseAssessment] :is(.assessment-intro, .assessment-results) { display: flex; flex-direction: column; gap: 1.25rem; }
+.cz-page[data-view=CourseAssessment] :is(.assessment-intro, .assessment-results) > .btn-back { align-self: flex-start; }
+.cz-page[data-view=CourseAssessment] :is(.intro-card, .results-card) { display: flex; flex-direction: column; align-items: center; gap: 1.25rem; padding: 2rem; text-align: center; }
+.cz-page[data-view=CourseAssessment] .intro-icon { display: grid; place-items: center; width: 3.5rem; height: 3.5rem; border-radius: 14px; background: var(--accent-subtle); color: var(--accent-primary); }
+.cz-page[data-view=CourseAssessment] .intro-icon svg { width: 1.75rem; height: 1.75rem; }
+.cz-page[data-view=CourseAssessment] .intro-description { max-width: 36rem; color: var(--text-secondary); }
+.cz-page[data-view=CourseAssessment] .intro-info { display: flex; flex-wrap: wrap; justify-content: center; gap: .75rem; }
+.cz-page[data-view=CourseAssessment] .info-item { display: inline-flex; align-items: center; gap: .5rem; padding: .5rem .875rem; border: 1px solid var(--border-color); border-radius: var(--radius-full); background: var(--bg-secondary); font-size: .875rem; font-weight: 600; }
+.cz-page[data-view=CourseAssessment] .info-item svg { width: 1rem; height: 1rem; color: var(--accent-primary); }
+.cz-page[data-view=CourseAssessment] .intro-instructions { width: 100%; max-width: 36rem; padding: 1.25rem; border-radius: 10px; background: var(--bg-secondary); text-align: left; }
+.cz-page[data-view=CourseAssessment] .intro-instructions h3 { margin-bottom: .625rem; }
+.cz-page[data-view=CourseAssessment] .intro-instructions ul { margin: 0; padding-left: 1.25rem; color: var(--text-secondary); font-size: .875rem; line-height: 1.7; }
+.cz-page[data-view=CourseAssessment] :is(.btn-start-assessment, .btn-submit, .btn-review, .btn-finish) svg { width: 1rem; height: 1rem; }
+.cz-page[data-view=CourseAssessment] .score-circle { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 8rem; height: 8rem; border: 8px solid var(--error); border-radius: 50%; }
+.cz-page[data-view=CourseAssessment] .results-score.pass .score-circle { border-color: var(--success); }
+.cz-page[data-view=CourseAssessment] .score-circle .score-value { font-size: 1.75rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.cz-page[data-view=CourseAssessment] .score-circle .score-label { color: var(--text-secondary); font-size: .75rem; }
+.cz-page[data-view=CourseAssessment] .results-summary { color: var(--text-secondary); }
+.cz-page[data-view=CourseAssessment] .results-breakdown { width: 100%; }
+.cz-page[data-view=CourseAssessment] .question-summary-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; }
+.cz-page[data-view=CourseAssessment] .summary-item { display: inline-flex; align-items: center; gap: .25rem; padding: .375rem .625rem; border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; font-size: .8125rem; font-weight: 600; }
+.cz-page[data-view=CourseAssessment] .summary-item svg { width: .875rem; height: .875rem; }
+.cz-page[data-view=CourseAssessment] .summary-item.correct { border-color: var(--success); background: var(--success-glow); color: var(--success); }
+.cz-page[data-view=CourseAssessment] .summary-item.incorrect { border-color: var(--error); background: var(--error-glow); color: var(--error); }
+.cz-page[data-view=CourseAssessment] .results-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; }
+.cz-page[data-view=CourseAssessment] .assessment-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem 1rem; padding: .75rem 1rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; }
+.cz-page[data-view=CourseAssessment] :is(.header-left, .header-right) { display: flex; align-items: center; gap: .75rem; min-width: 0; }
+.cz-page[data-view=CourseAssessment] .header-left { flex: 1 1 14rem; }
+.cz-page[data-view=CourseAssessment] .header-left h2 { font-size: 1rem; overflow-wrap: anywhere; }
+.cz-page[data-view=CourseAssessment] .timer { display: inline-flex; align-items: center; gap: .375rem; padding: .375rem .75rem; border-radius: var(--radius-full); background: var(--accent-subtle); color: var(--accent-primary); font-weight: 700; font-variant-numeric: tabular-nums; }
+.cz-page[data-view=CourseAssessment] .timer.warning { background: var(--error-glow); color: var(--error); }
+.cz-page[data-view=CourseAssessment] .timer svg { width: 1rem; height: 1rem; }
+.cz-page[data-view=CourseAssessment] .progress-text { color: var(--text-secondary); font-size: .8125rem; font-weight: 600; white-space: nowrap; }
+.cz-page[data-view=CourseAssessment] .assessment-content { display: grid; grid-template-columns: minmax(0, 1fr) 15rem; gap: 1rem; align-items: start; }
+.cz-page[data-view=CourseAssessment] .question-panel { display: flex; flex-direction: column; gap: 1.25rem; padding: 1.5rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; }
+.cz-page[data-view=CourseAssessment] .question-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem; }
+.cz-page[data-view=CourseAssessment] .question-number { padding: .25rem .625rem; border-radius: var(--radius-full); background: var(--accent-subtle); color: var(--accent-primary); font-size: .75rem; font-weight: 700; }
+.cz-page[data-view=CourseAssessment] .question-body { display: flex; flex-direction: column; gap: 1.25rem; }
+.cz-page[data-view=CourseAssessment] .question-text { font-size: 1.0625rem; font-weight: 600; line-height: 1.5; overflow-wrap: anywhere; }
+.cz-page[data-view=CourseAssessment] .question-nav { display: flex; justify-content: space-between; gap: .5rem; padding-top: 1rem; border-top: 1px solid var(--border-color); }
+.cz-page[data-view=CourseAssessment] .question-palette { position: sticky; top: 1rem; display: flex; flex-direction: column; gap: 1rem; padding: 1.25rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; }
+.cz-page[data-view=CourseAssessment] .palette-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(2.25rem, 1fr)); gap: .375rem; }
+.cz-page[data-view=CourseAssessment] button.palette-item { display: grid; place-items: center; height: 2.25rem; padding: 0; border: 1px solid var(--border-strong); border-radius: 7px; background: var(--bg-card); font-size: .8125rem; font-weight: 600; }
+.cz-page[data-view=CourseAssessment] button.palette-item.answered { border-color: var(--success); background: var(--success-glow); color: var(--success); }
+.cz-page[data-view=CourseAssessment] button.palette-item.current { border-color: var(--accent-primary); background: var(--accent-primary); color: var(--text-on-accent); }
+.cz-page[data-view=CourseAssessment] .palette-legend { display: flex; flex-direction: column; gap: .375rem; color: var(--text-secondary); font-size: .75rem; }
+.cz-page[data-view=CourseAssessment] .legend-item { display: flex; align-items: center; gap: .5rem; }
+.cz-page[data-view=CourseAssessment] .legend-dot { width: .75rem; height: .75rem; border: 1px solid var(--border-strong); border-radius: 3px; }
+.cz-page[data-view=CourseAssessment] .legend-dot.answered { border-color: var(--success); background: var(--success-glow); }
+.cz-page[data-view=CourseAssessment] .legend-dot.current { border-color: var(--accent-primary); background: var(--accent-primary); }
+@media (max-width: 900px) {
+  .cz-page[data-view=CourseAssessment] .assessment-content { grid-template-columns: minmax(0, 1fr); }
+  .cz-page[data-view=CourseAssessment] .question-palette { position: static; }
+}
+
+/* My assessments */
+.cz-page[data-view=Assessments] { gap: 1.25rem; }
+.cz-page[data-view=Assessments] .assessments-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .625rem; min-height: 16rem; padding: 2rem; text-align: center; color: var(--text-secondary); background: var(--bg-card); border: 1px dashed var(--border-strong); border-radius: 12px; }
+.cz-page[data-view=Assessments] .assessments-empty svg { width: 2.5rem; height: 2.5rem; padding: .5rem; border-radius: 12px; background: var(--accent-subtle); color: var(--accent-primary); }
+.cz-page[data-view=Assessments] .assessments-empty h3 { color: var(--text-primary); }
+.cz-page[data-view=Assessments] .assessments-empty p { max-width: 28rem; }
+.cz-page[data-view=Assessments] .assessments-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); gap: 1rem; }
+.cz-page[data-view=Assessments] .assessment-card { display: flex; flex-direction: column; min-width: 0; padding: 0; overflow: hidden; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; transition: border-color var(--transition-fast), box-shadow var(--transition-fast); }
+.cz-page[data-view=Assessments] .assessment-card:hover { border-color: var(--border-strong); box-shadow: var(--shadow-md); }
+.cz-page[data-view=Assessments] .card-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem; padding: 1rem 1.25rem 0; margin: 0; border: 0; }
+.cz-page[data-view=Assessments] .card-body { display: flex; flex-direction: column; gap: .375rem; flex: 1 1 auto; padding: .75rem 1.25rem 1rem; min-width: 0; }
+.cz-page[data-view=Assessments] .card-body h3 { font-size: 1.0625rem; line-height: 1.35; overflow-wrap: anywhere; }
+.cz-page[data-view=Assessments] .card-body .assessment-title { margin: 0; color: var(--text-secondary); font-size: .875rem; font-weight: 500; }
+.cz-page[data-view=Assessments] .card-body .target-audience { margin: 0; color: var(--text-tertiary); font-size: .8125rem; }
+.cz-page[data-view=Assessments] .card-meta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .625rem 1rem; margin-top: .75rem; padding: .875rem 0 0; border-top: 1px solid var(--border-color); }
+.cz-page[data-view=Assessments] .meta-item { display: flex; align-items: center; gap: .5rem; min-width: 0; padding: 0; border: 0; color: var(--text-secondary); font-size: .8125rem; }
+.cz-page[data-view=Assessments] .meta-item svg { width: 1rem; height: 1rem; flex: 0 0 auto; color: var(--text-tertiary); }
+.cz-page[data-view=Assessments] .meta-item span { overflow-wrap: anywhere; }
+.cz-page[data-view=Assessments] .score-display { display: flex; align-items: center; gap: .875rem; margin-top: .75rem; }
+.cz-page[data-view=Assessments] .score-circle { position: relative; width: 3.5rem; height: 3.5rem; flex: 0 0 auto; }
+.cz-page[data-view=Assessments] .score-circle svg { width: 100%; height: 100%; }
+.cz-page[data-view=Assessments] .score-value { position: absolute; inset: 0; display: grid; place-items: center; font-size: .8125rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.cz-page[data-view=Assessments] .pass-status { font-size: .875rem; font-weight: 650; }
+.cz-page[data-view=Assessments] .pass-status.passed { color: var(--success); }
+.cz-page[data-view=Assessments] .pass-status.failed { color: var(--error); }
+.cz-page[data-view=Assessments] .card-actions { display: flex; flex-wrap: wrap; gap: .5rem; padding: .875rem 1.25rem; margin: 0; border-top: 1px solid var(--border-color); background: var(--bg-secondary); }
+.cz-page[data-view=Assessments] .card-actions .cz-button { flex: 1 1 8rem; }
+@media (max-width: 600px) {
+  .cz-page[data-view=Assessments] .card-meta { grid-template-columns: minmax(0, 1fr); }
+  .la-tabs { width: 100%; }
+  .cz-page .la-tabs > button { flex: 1 1 auto; justify-content: center; }
+}

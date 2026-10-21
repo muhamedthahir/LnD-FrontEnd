@@ -4,6 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import { useApi } from '../../../contexts/ApiContext';
 import { toast } from 'react-toastify';
 import Button from '../../../components/Button/Button';
+const STATUS_TONES = {
+  'not-started': 'accent',
+  'in-progress': 'warning',
+  completed: 'success',
+  expired: 'danger'
+};
 function Assessments() {
   const navigate = useNavigate();
   const {
@@ -260,9 +266,8 @@ function Assessments() {
   return <PageContent className="assessments-page" view="Assessments">
 
 
-      {}
-      <div className="assessments-tabs">
-        {tabs.map(tab => <button key={tab.id} className={`tab-button ${activeTab === tab.id ? 'active' : ''}`} onClick={() => setActiveTab(tab.id)}>
+      <div className="assessments-tabs la-tabs" role="tablist" aria-label="Assessment status">
+        {tabs.map(tab => <button key={tab.id} type="button" role="tab" aria-selected={activeTab === tab.id} className={`tab-button ${activeTab === tab.id ? 'active' : ''}`} onClick={() => setActiveTab(tab.id)}>
             {tab.label}
             <span className="tab-count">{tab.count}</span>
           </button>)}
@@ -280,10 +285,10 @@ function Assessments() {
         const statusConfig = getStatusConfig(assessment.status);
         return <div key={assessment.user_mapping_id} className="assessment-card">
                 <div className="card-header">
-                  <span className={`status-badge ${statusConfig.color}`}>
+                  <span className={`la-pill status-badge ${statusConfig.color}`} data-tone={STATUS_TONES[statusConfig.color]}>
                     {statusConfig.label}
                   </span>
-                  {(assessment.max_attempts || 1) > 1 && <span className="attempts-badge">
+                  {(assessment.max_attempts || 1) > 1 && <span className="la-pill attempts-badge">
                       Attempt {assessment.current_attempt || assessment.attempt_number || 1} of {assessment.max_attempts}
                     </span>}
                 </div>
@@ -347,7 +352,7 @@ function Assessments() {
                   {statusConfig.canStart && <Button variant="primary" onClick={() => handleStartAssessment(assessment)}>
                       {assessment.status === 'IN_PROGRESS' ? 'Continue' : assessment.status === 'PAUSED' ? 'Resume' : assessment.status === 'INVITED' ? 'Start Assessment' : 'Start Assessment'}
                     </Button>}
-                  {['COMPLETED', 'SUBMITTED', 'DISQUALIFIED'].includes(assessment.status) && <Button variant="outline" onClick={() => handleViewResults(assessment)}>
+                  {['COMPLETED', 'SUBMITTED', 'DISQUALIFIED'].includes(assessment.status) && <Button variant="secondary" onClick={() => handleViewResults(assessment)}>
                       View Results
                     </Button>}
                   {canRetake(assessment) && <Button variant="primary" onClick={() => handleRetake(assessment)}>
