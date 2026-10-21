@@ -7,6 +7,7 @@ import { useApi } from '../../contexts/ApiContext';
 import { CODE_SNIPPETS, LANGUAGE_KEY_MAP } from "../../constants/constants.js";
 import { loadAssessmentDraft, saveAssessmentDraft } from "../../utils/assessmentDraftStorage.js";
 import { outputsMatch } from "../../utils/outputCompare.js";
+import { executionSucceeded } from '../../utils/executionResult.js';
 import { configureMonacoClipboardBlock } from "../../hooks/useAssessmentClipboardGuard.js";
 function CodeEditor({
   questionId,
@@ -28,7 +29,9 @@ function CodeEditor({
     apiBaseUrl,
     accessToken
   } = useApi();
-  const [editorHeight, setEditorHeight] = useState(52);
+  const [editorHeight, setEditorHeight] = useState(62);
+  const [fontSize, setFontSize] = useState(15);
+  const [wordWrap, setWordWrap] = useState(false);
   const [code, setCode] = useState('');
   const [savedCodeSnapshot, setSavedCodeSnapshot] = useState('');
   const [lastTestedCode, setLastTestedCode] = useState('');
@@ -50,6 +53,7 @@ function CodeEditor({
   const monacoRef = useRef(null);
   const isDragging = useRef(false);
   const previousQuestionIdRef = useRef(null);
+  const languageDraftsRef = useRef({});
   const wsRef = useRef(null);
   const outputRef = useRef(null);
   const useInteractiveMode = false;
@@ -57,7 +61,7 @@ function CodeEditor({
   const hasTestCases = visibleTestCases.length > 0;
   const codeIsSaved = code === savedCodeSnapshot && code.trim().length > 0;
   const canSubmitCode = hasTestCases ? visibleTestsPassed && lastTestedCode === code && codeIsSaved : codeIsSaved;
-  const saveButtonLabel = activeTab === 'custom' ? 'Save & Run' : activeTab === 'testcases' ? 'Save & Test' : 'Save Code';
+  const busy = isRunning || isSaving || isSubmitting;
   const defaultLanguages = [{
     id: 1,
     name: 'JavaScript',
@@ -129,6 +133,7 @@ function CodeEditor({
       if (previousQuestionIdRef.current === questionId) return;
       const isNewQuestion = previousQuestionIdRef.current !== null && previousQuestionIdRef.current !== questionId;
       previousQuestionIdRef.current = questionId;
+      languageDraftsRef.current = {};
       if (isNewQuestion) {
         setOutput('');
         setUserInput('');
@@ -190,10 +195,14 @@ function CodeEditor({
     }
   }, [code, lastTestedCode]);
   const handleLanguageChange = newLanguage => {
+    languageDraftsRef.current[language] = code;
     setLanguage(newLanguage);
     const langObj = languages.find(l => l.key === newLanguage || LANGUAGE_KEY_MAP[l.name] === newLanguage);
     const template = codeTemplates.find(t => t.language_id === langObj?.id || LANGUAGE_KEY_MAP[t.language_name] === newLanguage);
-    const nextCode = template?.template_code ? template.template_code : CODE_SNIPPETS[newLanguage] || '';
+    const nextCode = languageDraftsRef.current[newLanguage] ?? (template?.template_code || CODE_SNIPPETS[newLanguage] || '');
+    setVisibleTestsPassed(false);
+    setLastTestedCode('');
+    setSavedCodeSnapshot('');
     setCode(nextCode);
     if (assessmentMappingId && questionId) {
       saveAssessmentDraft(assessmentMappingId, questionId, nextCode, newLanguage);
@@ -467,13 +476,13 @@ function CodeEditor({
         const result = await response.json();
         let actualOutput = '';
         let passed = false;
-        if (response.ok && result.run) {
+        if (response.ok && executionSucceeded(result)) {
           actualOutput = result.run.stdout || '';
           const expectedOutput = testCase.expected_result || testCase.expected_output || '';
           passed = outputsMatch(actualOutput, expectedOutput);
           actualOutput = actualOutput.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trimEnd();
         } else {
-          actualOutput = result.error || result.run?.stderr || 'Execution failed';
+          actualOutput = result.error || result.compile?.stderr || result.run?.stderr || `Execution failed (exit code ${result.run?.code ?? result.compile?.code ?? 'unknown'})`;
         }
         results.push({
           ...testCase,
@@ -497,19 +506,20 @@ function CodeEditor({
     setIsRunning(false);
     return allPassed;
   };
-  const handleSaveAndRun = async () => {
+  const handleSaveAndRun = async (action = 'save') => {
     if (isRunning || isSaving) return;
     setIsSaving(true);
     try {
       await persistCode();
-      if (activeTab === 'custom') {
+      if (action === 'run') {
         await handleRunCodeBatch();
-      } else if (activeTab === 'testcases') {
+      } else if (action === 'test') {
         await handleRunWithTestCases();
       } else {
         setOutput('> Code saved\n');
       }
     } catch (error) {
+      setActiveTab('custom');
       setOutput(`> Save failed: ${error.message}`);
     } finally {
       setIsSaving(false);
@@ -572,7 +582,6 @@ function CodeEditor({
   };
   const handleClearOutput = () => {
     if (activeTab === 'custom') {
-      setUserInput('');
       setOutput('');
     } else if (activeTab === 'testcases') {
       setTestResults([]);
@@ -612,19 +621,25 @@ function CodeEditor({
     }}>
         <div className={styles.codeHeader}>
           <div className={styles.languageSelector}>
-            <select aria-label="Programming language" value={language} onChange={e => handleLanguageChange(e.target.value)}>
+            <select aria-label="Programming language" value={language} onChange={e => handleLanguageChange(e.target.value)} disabled={busy}>
               {languages.map(lang => <option key={lang.id || lang.key} value={lang.key || LANGUAGE_KEY_MAP[lang.name]}>
                   {lang.name}
                 </option>)}
             </select>
           </div>
+          <div className={styles.editorPreferences}>
+            <label>Text size<select aria-label="Editor text size" value={fontSize} onChange={e => setFontSize(Number(e.target.value))}>{[13,15,17,19].map(size => <option key={size} value={size}>{size}px</option>)}</select></label>
+            <button type="button" aria-pressed={wordWrap} onClick={() => setWordWrap(value => !value)}>Wrap lines</button>
+          </div>
           <div className={styles.codeActions}>
+            <ActionButton onClick={() => handleSaveAndRun('run')} disabled={busy || !code.trim()}>Run code</ActionButton>
+            {hasTestCases && <ActionButton onClick={() => handleSaveAndRun('test')} disabled={busy || !code.trim()}>Test samples</ActionButton>}
             {useInteractiveMode && isRunning && isInteractive ? <ActionButton className={styles.btnStopHeader} onClick={handleStopExecution}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <rect x="6" y="6" width="12" height="12" />
                 </svg>
                 Stop
-              </ActionButton> : <ActionButton className={styles.btnSaveAndTest} onClick={handleSaveAndRun} disabled={isRunning || isSaving} title={activeTab === 'custom' ? 'Save your code and run against your custom input' : activeTab === 'testcases' ? 'Save your code and run against visible sample test cases' : 'Save your code'}>
+              </ActionButton> : <ActionButton className={styles.btnSaveAndTest} onClick={() => handleSaveAndRun('save')} disabled={busy || !code.trim()} title="Save code without running it">
                 {isRunning || isSaving ? <>
                     <svg className={styles.spinner} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <circle cx="12" cy="12" r="10" strokeDasharray="32" strokeDashoffset="12" />
@@ -636,10 +651,10 @@ function CodeEditor({
                       <polyline points="17 21 17 13 7 13 7 21" />
                       <polyline points="7 3 7 8 15 8" />
                     </svg>
-                    {saveButtonLabel}
+                    Save code
                   </>}
               </ActionButton>}
-            <ActionButton className={styles.btnSubmit} onClick={handleSubmit} disabled={isSubmitting || !canSubmitCode} title={canSubmitCode ? 'Submit your solution for grading' : hasTestCases ? 'Pass all visible test cases with Save & Test before submitting' : 'Save your code before submitting'}>
+            <ActionButton className={styles.btnSubmit} onClick={handleSubmit} disabled={busy || !canSubmitCode} title={canSubmitCode ? 'Submit your solution for grading' : hasTestCases ? 'Pass all visible samples with Test samples before submitting' : 'Save your code before submitting'}>
               {isSubmitting ? <>
                   <svg className={styles.spinner} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <circle cx="12" cy="12" r="10" strokeDasharray="32" strokeDashoffset="12" />
@@ -654,18 +669,22 @@ function CodeEditor({
             </ActionButton>
           </div>
         </div>
+        <div className={styles.workflowHint} role="status">
+          <span>{isSaving ? 'Saving code…' : isRunning ? 'Running code…' : isSubmitting ? 'Submitting solution…' : codeIsSaved ? 'Code saved' : 'Unsaved changes'}</span>
+          <span>{hasTestCases ? canSubmitCode ? 'Samples passed. Ready to submit.' : 'Run code with your input, then Test samples to unlock Submit code.' : 'Save your code, then submit your solution.'}</span>
+        </div>
         <div className={styles.codeArea}>
           <Editor height="100%" language={language === 'cpp' ? 'cpp' : language} value={code} onChange={handleEditorChange} onMount={handleEditorDidMount} options={{
           minimap: {
             enabled: false
           },
-          fontSize: 14,
+          fontSize,
           fontFamily: "'Fira Code', 'Consolas', 'Monaco', monospace",
           lineNumbers: 'on',
           scrollBeyondLastLine: false,
           automaticLayout: true,
           tabSize: 2,
-          wordWrap: 'off',
+          wordWrap: wordWrap ? 'on' : 'off',
           padding: {
             top: 16
           },
@@ -684,7 +703,7 @@ function CodeEditor({
       </div>
 
       {}
-      <div className={styles.horizontalResizer} onMouseDown={handleMouseDown}>
+      <div className={styles.horizontalResizer} role="separator" tabIndex={0} aria-label="Resize code editor" aria-orientation="horizontal" aria-valuemin={28} aria-valuemax={72} aria-valuenow={editorHeight} onKeyDown={event => { if (['ArrowUp', 'ArrowDown'].includes(event.key)) { event.preventDefault(); setEditorHeight(value => Math.max(28, Math.min(72, value + (event.key === 'ArrowUp' ? -4 : 4)))); } }} onMouseDown={handleMouseDown}>
         <div className={styles.resizerHandleHorizontal}>
           <span></span>
           <span></span>
@@ -702,7 +721,7 @@ function CodeEditor({
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14">
                 <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
               </svg>
-              Custom Testcase
+              Input / output
               {userInput.trim() && <span className={styles.inputIndicator}></span>}
             </button>
             {hasAnyTestCases && <button className={`${styles.tabBtn} ${activeTab === 'testcases' ? styles.active : ''}`} onClick={() => setActiveTab('testcases')}>
@@ -713,8 +732,8 @@ function CodeEditor({
               {submissionHistory.length > 0 && ` (${submissionHistory.length})`}
             </button>
           </div>
-          <ActionButton className={styles.btnClear} onClick={handleClearOutput}>
-            Clear
+          <ActionButton className={styles.btnClear} onClick={handleClearOutput} disabled={busy || activeTab === 'history'}>
+            Clear results
           </ActionButton>
         </div>
 
@@ -739,7 +758,7 @@ function CodeEditor({
                   </svg>
                   Output
                 </label>
-                <pre ref={outputRef} className={styles.customOutputArea}>
+                <pre ref={outputRef} className={styles.customOutputArea} aria-label="Execution output" aria-live="polite">
                   {output || '// Run your code to see output here'}
                 </pre>
               </div>

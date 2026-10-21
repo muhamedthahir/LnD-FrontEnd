@@ -907,7 +907,7 @@ function AssessmentTake() {
                 {formatTime(segmentTimeRemaining)}
               </span>
             </div>}</div><div className={styles.headerRight}><span className={styles.progressText}>
-            Question {currentQuestionIndex + 1} of {questions.length}</span><ActionButton className={styles.toggleNavBtn} onClick={() => setShowQuestionNav(!showQuestionNav)} title={showQuestionNav ? 'Hide navigation' : 'Show navigation'}>
+            Question {currentQuestionIndex + 1} of {questions.length}</span><ActionButton className={styles.toggleNavBtn} onClick={() => setShowQuestionNav(!showQuestionNav)} aria-expanded={showQuestionNav} aria-label={showQuestionNav ? 'Hide questions' : 'Show questions'} title={showQuestionNav ? 'Hide navigation' : 'Show navigation'}><span>{showQuestionNav ? 'Hide questions' : 'Show questions'}</span>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
               <rect x="3" y="3" width="7" height="7" />
               <rect x="14" y="3" width="7" height="7" />
@@ -916,7 +916,7 @@ function AssessmentTake() {
             </svg>
           </ActionButton></div></Toolbar>
 
-      <div className={styles.assessmentBody}>
+      <div className={`${styles.assessmentBody} ${!showQuestionNav ? styles.navigationHidden : ''}`}>
         {}
         <section className={`${styles.questionArea} ${isProgrammingQuestion ? styles.questionAreaProgramming : ''}`}>
           {currentQuestion ? <div className={`${styles.questionContainer} ${isProgrammingQuestion ? styles.questionContainerProgramming : ''}`}>
@@ -1192,7 +1192,7 @@ function AssessmentTake() {
             <div className={styles.navGrid}>
               {questions.map((q, index) => {
             const status = getQuestionStatus(index);
-            return <ActionButton key={q.id || index} className={`${styles.navItem} ${status === 'current' ? styles.navItemCurrent : ''} ${status === 'answered' ? styles.navItemAnswered : ''} ${status === 'visited' ? styles.navItemVisited : ''}`} onClick={() => handleJumpToQuestion(index)}>
+            return <ActionButton key={q.id || index} className={`${styles.navItem} ${status === 'current' ? styles.navItemCurrent : ''} ${status === 'answered' ? styles.navItemAnswered : ''} ${status === 'visited' ? styles.navItemVisited : ''}`} aria-label={`Question ${index + 1}, ${status}`} aria-current={index === currentQuestionIndex ? 'step' : undefined} onClick={() => handleJumpToQuestion(index)}>
                     {index + 1}
                   </ActionButton>;
           })}
