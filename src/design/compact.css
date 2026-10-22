@@ -59,6 +59,9 @@
 @media(max-width:900px) { .cz-page[data-view="CoursesManagement"] > .filters-section { grid-template-columns:minmax(0,1fr); } }
 .cz-page .filters-section .cz-field,.cz-page .table-filters .cz-field,.cz-page .mailer-filters .cz-field { margin-bottom:0; }
 .cz-page .table-filters > .cz-field,.cz-page .mailer-filters > .cz-field { flex:1 1 10rem; }
+.cz-page[data-view="QuestionList"] .table-filters > .cz-filter-actions,
+.cz-page[data-view="QuestionBanks"] .table-filters > .cz-filter-actions { order: -1; flex: 0 0 auto; margin-left: 0; align-self: end; }
+.cz-page[data-view="QuestionList"] .table-filters > .cz-field { flex: 1 1 9rem; max-width: 14rem; }
 .cz-page { padding-top: 1.25rem; gap: 1.25rem; }
 @media(max-width:600px) { .cz-page { padding-top: 1rem; gap: 1rem; } .cz-filter-actions { width: 100%; margin-left: 0; } .cz-filter-actions .cz-button { flex: 1 1 auto; } }
 .cz-form-title { display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-bottom:1rem; } .cz-context-bar:empty { display:none; }

@@ -6,6 +6,7 @@ import { useApi } from '../../../contexts/ApiContext';
 import { API_ENDPOINTS } from "../../../constants/constants.js";
 import Pagination from '../../../components/Pagination/Pagination';
 import Table from '../../../components/Table/Table';
+import ConfirmModal from '../../../components/ConfirmModal/ConfirmModal';
 import { stripHtml } from "../../../pages/admin/Questions/questionUtils.js";
 function QuestionBanks() {
   const navigate = useNavigate();
@@ -19,6 +20,7 @@ function QuestionBanks() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
+  const [bankToDelete, setBankToDelete] = useState(null);
   const abortControllerRef = useRef(null);
   const fetchQuestionBanks = useCallback(async () => {
     if (!apiBaseUrl) return;
@@ -78,6 +80,29 @@ function QuestionBanks() {
       default:
         return '';
     }
+  };
+  const handleDeleteConfirm = async () => {
+    if (!bankToDelete?.id) return;
+    try {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.QUESTION_BANKS.DELETE(bankToDelete.id)}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
+        }
+      });
+      if (response.ok) {
+        toast.success('Question bank deleted');
+        fetchQuestionBanks();
+      } else {
+        const data = await response.json().catch(() => ({}));
+        toast.error(data.error || 'Failed to delete question bank');
+      }
+    } catch (error) {
+      console.error('Error deleting question bank:', error);
+      toast.error('Failed to delete question bank');
+    }
+    setBankToDelete(null);
   };
   const handleRowClick = bank => {
     navigate(`/admin/questions/banks/${bank.id}`);
@@ -154,6 +179,12 @@ function QuestionBanks() {
                           <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                         </svg>
                       </ActionButton>
+                      <ActionButton type="button" className="btn-delete" onClick={e => {
+                  e.stopPropagation();
+                  setBankToDelete(bank);
+                }} title="Delete">
+                        Delete
+                      </ActionButton>
                     </td>
                   </tr>)}
               </tbody>
@@ -164,6 +195,7 @@ function QuestionBanks() {
             <Pagination currentPage={currentPage} pageSize={pageSize} totalCount={totalCount} itemName="question banks" onPageChange={setCurrentPage} onPageSizeChange={setPageSize} />
           </div>}
       </div>
+      <ConfirmModal isOpen={!!bankToDelete} onClose={() => setBankToDelete(null)} onConfirm={handleDeleteConfirm} title="Delete Question Bank" message={bankToDelete ? `Are you sure you want to delete "${bankToDelete.name}"? This action cannot be undone.` : 'Are you sure you want to delete this question bank?'} confirmText="Delete" cancelText="Cancel" />
     </PageContent>;
 }
 export default QuestionBanks;

@@ -116,7 +116,7 @@ function AssessmentEdit() {
   }, [apiBaseUrl, id, accessToken]);
   const fetchDropdowns = async () => {
     try {
-      const instRes = await fetch(`${apiBaseUrl}/api/institutions`, {
+      const instRes = await fetch(`${apiBaseUrl}/api/institutions/all`, {
         headers: getAuthHeader()
       });
       if (instRes.ok) {

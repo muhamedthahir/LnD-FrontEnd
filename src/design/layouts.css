@@ -30,7 +30,7 @@
 .cz-page .detail-content { display: grid; grid-template-columns: minmax(0,1fr); gap: 1.25rem; }
 .cz-page .info-row,.cz-page .detail-row { display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: .75rem; padding: .875rem 0; border-bottom: 1px solid var(--border-color); }
 .cz-page .info-label,.cz-page .detail-label { color: var(--text-secondary); font-size: .8125rem; }
-.cz-page .info-value,.cz-page .detail-value { font-size: .875rem; font-weight: 550; overflow-wrap: anywhere; }
+.cz-page .info-value,.cz-page .detail-value { font-size: .875rem; font-weight: 550; overflow-wrap: break-word; }
 .cz-page .action-buttons,.cz-page .header-actions,.cz-page .table-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
 .cz-page .file-input-wrapper { border: 1px dashed var(--border-strong); padding: 1rem; border-radius: 8px; }
 .cz-page input[type=file] { max-width: 100%; font-size: .8125rem; }
@@ -226,7 +226,9 @@
 /* Detail views separate field names from values. */
 .cz-page :is(.detail-item,.view-field,.detail-field,[class$='-infoItem'],[class$='-detailItem']) { display: flex; flex-direction: column; gap: .375rem; min-width: 0; }
 .cz-page :is(.detail-label,.view-field > label,[class$='-infoItem'] > label,[class$='-detailLabel']) { display: block; color: var(--text-secondary); font-size: .75rem; font-weight: 600; }
-.cz-page :is(.detail-value,[class$='-infoItem'] > span,.view-field > span) { display: block; overflow-wrap: anywhere; }
+.cz-page :is(.detail-value,[class$='-infoItem'] > span,.view-field > span) { display: block; overflow-wrap: break-word; }
+.cz-page .detail-item--wide { grid-column: 1 / -1; }
+.cz-page .detail-value--email { overflow-wrap: normal; word-break: normal; overflow-x: auto; }
 .cz-page :is(.detail-grid,[class$='-infoGridHorizontal']) { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,13rem),1fr)); gap: 1.5rem; margin-top: 1rem; }
 .cz-page .view-section { display: flex; flex-direction: column; gap: 1rem; padding-bottom: 1.25rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-color); }
 .cz-page[data-view=UserDetail] .header-content { flex: 1; display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-between; }

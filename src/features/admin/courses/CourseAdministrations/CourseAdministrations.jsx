@@ -6,7 +6,9 @@ import Button from '../../../../components/Button/Button';
 import Pagination from '../../../../components/Pagination/Pagination';
 import Table from '../../../../components/Table/Table';
 import { useApi } from '../../../../contexts/ApiContext';
+import { toast } from 'react-toastify';
 import { API_ENDPOINTS } from "../../../../constants/constants.js";
+import ConfirmModal from '../../../../components/ConfirmModal/ConfirmModal';
 import { toDateTimeInput } from '../../../../utils/localDateTime';
 function CourseAdministrations() {
   const {
@@ -55,6 +57,7 @@ function CourseAdministrations() {
   const [groupSearch, setGroupSearch] = useState('');
   const [userSearch, setUserSearch] = useState('');
   const [availableUsers, setAvailableUsers] = useState([]);
+  const [administrationToDelete, setAdministrationToDelete] = useState(null);
   useEffect(() => {
     fetchCourses();
     fetchColleges();
@@ -628,6 +631,9 @@ function CourseAdministrations() {
                                                 <circle cx="12" cy="12" r="3"></circle>
                                               </svg>
                                             </ActionButton>
+                                            <ActionButton className="btn-delete" type="button" onClick={() => setAdministrationToDelete(admin)} title="Delete administration">
+                                              Delete
+                                            </ActionButton>
                                           </div>
                                         </td>
                       </tr>)}
@@ -877,6 +883,31 @@ function CourseAdministrations() {
               </>}
           </DialogSurface>
       </DialogLayer>}
+      <ConfirmModal isOpen={!!administrationToDelete} onClose={() => setAdministrationToDelete(null)} onConfirm={async () => {
+        if (!administrationToDelete?.id) return;
+        try {
+          const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.ADMINISTRATIONS.DELETE(administrationToDelete.id)}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              ...((accessToken || localStorage.getItem('accessToken')) && {
+                'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
+              })
+            }
+          });
+          if (response.ok) {
+            toast.success('Course delivery deleted');
+            fetchAdministrations();
+          } else {
+            const data = await response.json().catch(() => ({}));
+            toast.error(data.error || 'Failed to delete course delivery');
+          }
+        } catch (error) {
+          console.error('Error deleting administration:', error);
+          toast.error('Failed to delete course delivery');
+        }
+        setAdministrationToDelete(null);
+      }} title="Delete Course Delivery" message={administrationToDelete ? `Are you sure you want to delete "${administrationToDelete.administrationName}"? This action cannot be undone.` : 'Are you sure you want to delete this course delivery?'} confirmText="Delete" cancelText="Cancel" />
     </PageContent>;
 }
 export default CourseAdministrations;

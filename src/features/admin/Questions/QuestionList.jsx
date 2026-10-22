@@ -8,6 +8,7 @@ import { API_ENDPOINTS } from "../../../constants/constants.js";
 import Pagination from '../../../components/Pagination/Pagination';
 import Dropdown from '../../../components/Dropdown/Dropdown';
 import Table from '../../../components/Table/Table';
+import ConfirmModal from '../../../components/ConfirmModal/ConfirmModal';
 function QuestionList() {
   const navigate = useNavigate();
   const {
@@ -28,15 +29,26 @@ function QuestionList() {
   const [selectedType, setSelectedType] = useState(null);
   const [selectedLevel, setSelectedLevel] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState(null);
+  const [questionToDelete, setQuestionToDelete] = useState(null);
   const abortControllerRef = useRef(null);
+  const requestSeq = useRef(0);
+  const questionsRef = useRef(questions);
+  questionsRef.current = questions;
+  const authHeaders = () => ({
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
+  });
   const fetchQuestions = useCallback(async () => {
     if (!apiBaseUrl) return;
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
-    abortControllerRef.current = new AbortController();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+    const seq = ++requestSeq.current;
+    const showFullLoader = questionsRef.current.length === 0;
     try {
-      setLoading(true);
+      if (showFullLoader) setLoading(true);
       const offset = (currentPage - 1) * pageSize;
       const url = new URL(`${apiBaseUrl}${API_ENDPOINTS.QUESTIONS.LIST}`);
       url.searchParams.append('limit', pageSize.toString());
@@ -46,12 +58,10 @@ function QuestionList() {
       if (selectedLevel) url.searchParams.append('level_id', selectedLevel);
       if (selectedStatus) url.searchParams.append('status_id', selectedStatus);
       const response = await fetch(url, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
-        },
-        signal: abortControllerRef.current.signal
+        headers: authHeaders(),
+        signal: controller.signal
       });
+      if (seq !== requestSeq.current) return;
       if (response.ok) {
         const data = await response.json();
         setQuestions(data.questions || []);
@@ -60,12 +70,12 @@ function QuestionList() {
         toast.error('Failed to fetch questions');
       }
     } catch (error) {
-      if (error.name !== 'AbortError') {
+      if (error.name !== 'AbortError' && seq === requestSeq.current) {
         console.error('Error fetching questions:', error);
         toast.error('Failed to fetch questions');
       }
     } finally {
-      setLoading(false);
+      if (seq === requestSeq.current) setLoading(false);
     }
   }, [apiBaseUrl, accessToken, currentPage, pageSize, search, selectedType, selectedLevel, selectedStatus]);
   useEffect(() => {
@@ -79,6 +89,26 @@ function QuestionList() {
       }
     };
   }, [fetchQuestions]);
+  const handleDeleteConfirm = async () => {
+    if (!questionToDelete?.id) return;
+    try {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.QUESTIONS.DELETE(questionToDelete.id)}`, {
+        method: 'DELETE',
+        headers: authHeaders()
+      });
+      if (response.ok) {
+        toast.success('Question deleted');
+        fetchQuestions();
+      } else {
+        const data = await response.json().catch(() => ({}));
+        toast.error(data.error || 'Failed to delete question');
+      }
+    } catch (error) {
+      console.error('Error deleting question:', error);
+      toast.error('Failed to delete question');
+    }
+    setQuestionToDelete(null);
+  };
   const getStatusBadgeClass = statusName => {
     switch (statusName?.toUpperCase()) {
       case 'PUBLISHED':
@@ -158,8 +188,8 @@ function QuestionList() {
             </ActionButton>}
         </div>
 
-        <div className="table-container">
-          {loading ? <div className="loading-state">Loading questions...</div> : questions.length === 0 ? <div className="empty-state">
+        <div className="table-container" aria-busy={loading}>
+          {loading && questions.length === 0 ? <div className="loading-state">Loading questions...</div> : questions.length === 0 ? <div className="empty-state">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="12" cy="12" r="10" />
                 <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
@@ -213,16 +243,23 @@ function QuestionList() {
                           <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                         </svg>
                       </ActionButton>
+                      <ActionButton className="btn-delete" type="button" onClick={e => {
+                  e.stopPropagation();
+                  setQuestionToDelete(question);
+                }} title="Delete">
+                        Delete
+                      </ActionButton>
                     </td>
                   </tr>)}
               </tbody>
             </Table>}
         </div>
 
-        {!loading && totalCount > 0 && <div className="pagination-wrapper">
+        {(questions.length > 0 || !loading) && totalCount > 0 && <div className="pagination-wrapper">
             <Pagination currentPage={currentPage} pageSize={pageSize} totalCount={totalCount} itemName="questions" onPageChange={setCurrentPage} onPageSizeChange={setPageSize} />
           </div>}
       </div>
+      <ConfirmModal isOpen={!!questionToDelete} onClose={() => setQuestionToDelete(null)} onConfirm={handleDeleteConfirm} title="Delete Question" message={questionToDelete ? `Are you sure you want to delete "${questionToDelete.name}"? This action cannot be undone.` : 'Are you sure you want to delete this question?'} confirmText="Delete" cancelText="Cancel" />
     </PageContent>;
 }
 export default QuestionList;

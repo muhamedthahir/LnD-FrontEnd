@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useApi } from '../../../../contexts/ApiContext';
 import { toast } from 'react-toastify';
 import Button from '../../../../components/Button/Button';
+import { API_ENDPOINTS } from "../../../../constants/constants.js";
 function AssessmentCreate() {
   const navigate = useNavigate();
   const {
@@ -19,7 +20,7 @@ function AssessmentCreate() {
   });
   const [errors, setErrors] = useState({});
   const [institutions, setInstitutions] = useState([]);
-  const [saving, setSaving] = useState(false);
+  const [saving, setSaving] = useState(null);
   const getAuthHeader = () => ({
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
@@ -27,7 +28,7 @@ function AssessmentCreate() {
   useEffect(() => {
     const fetchDropdownData = async () => {
       try {
-        const instRes = await fetch(`${apiBaseUrl}/api/institutions`, {
+        const instRes = await fetch(`${apiBaseUrl}${API_ENDPOINTS.INSTITUTIONS.ALL}`, {
           headers: getAuthHeader()
         });
         if (instRes.ok) {
@@ -49,9 +50,10 @@ function AssessmentCreate() {
     return Object.keys(newErrors).length === 0;
   };
   const handleSave = async (continueToEdit = false) => {
-    if (!validateForm()) return;
+    if (!validateForm() || saving) return;
+    const mode = continueToEdit ? 'continue' : 'draft';
     try {
-      setSaving(true);
+      setSaving(mode);
       const response = await fetch(`${apiBaseUrl}/api/assessment/assessments`, {
         method: 'POST',
         headers: getAuthHeader(),
@@ -69,7 +71,7 @@ function AssessmentCreate() {
       console.error('Error creating assessment:', error);
       toast.error('Failed to create assessment');
     } finally {
-      setSaving(false);
+      setSaving(null);
     }
   };
   return <PageContent className={styles.assessmentCreatePage} view="AssessmentCreate">
@@ -145,15 +147,15 @@ function AssessmentCreate() {
         </div>
 
         <div className={styles.actionBar}>
-          <Button variant="secondary" onClick={() => navigate('/admin/assessments/management')} disabled={saving}>
+          <Button variant="secondary" onClick={() => navigate('/admin/assessments/management')} disabled={!!saving}>
             Cancel
           </Button>
           <div className={styles.actionGroup}>
-            <Button variant="outline" onClick={() => handleSave(false)} disabled={saving}>
-              {saving ? 'Saving...' : 'Save as Draft'}
+            <Button variant="outline" onClick={() => handleSave(false)} disabled={!!saving}>
+              {saving === 'draft' ? 'Saving...' : 'Save as Draft'}
             </Button>
-            <Button variant="primary" onClick={() => handleSave(true)} disabled={saving}>
-              {saving ? 'Saving...' : 'Create & Add Segments'}
+            <Button variant="primary" onClick={() => handleSave(true)} disabled={!!saving}>
+              {saving === 'continue' ? 'Saving...' : 'Create & Add Segments'}
             </Button>
           </div>
         </div>

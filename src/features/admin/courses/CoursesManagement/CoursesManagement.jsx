@@ -7,6 +7,8 @@ import Button from '../../../../components/Button/Button';
 import CourseCard from '../../../../components/CourseCard/CourseCard';
 import { toast } from 'react-toastify';
 import { useApi } from '../../../../contexts/ApiContext';
+import { API_ENDPOINTS } from "../../../../constants/constants.js";
+import ConfirmModal from '../../../../components/ConfirmModal/ConfirmModal';
 function CoursesManagement() {
   const {
     apiBaseUrl,
@@ -26,6 +28,7 @@ function CoursesManagement() {
   const [totalCount, setTotalCount] = useState(0);
   const abortControllerRef = useRef(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [courseToDelete, setCourseToDelete] = useState(null);
   const [categories] = useState(['Python', 'Java', 'C', 'C++']);
   const [newCategory, setNewCategory] = useState('');
   const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
@@ -101,6 +104,31 @@ function CoursesManagement() {
     setSelectedCategory('');
     setSelectedStatus('all');
     setCurrentPage(1);
+  };
+  const handleDeleteConfirm = async () => {
+    if (!courseToDelete?.id) return;
+    try {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.COURSES.DELETE(courseToDelete.id)}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && {
+            'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
+          })
+        }
+      });
+      if (response.ok) {
+        toast.success('Course deleted');
+        fetchCourses();
+      } else {
+        const data = await response.json().catch(() => ({}));
+        toast.error(data.error || 'Failed to delete course');
+      }
+    } catch (error) {
+      console.error('Error deleting course:', error);
+      toast.error('Failed to delete course');
+    }
+    setCourseToDelete(null);
   };
   const handleCreateCourse = () => {
     setShowCreateModal(true);
@@ -318,7 +346,7 @@ function CoursesManagement() {
           <div className="courses-grid">
 
 
-              {filteredCourses.map(course => <CourseCard key={course.id} course={course} />)}
+              {filteredCourses.map(course => <CourseCard key={course.id} course={course} onDelete={setCourseToDelete} />)}
             </div>
 
             {totalCount > 0 && <div className="pagination-wrapper">
@@ -402,6 +430,7 @@ function CoursesManagement() {
             </div>
           </DialogSurface>
         </DialogLayer>}
+      <ConfirmModal isOpen={!!courseToDelete} onClose={() => setCourseToDelete(null)} onConfirm={handleDeleteConfirm} title="Delete Course" message={courseToDelete ? `Are you sure you want to delete "${courseToDelete.name}"? This action cannot be undone.` : 'Are you sure you want to delete this course?'} confirmText="Delete" cancelText="Cancel" />
     </PageContent>;
 }
 export default CoursesManagement;

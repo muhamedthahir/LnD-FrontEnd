@@ -6,6 +6,7 @@ import Pagination from '../../../components/Pagination/Pagination';
 import Table from '../../../components/Table/Table';
 import { useApi } from '../../../contexts/ApiContext';
 import { API_ENDPOINTS, ERROR_MESSAGES } from "../../../constants/constants.js";
+import ConfirmModal from '../../../components/ConfirmModal/ConfirmModal';
 import { CREATE_INSTITUTION_ROUTE } from "../../../pages/admin/Institutions/createInstitutionLogic.js";
 function Institutions() {
   const navigate = useNavigate();
@@ -19,6 +20,7 @@ function Institutions() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
+  const [institutionToDelete, setInstitutionToDelete] = useState(null);
   const fetchingRef = useRef(false);
   const abortControllerRef = useRef(null);
   const isMountedRef = useRef(true);
@@ -70,6 +72,31 @@ function Institutions() {
       controller.abort();
     };
   }, [fetchInstitutions]);
+  const handleDeleteConfirm = async () => {
+    if (!institutionToDelete?.id) return;
+    try {
+      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.INSTITUTIONS.DELETE(institutionToDelete.id)}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          ...((accessToken || localStorage.getItem('accessToken')) && {
+            'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
+          })
+        }
+      });
+      if (response.ok) {
+        toast.success('Institution deleted');
+        fetchInstitutions();
+      } else {
+        const data = await response.json().catch(() => ({}));
+        toast.error(data.error || ERROR_MESSAGES.INSTITUTION_DELETE_FAILED || 'Failed to delete institution');
+      }
+    } catch (error) {
+      console.error('Error deleting institution:', error);
+      toast.error(ERROR_MESSAGES.INSTITUTION_DELETE_FAILED || 'Failed to delete institution');
+    }
+    setInstitutionToDelete(null);
+  };
   return <PageContent className="user-admin-page" view="Institutions">
 
 
@@ -125,6 +152,9 @@ function Institutions() {
                           <ActionButton className="btn-edit" type="button" onClick={() => navigate(`/admin/institutions/${institution.id}`)} title="View institution">
                             View
                           </ActionButton>
+                          <ActionButton className="btn-delete" type="button" onClick={() => setInstitutionToDelete(institution)} title="Delete institution">
+                            Delete
+                          </ActionButton>
                         </div>
                       </td>
                     </tr>)}
@@ -136,6 +166,7 @@ function Institutions() {
             </div>}
         </div>
       </div>
+      <ConfirmModal isOpen={!!institutionToDelete} onClose={() => setInstitutionToDelete(null)} onConfirm={handleDeleteConfirm} title="Delete Institution" message={institutionToDelete ? `Are you sure you want to delete "${institutionToDelete.name}"? This action cannot be undone.` : 'Are you sure you want to delete this institution?'} confirmText="Delete" cancelText="Cancel" />
     </PageContent>;
 }
 export default Institutions;

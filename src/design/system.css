@@ -69,11 +69,16 @@ label:has(input[type=checkbox]),label:has(input[type=radio]) { display: flex; al
 .cz-button--quiet { border-color: transparent; background: transparent; padding: .5rem; }
 .cz-button:disabled { opacity: .5; }
 .cz-table-scroll { width: 100%; max-width: 100%; min-width: 0; overflow: auto; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-card); }
-.cz-table { width: 100%; border-collapse: collapse; text-align: left; font-size: .8125rem; white-space: nowrap; }
+.cz-table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; font-size: .8125rem; white-space: normal; }
 .cz-table th { padding: .875rem 1rem; background: var(--bg-input); border-bottom: 1px solid var(--border-color); color: var(--text-secondary); font-size: .6875rem; letter-spacing: .06em; text-transform: uppercase; font-weight: 600; }
-.cz-table td { padding: 1rem; border-bottom: 1px solid var(--border-color); }
+.cz-table td { padding: 1rem; border-bottom: 1px solid var(--border-color); vertical-align: middle; overflow-wrap: break-word; }
+.cz-table th, .cz-table td { vertical-align: middle; }
 .cz-table tr:last-child td { border-bottom: 0; }
 .cz-table tbody tr:hover { background: var(--bg-hover); }
+.cz-table :is(th:last-child, td:last-child) { position: sticky; right: 0; white-space: nowrap; z-index: 1; }
+.cz-table th:last-child { background: var(--bg-input); z-index: 2; }
+.cz-table td:last-child { background: var(--bg-card); }
+.cz-table tbody tr:hover td:last-child { background: var(--bg-hover); }
 .cz-table td:first-child { font-weight: 600; }
 .cz-table .cz-button { min-height: 2rem; padding: .375rem .5rem; }
 .cz-empty { min-height: 16rem; padding: 2rem; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: .75rem; color: var(--text-secondary); }

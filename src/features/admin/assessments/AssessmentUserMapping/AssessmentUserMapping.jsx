@@ -583,6 +583,7 @@ function AssessmentUserMapping() {
   };
   const getStatusBadgeClass = status => {
     const classes = {
+      INVITED: 'invited',
       NOT_STARTED: 'pending',
       IN_PROGRESS: 'active',
       COMPLETED: 'completed',
@@ -1035,7 +1036,7 @@ function AssessmentUserMapping() {
                     </div>
                   </td>
                   <td>
-                    {mapping.percentage_score !== undefined && mapping.percentage_score !== null ? <span className={mapping.passed ? 'score passed' : 'score failed'}>
+                    {['COMPLETED', 'SUBMITTED', 'DISQUALIFIED'].includes(mapping.status) && mapping.percentage_score != null ? <span className={mapping.passed ? 'score passed' : 'score failed'}>
                         {Math.round(mapping.percentage_score)}%
                       </span> : '-'}
                   </td>

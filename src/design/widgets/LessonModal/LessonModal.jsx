@@ -211,14 +211,14 @@ function LessonModal({
           url: videoUrl
         };
       } else {
-        if (!audioFile) {
+        if (!audioFile && !existingMediaUrl) {
           toast.error('Please upload an audio file or provide an embedded URL');
           return;
         }
         content = {
           type: 'audio',
           source: 'upload',
-          file: audioFile
+          ...(audioFile ? {file: audioFile} : {url: existingMediaUrl, fileName: existingMediaFileName})
         };
       }
     } else if (contentType === 'document') {
@@ -621,10 +621,10 @@ function LessonModal({
                 </div>
 
                 {videoEmbedded ? <FieldGroup className={styles.formGroup}>
-                    <label>Video URL (YouTube / Vimeo) <span className={styles.required}>*</span></label>
-                    <input type="url" value={videoUrl} onChange={e => setVideoUrl(e.target.value)} placeholder="https://www.youtube.com/watch?v=VIDEO_ID" />
+                    <label>{contentType === 'audio' ? 'Audio URL' : 'Video URL (YouTube / Vimeo)'} <span className={styles.required}>*</span></label>
+                    <input type="url" value={videoUrl} onChange={e => setVideoUrl(e.target.value)} placeholder={contentType === 'audio' ? 'https://example.com/audio.mp3' : 'https://www.youtube.com/watch?v=VIDEO_ID'} />
                     <p className={styles.helpText}>
-                      Use the normal link (e.g. https://www.youtube.com/watch?v=...) or the embed link — both work.
+                      {contentType === 'audio' ? 'Use a direct link to an audio file, such as MP3 or WAV.' : 'Use a YouTube / Vimeo link, an embed link, or a direct video file URL.'}
                     </p>
                   </FieldGroup> : <div className={styles.mediaUpload}>
                     <div className={styles.mediaPlaceholder}>

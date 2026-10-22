@@ -49,7 +49,9 @@ function UserDetail() {
   const [showResetModal, setShowResetModal] = useState(false);
   const [editData, setEditData] = useState({});
   const [resetPassword, setResetPassword] = useState('');
-  const [actionLoading, setActionLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [resettingPassword, setResettingPassword] = useState(false);
+  const [resendingOtp, setResendingOtp] = useState(false);
   useEffect(() => {
     fetchUserData();
   }, [id]);
@@ -142,7 +144,7 @@ function UserDetail() {
   };
   const handleEditSubmit = async e => {
     e.preventDefault();
-    setActionLoading(true);
+    setSaving(true);
     try {
       const token = accessToken || localStorage.getItem('accessToken');
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.USERS.UPDATE(id)}`, {
@@ -167,7 +169,7 @@ function UserDetail() {
       console.error('Error updating user:', error);
       toast.error(ERROR_MESSAGES.USER_UPDATE_FAILED);
     } finally {
-      setActionLoading(false);
+      setSaving(false);
     }
   };
   const handleResetPassword = async e => {
@@ -176,7 +178,7 @@ function UserDetail() {
       toast.error(ERROR_MESSAGES.PASSWORD_TOO_SHORT);
       return;
     }
-    setActionLoading(true);
+    setResettingPassword(true);
     try {
       const token = accessToken || localStorage.getItem('accessToken');
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.USERS.RESET_PASSWORD(id)}`, {
@@ -203,11 +205,11 @@ function UserDetail() {
       console.error('Error resetting password:', error);
       toast.error(ERROR_MESSAGES.USER_PASSWORD_RESET_FAILED);
     } finally {
-      setActionLoading(false);
+      setResettingPassword(false);
     }
   };
   const handleResendOTP = async () => {
-    setActionLoading(true);
+    setResendingOtp(true);
     try {
       const token = accessToken || localStorage.getItem('accessToken');
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.USERS.RESEND_OTP(id)}`, {
@@ -230,7 +232,7 @@ function UserDetail() {
       console.error('Error regenerating OTP:', error);
       toast.error('Failed to regenerate OTP');
     } finally {
-      setActionLoading(false);
+      setResendingOtp(false);
     }
   };
   const getRoleDisplay = role => {
@@ -299,12 +301,12 @@ function UserDetail() {
                 <path d="M7 11V7a5 5 0 0 1 10 0v4" />
               </svg>
               Reset Password
-            </ActionButton>{user.status === 'pending' && <ActionButton className="btn-action info" onClick={handleResendOTP} disabled={actionLoading}>
+            </ActionButton>{user.status === 'pending' && <ActionButton className="btn-action info" onClick={handleResendOTP} disabled={resendingOtp}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M21.5 2v6h-6M2.5 22v-6h6" />
                   <path d="M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
                 </svg>
-                {actionLoading ? 'Sending...' : 'Regenerate OTP'}
+                {resendingOtp ? 'Sending...' : 'Regenerate OTP'}
               </ActionButton>}</div></div></Toolbar>
 
       <section className="user-detail-main">
@@ -319,9 +321,9 @@ function UserDetail() {
               Account Information
             </h2>
             <div className="detail-grid">
-              <div className="detail-item">
+              <div className="detail-item detail-item--wide">
                 <span className="detail-label">Email</span>
-                <span className="detail-value">{user.email}</span>
+                <span className="detail-value detail-value--email">{user.email}</span>
               </div>
               <div className="detail-item">
                 <span className="detail-label">Role</span>
@@ -582,7 +584,7 @@ function UserDetail() {
       </section>
 
       {}
-      {showEditModal && <DialogLayer className="modal-overlay" onClick={() => setShowEditModal(false)} busy={actionLoading}>
+      {showEditModal && <DialogLayer className="modal-overlay" onClick={() => setShowEditModal(false)} busy={saving}>
           <DialogSurface className="modal-content" onClick={e => e.stopPropagation()}>
             <h2>Edit User Details</h2>
             <form onSubmit={handleEditSubmit}>
@@ -651,8 +653,8 @@ function UserDetail() {
               </FieldGroup>
 
               <div className="form-actions">
-                <ActionButton type="submit" className="btn-primary" disabled={actionLoading}>
-                  {actionLoading ? 'Updating...' : 'Update'}
+                <ActionButton type="submit" className="btn-primary" disabled={saving}>
+                  {saving ? 'Updating...' : 'Update'}
                 </ActionButton>
                 <ActionButton type="button" className="btn-secondary" onClick={() => setShowEditModal(false)}>
                   Cancel
@@ -663,7 +665,7 @@ function UserDetail() {
         </DialogLayer>}
 
       {}
-      {showResetModal && <DialogLayer className="modal-overlay" onClick={() => setShowResetModal(false)} busy={actionLoading}>
+      {showResetModal && <DialogLayer className="modal-overlay" onClick={() => setShowResetModal(false)} busy={resettingPassword}>
           <DialogSurface className="modal-content" onClick={e => e.stopPropagation()}>
             <h2>Reset Password</h2>
             <p>Reset password for {user.name}</p>
@@ -673,8 +675,8 @@ function UserDetail() {
                 <input type="password" value={resetPassword} onChange={e => setResetPassword(e.target.value)} placeholder="Minimum 6 characters" required minLength={6} />
               </FieldGroup>
               <div className="form-actions">
-                <ActionButton type="submit" className="btn-primary" disabled={actionLoading}>
-                  {actionLoading ? 'Resetting...' : 'Reset Password'}
+                <ActionButton type="submit" className="btn-primary" disabled={resettingPassword}>
+                  {resettingPassword ? 'Resetting...' : 'Reset Password'}
                 </ActionButton>
                 <ActionButton type="button" className="btn-secondary" onClick={() => {
               setShowResetModal(false);
