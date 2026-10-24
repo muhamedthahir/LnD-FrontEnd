@@ -27,8 +27,29 @@ function CodeEditor({
 }) {
   const {
     apiBaseUrl,
-    accessToken
+    ensureAccessToken
   } = useApi();
+  const ensureAccessTokenRef = useRef(ensureAccessToken);
+  ensureAccessTokenRef.current = ensureAccessToken;
+  const authorizedFetch = async (url, options = {}) => {
+    const send = async () => {
+      const token = await ensureAccessTokenRef.current();
+      return fetch(url, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          ...(options.headers || {}),
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        }
+      });
+    };
+    let response = await send();
+    if (response.status === 401) {
+      await ensureAccessTokenRef.current({ force: true });
+      response = await send();
+    }
+    return response;
+  };
   const [editorHeight, setEditorHeight] = useState(62);
   const [fontSize, setFontSize] = useState(15);
   const [wordWrap, setWordWrap] = useState(false);
@@ -100,14 +121,7 @@ function CodeEditor({
       }
       const query = params.toString();
       const url = `${apiBaseUrl}/api/submissions/programming/${qId}/history${query ? `?${query}` : ''}`;
-      const response = await fetch(url, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...((accessToken || localStorage.getItem('accessToken')) && {
-            'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
-          })
-        }
-      });
+      const response = await authorizedFetch(url);
       if (response.ok) {
         const data = await response.json();
         setSubmissionHistory(data.history || []);
@@ -394,14 +408,8 @@ function CodeEditor({
       if (userInput.trim()) {
         requestBody.stdin = userInput;
       }
-      const response = await fetch(`${apiBaseUrl}/api/codeExecute`, {
+      const response = await authorizedFetch(`${apiBaseUrl}/api/codeExecute`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...((accessToken || localStorage.getItem('accessToken')) && {
-            'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
-          })
-        },
         body: JSON.stringify(requestBody)
       });
       const result = await response.json();
@@ -459,14 +467,8 @@ function CodeEditor({
     for (let i = 0; i < visibleTestCases.length; i++) {
       const testCase = visibleTestCases[i];
       try {
-        const response = await fetch(`${apiBaseUrl}/api/codeExecute`, {
+        const response = await authorizedFetch(`${apiBaseUrl}/api/codeExecute`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...((accessToken || localStorage.getItem('accessToken')) && {
-              'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
-            })
-          },
           body: JSON.stringify({
             language: language,
             code: code,

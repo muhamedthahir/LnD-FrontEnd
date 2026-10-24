@@ -73,7 +73,7 @@ function AssessmentTake() {
   const location = useLocation();
   const {
     apiBaseUrl,
-    accessToken
+    ensureAccessToken
   } = useApi();
   const searchParams = new URLSearchParams(location.search);
   const isSecureWindow = searchParams.get('secure') === 'true' || location.pathname.startsWith('/secure/');
@@ -133,18 +133,38 @@ function AssessmentTake() {
     pendingQuestionMsRef.current[questionId] = 0;
     return ms;
   };
-  const getAuthHeader = () => ({
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${accessToken || localStorage.getItem('accessToken')}`
-  });
+  const ensureAccessTokenRef = useRef(ensureAccessToken);
+  ensureAccessTokenRef.current = ensureAccessToken;
+  const getAuthHeader = useCallback(async () => {
+    const token = await ensureAccessTokenRef.current();
+    return {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    };
+  }, []);
+  const authFetch = useCallback(async (url, options = {}) => {
+    const send = async () => fetch(url, {
+      ...options,
+      headers: {
+        ...(options.headers || {}),
+        ...(await getAuthHeader())
+      }
+    });
+    let response = await send();
+    if (response.status === 401) {
+      await ensureAccessTokenRef.current({ force: true });
+      response = await send();
+    }
+    return response;
+  }, [getAuthHeader]);
   const fetchAssessmentData = useCallback(async () => {
     if (!apiBaseUrl || !mappingId) return;
     if (hasFetchedRef.current) return;
     const showLoading = initialLoadRef.current;
     try {
       if (showLoading) setLoading(true);
-      const response = await fetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/take`, {
-        headers: getAuthHeader()
+      const response = await authFetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/take`, {
+        headers: await getAuthHeader()
       });
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({
@@ -427,9 +447,9 @@ function AssessmentTake() {
   const logProctoringEvent = async (eventType, details = {}) => {
     try {
       let segment = assessmentData?.segments?.[currentSegmentIndex];
-      await fetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/proctoring-log`, {
+      await authFetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/proctoring-log`, {
         method: 'POST',
-        headers: getAuthHeader(),
+        headers: await getAuthHeader(),
         body: JSON.stringify({
           event_type: eventType,
           details,
@@ -447,9 +467,9 @@ function AssessmentTake() {
       const segmentId = currentSegment?.id || null;
       const segmentDuration = currentSegment?.segment_duration || 0;
       const timeSpent = segmentDuration - segmentTimeRemaining;
-      await fetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/save-progress`, {
+      await authFetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/save-progress`, {
         method: 'POST',
-        headers: getAuthHeader(),
+        headers: await getAuthHeader(),
         body: JSON.stringify({
           current_segment_index: currentSegmentIndex,
           current_question_index: currentQuestionIndex,
@@ -463,7 +483,7 @@ function AssessmentTake() {
     } catch (error) {
       console.error('Failed to save progress:', error);
     }
-  }, [apiBaseUrl, mappingId, assessmentData, currentSegmentIndex, currentQuestionIndex, timeRemaining, segmentTimeRemaining]);
+  }, [apiBaseUrl, mappingId, assessmentData, currentSegmentIndex, currentQuestionIndex, timeRemaining, segmentTimeRemaining, authFetch]);
   const saveProgressRef = useRef(saveProgress);
   useEffect(() => {
     saveProgressRef.current = saveProgress;
@@ -545,9 +565,9 @@ function AssessmentTake() {
     }
     draftSaveTimersRef.current[questionId] = setTimeout(async () => {
       try {
-        await fetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/save-answer`, {
+        await authFetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/save-answer`, {
           method: 'POST',
-          headers: getAuthHeader(),
+          headers: await getAuthHeader(),
           body: JSON.stringify({
             question_id: questionId,
             question_type: 'PROGRAMMING',
@@ -585,9 +605,9 @@ function AssessmentTake() {
       timeTakenMs = consumeQuestionTime(questionId);
     }
     try {
-      await fetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/save-answer`, {
+      await authFetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/save-answer`, {
         method: 'POST',
-        headers: getAuthHeader(),
+        headers: await getAuthHeader(),
         body: JSON.stringify({
           question_id: questionId,
           question_type: type,
@@ -622,9 +642,9 @@ function AssessmentTake() {
       const hasSelection = Array.isArray(currentAnswer) ? currentAnswer.length > 0 : currentAnswer !== undefined && currentAnswer !== null && currentAnswer !== '';
       if (hasSelection) {
         try {
-          await fetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/save-answer`, {
+          await authFetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/save-answer`, {
             method: 'POST',
-            headers: getAuthHeader(),
+            headers: await getAuthHeader(),
             body: JSON.stringify({
               question_id: currentQuestion.id,
               question_type: 'MCQ',
@@ -654,9 +674,9 @@ function AssessmentTake() {
       const hasSelection = Array.isArray(val) ? val.length > 0 : val !== undefined && val !== null && val !== '';
       if (!hasSelection) continue;
       try {
-        await fetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/save-answer`, {
+        await authFetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/save-answer`, {
           method: 'POST',
-          headers: getAuthHeader(),
+          headers: await getAuthHeader(),
           body: JSON.stringify({
             question_id: q.id,
             question_type: 'MCQ',
@@ -694,9 +714,9 @@ function AssessmentTake() {
     await saveAllMcqAnswersInSegment();
     await saveCurrentProgress();
     try {
-      const response = await fetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/next-segment`, {
+      const response = await authFetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/next-segment`, {
         method: 'POST',
-        headers: getAuthHeader()
+        headers: await getAuthHeader()
       });
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -731,9 +751,9 @@ function AssessmentTake() {
     await saveCurrentProgress();
     await saveProgressRef.current?.();
     try {
-      const response = await fetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/switch-segment`, {
+      const response = await authFetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/switch-segment`, {
         method: 'POST',
-        headers: getAuthHeader(),
+        headers: await getAuthHeader(),
         body: JSON.stringify({
           segment_index: targetIndex
         })
@@ -768,9 +788,9 @@ function AssessmentTake() {
       try {
         accumulateQuestionTime(q.id);
         const codeTimeMs = consumeQuestionTime(q.id);
-        await fetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/submit-code`, {
+        await authFetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/submit-code`, {
           method: 'POST',
-          headers: getAuthHeader(),
+          headers: await getAuthHeader(),
           body: JSON.stringify({
             question_id: q.id,
             code,
@@ -789,9 +809,9 @@ function AssessmentTake() {
       setSubmitting(true);
       exitingRef.current = true;
       await submitSavedProgrammingAnswers();
-      const response = await fetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/submit`, {
+      const response = await authFetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/submit`, {
         method: 'POST',
-        headers: getAuthHeader(),
+        headers: await getAuthHeader(),
         body: JSON.stringify({
           answers,
           is_auto_submit: isAutoSubmit,
@@ -1081,9 +1101,9 @@ function AssessmentTake() {
                 }));
                 accumulateQuestionTime(currentQuestion.id);
                 const codeTimeMs = consumeQuestionTime(currentQuestion.id);
-                await fetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/save-answer`, {
+                await authFetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/save-answer`, {
                   method: 'POST',
-                  headers: getAuthHeader(),
+                  headers: await getAuthHeader(),
                   body: JSON.stringify({
                     question_id: currentQuestion.id,
                     question_type: 'PROGRAMMING',
@@ -1101,9 +1121,9 @@ function AssessmentTake() {
                 accumulateQuestionTime(currentQuestion.id);
                 const codeTimeMs = consumeQuestionTime(currentQuestion.id);
                 try {
-                  const response = await fetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/submit-code`, {
+                  const response = await authFetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/submit-code`, {
                     method: 'POST',
-                    headers: getAuthHeader(),
+                    headers: await getAuthHeader(),
                     body: JSON.stringify({
                       question_id: currentQuestion.id,
                       code: submissionData.code,
@@ -1126,7 +1146,8 @@ function AssessmentTake() {
                       hiddenTotal: data.hidden_total
                     };
                   } else {
-                    toast.error('Failed to submit code');
+                    const errorData = await response.json().catch(() => ({}));
+                    toast.error(errorData.error || 'Failed to submit code');
                   }
                 } catch (error) {
                   console.error('Code submission error:', error);

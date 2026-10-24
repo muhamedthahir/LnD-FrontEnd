@@ -2,21 +2,17 @@ import { createViewStyles } from "../../viewStyles";
 const styles = createViewStyles("SecureLayout");
 import { Outlet } from 'react-router-dom';
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useApi } from "../../../contexts/ApiContext";
 import { API_ENDPOINTS } from "../../../constants/constants";
+import { isAccessTokenUsable, readStoredAccessToken, readStoredRefreshToken } from "../../../utils/authToken";
 function SecureLayout() {
   const {
     apiBaseUrl,
-    accessToken,
-    refreshToken,
-    clearTokens,
-    setTokens,
+    ensureAccessToken,
     isLoading: apiLoading
   } = useApi();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
   const sessionReadyRef = useRef(false);
   const checkAuth = useCallback(async () => {
     if (sessionReadyRef.current) {
@@ -25,102 +21,82 @@ function SecureLayout() {
     if (apiLoading || !apiBaseUrl) {
       return;
     }
+    const acceptUser = dataUser => {
+      setUser(dataUser);
+      localStorage.setItem('user', JSON.stringify(dataUser));
+      sessionReadyRef.current = true;
+      setLoading(false);
+    };
     try {
-      const token = accessToken || localStorage.getItem('accessToken');
-      if (!token) {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-          try {
-            setUser(JSON.parse(storedUser));
-            setLoading(false);
-            return;
-          } catch (e) {}
+      const keepCachedSession = () => {
+        const cached = localStorage.getItem('user');
+        if (!cached || !readStoredRefreshToken()) return false;
+        try {
+          acceptUser(JSON.parse(cached));
+          return true;
+        } catch (e) {
+          return false;
         }
-        clearTokens();
-        localStorage.removeItem('user');
-        setUser(null);
-        setLoading(false);
+      };
+      let token = await ensureAccessToken();
+      if (!token) {
+        if (!keepCachedSession()) {
+          setUser(null);
+          setLoading(false);
+        }
         return;
       }
-      const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.AUTH.CHECK}`, {
+      let response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.AUTH.CHECK}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
-      if (!response.ok) {
-        throw new Error(`Auth check failed: ${response.status}`);
-      }
-      const data = await response.json();
-      if (data.authenticated && data.user) {
-        setUser(data.user);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        sessionReadyRef.current = true;
-        setLoading(false);
-        return;
-      }
-      const storedRefreshToken = refreshToken || localStorage.getItem('refreshToken');
-      if (storedRefreshToken) {
-        try {
-          const refreshResponse = await fetch(`${apiBaseUrl}${API_ENDPOINTS.AUTH.REFRESH}`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              refreshToken: storedRefreshToken
-            })
-          });
-          if (refreshResponse.ok) {
-            const refreshData = await refreshResponse.json();
-            if (refreshData.accessToken) {
-              setTokens(refreshData.accessToken, storedRefreshToken);
-              localStorage.setItem('accessToken', refreshData.accessToken);
-              if (refreshData.user) {
-                localStorage.setItem('user', JSON.stringify(refreshData.user));
-                setUser(refreshData.user);
-              }
-              sessionReadyRef.current = true;
-              setLoading(false);
-              return;
-            }
-          }
-        } catch (refreshError) {
-          console.error('Token refresh failed:', refreshError);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.authenticated && data.user) {
+          acceptUser(data.user);
+          return;
         }
       }
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        try {
-          setUser(JSON.parse(storedUser));
-          sessionReadyRef.current = true;
-          setLoading(false);
-          return;
-        } catch (e) {}
+      token = await ensureAccessToken({ force: true });
+      if (token && isAccessTokenUsable(token, 0)) {
+        response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.AUTH.CHECK}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          if (data.authenticated && data.user) {
+            acceptUser(data.user);
+            return;
+          }
+        }
       }
-      clearTokens();
-      localStorage.removeItem('user');
+      if (keepCachedSession()) return;
+      const cached = localStorage.getItem('user');
+      const stored = readStoredAccessToken();
+      if (cached && stored && isAccessTokenUsable(stored, 0)) {
+        acceptUser(JSON.parse(cached));
+        return;
+      }
       setUser(null);
-      sessionReadyRef.current = false;
       setLoading(false);
     } catch (error) {
       console.error('Auth check failed:', error);
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
+      const cached = localStorage.getItem('user');
+      if (cached && (readStoredAccessToken() || readStoredRefreshToken())) {
         try {
-          setUser(JSON.parse(storedUser));
-          sessionReadyRef.current = true;
-          setLoading(false);
+          acceptUser(JSON.parse(cached));
           return;
         } catch (e) {}
       }
-      clearTokens();
-      localStorage.removeItem('user');
       setUser(null);
-      sessionReadyRef.current = false;
       setLoading(false);
     }
-  }, [apiBaseUrl, accessToken, refreshToken, clearTokens, setTokens, apiLoading]);
+  }, [apiBaseUrl, ensureAccessToken, apiLoading]);
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);

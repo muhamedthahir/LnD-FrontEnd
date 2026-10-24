@@ -6,9 +6,10 @@ import Header from '../Header/Header'
 import { useApi } from '../../contexts/ApiContext'
 import { API_ENDPOINTS } from '../../constants/constants'
 import { LoadingState } from '../../design/Primitives'
+import { isAccessTokenUsable, readStoredAccessToken, readStoredRefreshToken } from '../../utils/authToken'
 
 function Layout() {
-  const { apiBaseUrl, accessToken, refreshToken, clearTokens, setTokens } = useApi()
+  const { apiBaseUrl, accessToken, refreshToken, clearTokens, ensureAccessToken } = useApi()
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
@@ -118,8 +119,7 @@ function Layout() {
       }
     }
     
-    const effectiveAccess = accessToken || localStorage.getItem('accessToken')
-    const effectiveRefresh = refreshToken || localStorage.getItem('refreshToken')
+    const effectiveAccess = await ensureAccessToken() || accessToken || readStoredAccessToken()
 
     try {
       // Add cache-busting to prevent 304 responses
@@ -148,52 +148,49 @@ function Layout() {
         localStorage.setItem('user', JSON.stringify(data.user))
         setLoading(false)
       } else {
-        if (effectiveRefresh) {
-          try {
-            const refreshResponse = await fetch(`${apiBaseUrl}${API_ENDPOINTS.AUTH.REFRESH}`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({ refreshToken: effectiveRefresh })
-            })
-
-            if (refreshResponse.ok) {
-              const refreshData = await refreshResponse.json()
-              if (refreshData.accessToken) {
-                setTokens(refreshData.accessToken, effectiveRefresh)
-                localStorage.setItem('accessToken', refreshData.accessToken)
-                if (refreshData.user) {
-                  localStorage.setItem('user', JSON.stringify(refreshData.user))
-                  setUser(refreshData.user)
-                }
-                setLoading(false)
-                return
-              }
+        const next = await ensureAccessToken({ force: true })
+        if (next && isAccessTokenUsable(next, 0)) {
+          const retry = await fetch(`${apiBaseUrl}${API_ENDPOINTS.AUTH.CHECK}?t=${Date.now()}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${next}`
             }
-          } catch (refreshError) {
-            console.error('Token refresh failed:', refreshError)
+          })
+          if (retry.ok) {
+            const retryData = await retry.json()
+            if (retryData.authenticated && retryData.user) {
+              setUser(retryData.user)
+              localStorage.setItem('user', JSON.stringify(retryData.user))
+              setLoading(false)
+              return
+            }
           }
         }
 
-        // If refresh failed or no refresh token, clear everything
+        if (readStoredRefreshToken() || readStoredAccessToken()) {
+          setLoading(false)
+          return
+        }
+
         clearTokens()
         localStorage.removeItem('user')
         setUser(null)
         setLoading(false)
-        // Only navigate to login if we're not already there
         if (window.location.pathname !== '/login') {
           navigate('/login', { replace: true })
         }
       }
     } catch (error) {
       console.error('Auth check failed:', error)
-      // Clear tokens on error
+      if (readStoredRefreshToken() || readStoredAccessToken()) {
+        setLoading(false)
+        return
+      }
       clearTokens()
       localStorage.removeItem('user')
       setUser(null)
       setLoading(false)
-      // Only navigate to login if we're not already there
       if (window.location.pathname !== '/login') {
         navigate('/login', { replace: true })
       }

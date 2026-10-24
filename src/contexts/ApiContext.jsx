@@ -1,6 +1,7 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
 import { getConfig } from '../config'
 import { API_ENDPOINTS } from '../constants/constants'
+import { isAccessTokenUsable, readStoredAccessToken, readStoredRefreshToken } from '../utils/authToken'
 
 const ApiContext = createContext()
 
@@ -34,19 +35,11 @@ export const ApiProvider = ({ children }) => {
 
   // Save tokens to localStorage whenever they change
   useEffect(() => {
-    if (accessToken) {
-      localStorage.setItem('accessToken', accessToken)
-    } else {
-      localStorage.removeItem('accessToken')
-    }
+    if (accessToken) localStorage.setItem('accessToken', accessToken)
   }, [accessToken])
 
   useEffect(() => {
-    if (refreshToken) {
-      localStorage.setItem('refreshToken', refreshToken)
-    } else {
-      localStorage.removeItem('refreshToken')
-    }
+    if (refreshToken) localStorage.setItem('refreshToken', refreshToken)
   }, [refreshToken])
 
   useEffect(() => {
@@ -107,81 +100,76 @@ export const ApiProvider = ({ children }) => {
     localStorage.removeItem(AUTH_REMEMBER_ME_KEY)
   }, [])
 
-  // Auto-refresh token when access token expires
-  useEffect(() => {
-    if (!apiBaseUrl) return
+  const refreshInFlight = useRef(null)
 
-    const accessTokenRef = { current: accessToken || localStorage.getItem('accessToken') }
-    const refreshTokenRef = { current: refreshToken || localStorage.getItem('refreshToken') }
+  const refreshSession = useCallback(async () => {
+    if (refreshInFlight.current) return refreshInFlight.current
 
-    const getStoredRefresh = () => refreshTokenRef.current || localStorage.getItem('refreshToken')
-    const getStoredAccess = () => accessTokenRef.current || localStorage.getItem('accessToken')
+    const run = async () => {
+      const rt = readStoredRefreshToken()
+      if (!rt || !apiBaseUrl) return readStoredAccessToken()
 
-    const refreshAccessToken = async () => {
-      const rt = getStoredRefresh()
-      if (!rt) return
+      const requestRefresh = () => fetch(`${apiBaseUrl}${API_ENDPOINTS.AUTH.REFRESH}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken: rt })
+      })
 
+      const keepSession = () => readStoredAccessToken()
       try {
-        const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.AUTH.REFRESH}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ refreshToken: rt })
-        })
+        let response
+        for (let attempt = 0; attempt < 3; attempt += 1) {
+          response = await requestRefresh()
+          if (response.ok || response.status === 401) break
+          if (![500, 502, 503, 504].includes(response.status) || attempt === 2) {
+            return keepSession()
+          }
+          await new Promise(resolve => setTimeout(resolve, 400 * (attempt + 1)))
+        }
 
-        if (!response.ok) {
+        if (response.status === 401) {
           clearTokens()
           localStorage.removeItem('user')
-          return
+          return null
         }
+
+        if (!response.ok) return keepSession()
 
         const data = await response.json()
-
         if (data.accessToken) {
-          accessTokenRef.current = data.accessToken
           setAccessToken(data.accessToken)
-          if (data.user) {
-            localStorage.setItem('user', JSON.stringify(data.user))
-          }
+          localStorage.setItem('accessToken', data.accessToken)
+          if (data.user) localStorage.setItem('user', JSON.stringify(data.user))
+          return data.accessToken
         }
+        return keepSession()
       } catch (error) {
         console.error('Token refresh failed:', error)
-        clearTokens()
-        localStorage.removeItem('user')
+        return keepSession()
       }
     }
 
-    const checkAndRefresh = async () => {
-      refreshTokenRef.current = refreshToken || localStorage.getItem('refreshToken')
-      accessTokenRef.current = accessToken || localStorage.getItem('accessToken')
-
-      const at = getStoredAccess()
-      const rt = getStoredRefresh()
-
-      if (!at) {
-        if (rt) await refreshAccessToken()
-        return
-      }
-
-      try {
-        const payload = JSON.parse(atob(at.split('.')[1]))
-        const expirationTime = payload.exp * 1000
-        const timeUntilExpiry = expirationTime - Date.now()
-
-        if (timeUntilExpiry < 5 * 60 * 1000) {
-          await refreshAccessToken()
-        }
-      } catch {
-        if (rt) await refreshAccessToken()
-      }
-    }
-
-    checkAndRefresh()
-    const interval = setInterval(checkAndRefresh, 60 * 1000)
-
-    return () => clearInterval(interval)
+    refreshInFlight.current = run().finally(() => {
+      refreshInFlight.current = null
+    })
+    return refreshInFlight.current
   }, [apiBaseUrl, clearTokens])
+
+  const ensureAccessToken = useCallback(async ({ force = false } = {}) => {
+    const current = readStoredAccessToken()
+    if (!force && isAccessTokenUsable(current)) return current
+    if (!readStoredRefreshToken()) return isAccessTokenUsable(current, 0) ? current : null
+    const refreshed = await refreshSession()
+    if (isAccessTokenUsable(refreshed, 0)) return refreshed
+    return isAccessTokenUsable(current, 0) ? current : null
+  }, [refreshSession])
+
+  useEffect(() => {
+    if (!apiBaseUrl) return
+    ensureAccessToken()
+    const interval = setInterval(() => { ensureAccessToken() }, 60 * 1000)
+    return () => clearInterval(interval)
+  }, [apiBaseUrl, ensureAccessToken])
 
   return (
     <ApiContext.Provider value={{ 
@@ -191,6 +179,7 @@ export const ApiProvider = ({ children }) => {
       refreshToken,
       setTokens, 
       clearTokens,
+      ensureAccessToken,
       // Legacy support
       token: accessToken,
       setToken: (token) => setAccessToken(token),
