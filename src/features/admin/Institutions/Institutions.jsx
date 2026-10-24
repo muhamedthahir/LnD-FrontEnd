@@ -166,7 +166,7 @@ function Institutions() {
             </div>}
         </div>
       </div>
-      <ConfirmModal isOpen={!!institutionToDelete} onClose={() => setInstitutionToDelete(null)} onConfirm={handleDeleteConfirm} title="Delete Institution" message={institutionToDelete ? `Are you sure you want to delete "${institutionToDelete.name}"? This action cannot be undone.` : 'Are you sure you want to delete this institution?'} confirmText="Delete" cancelText="Cancel" />
+      <ConfirmModal isOpen={!!institutionToDelete} onClose={() => setInstitutionToDelete(null)} onConfirm={handleDeleteConfirm} title="Delete Institution" message={institutionToDelete ? `Are you sure you want to delete "${institutionToDelete.name}"? Its institution admin account will also be deleted. This action cannot be undone.` : 'Are you sure you want to delete this institution?'} confirmText="Delete" cancelText="Cancel" />
     </PageContent>;
 }
 export default Institutions;
