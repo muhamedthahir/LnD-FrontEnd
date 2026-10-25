@@ -642,10 +642,6 @@ function CodeEditor({
           </div>
 
         </div>
-        <div className={styles.workflowHint} role="status">
-          <span>{isSaving ? 'Saving code…' : isRunning ? 'Running code…' : isSubmitting ? 'Submitting solution…' : codeIsSaved ? 'Code saved' : 'Unsaved changes'}</span>
-          <span>Save & Run checks samples or the selected custom case. Submit Code grades your solution.</span>
-        </div>
         <div className={styles.codeArea}>
           <Editor height="100%" language={language === 'cpp' ? 'cpp' : language} value={code} onChange={handleEditorChange} onMount={handleEditorDidMount} options={{
           minimap: {
