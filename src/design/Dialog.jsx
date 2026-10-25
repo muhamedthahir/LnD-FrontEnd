@@ -5,6 +5,17 @@ import { ActionButton } from './Primitives'
 const DialogContext = createContext(null)
 const layers = []
 let savedOverflow = ''
+const originalInert = new Map()
+const activeRoots = new Map()
+function syncDialogInert() {
+  const top = activeRoots.get(layers.at(-1))
+  for (const sibling of document.body.children) {
+    if (sibling.matches('script,style')) continue
+    if (!originalInert.has(sibling)) originalInert.set(sibling, sibling.inert)
+    sibling.inert = top ? !sibling.contains(top) : originalInert.get(sibling)
+  }
+  if (!top) { for (const [element, inert] of originalInert) element.inert = inert; originalInert.clear() }
+}
 const focusables = 'a[href],button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),[tabindex="0"]'
 export function DialogLayer({ children, className = '', onClick, onClose, busy = false, dismissible = true, ...props }) {
   const id = useId()
@@ -25,12 +36,8 @@ export function DialogLayer({ children, className = '', onClick, onClose, busy =
       if (!heading.id) heading.id = `${id}-heading`
       surface.setAttribute('aria-labelledby', heading.id)
     }
-    const hidden = []
-    for (const sibling of document.body.children) {
-      if (sibling.contains(root) || sibling.matches('script,style')) continue
-      hidden.push([sibling, sibling.inert])
-      sibling.inert = true
-    }
+    activeRoots.set(id, root)
+    syncDialogInert()
     const first = surface.querySelector('[autofocus]') || surface.querySelector(focusables) || surface
     first.focus()
     const keydown = event => {
@@ -55,7 +62,8 @@ export function DialogLayer({ children, className = '', onClick, onClose, busy =
       document.removeEventListener('keydown', keydown, true)
       const index = layers.indexOf(id)
       if (index >= 0) layers.splice(index, 1)
-      for (const [sibling, inert] of hidden) if (sibling.isConnected) sibling.inert = inert
+      activeRoots.delete(id)
+      syncDialogInert()
       if (!layers.length) document.body.style.overflow = savedOverflow
       if (before?.isConnected) before.focus()
     }

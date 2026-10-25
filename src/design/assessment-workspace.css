@@ -46,3 +46,35 @@
 @media(min-width:1500px) { .cz-page[data-view=CodeEditor] { height: calc(100dvh - 14rem); min-height: 650px; } }
 @media(max-width:1150px) { .czv-AssessmentTake-assessmentBody { grid-template-columns: minmax(0,1fr); } .czv-AssessmentTake-questionNav { position: static; } }
 @media(max-width:850px) { .czv-AssessmentTake-programmingQuestion { grid-template-columns: minmax(0,1fr); } .czv-AssessmentTake-problemPanel { max-height: 340px; } .czv-CodeEditor-customTestcaseGrid,.czv-CodeEditor-testcaseIo { grid-template-columns: minmax(0,1fr); } .czv-AssessmentTake-questionContainer { padding: .75rem; } }
+/* Flexible assessment panels and an anchored, text-labelled question menu. */
+.czv-AssessmentTake-headerRight { display:flex; align-items:center; gap:.75rem; flex-wrap:wrap; margin-left:auto; }
+.czv-AssessmentTake-toggleNavBtn { display:inline-flex; align-items:center; white-space:nowrap; }
+.czv-AssessmentTake-assessmentBody { display:grid; grid-template-columns:minmax(0,1fr) 15rem; gap:1rem; align-items:start; }
+.czv-AssessmentTake-assessmentBody.czv-AssessmentTake-navigationHidden { grid-template-columns:minmax(0,1fr); }
+.czv-AssessmentTake-questionArea,.czv-AssessmentTake-codeEditorWrapper { min-width:0; }
+.czv-AssessmentTake-programmingQuestion { display:grid; grid-template-columns:minmax(16rem, .8fr) minmax(24rem,1.6fr); }
+.czv-AssessmentTake-problemPanel { resize:horizontal; min-width:16rem; max-width:100%; }
+.czv-AssessmentTake-questionNav { position:sticky; top:6rem; max-height:calc(100dvh - 7rem); overflow:auto; }
+.czv-AssessmentTake-navGrid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:.5rem; }
+.czv-AssessmentTake-navItem { min-height:2.5rem; padding:.5rem; }
+.cz-page[data-view=AssessmentTake] .cz-page[data-view=CodeEditor] { height:calc(100dvh - 13rem); min-height:560px; resize:vertical; overflow:hidden; max-height:none; }
+.czv-CodeEditor-codeSection { min-height:240px; display:flex; flex-direction:column; }
+.czv-CodeEditor-codeActions { display:flex; gap:.625rem; }
+.czv-CodeEditor-codeActions button { flex:1; }
+.czv-CodeEditor-outputSection { overflow:auto; min-height:160px; }
+.czv-CodeEditor-caseTabs { display:flex; flex-wrap:wrap; gap:.4rem; padding:.75rem; }
+.czv-CodeEditor-caseTabs button { border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-secondary); padding:.4rem .65rem; border-radius:6px; }
+.czv-CodeEditor-caseTabs button[aria-pressed=true] { background:var(--accent-subtle); color:var(--accent-primary); border-color:var(--accent-primary); }
+.czv-CodeEditor-customTestcaseGrid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:.75rem; padding:.75rem; }
+.czv-CodeEditor-customInputArea { min-height:120px; resize:vertical; }
+@media(max-width:1200px) { .czv-AssessmentTake-assessmentBody { grid-template-columns:minmax(0,1fr); } .czv-AssessmentTake-questionNav { position:static; max-height:none; } }
+@media(max-width:900px) { .czv-AssessmentTake-programmingQuestion { grid-template-columns:minmax(0,1fr); } .czv-AssessmentTake-problemPanel { resize:none; max-height:320px; min-width:0; } .czv-CodeEditor-customTestcaseGrid { grid-template-columns:minmax(0,1fr); } }
+.czv-AssessmentTake-programmingQuestion { grid-template-columns:minmax(0,var(--problem-width,34%)) 8px minmax(0,1fr); gap:.5rem; }
+.czv-AssessmentTake-problemPanel { resize:none; min-width:0; }
+.czv-AssessmentTake-problemResizer { align-self:stretch; cursor:col-resize; touch-action:none; border-radius:4px; background:var(--border-color); }
+.czv-AssessmentTake-problemResizer:focus-visible { outline:2px solid var(--accent-primary); }
+@media(max-width:900px) { .czv-AssessmentTake-programmingQuestion { grid-template-columns:minmax(0,1fr); } .czv-AssessmentTake-problemResizer { display:none; } }
+.czv-CodeEditor-outputHeader { position:sticky; top:0; z-index:2; background:var(--bg-card); }
+.czv-CodeEditor-outputHeader .czv-CodeEditor-codeActions { width:auto; flex:0 0 auto; margin-left:auto; }
+.czv-CodeEditor-outputHeader .czv-CodeEditor-codeActions button { flex:0 0 auto; white-space:nowrap; }
+.czv-CodeEditor-outputTabs { min-width:0; }

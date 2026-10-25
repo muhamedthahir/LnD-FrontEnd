@@ -36,6 +36,7 @@ function CodeEditor({
       const token = await ensureAccessTokenRef.current();
       return fetch(url, {
         ...options,
+        signal: options.signal ?? AbortSignal.timeout(30000),
         headers: {
           'Content-Type': 'application/json',
           ...(options.headers || {}),
@@ -59,6 +60,9 @@ function CodeEditor({
   const [visibleTestsPassed, setVisibleTestsPassed] = useState(false);
   const [output, setOutput] = useState('');
   const [userInput, setUserInput] = useState('');
+  const [customCases, setCustomCases] = useState([]);
+  const [selectedCustomCase, setSelectedCustomCase] = useState(null);
+  const [selectedSample, setSelectedSample] = useState(0);
   const [interactiveInput, setInteractiveInput] = useState('');
   const [language, setLanguage] = useState('');
   const [isRunning, setIsRunning] = useState(false);
@@ -81,7 +85,7 @@ function CodeEditor({
   const visibleTestCases = testCases.filter(tc => !tc.is_hidden);
   const hasTestCases = visibleTestCases.length > 0;
   const codeIsSaved = code === savedCodeSnapshot && code.trim().length > 0;
-  const canSubmitCode = hasTestCases ? visibleTestsPassed && lastTestedCode === code && codeIsSaved : codeIsSaved;
+  const canSubmitCode = code.trim().length > 0;
   const busy = isRunning || isSaving || isSubmitting;
   const defaultLanguages = [{
     id: 1,
@@ -151,6 +155,8 @@ function CodeEditor({
       if (isNewQuestion) {
         setOutput('');
         setUserInput('');
+        setCustomCases([]);
+        setSelectedCustomCase(null);
         setTestResults([]);
         setActiveTab('custom');
         setSavedCodeSnapshot('');
@@ -273,6 +279,8 @@ function CodeEditor({
   };
   useEffect(() => {
     return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
       if (wsRef.current) {
         wsRef.current.close();
         wsRef.current = null;
@@ -435,7 +443,7 @@ function CodeEditor({
       setOutput(outputText || '> Program executed successfully with no output');
       if (onRunComplete) {
         onRunComplete({
-          success: true,
+          success: executionSucceeded(result),
           output: outputText,
           result
         });
@@ -472,7 +480,7 @@ function CodeEditor({
           body: JSON.stringify({
             language: language,
             code: code,
-            stdin: testCase.input
+            stdin: testCase.input ?? testCase.input_data ?? ''
           })
         });
         const result = await response.json();
@@ -480,7 +488,7 @@ function CodeEditor({
         let passed = false;
         if (response.ok && executionSucceeded(result)) {
           actualOutput = result.run.stdout || '';
-          const expectedOutput = testCase.expected_result || testCase.expected_output || '';
+          const expectedOutput = testCase.expected_result ?? testCase.expected_output ?? testCase.output ?? '';
           passed = outputsMatch(actualOutput, expectedOutput);
           actualOutput = actualOutput.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trimEnd();
         } else {
@@ -508,17 +516,15 @@ function CodeEditor({
     setIsRunning(false);
     return allPassed;
   };
-  const handleSaveAndRun = async (action = 'save') => {
+  const handleSaveAndRun = async () => {
     if (isRunning || isSaving) return;
     setIsSaving(true);
     try {
       await persistCode();
-      if (action === 'run') {
+      if (selectedCustomCase !== null || !hasTestCases) {
         await handleRunCodeBatch();
-      } else if (action === 'test') {
-        await handleRunWithTestCases();
       } else {
-        setOutput('> Code saved\n');
+        await handleRunWithTestCases();
       }
     } catch (error) {
       setActiveTab('custom');
@@ -528,7 +534,7 @@ function CodeEditor({
     }
   };
   const handleSubmit = async () => {
-    if (isSubmitting || !canSubmitCode) return;
+    if (busy || !canSubmitCode) return;
     setIsSubmitting(true);
     setOutput(`> Submitting solution...\n`);
     try {
@@ -541,6 +547,7 @@ function CodeEditor({
           testCasesPassed: visibleTestCases.length,
           testCasesTotal: visibleTestCases.length
         });
+        if (result?.success === false) throw new Error('Code submission failed. Please retry.');
         if (result) {
           if (assessmentMode && result.testCasesTotal !== undefined) {
             const visibleTotal = (result.testCasesTotal || 0) - (result.hiddenTotal || 0);
@@ -633,47 +640,11 @@ function CodeEditor({
             <label>Text size<select aria-label="Editor text size" value={fontSize} onChange={e => setFontSize(Number(e.target.value))}>{[13,15,17,19].map(size => <option key={size} value={size}>{size}px</option>)}</select></label>
             <button type="button" aria-pressed={wordWrap} onClick={() => setWordWrap(value => !value)}>Wrap lines</button>
           </div>
-          <div className={styles.codeActions}>
-            <ActionButton onClick={() => handleSaveAndRun('run')} disabled={busy || !code.trim()}>Run code</ActionButton>
-            {hasTestCases && <ActionButton onClick={() => handleSaveAndRun('test')} disabled={busy || !code.trim()}>Test samples</ActionButton>}
-            {useInteractiveMode && isRunning && isInteractive ? <ActionButton className={styles.btnStopHeader} onClick={handleStopExecution}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="6" y="6" width="12" height="12" />
-                </svg>
-                Stop
-              </ActionButton> : <ActionButton className={styles.btnSaveAndTest} onClick={() => handleSaveAndRun('save')} disabled={busy || !code.trim()} title="Save code without running it">
-                {isRunning || isSaving ? <>
-                    <svg className={styles.spinner} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <circle cx="12" cy="12" r="10" strokeDasharray="32" strokeDashoffset="12" />
-                    </svg>
-                    {isSaving ? 'Saving...' : 'Running...'}
-                  </> : <>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                      <polyline points="17 21 17 13 7 13 7 21" />
-                      <polyline points="7 3 7 8 15 8" />
-                    </svg>
-                    Save code
-                  </>}
-              </ActionButton>}
-            <ActionButton className={styles.btnSubmit} onClick={handleSubmit} disabled={busy || !canSubmitCode} title={canSubmitCode ? 'Submit your solution for grading' : hasTestCases ? 'Pass all visible samples with Test samples before submitting' : 'Save your code before submitting'}>
-              {isSubmitting ? <>
-                  <svg className={styles.spinner} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="10" strokeDasharray="32" strokeDashoffset="12" />
-                  </svg>
-                  Submitting...
-                </> : <>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                  Submit Code
-                </>}
-            </ActionButton>
-          </div>
+
         </div>
         <div className={styles.workflowHint} role="status">
           <span>{isSaving ? 'Saving code…' : isRunning ? 'Running code…' : isSubmitting ? 'Submitting solution…' : codeIsSaved ? 'Code saved' : 'Unsaved changes'}</span>
-          <span>{hasTestCases ? canSubmitCode ? 'Samples passed. Ready to submit.' : 'Run code with your input, then Test samples to unlock Submit code.' : 'Save your code, then submit your solution.'}</span>
+          <span>Save & Run checks samples or the selected custom case. Submit Code grades your solution.</span>
         </div>
         <div className={styles.codeArea}>
           <Editor height="100%" language={language === 'cpp' ? 'cpp' : language} value={code} onChange={handleEditorChange} onMount={handleEditorDidMount} options={{
@@ -723,23 +694,30 @@ function CodeEditor({
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14">
                 <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
               </svg>
-              Input / output
+              Test cases
               {userInput.trim() && <span className={styles.inputIndicator}></span>}
             </button>
             {hasAnyTestCases && <button className={`${styles.tabBtn} ${activeTab === 'testcases' ? styles.active : ''}`} onClick={() => setActiveTab('testcases')}>
-                Test Cases ({visibleTestCases.length})
+                Sample results ({visibleTestCases.length})
               </button>}
             <button className={`${styles.tabBtn} ${activeTab === 'history' ? styles.active : ''}`} onClick={() => setActiveTab('history')}>
               {assessmentMode ? 'Submissions' : 'History'}
               {submissionHistory.length > 0 && ` (${submissionHistory.length})`}
             </button>
           </div>
-          <ActionButton className={styles.btnClear} onClick={handleClearOutput} disabled={busy || activeTab === 'history'}>
-            Clear results
-          </ActionButton>
+          <div className={styles.codeActions}>
+            <ActionButton onClick={handleSaveAndRun} disabled={busy || !code.trim()}>{isSaving ? 'Saving…' : isRunning ? 'Running…' : 'Save & Run'}</ActionButton>
+            <ActionButton className={styles.btnSubmit} onClick={handleSubmit} disabled={busy || !canSubmitCode}>{isSubmitting ? 'Submitting…' : 'Submit Code'}</ActionButton>
+          </div>
+
         </div>
 
         {activeTab === 'custom' ? <div className={styles.customTestcaseContent}>
+            <div className={styles.caseTabs} role="group" aria-label="Test cases">
+              {visibleTestCases.map((tc, index) => <button type="button" key={tc.id ?? index} disabled={busy} aria-pressed={selectedCustomCase === null && selectedSample === index} onClick={() => { setSelectedCustomCase(null); setSelectedSample(index); setOutput(''); }}>Case {index + 1}</button>)}
+              {customCases.map((value, index) => <button type="button" key={index} disabled={busy} aria-pressed={selectedCustomCase === index} onClick={() => { setSelectedCustomCase(index); setUserInput(value); setOutput(''); }}>Custom {index + 1}</button>)}
+              <button type="button" disabled={busy || customCases.length >= 10} aria-label="Add custom test case" onClick={() => { setCustomCases(cases => [...cases, '']); setSelectedCustomCase(customCases.length); setUserInput(''); setOutput(''); }}>+ Custom case</button>
+            </div>
             <div className={styles.customTestcaseGrid}>
               {}
               <div className={styles.customInputSection}>
@@ -749,7 +727,7 @@ function CodeEditor({
                   </svg>
                   Input
                 </label>
-                <textarea aria-label="Custom testcase input" className={styles.customInputArea} value={userInput} onChange={e => setUserInput(e.target.value)} placeholder="Enter your input here (one value per line for multiple inputs)..." spellCheck={false} disabled={isRunning} />
+                <textarea aria-label="Custom testcase input" className={styles.customInputArea} value={selectedCustomCase === null && hasTestCases ? (visibleTestCases[selectedSample]?.input ?? visibleTestCases[selectedSample]?.input_data ?? '') : userInput} readOnly={selectedCustomCase === null && hasTestCases} onChange={e => { setUserInput(e.target.value); if (selectedCustomCase !== null) setCustomCases(cases => cases.map((value, index) => index === selectedCustomCase ? e.target.value : value)); }} placeholder="Enter your input here (one value per line for multiple inputs)..." spellCheck={false} disabled={isRunning} />
               </div>
 
               {}
@@ -761,7 +739,7 @@ function CodeEditor({
                   Output
                 </label>
                 <pre ref={outputRef} className={styles.customOutputArea} aria-label="Execution output" aria-live="polite">
-                  {output || '// Run your code to see output here'}
+                  {output || (selectedCustomCase === null && hasTestCases ? `Expected: ${visibleTestCases[selectedSample]?.expected_output ?? visibleTestCases[selectedSample]?.expected_result ?? visibleTestCases[selectedSample]?.output ?? ''}` : '// Save & Run to see output here')}
                 </pre>
               </div>
             </div>
@@ -792,7 +770,7 @@ function CodeEditor({
                 <p>No visible test cases available</p>
               </div> : <div className={styles.testcaseList}>
                 {visibleTestCases.map((tc, index) => {
-            const result = testResults.find(r => r.id === tc.id || r.id === index);
+            const result = testResults.find(r => r.id != null && tc.id != null ? r.id === tc.id : testResults.indexOf(r) === index);
             return <div key={tc.id || index} className={`${styles.testcaseItem} ${result?.status ? styles[result.status] : ''}`}>
                       <div className={styles.testcaseHeader}>
                         <span className={styles.testcaseName}>

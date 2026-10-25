@@ -3,19 +3,9 @@ import { toast } from 'react-toastify'
 
 const BLOCKED_TOAST = 'Copy/Paste is disabled for this assessment'
 
-const clearClipboard = async () => {
-  try {
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText('')
-    }
-  } catch {
-    // Clipboard API may be denied; key/paste handlers still apply.
-  }
-}
-
 /**
  * Blocks clipboard usage during proctored assessments (Ctrl/Cmd shortcuts,
- * context menu, drag-drop paste, and clipboard API on tab return).
+ * clipboard events and paste/drop input). Ordinary pointer gestures remain usable.
  */
 export function useAssessmentClipboardGuard(enabled) {
   const toastAtRef = useRef(0)
@@ -63,42 +53,18 @@ export function useAssessmentClipboardGuard(enabled) {
       }
     }
 
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        clearClipboard()
-      }
-    }
-
-    const handleWindowFocus = () => {
-      clearClipboard()
-    }
-
-    clearClipboard()
-
     window.addEventListener('keydown', blockKeyboardShortcuts, true)
-    window.addEventListener('keyup', blockKeyboardShortcuts, true)
     document.addEventListener('copy', prevent, true)
     document.addEventListener('cut', prevent, true)
     document.addEventListener('paste', prevent, true)
-    document.addEventListener('contextmenu', prevent, true)
-    document.addEventListener('dragstart', prevent, true)
-    document.addEventListener('drop', prevent, true)
     document.addEventListener('beforeinput', blockBeforeInput, true)
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-    window.addEventListener('focus', handleWindowFocus)
 
     return () => {
       window.removeEventListener('keydown', blockKeyboardShortcuts, true)
-      window.removeEventListener('keyup', blockKeyboardShortcuts, true)
       document.removeEventListener('copy', prevent, true)
       document.removeEventListener('cut', prevent, true)
       document.removeEventListener('paste', prevent, true)
-      document.removeEventListener('contextmenu', prevent, true)
-      document.removeEventListener('dragstart', prevent, true)
-      document.removeEventListener('drop', prevent, true)
       document.removeEventListener('beforeinput', blockBeforeInput, true)
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-      window.removeEventListener('focus', handleWindowFocus)
     }
   }, [enabled])
 }
@@ -120,7 +86,5 @@ export function configureMonacoClipboardBlock(editor, monaco, onBlocked = () => 
   editor.addCommand(KeyMod.CtrlCmd | KeyCode.Insert, noop)
   editor.addCommand(KeyMod.Shift | KeyCode.Insert, noop)
 
-  editor.onContextMenu(() => {
-    onBlocked()
-  })
+
 }

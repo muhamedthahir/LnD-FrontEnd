@@ -9,7 +9,7 @@ import { toast } from 'react-toastify';
 import Button from '../../../../components/Button/Button';
 import CodeEditor from '../../../CodeEditor/CodeEditor';
 import { useAssessmentClipboardGuard } from "../../../../hooks/useAssessmentClipboardGuard.js";
-import { saveAssessmentDraft, clearAssessmentDraft } from "../../../../utils/assessmentDraftStorage.js";
+import { saveAssessmentDraft } from "../../../../utils/assessmentDraftStorage.js";
 import { LANGUAGE_KEY_MAP } from "../../../../constants/constants.js";
 const isConfigFlagEnabled = (value, defaultEnabled = true) => {
   if (value === undefined || value === null) return defaultEnabled;
@@ -78,6 +78,8 @@ function AssessmentTake() {
   const searchParams = new URLSearchParams(location.search);
   const isSecureWindow = searchParams.get('secure') === 'true' || location.pathname.startsWith('/secure/');
   const [assessmentData, setAssessmentData] = useState(null);
+  const [testEntered, setTestEntered] = useState(false);
+  const switchCountRef = useRef(0);
   const [currentSegmentIndex, setCurrentSegmentIndex] = useState(0);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [questions, setQuestions] = useState([]);
@@ -99,6 +101,8 @@ function AssessmentTake() {
   }, [navigate]);
   const PROGRESS_SAVE_INTERVAL = 10;
   const [showQuestionNav, setShowQuestionNav] = useState(false);
+  const [problemWidth, setProblemWidth] = useState(34);
+  const resizingProblemRef = useRef(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showSegmentEndModal, setShowSegmentEndModal] = useState(false);
   const [showSegmentSubmitModal, setShowSegmentSubmitModal] = useState(false);
@@ -116,6 +120,7 @@ function AssessmentTake() {
   const exitingRef = useRef(false);
   const segmentTimeoutFiredRef = useRef(false);
   const autoSubmitFiredRef = useRef(false);
+  const timeoutActionsRef = useRef({});
   const questionEnterTsRef = useRef(null);
   const pendingQuestionMsRef = useRef({});
   const accumulateQuestionTime = questionId => {
@@ -145,6 +150,7 @@ function AssessmentTake() {
   const authFetch = useCallback(async (url, options = {}) => {
     const send = async () => fetch(url, {
       ...options,
+      signal: options.signal ?? AbortSignal.timeout(30000),
       headers: {
         ...(options.headers || {}),
         ...(await getAuthHeader())
@@ -186,13 +192,14 @@ function AssessmentTake() {
       const safeQuestionIndex = loadedQuestions.length > 0 ? Math.min(Math.max(0, data.current_question_index || 0), loadedQuestions.length - 1) : 0;
       setAssessmentData(data);
       setQuestions(loadedQuestions);
-      setTimeRemaining(data.time_remaining || data.total_duration);
-      setSegmentTimeRemaining(data.segment_time_remaining || data.current_segment?.time_remaining || data.segments?.[0]?.segment_duration || 0);
+      setTimeRemaining(data.time_remaining ?? data.total_duration);
+      setSegmentTimeRemaining(data.segment_time_remaining ?? data.current_segment?.time_remaining ?? data.segments?.[0]?.segment_duration ?? 0);
       setCurrentSegmentIndex(data.current_segment_index || 0);
       setCurrentQuestionIndex(safeQuestionIndex);
       setTotalTimeWorked(data.total_time_worked || 0);
       if (data.tab_switch_count > 0) {
         setTabSwitchCount(data.tab_switch_count);
+        switchCountRef.current = data.tab_switch_count;
       }
       const initialSegmentId = data.segments?.[data.current_segment_index || 0]?.id;
       setAnswers(mergeSegmentAnswers(data.saved_answers, loadedQuestions, initialSegmentId, segmentAnswersCacheRef));
@@ -200,9 +207,7 @@ function AssessmentTake() {
       if (data.resume_count > 0) {
         toast.info(`Resuming assessment (Resume #${data.resume_count}). Time remaining: ${formatTime(data.time_remaining)}`);
       }
-      if (data.proctoring?.full_screen_mandatory) {
-        enterFullScreen();
-      }
+
     } catch (error) {
       console.error('Error fetching assessment:', error);
       toast.error('Failed to load assessment');
@@ -230,16 +235,6 @@ function AssessmentTake() {
   }, [apiBaseUrl, mappingId, fetchAssessmentData]);
   useEffect(() => {
     if (!isSecureWindow) return;
-    const enterFullscreenOnLoad = async () => {
-      try {
-        await document.documentElement.requestFullscreen();
-        setIsFullScreen(true);
-      } catch (error) {
-        console.error('Auto fullscreen failed:', error);
-        toast.warning('Please enable fullscreen mode for this assessment');
-      }
-    };
-    const timer = setTimeout(enterFullscreenOnLoad, 500);
     const handleBeforeUnload = e => {
       if (exitingRef.current) return;
       e.preventDefault();
@@ -267,115 +262,56 @@ function AssessmentTake() {
     window.addEventListener('beforeunload', handleBeforeUnload);
     document.addEventListener('keydown', handleKeyDown, true);
     return () => {
-      clearTimeout(timer);
       window.removeEventListener('beforeunload', handleBeforeUnload);
       document.removeEventListener('keydown', handleKeyDown, true);
     };
   }, [isSecureWindow]);
   useEffect(() => {
-    if (!isSecureWindow) return;
-    const handleWindowBlur = () => {
-      const newCount = tabSwitchCount + 1;
-      setTabSwitchCount(newCount);
-      const maxAllowed = assessmentData?.proctoring?.max_tab_switch_allowed ?? -1;
-      logProctoringEvent('WINDOW_BLUR', {
-        count: newCount,
-        maxAllowed
-      });
-      setShowTabSwitchModal(true);
-      if (maxAllowed >= 0 && (maxAllowed === 0 || newCount > maxAllowed)) {
-        setIsTabLimitExceeded(true);
-        if (!countdownTimerRef.current) {
-          startExceededCountdown();
-        }
-      } else if (maxAllowed >= 0) {
-        setIsTabLimitExceeded(false);
-      }
-    };
-    const handleWindowFocus = () => {
-      if (!document.fullscreenElement && !pendingFullscreenExit) {
-        document.documentElement.requestFullscreen().catch(() => {});
-      }
-      if (!isTabLimitExceeded && countdownTimerRef.current) {
-        clearInterval(countdownTimerRef.current);
-        countdownTimerRef.current = null;
-      }
-    };
-    window.addEventListener('blur', handleWindowBlur);
-    window.addEventListener('focus', handleWindowFocus);
-    return () => {
-      window.removeEventListener('blur', handleWindowBlur);
-      window.removeEventListener('focus', handleWindowFocus);
-    };
-  }, [isSecureWindow, tabSwitchCount, assessmentData, pendingFullscreenExit, isTabLimitExceeded]);
-  useEffect(() => {
     if (!assessmentData) return;
+    let lastTick = Date.now();
     timerRef.current = setInterval(() => {
-      setTimeRemaining(prev => {
-        if (prev <= 1) {
-          if (!autoSubmitFiredRef.current) {
-            autoSubmitFiredRef.current = true;
-            handleAutoSubmit();
-          }
-          return 0;
-        }
-        return prev - 1;
-      });
-      setTotalTimeWorked(prev => prev + 1);
-      if (assessmentData.timing_mode !== 'OVERALL') {
-        setSegmentTimeRemaining(prev => {
-          if (prev <= 0) return prev;
-          if (prev <= 1) {
-            if (!segmentTimeoutFiredRef.current) {
-              segmentTimeoutFiredRef.current = true;
-              handleSegmentTimeout();
-            }
-            return 0;
-          }
-          return prev - 1;
-        });
-      }
+      if (exitingRef.current) return;
+      const elapsed = Math.floor((Date.now() - lastTick) / 1000);
+      if (elapsed < 1) return;
+      lastTick += elapsed * 1000;
+      setTimeRemaining(prev => Math.max(0, prev - elapsed));
+      setTotalTimeWorked(prev => prev + elapsed);
+      if (assessmentData.timing_mode !== 'OVERALL') setSegmentTimeRemaining(prev => Math.max(0, prev - elapsed));
     }, 1000);
     return () => clearInterval(timerRef.current);
   }, [assessmentData]);
   useEffect(() => {
-    if (!assessmentData?.proctoring?.proctoring_enabled) return;
+    if (!assessmentData || exitingRef.current) return;
+    if (timeRemaining <= 0) {
+      if (!autoSubmitFiredRef.current) timeoutActionsRef.current.autoSubmit?.();
+    } else if (assessmentData.timing_mode !== 'OVERALL' && segmentTimeRemaining <= 0 && !segmentTimeoutFiredRef.current) {
+      segmentTimeoutFiredRef.current = true;
+      timeoutActionsRef.current.segmentTimeout?.();
+    }
+  }, [assessmentData, timeRemaining, segmentTimeRemaining]);
+  useEffect(() => {
+    if (!testEntered || !isConfigFlagEnabled(assessmentData?.proctoring?.proctoring_enabled, false)) return;
+    // Permission/select dialogs may blur without leaving the assessment tab.
     const handleVisibilityChange = () => {
-      if (document.hidden) {
-        const newCount = tabSwitchCount + 1;
-        setTabSwitchCount(newCount);
-        const maxAllowed = assessmentData.proctoring.max_tab_switch_allowed ?? -1;
-        logProctoringEvent('TAB_SWITCH', {
-          count: newCount,
-          maxAllowed
-        });
-        setShowTabSwitchModal(true);
-        if (maxAllowed >= 0 && (maxAllowed === 0 || newCount > maxAllowed)) {
-          setIsTabLimitExceeded(true);
-          if (!countdownTimerRef.current) {
-            startExceededCountdown();
-          }
-        } else {
-          setIsTabLimitExceeded(false);
-        }
-      } else {
-        if (!isTabLimitExceeded && countdownTimerRef.current) {
-          clearInterval(countdownTimerRef.current);
-          countdownTimerRef.current = null;
-        }
-      }
+      if (!document.hidden || exitingRef.current) return;
+      const count = ++switchCountRef.current;
+      setTabSwitchCount(count);
+      const maxAllowed = assessmentData.proctoring.max_tab_switch_allowed ?? -1;
+      logProctoringEvent('TAB_SWITCH', { count, maxAllowed });
+      const exceeded = maxAllowed >= 0 && count > maxAllowed;
+      setIsTabLimitExceeded(exceeded);
+      setShowTabSwitchModal(true);
+      if (exceeded && !countdownTimerRef.current) startExceededCountdown();
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [assessmentData, tabSwitchCount, isTabLimitExceeded]);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [testEntered, assessmentData]);
   useEffect(() => {
-    if (!assessmentData?.proctoring?.full_screen_mandatory) return;
+    if (!testEntered || !isConfigFlagEnabled(assessmentData?.proctoring?.full_screen_mandatory, false)) return;
     const handleFullScreenChange = () => {
       const isFS = !!document.fullscreenElement;
       setIsFullScreen(isFS);
-      if (!isFS) {
+      if (!isFS && !exitingRef.current) {
         setShowFullscreenRequiredModal(true);
         logProctoringEvent('FULLSCREEN_EXIT');
       } else {
@@ -387,9 +323,9 @@ function AssessmentTake() {
       setShowFullscreenRequiredModal(true);
     }
     return () => document.removeEventListener('fullscreenchange', handleFullScreenChange);
-  }, [assessmentData]);
+  }, [assessmentData, testEntered]);
   useEffect(() => {
-    if (!assessmentData?.proctoring?.full_screen_mandatory) return;
+    if (!testEntered || !isConfigFlagEnabled(assessmentData?.proctoring?.full_screen_mandatory, false)) return;
     const handleKeyDown = e => {
       if (e.key === 'Escape' && isFullScreen) {
         e.preventDefault();
@@ -398,18 +334,18 @@ function AssessmentTake() {
     };
     document.addEventListener('keydown', handleKeyDown, true);
     return () => document.removeEventListener('keydown', handleKeyDown, true);
-  }, [assessmentData, isFullScreen]);
+  }, [assessmentData, isFullScreen, testEntered]);
   const disableCopyPaste = isConfigFlagEnabled(assessmentData?.proctoring?.disable_copy_paste, false);
   const disableRightClick = isConfigFlagEnabled(assessmentData?.proctoring?.disable_right_click, false);
-  useAssessmentClipboardGuard(disableCopyPaste);
+  useAssessmentClipboardGuard(testEntered && disableCopyPaste);
   useEffect(() => {
-    if (!disableRightClick || disableCopyPaste) return;
+    if (!testEntered || !disableRightClick) return;
     const preventContextMenu = e => {
       e.preventDefault();
     };
     document.addEventListener('contextmenu', preventContextMenu, true);
     return () => document.removeEventListener('contextmenu', preventContextMenu, true);
-  }, [disableRightClick, disableCopyPaste]);
+  }, [disableRightClick, testEntered]);
   useEffect(() => {
     if (showFullscreenRequiredModal && typeof document !== 'undefined') {
       const active = document.activeElement;
@@ -510,7 +446,7 @@ function AssessmentTake() {
       }
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [assessmentData]);
+  }, [assessmentData, testEntered]);
   const handleAutoSubmit = async () => {
     if (autoSubmitFiredRef.current) return;
     autoSubmitFiredRef.current = true;
@@ -529,8 +465,8 @@ function AssessmentTake() {
         clearInterval(countdownTimerRef.current);
         countdownTimerRef.current = null;
         setTabSwitchCountdown(0);
-        submitAssessment(true).then(() => {
-          if (isSecureWindow) {
+        submitAssessment(true).then(success => {
+          if (success && isSecureWindow) {
             toast.success('Assessment submitted. Closing window...');
             setTimeout(() => {
               window.close();
@@ -549,6 +485,7 @@ function AssessmentTake() {
       handleAutoSubmit();
     }
   };
+  timeoutActionsRef.current = { autoSubmit: handleAutoSubmit, segmentTimeout: handleSegmentTimeout };
   const updateSegmentAnswerCache = nextAnswers => {
     const segId = assessmentData?.segments?.[currentSegmentIndex]?.id;
     if (segId) {
@@ -828,6 +765,7 @@ function AssessmentTake() {
         document.exitFullscreen();
       }
       toast.success('Assessment submitted successfully!');
+      setShowSubmitModal(false);
       if (isSecureWindow) {
         setTimeout(() => {
           window.close();
@@ -847,13 +785,15 @@ function AssessmentTake() {
           navigate('/user/assessments');
         }
       }
+      return true;
     } catch (error) {
       console.error('Error submitting:', error);
       toast.error('Failed to submit assessment');
       exitingRef.current = false;
+      if (!isTabLimitExceeded) setShowSubmitModal(true);
+      return false;
     } finally {
       setSubmitting(false);
-      setShowSubmitModal(false);
     }
   };
   const formatTime = seconds => {
@@ -868,8 +808,8 @@ function AssessmentTake() {
   const getQuestionStatus = index => {
     const q = questions[index];
     if (!q) return '';
-    if (isQuestionAnswered(answers, q)) return 'answered';
     if (index === currentQuestionIndex) return 'current';
+    if (isQuestionAnswered(answers, q)) return 'answered';
     if (index < currentQuestionIndex) return 'visited';
     return '';
   };
@@ -928,12 +868,7 @@ function AssessmentTake() {
               </span>
             </div>}</div><div className={styles.headerRight}><span className={styles.progressText}>
             Question {currentQuestionIndex + 1} of {questions.length}</span><ActionButton className={styles.toggleNavBtn} onClick={() => setShowQuestionNav(!showQuestionNav)} aria-expanded={showQuestionNav} aria-label={showQuestionNav ? 'Hide questions' : 'Show questions'} title={showQuestionNav ? 'Hide navigation' : 'Show navigation'}><span>{showQuestionNav ? 'Hide questions' : 'Show questions'}</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
-              <rect x="3" y="3" width="7" height="7" />
-              <rect x="14" y="3" width="7" height="7" />
-              <rect x="14" y="14" width="7" height="7" />
-              <rect x="3" y="14" width="7" height="7" />
-            </svg>
+
           </ActionButton></div></Toolbar>
 
       <div className={`${styles.assessmentBody} ${!showQuestionNav ? styles.navigationHidden : ''}`}>
@@ -978,7 +913,7 @@ function AssessmentTake() {
               })}
                   </div>
                   {(!currentQuestion.options || currentQuestion.options.length === 0) && <p className={styles.noOptions}>No options available for this question.</p>}
-                </div> : currentQuestion.type === 'PROGRAMMING' || currentQuestion.question_type === 'PROGRAMMING' ? <div className={styles.programmingQuestion}>
+                </div> : currentQuestion.type === 'PROGRAMMING' || currentQuestion.question_type === 'PROGRAMMING' ? <div className={styles.programmingQuestion} style={{"--problem-width": `${problemWidth}%`}}>
                   {}
                   <div className={styles.problemPanel}>
                     <div className={styles.problemContent}>
@@ -1074,6 +1009,11 @@ function AssessmentTake() {
                   </div>
 
                   {}
+                  <div className={styles.problemResizer} role="separator" tabIndex={0} aria-label="Resize problem panel" aria-orientation="vertical" aria-valuemin={25} aria-valuemax={55} aria-valuenow={problemWidth}
+                    onPointerDown={e => { resizingProblemRef.current = true; e.currentTarget.setPointerCapture(e.pointerId); }}
+                    onPointerMove={e => { if (!resizingProblemRef.current) return; const rect = e.currentTarget.parentElement.getBoundingClientRect(); setProblemWidth(Math.max(25, Math.min(55, (e.clientX - rect.left) / rect.width * 100))); }}
+                    onPointerUp={e => { resizingProblemRef.current = false; e.currentTarget.releasePointerCapture(e.pointerId); }} onPointerCancel={() => { resizingProblemRef.current = false; }}
+                    onKeyDown={e => { if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); setProblemWidth(value => Math.max(25, Math.min(55, value + (e.key === 'ArrowRight' ? 2 : -2)))); } }} />
                   <div className={styles.codeEditorWrapper}>
                     <CodeEditor key={`code-q-${currentQuestion.id}`} questionId={currentQuestion.id} disableCopyPaste={disableCopyPaste} initialCode={(() => {
                 const code = getQuestionAnswerValue(answers, currentQuestion.id);
@@ -1093,7 +1033,6 @@ function AssessmentTake() {
                 code,
                 language
               }) => {
-                clearAssessmentDraft(mappingId, currentQuestion.id);
                 setAnswers(prev => ({
                   ...prev,
                   [currentQuestion.id]: code,
@@ -1101,7 +1040,7 @@ function AssessmentTake() {
                 }));
                 accumulateQuestionTime(currentQuestion.id);
                 const codeTimeMs = consumeQuestionTime(currentQuestion.id);
-                await authFetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/save-answer`, {
+                const response = await authFetch(`${apiBaseUrl}/api/assessment/user/assessments/${mappingId}/save-answer`, {
                   method: 'POST',
                   headers: await getAuthHeader(),
                   body: JSON.stringify({
@@ -1112,6 +1051,7 @@ function AssessmentTake() {
                     time_taken_ms: codeTimeMs
                   })
                 });
+                if (!response.ok) throw new Error('Unable to save code. Please retry.');
               }} onSubmit={async submissionData => {
                 setAnswers(prev => ({
                   ...prev,
@@ -1248,17 +1188,24 @@ function AssessmentTake() {
       {}
 
     <AssessmentDialogs views={{
-      fullscreenRequired: showFullscreenRequiredModal && assessmentData?.proctoring?.full_screen_mandatory,
-      fullscreenExit: showFullscreenExitModal,
-      submit: showSubmitModal,
-      segmentSubmit: showSegmentSubmitModal,
-      segmentEnd: showSegmentEndModal,
-      closeWarning: showCloseWarning,
-      tabSwitch: showTabSwitchModal
-    }} total={questions.length} answered={getAnsweredCount()} time={formatTime(timeRemaining)} segmentName={currentSegment?.name} allowSegmentSwitch={isConfigFlagEnabled(assessmentData?.allow_segment_switch, true)} switchCount={tabSwitchCount} switchLimit={assessmentData?.proctoring?.max_tab_switch_allowed ?? -1} limitExceeded={isTabLimitExceeded} countdown={tabSwitchCountdown} busy={submitting} onEnterFullscreen={enterFullScreen} onStayFullscreen={handleCancelExitFullscreen} onExitFullscreen={handleConfirmExitFullscreen} onCloseSubmit={() => setShowSubmitModal(false)} onSubmit={() => submitAssessment(false)} onCloseSegmentSubmit={() => setShowSegmentSubmitModal(false)} onSubmitSegment={async () => {
+      entry: !testEntered,
+      fullscreenRequired: testEntered && showFullscreenRequiredModal && !showTabSwitchModal && assessmentData?.proctoring?.full_screen_mandatory,
+      fullscreenExit: testEntered && showFullscreenExitModal && !showTabSwitchModal && !showFullscreenRequiredModal,
+      submit: testEntered && showSubmitModal && !showTabSwitchModal && !showFullscreenRequiredModal,
+      segmentSubmit: testEntered && showSegmentSubmitModal && !showTabSwitchModal && !showFullscreenRequiredModal,
+      segmentEnd: testEntered && showSegmentEndModal && !showTabSwitchModal && !showFullscreenRequiredModal,
+      closeWarning: testEntered && showCloseWarning && !showTabSwitchModal && !showFullscreenRequiredModal,
+      tabSwitch: testEntered && showTabSwitchModal
+    }} total={questions.length} answered={getAnsweredCount()} time={formatTime(timeRemaining)} segmentName={currentSegment?.name} allowSegmentSwitch={isConfigFlagEnabled(assessmentData?.allow_segment_switch, true)} switchCount={tabSwitchCount} switchLimit={assessmentData?.proctoring?.max_tab_switch_allowed ?? -1} limitExceeded={isTabLimitExceeded} countdown={tabSwitchCountdown} busy={submitting} onEnterTest={async () => {
+      if (isConfigFlagEnabled(assessmentData?.proctoring?.full_screen_mandatory, false)) {
+        await document.documentElement.requestFullscreen();
+        setIsFullScreen(true);
+      }
+      setTestEntered(true);
+    }} onEnterFullscreen={enterFullScreen} onStayFullscreen={handleCancelExitFullscreen} onExitFullscreen={handleConfirmExitFullscreen} onCloseSubmit={() => setShowSubmitModal(false)} onSubmit={() => submitAssessment(false)} onCloseSegmentSubmit={() => setShowSegmentSubmitModal(false)} onSubmitSegment={async () => {
       setShowSegmentSubmitModal(false);
       await saveCurrentProgress();
       await handleMoveToNextSegment();
-    }} onNextSegment={handleMoveToNextSegment} onContinueWindow={() => setShowCloseWarning(false)} onContinueAfterSwitch={() => setShowTabSwitchModal(false)} /></PageContent>;
+    }} onNextSegment={handleMoveToNextSegment} onContinueWindow={() => setShowCloseWarning(false)} onRetrySubmit={() => submitAssessment(true)} onContinueAfterSwitch={() => setShowTabSwitchModal(false)} /></PageContent>;
 }
 export default AssessmentTake;
