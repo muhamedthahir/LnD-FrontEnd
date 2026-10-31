@@ -74,12 +74,12 @@ function AssessmentCreate() {
       setSaving(null);
     }
   };
-  return <PageContent className={styles.assessmentCreatePage} view="AssessmentCreate">
-      <Toolbar className="cz-context-bar"><div className={styles.headerLeft}><ActionButton className={styles.backBtn} onClick={() => navigate('/admin/assessments/management')}>
+  return <PageContent className={styles.assessmentCreatePage} view="AssessmentCreate" backAction={<ActionButton variant="secondary" className={styles.backBtn} onClick={() => navigate('/admin/assessments/management')}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
               <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
-          </ActionButton></div></Toolbar>
+          </ActionButton>}>
+      <Toolbar className="cz-context-bar"><div className={styles.headerLeft}></div></Toolbar>
 
       <div className={styles.createContent}>
         <div className={styles.formCard}>

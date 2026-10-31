@@ -1,13 +1,13 @@
+import ResizeHandle from '../../design/ResizeHandle';
 import ThemeSwitch from '../../design/ThemeSwitch';
 import { PageContent, Toolbar } from "../../design/Primitives";
 import { createViewStyles } from "../../design/viewStyles";
 const styles = createViewStyles("CodeEditorLayout");
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef } from 'react';
 import CodeEditor from './CodeEditor';
 function CodeEditorLayout() {
   const [leftPanelWidth, setLeftPanelWidth] = useState(40);
   const containerRef = useRef(null);
-  const isDragging = useRef(false);
   const [questionData] = useState({
     title: 'Two Sum',
     difficulty: 'Easy',
@@ -18,16 +18,16 @@ function CodeEditorLayout() {
       <p>You can return the answer in any order.</p>
 
       <h4>Example 1:</h4>
-      <pre><code>Input: nums = [2,7,11,15], target = 9
+      <pre tabindex="0"><code>Input: nums = [2,7,11,15], target = 9
 Output: [0,1]
 Explanation: Because nums[0] + nums[1] == 9, we return [0, 1].</code></pre>
 
       <h4>Example 2:</h4>
-      <pre><code>Input: nums = [3,2,4], target = 6
+      <pre tabindex="0"><code>Input: nums = [3,2,4], target = 6
 Output: [1,2]</code></pre>
 
       <h4>Example 3:</h4>
-      <pre><code>Input: nums = [3,3], target = 6
+      <pre tabindex="0"><code>Input: nums = [3,3], target = 6
 Output: [0,1]</code></pre>
 
       <h4>Constraints:</h4>
@@ -39,25 +39,6 @@ Output: [0,1]</code></pre>
       </ul>
     `
   });
-  const handleMouseDown = useCallback(e => {
-    e.preventDefault();
-    isDragging.current = true;
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-  }, []);
-  const handleMouseMove = useCallback(e => {
-    if (!isDragging.current || !containerRef.current) return;
-    const containerRect = containerRef.current.getBoundingClientRect();
-    const newWidth = (e.clientX - containerRect.left) / containerRect.width * 100;
-    if (newWidth >= 20 && newWidth <= 80) {
-      setLeftPanelWidth(newWidth);
-    }
-  }, []);
-  const handleMouseUp = useCallback(() => {
-    isDragging.current = false;
-    document.removeEventListener('mousemove', handleMouseMove);
-    document.removeEventListener('mouseup', handleMouseUp);
-  }, [handleMouseMove]);
   const getDifficultyClass = difficulty => {
     switch (difficulty?.toLowerCase()) {
       case 'easy':
@@ -75,7 +56,7 @@ Output: [0,1]</code></pre>
       <div className={styles.questionPanel} style={{
       width: `${leftPanelWidth}%`
     }}>
-        <Toolbar className="cz-context-bar"><ThemeSwitch /><strong className={styles.questionTitle}>{questionData.title}</strong><span className={`${styles.difficultyBadge} ${getDifficultyClass(questionData.difficulty)}`}>{questionData.difficulty}</span></Toolbar>
+        <Toolbar className="cz-context-bar"><ThemeSwitch /><h1 className={`${styles.questionTitle} cz-session-title`}>{questionData.title}</h1><span className={`${styles.difficultyBadge} ${getDifficultyClass(questionData.difficulty)}`}>{questionData.difficulty}</span></Toolbar>
         <div className={styles.questionContent}>
           <div className={styles.questionDescription} dangerouslySetInnerHTML={{
           __html: questionData.description
@@ -84,13 +65,13 @@ Output: [0,1]</code></pre>
       </div>
 
       {}
-      <div className={styles.verticalResizer} onMouseDown={handleMouseDown}>
+      <ResizeHandle containerRef={containerRef} value={leftPanelWidth} onChange={setLeftPanelWidth} label="Resize problem panel" className={styles.verticalResizer}>
         <div className={styles.resizerHandle}>
           <span></span>
           <span></span>
           <span></span>
         </div>
-      </div>
+      </ResizeHandle>
 
       {}
       <div className={styles.editorPanel} style={{

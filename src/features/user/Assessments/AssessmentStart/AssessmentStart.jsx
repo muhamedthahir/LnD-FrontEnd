@@ -113,10 +113,10 @@ function AssessmentStart() {
       </PageContent>;
   }
   if (!assessmentData) {
-    return <PageContent className="assessment-start-page" view="AssessmentStart">
+    return <PageContent className="assessment-start-page" view="AssessmentStart" backAction={<ActionButton variant="secondary" onClick={() => navigate('/user/assessments')}>Back to Assessments</ActionButton>} title="Assessment Start">
         <EmptyState>
           <h3>Assessment not found</h3>
-          <ActionButton onClick={() => navigate('/user/assessments')}>Back to Assessments</ActionButton>
+
         </EmptyState>
       </PageContent>;
   }
@@ -208,17 +208,17 @@ function AssessmentStart() {
   }];
   const subtitle = assessmentData.assessment_title && assessmentData.assessment_title !== assessmentData.display_name ? assessmentData.assessment_title : null;
   const startHint = timingBlocked ? null : !agreed ? 'Tick the agreement above to enable the start button.' : null;
-  return <PageContent className="assessment-start-page" view="AssessmentStart">
-      <ActionButton variant="quiet" className="as-back back-link" onClick={() => navigate('/user/assessments')}>
+  return <PageContent className="assessment-start-page" view="AssessmentStart" backAction={<ActionButton variant="quiet" className="as-back back-link" onClick={() => navigate('/user/assessments')}>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
           <path d="M19 12H5M12 19l-7-7 7-7" />
         </svg>
         Back to Assessments
-      </ActionButton>
+      </ActionButton>} title={<>{assessmentData.display_name || assessmentData.assessment_title}</>}>
+
 
       <header className="as-hero">
         <span className="cz-eyebrow">Assessment</span>
-        <h1>{assessmentData.display_name || assessmentData.assessment_title}</h1>
+
         {subtitle && <p>{subtitle}</p>}
       </header>
 

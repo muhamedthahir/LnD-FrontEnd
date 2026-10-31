@@ -164,20 +164,20 @@ function QuestionBankDetail() {
         <div className="empty-state">Question bank not found</div>
       </PageContent>;
   }
-  return <PageContent className="question-form-page questions-page" view="QuestionBankDetail">
-      <Toolbar className="cz-context-bar"><div><ActionButton type="button" className="btn-secondary back-btn" onClick={() => navigate('/admin/questions/banks')}>
+  return <PageContent className="question-form-page questions-page" view="QuestionBankDetail" backAction={<ActionButton variant="secondary" type="button" className="btn-secondary back-btn" onClick={() => navigate('/admin/questions/banks')}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <polyline points="15 18 9 12 15 6" />
             </svg>
             Back
-          </ActionButton><strong>{questionBank.name}</strong><div className="page-meta"><span className={`status-badge ${getStatusBadgeClass(questionBank.status_name)}`}>{questionBank.status_name}</span>{questionBank.institution_name && <span className="meta-item">
+          </ActionButton>}>
+      <Toolbar className="cz-context-bar"><div><strong>{questionBank.name}</strong><div className="page-meta"><span className={`status-badge ${getStatusBadgeClass(questionBank.status_name)}`}>{questionBank.status_name}</span>{questionBank.institution_name && <span className="meta-item">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M3 21h18v-2H3v2z" />
                   <path d="M5 21V8l7-4 7 4v13" />
                 </svg>
                 {questionBank.institution_name}
               </span>}<span className="meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>{questionsTotal} Questions
-            </span></div></div><ActionButton type="button" className="btn-primary" onClick={() => navigate(`/admin/questions/banks/${id}/edit`)}>
+            </span></div></div><ActionButton variant="primary" type="button" className="btn-primary" onClick={() => navigate(`/admin/questions/banks/${id}/edit`)}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
@@ -208,7 +208,7 @@ function QuestionBankDetail() {
       <Panel className="detail-card">
         <div className="card-header">
           <h2>Questions ({questionsTotal})</h2>
-          <ActionButton type="button" className="btn-primary" onClick={() => navigate(`/admin/questions/list/create?bank=${id}`)}>
+          <ActionButton variant="primary" type="button" className="btn-primary" onClick={() => navigate(`/admin/questions/list/create?bank=${id}`)}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <line x1="12" y1="5" x2="12" y2="19" />
               <line x1="5" y1="12" x2="19" y2="12" />
@@ -225,7 +225,7 @@ function QuestionBankDetail() {
                 <line x1="12" y1="17" x2="12.01" y2="17" />
               </svg>
               <p>No questions in this bank yet</p>
-            </div> : <Table>
+            </div> : <Table aria-label="Question Bank Detail" stickyActions>
               <thead>
                 <tr>
                   <th>Code</th>
@@ -260,7 +260,7 @@ function QuestionBankDetail() {
                     </td>
                     <td>{new Date(question.created_at).toLocaleDateString()}</td>
                     <td className="actions-cell">
-                      <ActionButton type="button" className="action-btn view" onClick={e => {
+                      <ActionButton variant="secondary" type="button" className="action-btn view" onClick={e => {
                   e.stopPropagation();
                   navigate(`/admin/questions/list/${question.id}`);
                 }} title="View">
@@ -269,7 +269,7 @@ function QuestionBankDetail() {
                           <circle cx="12" cy="12" r="3" />
                         </svg>
                       </ActionButton>
-                      <ActionButton type="button" className="action-btn edit" onClick={e => {
+                      <ActionButton variant="secondary" type="button" className="action-btn edit" onClick={e => {
                   e.stopPropagation();
                   navigate(`/admin/questions/list/${question.id}/edit`);
                 }} title="Edit">

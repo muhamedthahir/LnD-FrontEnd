@@ -297,22 +297,22 @@ function CourseOverview() {
       </PageContent>;
   }
   if (!course) {
-    return <PageContent className="course-overview-page" view="CourseOverview">
+    return <PageContent className="course-overview-page" view="CourseOverview" backAction={<ActionButton variant="secondary" onClick={() => navigate('/courses/user-courses')} className="btn-back">
+            Back to Courses
+          </ActionButton>} title="Course Overview">
         <div className="empty-state">
           <h3>Course not found</h3>
-          <ActionButton onClick={() => navigate('/courses/user-courses')} className="btn-back">
-            Back to Courses
-          </ActionButton>
+
         </div>
       </PageContent>;
   }
-  return <PageContent className="course-overview-page" view="CourseOverview">
-      <ActionButton onClick={() => navigate('/courses/user-courses')} className="btn-back">
+  return <PageContent className="course-overview-page" view="CourseOverview" backAction={<ActionButton variant="secondary" onClick={() => navigate('/courses/user-courses')} className="btn-back">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M19 12H5M12 19l-7-7 7-7" />
         </svg>
         Back to Courses
-      </ActionButton>
+      </ActionButton>} title={<>{course.name}</>}>
+
 
       <Panel className="course-header">
         {course.thumbnail && <div className="course-thumbnail-large">
@@ -326,8 +326,8 @@ function CourseOverview() {
               </span>}
           </div>
           <div className="course-title-row">
-            <h1>{course.name}</h1>
-            <ActionButton className={`btn-start-course ${hasStarted ? 'resume' : ''}`} onClick={handleStartCourse}>
+
+            <ActionButton variant="primary" className={`btn-start-course ${hasStarted ? 'resume' : ''}`} onClick={handleStartCourse}>
               {hasStarted ? <>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polygon points="5 3 19 12 5 21 5 3" />
@@ -434,7 +434,7 @@ function CourseOverview() {
           });
           const totalItems = regularLessons.length + practiceSegments.length + assessments.length;
           return <div key={section.id} className={`section-item ${topicProgress?.progress_status ? getStatusClass(topicProgress.progress_status) : ''}`}>
-                  <ActionButton className="section-header" onClick={() => toggleSection(section.id)}>
+                  <ActionButton variant="secondary" className="section-header" onClick={() => toggleSection(section.id)}>
                     <div className="section-header-left">
                       <span className={`section-number ${topicProgress?.progress_status === 'completed' ? 'completed' : ''}`}>
                         {topicProgress?.progress_status === 'completed' ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -483,7 +483,7 @@ function CourseOverview() {
                 const segmentProgress = getSegmentProgress(lesson.id, false);
                 const isCompleted = segmentProgress?.progress_status === 'completed';
                 const isInProgress = segmentProgress?.progress_status === 'in_progress';
-                return <ActionButton key={`lesson-${lesson.id}`} className={`lesson-item ${isCompleted ? 'completed' : ''} ${isInProgress ? 'in-progress' : ''}`} onClick={() => handleLessonClick(lesson)}>
+                return <ActionButton variant="secondary" key={`lesson-${lesson.id}`} className={`lesson-item ${isCompleted ? 'completed' : ''} ${isInProgress ? 'in-progress' : ''}`} onClick={() => handleLessonClick(lesson)}>
                             <span className={`lesson-icon ${isCompleted ? 'completed' : ''}`}>
                               {isCompleted ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                   <polyline points="20 6 9 17 4 12" />
@@ -519,7 +519,7 @@ function CourseOverview() {
                 const practiceProgress = getSegmentProgress(practice.id, true);
                 const isCompleted = practiceProgress?.progress_status === 'completed';
                 const isInProgress = practiceProgress?.progress_status === 'in_progress';
-                return <ActionButton key={`practice-${practice.id}`} className={`lesson-item practice-item ${isCompleted ? 'completed' : ''} ${isInProgress ? 'in-progress' : ''}`} onClick={() => handleLessonClick(practice)}>
+                return <ActionButton variant="secondary" key={`practice-${practice.id}`} className={`lesson-item practice-item ${isCompleted ? 'completed' : ''} ${isInProgress ? 'in-progress' : ''}`} onClick={() => handleLessonClick(practice)}>
                             <span className={`lesson-icon practice-icon ${isCompleted ? 'completed' : ''}`}>
                               {isCompleted ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                   <polyline points="20 6 9 17 4 12" />
@@ -541,7 +541,7 @@ function CourseOverview() {
                       {assessments.map(assessment => {
                 const assessmentProgress = getSegmentProgress(assessment.id, false);
                 const isCompleted = assessmentProgress?.progress_status === 'completed';
-                return <ActionButton key={`assessment-${assessment.id}`} className={`lesson-item assessment-item ${isCompleted ? 'completed' : ''}`} onClick={() => handleLessonClick(assessment)}>
+                return <ActionButton variant="secondary" key={`assessment-${assessment.id}`} className={`lesson-item assessment-item ${isCompleted ? 'completed' : ''}`} onClick={() => handleLessonClick(assessment)}>
                             <span className={`lesson-icon assessment-icon ${isCompleted ? 'completed' : ''}`}>
                               {isCompleted ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                   <polyline points="20 6 9 17 4 12" />

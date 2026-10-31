@@ -108,10 +108,10 @@ function ProgressReport() {
       </PageContent>;
   }
   if (!reportData) {
-    return <PageContent className={styles.progressReportPage} view="ProgressReport">
+    return <PageContent className={styles.progressReportPage} view="ProgressReport" backAction={<ActionButton variant="secondary" onClick={() => navigate(-1)}>Go Back</ActionButton>}>
         <div className={styles.errorContainer}>
           <p>Failed to load progress report</p>
-          <ActionButton onClick={() => navigate(-1)}>Go Back</ActionButton>
+
         </div>
       </PageContent>;
   }
@@ -122,14 +122,14 @@ function ProgressReport() {
     courseProgress,
     topics
   } = reportData;
-  return <PageContent className={styles.progressReportPage} view="ProgressReport">
-      {}
-      <Toolbar className="cz-context-bar"><ActionButton className={styles.btnBack} onClick={() => navigate(`/admin/courses/administrations/${id}`)}>
+  return <PageContent className={styles.progressReportPage} view="ProgressReport" backAction={<ActionButton variant="secondary" className={styles.btnBack} onClick={() => navigate(`/admin/courses/administrations/${id}`)}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <polyline points="15 18 9 12 15 6"></polyline>
           </svg>
           Back to Administration
-        </ActionButton></Toolbar>
+        </ActionButton>}>
+      {}
+
 
       {}
       <div className={`${styles.infoCard} ${styles.userCard} ${styles.fullWidthCard}`}>
@@ -265,7 +265,7 @@ function ProgressReport() {
                   <div className={styles.topicInfo}>
                     <span className={styles.topicNumber}>{index + 1}</span>
                     <div className={styles.topicDetails}>
-                      <h4>{topic.name || topic.title}</h4>
+                      <h4><button type="button" className="cz-disclosure-title" aria-expanded={Boolean(expandedTopics[topic.id])} onClick={event => { event.stopPropagation(); toggleTopic(topic.id) }}>{topic.name || topic.title}</button></h4>
                       <p className={styles.topicMeta}>
                         {topic.progress?.segments_completed || 0} / {topic.progress?.segments_total || 0} segments completed
                       </p>
@@ -315,7 +315,7 @@ function ProgressReport() {
                                     {segment.type_category === 'lesson' ? segment.segment_type === 'lesson_video' ? '🎬' : segment.segment_type === 'lesson_audio' ? '🎵' : segment.segment_type === 'lesson_document' ? '📄' : '📖' : '💻'}
                                   </span>
                                   <div className={styles.segmentDetails}>
-                                    <h5>{segment.title || segment.name}</h5>
+                                    <h5>{isExpandable ? <button type="button" className="cz-disclosure-title" aria-expanded={Boolean(isExpanded)} onClick={event => { event.stopPropagation(); toggleSegment(`${segment.type_category}-${segment.id}`) }}>{segment.title || segment.name}</button> : segment.title || segment.name}</h5>
                                     <p className={styles.segmentMeta}>
                                       {segment.type_category === 'lesson' ? getLessonTypeLabel(segment.segment_type) : 'Practice'}
                                     </p>
@@ -372,7 +372,7 @@ function ProgressReport() {
                                           {question.is_correct ? '✓ Correct' : question.status === 'answered' || question.status === 'submitted' || question.status === 'completed' ? 'Attempted' : 'Not Attempted'}
                                         </span>
                                         <span className={styles.questionAction}>
-                                          {question.question_type === 'programming' && (question.best_submitted_code || question.last_submitted_code) ? <ActionButton className={styles.btnShowCode} onClick={e => {
+                                          {question.question_type === 'programming' && (question.best_submitted_code || question.last_submitted_code) ? <ActionButton variant="secondary" className={styles.btnShowCode} onClick={e => {
                             e.stopPropagation();
                             setCodeModalData({
                               questionName: question.question_text,
@@ -404,7 +404,7 @@ function ProgressReport() {
       </div>
 
       {}
-      {codeModalData && <DialogLayer className={styles.codeModalOverlay} onClick={() => setCodeModalData(null)}>
+      {<DialogLayer open={Boolean(codeModalData)} className={styles.codeModalOverlay} onClick={() => setCodeModalData(null)}>{Boolean(codeModalData) ? <>
           <DialogSurface className={styles.codeModal} onClick={e => e.stopPropagation()}>
             <div className={styles.codeModalHeader}>
               <div className={styles.codeModalTitle}>
@@ -419,7 +419,7 @@ function ProgressReport() {
                   </span>
                 </div>
               </div>
-              <ActionButton className={styles.codeModalClose} onClick={() => setCodeModalData(null)}>
+              <ActionButton variant="secondary" className={styles.codeModalClose} onClick={() => setCodeModalData(null)}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <line x1="18" y1="6" x2="6" y2="18"></line>
                   <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -427,12 +427,12 @@ function ProgressReport() {
               </ActionButton>
             </div>
             <div className={styles.codeModalBody}>
-              <pre className={styles.codeBlock}>
+              <pre tabIndex={0} className={styles.codeBlock}>
                 <code>{codeModalData.code}</code>
               </pre>
             </div>
             <div className={styles.codeModalFooter}>
-              <ActionButton className={styles.btnCopyCode} onClick={() => {
+              <ActionButton variant="secondary" className={styles.btnCopyCode} onClick={() => {
             navigator.clipboard.writeText(codeModalData.code);
             toast.success('Code copied to clipboard!');
           }}>
@@ -442,12 +442,12 @@ function ProgressReport() {
                 </svg>
                 Copy Code
               </ActionButton>
-              <ActionButton className={styles.btnCloseModal} onClick={() => setCodeModalData(null)}>
+              <ActionButton variant="secondary" className={styles.btnCloseModal} onClick={() => setCodeModalData(null)}>
                 Close
               </ActionButton>
             </div>
           </DialogSurface>
-        </DialogLayer>}
+        </> : null}</DialogLayer>}
     </PageContent>;
 }
 export default ProgressReport;

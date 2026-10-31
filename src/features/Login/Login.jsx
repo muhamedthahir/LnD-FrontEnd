@@ -194,7 +194,7 @@ function Login() {
   if (requiresPasswordSetup && passwordSetupData) {
     return <PasswordSetup userId={passwordSetupData.userId} otp={passwordSetupData.otp} onComplete={handlePasswordSetupComplete} />;
   }
-  return <div className="cz-auth"><section className="cz-auth-content"><div className="cz-auth-theme"><ThemeSwitch /></div><div className="cz-auth-form"><a href="/" className="cz-brand cz-auth-brand"><img className="cz-brand-mark" src="/campuszen-logo.png" alt="" /><span className="cz-brand-name">CampusZen</span></a><form onSubmit={handleSubmit} className={styles.loginForm}>
+  return <div className="cz-auth"><section className="cz-auth-content"><div className="cz-auth-theme"><ThemeSwitch /></div><div className="cz-auth-form"><a href="/" className="cz-brand cz-auth-brand"><img className="cz-brand-mark" src="/campuszen-logo.png" alt="" /><span className="cz-brand-name">CampusZen</span></a><h1 className="cz-auth-title">Sign in</h1><form onSubmit={handleSubmit} className={styles.loginForm}>
               <FieldGroup className={`${styles.formGroup} ${styles.loginCred} ${errors.email ? styles.hasError : ''}`}>
                 <label htmlFor="email">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -217,7 +217,7 @@ function Login() {
                 </label>
                 <div className={styles.passwordInputWrapper}>
                   <input type={showPassword ? 'text' : 'password'} id="password" name="password" value={formData.password} onChange={handleChange} placeholder="Enter password or OTP from email" autoComplete="current-password" />
-                  <ActionButton type="button" className={styles.passwordToggle} onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'Hide password' : 'Show password'}>
+                  <ActionButton variant="secondary" type="button" className={styles.passwordToggle} onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'Hide password' : 'Show password'}>
                     {showPassword ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
                         <line x1="1" y1="1" x2="23" y2="23" />
@@ -246,12 +246,12 @@ function Login() {
                   <span className={styles.checkmark}></span>
                   Remember me
                 </label>
-                <ActionButton type="button" className={styles.forgotPassword} onClick={() => setShowForgotPasswordModal(true)}>
+                <ActionButton variant="secondary" type="button" className={styles.forgotPassword} onClick={() => setShowForgotPasswordModal(true)}>
                   Forgot password?
                 </ActionButton>
               </div>
 
-              <ActionButton type="submit" className={styles.submitBtn} disabled={isLoading}>
+              <ActionButton variant="primary" type="submit" className={styles.submitBtn} disabled={isLoading}>
                     Sign In
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <line x1="5" y1="12" x2="19" y2="12" />

@@ -132,19 +132,19 @@ function MailerTemplateDetail() {
       </PageContent>;
   }
   if (isEdit) {
-    return <PageContent className="user-admin-page mailer-templates-page" view="MailerTemplateDetail">
-        <Toolbar className="cz-context-bar"><ActionButton type="button" className="btn-secondary mailer-detail-back" onClick={() => navigate(`/admin/mailer-templates/${id}`)}>
+    return <PageContent className="user-admin-page mailer-templates-page" view="MailerTemplateDetail" backAction={<ActionButton variant="secondary" type="button" className="btn-secondary mailer-detail-back" onClick={() => navigate(`/admin/mailer-templates/${id}`)}>
             ← Back to template
-          </ActionButton></Toolbar>
+          </ActionButton>}>
+
         <Panel className="user-form-card mailer-form-card mailer-detail-form-card">
           <MailerTemplateForm formData={formData} errors={errors} handleChange={handleChange} onSubmit={handleSubmit} onCancel={() => navigate(`/admin/mailer-templates/${id}`)} submitLabel={saving ? 'Saving…' : 'Update template'} disableUniqueId isSubmitting={saving} />
         </Panel>
       </PageContent>;
   }
-  return <PageContent className="user-admin-page mailer-templates-page" view="MailerTemplateDetail">
-      <Toolbar className="cz-context-bar"><ActionButton type="button" className="btn-secondary mailer-detail-back" onClick={() => navigate('/admin/mailer-templates')}>
+  return <PageContent className="user-admin-page mailer-templates-page" view="MailerTemplateDetail" backAction={<ActionButton variant="secondary" type="button" className="btn-secondary mailer-detail-back" onClick={() => navigate('/admin/mailer-templates')}>
           ← All templates
-        </ActionButton><strong>{template.name}</strong><div className="template-view-header mailer-detail-badges"><span className={`type-badge ${getTypeBadgeClass(template.type)}`}>{template.type}</span><span className={`status-badge ${template.is_active ? 'active' : 'inactive'}`}>{template.is_active ? 'Active' : 'Inactive'}</span></div></Toolbar>
+        </ActionButton>}>
+      <Toolbar className="cz-context-bar"><strong>{template.name}</strong><div className="template-view-header mailer-detail-badges"><span className={`type-badge ${getTypeBadgeClass(template.type)}`}>{template.type}</span><span className={`status-badge ${template.is_active ? 'active' : 'inactive'}`}>{template.is_active ? 'Active' : 'Inactive'}</span></div></Toolbar>
 
       <Panel className="user-form-card mailer-detail-view-card">
         <div className="view-section">
@@ -182,7 +182,7 @@ function MailerTemplateDetail() {
 
         <div className="view-section">
           <label>HTML template</label>
-          <pre className="template-preview-code">{template.html_template || '(empty)'}</pre>
+          <pre tabIndex={0} className="template-preview-code">{template.html_template || '(empty)'}</pre>
         </div>
 
         <div className="view-stats">
@@ -192,10 +192,10 @@ function MailerTemplateDetail() {
         </div>
 
         <div className="form-actions mailer-form-actions mailer-detail-view-actions">
-          <ActionButton type="button" className="btn-primary" onClick={() => navigate(`/admin/mailer-templates/${id}/edit`)}>
+          <ActionButton variant="primary" type="button" className="btn-primary" onClick={() => navigate(`/admin/mailer-templates/${id}/edit`)}>
             Edit
           </ActionButton>
-          <ActionButton type="button" className="btn-secondary" onClick={() => navigate('/admin/mailer-templates')}>
+          <ActionButton variant="secondary" type="button" className="btn-secondary" onClick={() => navigate('/admin/mailer-templates')}>
             Close
           </ActionButton>
         </div>

@@ -146,7 +146,7 @@ function AudioPlayer({
 
       <div className={styles.player}>
         {}
-        <ActionButton className={styles.playBtn} onClick={togglePlay} disabled={loading} aria-label={isPlaying ? 'Pause' : 'Play'}>
+        <ActionButton variant="secondary" className={styles.playBtn} onClick={togglePlay} disabled={loading} aria-label={isPlaying ? 'Pause' : 'Play'}>
           {loading ? <div className={styles.btnSpinner}></div> : isPlaying ? <svg viewBox="0 0 24 24" fill="currentColor">
               <rect x="6" y="4" width="4" height="16" />
               <rect x="14" y="4" width="4" height="16" />

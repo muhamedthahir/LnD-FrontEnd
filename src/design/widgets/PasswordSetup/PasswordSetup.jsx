@@ -101,7 +101,7 @@ function PasswordSetup({
           </FieldGroup>
 
           <div className={styles.formActions}>
-            <ActionButton type="submit" className={styles.btnPrimary} disabled={loading}>
+            <ActionButton variant="primary" type="submit" className={styles.btnPrimary} disabled={loading}>
               {loading ? 'Setting Password...' : 'Set Password'}
             </ActionButton>
           </div>

@@ -111,7 +111,7 @@ function QuestionBanks() {
 
 
       <div className="table-card">
-        <div className="table-filters"><div className="cz-filter-actions"><ActionButton className="btn-primary" onClick={() => navigate('/admin/questions/banks/create')}>
+        <div className="table-filters"><div className="cz-filter-actions"><ActionButton variant="primary" className="btn-primary" onClick={() => navigate('/admin/questions/banks/create')}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <line x1="12" y1="5" x2="12" y2="19" />
             <line x1="5" y1="12" x2="19" y2="12" />
@@ -132,7 +132,7 @@ function QuestionBanks() {
               </svg>
               <h3>No Question Banks Found</h3>
               <p>Create your first question bank to organize questions</p>
-            </div> : <Table>
+            </div> : <Table aria-label="Question Banks" stickyActions>
               <thead>
                 <tr>
                   <th>Name</th>
@@ -161,7 +161,7 @@ function QuestionBanks() {
                     <td>{bank.question_count || 0}</td>
                     <td>{new Date(bank.created_at).toLocaleDateString()}</td>
                     <td className="actions-cell">
-                      <ActionButton type="button" className="action-btn view" onClick={e => {
+                      <ActionButton variant="secondary" type="button" className="action-btn view" onClick={e => {
                   e.stopPropagation();
                   navigate(`/admin/questions/banks/${bank.id}`);
                 }} title="View">
@@ -170,7 +170,7 @@ function QuestionBanks() {
                           <circle cx="12" cy="12" r="3" />
                         </svg>
                       </ActionButton>
-                      <ActionButton type="button" className="action-btn edit" onClick={e => {
+                      <ActionButton variant="secondary" type="button" className="action-btn edit" onClick={e => {
                   e.stopPropagation();
                   navigate(`/admin/questions/banks/${bank.id}/edit`);
                 }} title="Edit">
@@ -179,7 +179,7 @@ function QuestionBanks() {
                           <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                         </svg>
                       </ActionButton>
-                      <ActionButton type="button" className="btn-delete" onClick={e => {
+                      <ActionButton variant="danger" type="button" className="btn-delete" onClick={e => {
                   e.stopPropagation();
                   setBankToDelete(bank);
                 }} title="Delete">

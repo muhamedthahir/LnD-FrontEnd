@@ -1,0 +1,604 @@
+[
+  {
+    "route": "/personal-details",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/courses/1",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/user/assessments/1/start",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/institutions/create",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/users/create",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/assessments/1/edit",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/groups/1/edit",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/questions/list/1",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/personal-details",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/courses/1",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/user/assessments/1/start",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/institutions/create",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/users/create",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/assessments/1/edit",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/groups/1/edit",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/questions/list/1",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/personal-details",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/courses/1",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/courses/1/current",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/courses/1/practice/1",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/courses/1/quiz/1",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/courses/1/assessment/1",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/user/assessments/1/start",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/user/assessments/1/results",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/institutions/create",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/institutions/1",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/mailer-templates/1/edit",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/mailer-templates/1",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/users/create",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/users/1",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/assessments/create",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/assessments/1/edit",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/assessments/1/configurations",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/assessments/1/configurations/create",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/assessments/administrators/1/users",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/assessments/results/1",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/assessments/progress/1",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/groups/create",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/groups/1/edit",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/courses/management/1/edit",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/courses/1/topics/1/practice",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/courses/administrations/create",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/courses/administrations/1",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/courses/administrations/1/users/1/progress",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/questions/banks/create",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/questions/banks/1",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/questions/banks/1/edit",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/questions/list/create",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/questions/list/1",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/questions/list/1/edit",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/questions/list/2/testcases",
+    "width": 320,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/personal-details",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/courses/1",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/courses/1/current",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/courses/1/practice/1",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/courses/1/quiz/1",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/courses/1/assessment/1",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/user/assessments/1/start",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/user/assessments/1/results",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/institutions/create",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/institutions/1",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/mailer-templates/1/edit",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/mailer-templates/1",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/users/create",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/users/1",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/assessments/create",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/assessments/1/edit",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/assessments/1/configurations",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/assessments/1/configurations/create",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/assessments/administrators/1/users",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/assessments/results/1",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/assessments/progress/1",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/groups/create",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/groups/1/edit",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/courses/management/1/edit",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/courses/1/topics/1/practice",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/courses/administrations/create",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/courses/administrations/1",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/courses/administrations/1/users/1/progress",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/questions/banks/create",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/questions/banks/1",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/questions/banks/1/edit",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/questions/list/create",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/questions/list/1",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/questions/list/1/edit",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  },
+  {
+    "route": "/admin/questions/list/2/testcases",
+    "width": 1440,
+    "centerDelta": 0,
+    "overlap": false,
+    "pageOverflow": false
+  }
+]

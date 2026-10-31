@@ -44,6 +44,10 @@ html[data-sidebar-collapsed=true] .cz-shell { grid-template-columns: var(--sideb
 .cz-account-popover > a { display: flex; align-items: center; gap: .75rem; padding: .75rem; font-size: .8125rem; color: var(--text-primary); border-radius: 6px; }
 .cz-account-popover > a:hover { background: var(--bg-hover); text-decoration: none; }
 .cz-shell-backdrop { display: none; }
+.cz-navigation-layer { padding: 0; place-items: stretch start; overflow: hidden; }
+.cz-navigation-close { position: absolute; top: .75rem; right: .75rem; z-index: 1; }
+.cz-navigation-layer .cz-navigation { position: relative; inset: auto; transform: none; width: min(20rem,calc(100vw - 3rem)); height: 100dvh; padding-top: .5rem; }
+.cz-navigation-layer .cz-brand { padding-right: 3.5rem; }
 .cz-skip-link { position: fixed; top: .5rem; left: 1rem; padding: .75rem; background: var(--bg-card); z-index: 3000; transform: translateY(-200%); }
 .cz-skip-link:focus { transform: none; }
 @media(min-width: 601px) and (max-width: 1024px) { .cz-shell,html[data-sidebar-collapsed=false] .cz-shell { grid-template-columns: var(--sidebar-width-collapsed) minmax(0,1fr); } .cz-navigation .cz-brand { justify-content: center; padding-inline: .5rem; } .cz-navigation :is(.cz-brand-name,.cz-nav-context,.cz-nav-group h2,.cz-nav-link span,.cz-nav-active-dot,.cz-nav-footer > div) { display: none; } .cz-navigation .cz-nav-link,.cz-navigation .cz-nav-footer { justify-content: center; padding-inline: .5rem; } }

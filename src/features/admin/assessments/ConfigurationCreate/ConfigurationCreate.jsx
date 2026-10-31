@@ -646,16 +646,16 @@ function ConfigurationCreate() {
         </div>
       </PageContent>;
   }
-  return <PageContent className="config-create-page" view="ConfigurationCreate">
-      <Toolbar className="cz-context-bar"><div className="header-left"><ActionButton className="back-btn" onClick={() => navigate(`/admin/assessments/${assessmentId}/configurations`)}>
+  return <PageContent className="config-create-page" view="ConfigurationCreate" backAction={<ActionButton variant="secondary" className="back-btn" onClick={() => navigate(`/admin/assessments/${assessmentId}/configurations`)}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
               <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
-          </ActionButton><div><span className="breadcrumb">{assessment?.title}</span></div></div></Toolbar>
+          </ActionButton>}>
+      <Toolbar className="cz-context-bar"><div className="header-left"><div><span className="breadcrumb">{assessment?.title}</span></div></div></Toolbar>
 
       <div className="config-layout">
         {}
-        <nav className="steps-nav">
+        <nav className="steps-nav" aria-label="Configuration steps">
           {steps.map((step, index) => <button type="button" aria-current={activeStep === index ? 'step' : undefined} key={step.id} className={`step-item ${activeStep === index ? 'active' : ''} ${activeStep > index ? 'completed' : ''}`} onClick={() => setActiveStep(index)}>
               <span className="step-icon">{stepIcons[step.id]}</span>
               <span className="step-label">{step.label}</span>

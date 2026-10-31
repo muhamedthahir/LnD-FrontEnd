@@ -102,7 +102,7 @@ export default function BulkResetModal({
       <DialogSurface ref={dialogRef} className={styles.dialog} role="dialog" aria-modal="true" aria-labelledby="bulk-reset-title" tabIndex={-1} onClick={event => event.stopPropagation()}>
         <header className={styles.header}>
           <h2 id="bulk-reset-title">Bulk reset passwords</h2>
-          <ActionButton type="button" aria-label="Close bulk password reset" onClick={onClose} disabled={busy}>×</ActionButton>
+          <ActionButton variant="secondary" type="button" aria-label="Close bulk password reset" onClick={onClose} disabled={busy}>×</ActionButton>
         </header>
         <form onSubmit={submit} className={styles.form}>
           <p>Choose a group and set one new password for all its users. No email will be sent.</p>
@@ -119,11 +119,11 @@ export default function BulkResetModal({
             <option value="">{loading ? 'Loading groups…' : 'Select a group'}</option>
             {groups.map(item => <option key={item.id} value={item.id}>{item.name} — {item.college_name} ({item.member_count} users)</option>)}
           </select>
-          {loadError ? <div role="alert" className={styles.error}>{loadError} <ActionButton type="button" onClick={() => setRetry(value => value + 1)}>Retry</ActionButton></div> : !loading && !groups.length ? <p role="status">No groups found.</p> : null}
+          {loadError ? <div role="alert" className={styles.error}>{loadError} <ActionButton variant="secondary" type="button" onClick={() => setRetry(value => value + 1)}>Retry</ActionButton></div> : !loading && !groups.length ? <p role="status">No groups found.</p> : null}
           {total > PAGE_SIZE && <div className={styles.pagination}>
-            <ActionButton type="button" disabled={busy || loading || offset === 0} onClick={() => setOffset(value => Math.max(0, value - PAGE_SIZE))}>Previous groups</ActionButton>
+            <ActionButton variant="secondary" type="button" disabled={busy || loading || offset === 0} onClick={() => setOffset(value => Math.max(0, value - PAGE_SIZE))}>Previous groups</ActionButton>
             <span>{offset + 1}–{Math.min(offset + PAGE_SIZE, total)} of {total}</span>
-            <ActionButton type="button" disabled={busy || loading || offset + PAGE_SIZE >= total} onClick={() => setOffset(value => value + PAGE_SIZE)}>Next groups</ActionButton>
+            <ActionButton variant="secondary" type="button" disabled={busy || loading || offset + PAGE_SIZE >= total} onClick={() => setOffset(value => value + PAGE_SIZE)}>Next groups</ActionButton>
           </div>}
           {group && <p className={styles.summary} role="status"><strong>{group.name}</strong>: all {group.member_count} users will receive this password. Users outside this group are unchanged.</p>}
           <label htmlFor="bulk-password">New password</label>
@@ -133,8 +133,8 @@ export default function BulkResetModal({
           <input id="bulk-password-confirm" type="password" autoComplete="new-password" required value={confirmation} disabled={busy} onChange={event => setConfirmation(event.target.value)} />
           {error && <p role="alert" className={styles.error}>{error}</p>}
           <footer className={styles.actions}>
-            <ActionButton type="button" className="btn-secondary" onClick={onClose} disabled={busy}>Cancel</ActionButton>
-            <ActionButton type="submit" className="btn-primary" disabled={busy || loading || !group || Number(group.member_count) === 0 || !!loadError}>{busy ? 'Resetting…' : `Reset ${group ? `${group.member_count} users’ ` : ''}passwords`}</ActionButton>
+            <ActionButton variant="secondary" type="button" className="btn-secondary" onClick={onClose} disabled={busy}>Cancel</ActionButton>
+            <ActionButton variant="primary" type="submit" className="btn-primary" disabled={busy || loading || !group || Number(group.member_count) === 0 || !!loadError}>{busy ? 'Resetting…' : `Reset ${group ? `${group.member_count} users’ ` : ''}passwords`}</ActionButton>
           </footer>
         </form>
       </DialogSurface>

@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "test": "node --test src/pages/admin/Institutions/createInstitutionLogic.test.js src/pages/admin/Users/bulkResetValidation.test.js src/pages/admin/Users/bulkUpload.test.js scripts/testConfig.mjs scripts/testDesign.mjs scripts/testSpreadsheetImport.mjs scripts/testLocalDateTime.mjs scripts/testExecutionResult.mjs",
+    "test": "node --test src/pages/admin/Institutions/createInstitutionLogic.test.js src/pages/admin/Users/bulkResetValidation.test.js src/pages/admin/Users/bulkUpload.test.js scripts/testConfig.mjs scripts/testDesign.mjs scripts/testSpreadsheetImport.mjs scripts/testLocalDateTime.mjs scripts/testExecutionResult.mjs scripts/testDesignFoundation.mjs",
     "preview": "vite preview",
     "test:assessment": "node --test scripts/testAssessmentInteractions.mjs scripts/testExecutionResult.mjs scripts/testAssessmentDraftStorage.mjs"
   },
@@ -31,6 +31,7 @@
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.3",
+    "axe-core": "^4.14.0",
     "eslint": "^9.13.0",
     "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-react-hooks": "^5.0.0",

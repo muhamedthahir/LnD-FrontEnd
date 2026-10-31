@@ -103,14 +103,14 @@ function Institutions() {
       <div className="users-table-card">
         <div className="table-container">
           <div className="filters-section">
-            <Toolbar className="filters institutions-filters"><div className="cz-filter-actions"><ActionButton className="btn-primary" type="button" onClick={() => navigate(CREATE_INSTITUTION_ROUTE)}>
+            <Toolbar className="filters institutions-filters"><div className="cz-filter-actions"><ActionButton variant="primary" className="btn-primary" type="button" onClick={() => navigate(CREATE_INSTITUTION_ROUTE)}>
           + Create Institution
         </ActionButton></div>
               <FieldGroup className="filter-group">
                 <label>Search</label>
                 <input type="text" placeholder="Search institutions..." value={search} onChange={e => setSearch(e.target.value)} className="search-input" />
               </FieldGroup>
-              {search && <ActionButton onClick={() => setSearch('')} className="btn-clear-filters institutions-btn-clear-filters" title="Clear search">
+              {search && <ActionButton variant="secondary" onClick={() => setSearch('')} className="btn-clear-filters institutions-btn-clear-filters" title="Clear search">
                   <svg viewBox="64 64 896 896" focusable="false" width="1em" height="1em" fill="currentColor" aria-hidden="true">
                     <path d="M899.1 869.6l-53-305.6H864c14.4 0 26-11.6 26-26V346c0-14.4-11.6-26-26-26H618V138c0-14.4-11.6-26-26-26H432c-14.4 0-26 11.6-26 26v182H160c-14.4 0-26 11.6-26 26v192c0 14.4 11.6 26 26 26h17.9l-53 305.6a25.95 25.95 0 0025.6 30.4h723c1.5 0 3-.1 4.4-.4a25.88 25.88 0 0021.2-30zM204 390h272V182h72v208h272v104H204V390zm468 440V674c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v156H416V674c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v156H202.8l45.1-260H776l45.1 260H672z"></path>
                   </svg>
@@ -129,7 +129,7 @@ function Institutions() {
                 </div>
                 <h3>No Institutions Found</h3>
                 <p>Get started by creating your first institution or college.</p>
-              </div> : <Table variant="embedded">
+              </div> : <Table aria-label="Institutions" stickyActions variant="embedded">
                 <thead>
                   <tr>
                     <th>Name</th>
@@ -149,10 +149,10 @@ function Institutions() {
                       <td>{new Date(institution.created_at).toLocaleDateString()}</td>
                       <td className="actions-cell">
                         <div className="action-buttons">
-                          <ActionButton className="btn-edit" type="button" onClick={() => navigate(`/admin/institutions/${institution.id}`)} title="View institution">
+                          <ActionButton variant="secondary" className="btn-edit" type="button" onClick={() => navigate(`/admin/institutions/${institution.id}`)} title="View institution">
                             View
                           </ActionButton>
-                          <ActionButton className="btn-delete" type="button" onClick={() => setInstitutionToDelete(institution)} title="Delete institution">
+                          <ActionButton variant="danger" className="btn-delete" type="button" onClick={() => setInstitutionToDelete(institution)} title="Delete institution">
                             Delete
                           </ActionButton>
                         </div>

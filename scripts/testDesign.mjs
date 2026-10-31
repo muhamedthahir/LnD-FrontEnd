@@ -8,7 +8,7 @@ const parser=require('@babel/parser');
 const traverse=require('@babel/traverse').default;
 const root=path.resolve('src');
 function files(dir){return fs.readdirSync(dir,{withFileTypes:true}).flatMap(e=>e.isDirectory()?files(path.join(dir,e.name)):[path.join(dir,e.name)]);}
-test('both themes retain every original palette color',()=>{
+test('both themes match the approved semantic palette baseline',()=>{
  const baseline=JSON.parse(fs.readFileSync('docs/color-palette-baseline.json','utf8'));
  const css=fs.readFileSync('src/design/tokens/colors.css','utf8');
  for(const [theme,tokens] of Object.entries(baseline.themes)){

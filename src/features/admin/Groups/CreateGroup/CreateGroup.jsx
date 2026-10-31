@@ -1,3 +1,4 @@
+import ValidationSummary, { focusFirstInvalidField } from '../../../../design/ValidationSummary';
 import { PageContent, ActionButton, Panel, FieldGroup, Toolbar } from "../../../../design/Primitives";
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -168,13 +169,12 @@ function CreateGroup() {
     }
     setErrors(newErrors);
     if (Object.keys(newErrors).length) {
-      Object.values(newErrors).forEach(msg => toast.error(msg));
       return false;
     }
     return true;
   };
-  const handleNextPage = () => {
-    if (!validateForm()) return;
+  const handleNextPage = e => {
+    if (!validateForm()) { const form = e.currentTarget; requestAnimationFrame(() => focusFirstInvalidField(form)); return; }
     if (!isEditing) {
       fetchStudentsForCollege(formData.college_name);
     }
@@ -260,7 +260,7 @@ function CreateGroup() {
   const handleSubmit = async e => {
     e.preventDefault();
     if (formPage === 1) {
-      handleNextPage();
+      handleNextPage(e);
       return;
     }
     setLoading(true);
@@ -319,20 +319,21 @@ function CreateGroup() {
   };
   if (pageLoading) {
     return <PageContent className="create-page" view="CreateGroup">
-        <Toolbar className="cz-context-bar"></Toolbar>
+
         <div className="create-page-content">Loading group…</div>
       </PageContent>;
   }
-  return <PageContent className="create-page" view="CreateGroup">
-      <Toolbar className="cz-context-bar"><ActionButton className="btn-back" type="button" onClick={() => navigate('/admin/groups')}>
+  return <PageContent className="create-page" view="CreateGroup" backAction={<ActionButton variant="secondary" className="btn-back" type="button" onClick={() => navigate('/admin/groups')}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <polyline points="15 18 9 12 15 6"></polyline>
           </svg>
           Back
-        </ActionButton></Toolbar>
+        </ActionButton>}>
+
 
       <div className="create-page-content">
         <form onSubmit={handleSubmit} className="create-form">
+          <ValidationSummary errors={errors} />
           {formPage === 1 ? <>
               <Panel className="form-section">
                 <h2>Group Details</h2>
@@ -395,10 +396,10 @@ function CreateGroup() {
               </Panel>
 
               <div className="form-actions">
-                <ActionButton type="button" className="btn-secondary" onClick={() => navigate('/admin/groups')}>
+                <ActionButton variant="secondary" type="button" className="btn-secondary" onClick={() => navigate('/admin/groups')}>
                   Cancel
                 </ActionButton>
-                <ActionButton type="submit" className="btn-primary">
+                <ActionButton variant="primary" type="submit" className="btn-primary">
                   Next
                 </ActionButton>
               </div>
@@ -421,15 +422,15 @@ function CreateGroup() {
                         <span>Select All</span>
                       </label>}
                   </div>
-                  <input type="text" placeholder="Search students..." value={searchLeft} onChange={e => setSearchLeft(e.target.value)} className="search-input" />
+                  <input type="text" aria-label="Search available students" placeholder="Search students..." value={searchLeft} onChange={e => setSearchLeft(e.target.value)} className="search-input" />
                   <div className="student-list">
-                    {paginatedLeftStudents.map(student => <div key={student.id} className={`student-item ${selectedStudentIds.includes(student.id) ? 'selected' : ''}`} onClick={() => toggleStudentSelection(student.id)}>
-                        <input type="checkbox" aria-label={`Select ${student.name}`} checked={selectedStudentIds.includes(student.id)} onClick={e => e.stopPropagation()} onChange={() => toggleStudentSelection(student.id)} />
+                    {paginatedLeftStudents.map(student => <label key={student.id} className={`student-item ${selectedStudentIds.includes(student.id) ? 'selected' : ''}`}>
+                        <input type="checkbox" aria-label={`Select ${student.name}`} checked={selectedStudentIds.includes(student.id)} onChange={() => toggleStudentSelection(student.id)} />
                         <div>
                           <div className="student-name">{student.name}</div>
                           <div className="student-email">{student.email}</div>
                         </div>
-                      </div>)}
+                      </label>)}
                     {paginatedLeftStudents.length === 0 && <div className="empty-state">No students available</div>}
                   </div>
                   {filteredLeftStudents.length > 0 && <div className="student-list-pagination">
@@ -438,10 +439,10 @@ function CreateGroup() {
                 </div>
 
                 <div className="transfer-buttons">
-                  <ActionButton type="button" aria-label="Add selected students" className="btn-transfer" onClick={handleMoveToRight} disabled={selectedStudentIds.filter(sid => availableStudents.some(s => s.id === sid)).length === 0}>
+                  <ActionButton variant="secondary" type="button" aria-label="Add selected students" className="btn-transfer" onClick={handleMoveToRight} disabled={selectedStudentIds.filter(sid => availableStudents.some(s => s.id === sid)).length === 0}>
                     →
                   </ActionButton>
-                  <ActionButton type="button" aria-label="Remove selected students" className="btn-transfer" onClick={handleMoveToLeft} disabled={selectedStudentIds.filter(sid => groupStudents.some(s => s.id === sid)).length === 0}>
+                  <ActionButton variant="secondary" type="button" aria-label="Remove selected students" className="btn-transfer" onClick={handleMoveToLeft} disabled={selectedStudentIds.filter(sid => groupStudents.some(s => s.id === sid)).length === 0}>
                     ←
                   </ActionButton>
                 </div>
@@ -456,15 +457,15 @@ function CreateGroup() {
                         <span>Select All</span>
                       </label>}
                   </div>
-                  <input type="text" placeholder="Search students..." value={searchRight} onChange={e => setSearchRight(e.target.value)} className="search-input" />
+                  <input type="text" aria-label="Search selected students" placeholder="Search students..." value={searchRight} onChange={e => setSearchRight(e.target.value)} className="search-input" />
                   <div className="student-list">
-                    {paginatedRightStudents.map(student => <div key={student.id} className={`student-item ${selectedStudentIds.includes(student.id) ? 'selected' : ''}`} onClick={() => toggleStudentSelection(student.id)}>
-                        <input type="checkbox" aria-label={`Select ${student.name}`} checked={selectedStudentIds.includes(student.id)} onClick={e => e.stopPropagation()} onChange={() => toggleStudentSelection(student.id)} />
+                    {paginatedRightStudents.map(student => <label key={student.id} className={`student-item ${selectedStudentIds.includes(student.id) ? 'selected' : ''}`}>
+                        <input type="checkbox" aria-label={`Select ${student.name}`} checked={selectedStudentIds.includes(student.id)} onChange={() => toggleStudentSelection(student.id)} />
                         <div>
                           <div className="student-name">{student.name}</div>
                           <div className="student-email">{student.email}</div>
                         </div>
-                      </div>)}
+                      </label>)}
                     {paginatedRightStudents.length === 0 && <div className="empty-state">No students selected</div>}
                   </div>
                   {filteredRightStudents.length > 0 && <div className="student-list-pagination">
@@ -474,10 +475,10 @@ function CreateGroup() {
               </div>
 
               <div className="form-actions">
-                <ActionButton type="button" className="btn-secondary" onClick={handleBackToPage1}>
+                <ActionButton variant="secondary" type="button" className="btn-secondary" onClick={handleBackToPage1}>
                   Back
                 </ActionButton>
-                <ActionButton type="submit" className="btn-primary" disabled={loading}>
+                <ActionButton variant="primary" type="submit" className="btn-primary" disabled={loading}>
                   {loading ? isEditing ? 'Updating...' : 'Creating...' : isEditing ? 'Update Group' : 'Create Group'}
                 </ActionButton>
               </div>

@@ -173,13 +173,13 @@ function InstitutionDetail() {
         <div className="institution-detail-loading">Loading institution…</div>
       </PageContent>;
   }
-  return <PageContent className="create-page institution-detail-page" view="InstitutionDetail">
-      <Toolbar className="cz-context-bar"><ActionButton type="button" className="btn-back" onClick={() => navigate('/admin/institutions')}>
+  return <PageContent className="create-page institution-detail-page" view="InstitutionDetail" backAction={<ActionButton variant="secondary" type="button" className="btn-back" onClick={() => navigate('/admin/institutions')}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <polyline points="15 18 9 12 15 6"></polyline>
           </svg>
           Back
-        </ActionButton><strong>{institution.name}</strong>{!isEditing && <ActionButton type="button" className="btn-primary institution-detail-edit-btn" onClick={() => setIsEditing(true)}>
+        </ActionButton>}>
+      <Toolbar className="cz-context-bar"><strong>{institution.name}</strong>{!isEditing && <ActionButton variant="primary" type="button" className="btn-primary institution-detail-edit-btn" onClick={() => setIsEditing(true)}>
             Edit
           </ActionButton>}</Toolbar>
 
@@ -248,10 +248,10 @@ function InstitutionDetail() {
             </Panel>
 
             <div className="form-actions">
-              <ActionButton type="submit" className="btn-primary" disabled={saving}>
+              <ActionButton variant="primary" type="submit" className="btn-primary" disabled={saving}>
                 {saving ? 'Saving…' : 'Save changes'}
               </ActionButton>
-              <ActionButton type="button" className="btn-secondary" onClick={cancelEdit} disabled={saving}>
+              <ActionButton variant="secondary" type="button" className="btn-secondary" onClick={cancelEdit} disabled={saving}>
                 Cancel
               </ActionButton>
             </div>

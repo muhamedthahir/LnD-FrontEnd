@@ -556,7 +556,7 @@ function Users() {
     }} />}
 
       {showForm && <Panel className="user-form-card">
-          <div className="cz-form-title"><h2>Create New User</h2><ActionButton onClick={() => setShowForm(false)}>Cancel</ActionButton></div>
+          <div className="cz-form-title"><h2>Create New User</h2><ActionButton variant="secondary" onClick={() => setShowForm(false)}>Cancel</ActionButton></div>
           <form onSubmit={handleSubmit}>
             <FieldRow className="form-row">
               <FieldGroup className="form-group">
@@ -663,8 +663,8 @@ function Users() {
               </>}
 
             <div className="form-actions">
-              <ActionButton type="submit" className="btn-primary">Create User</ActionButton>
-              <ActionButton type="button" className="btn-secondary" onClick={() => setShowForm(false)}>
+              <ActionButton variant="primary" type="submit" className="btn-primary">Create User</ActionButton>
+              <ActionButton variant="secondary" type="button" className="btn-secondary" onClick={() => setShowForm(false)}>
                 Cancel
               </ActionButton>
             </div>
@@ -680,9 +680,9 @@ function Users() {
         display: 'flex',
         flexWrap: 'wrap',
         gap: 'var(--spacing-md)'
-      }}><ActionButton className="btn-secondary" onClick={() => setShowBulkResetModal(true)}>Bulk reset passwords</ActionButton><ActionButton className="btn-secondary" onClick={() => setShowBulkUploadModal(true)}>
+      }}><ActionButton variant="secondary" className="btn-secondary" onClick={() => setShowBulkResetModal(true)}>Bulk reset passwords</ActionButton><ActionButton variant="secondary" className="btn-secondary" onClick={() => setShowBulkUploadModal(true)}>
             + Add Users in Bulk
-          </ActionButton><ActionButton className="btn-primary" onClick={() => setShowForm(!showForm)}>
+          </ActionButton><ActionButton variant="primary" className="btn-primary" onClick={() => setShowForm(!showForm)}>
             {showForm ? 'Cancel' : '+ Create User'}
           </ActionButton></div></div>
               <FieldGroup className="filter-group users-filter-group">
@@ -693,7 +693,7 @@ function Users() {
                 <label>College</label>
                 <ThemedSelect name="college_filter" value={selectedCollege} onChange={e => setSelectedCollege(e.target.value)} size="compact" className="users-filter-select" options={filterCollegeOptions} />
               </FieldGroup>
-              {selectedCollege && <ActionButton onClick={() => setSelectedCollege('')} className="btn-clear-filters users-btn-clear-filters" title="Clear college filter">
+              {selectedCollege && <ActionButton variant="secondary" onClick={() => setSelectedCollege('')} className="btn-clear-filters users-btn-clear-filters" title="Clear college filter">
                   <svg viewBox="64 64 896 896" focusable="false" width="1em" height="1em" fill="currentColor" aria-hidden="true">
                     <path d="M899.1 869.6l-53-305.6H864c14.4 0 26-11.6 26-26V346c0-14.4-11.6-26-26-26H618V138c0-14.4-11.6-26-26-26H432c-14.4 0-26 11.6-26 26v182H160c-14.4 0-26 11.6-26 26v192c0 14.4 11.6 26 26 26h17.9l-53 305.6a25.95 25.95 0 0025.6 30.4h723c1.5 0 3-.1 4.4-.4a25.88 25.88 0 0021.2-30zM204 390h272V182h72v208h272v104H204V390zm468 440V674c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v156H416V674c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v156H202.8l45.1-260H776l45.1 260H672z"></path>
                   </svg>
@@ -714,7 +714,7 @@ function Users() {
                 </div>
                 <h3>No Users Found</h3>
                 <p>Get started by creating your first user or uploading users in bulk.</p>
-              </div> : <Table variant="embedded">
+              </div> : <Table aria-label="Users" stickyActions variant="embedded">
                 <thead>
                   <tr>
                     <th>Name</th>
@@ -745,7 +745,7 @@ function Users() {
                       </td>
                       <td>{new Date(u.created_at).toLocaleDateString()}</td>
                       <td>
-                        <ActionButton className="action-btn delete" type="button" onClick={() => handleDeleteClick(u.id)} disabled={u.role === 'primary_admin' || u.role === 'campuszen_admin' || u.id === user?.id} title={u.role === 'primary_admin' || u.role === 'campuszen_admin' || u.id === user?.id ? 'Cannot delete this user' : 'Delete User'}>
+                        <ActionButton variant="danger" className="action-btn delete" type="button" onClick={() => handleDeleteClick(u.id)} disabled={u.role === 'primary_admin' || u.role === 'campuszen_admin' || u.id === user?.id} title={u.role === 'primary_admin' || u.role === 'campuszen_admin' || u.id === user?.id ? 'Cannot delete this user' : 'Delete User'}>
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
                             <polyline points="3 6 5 6 21 6" />
                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
@@ -762,7 +762,7 @@ function Users() {
         </div>
       </div>}
 
-      {showEditModal && selectedUser && <DialogLayer className="modal-overlay" onClick={() => setShowEditModal(false)}>
+      {<DialogLayer open={Boolean(showEditModal && selectedUser)} className="modal-overlay" onClick={() => setShowEditModal(false)}>{Boolean(showEditModal && selectedUser) ? <>
           <DialogSurface className="modal-content" onClick={e => e.stopPropagation()}>
             <h2>Edit User Details</h2>
             <form onSubmit={handleEditSubmit}>
@@ -834,16 +834,16 @@ function Users() {
               </FieldGroup>
 
               <div className="form-actions">
-                <ActionButton type="submit" className="btn-primary">Update</ActionButton>
-                <ActionButton type="button" className="btn-secondary" onClick={() => setShowEditModal(false)}>
+                <ActionButton variant="primary" type="submit" className="btn-primary">Update</ActionButton>
+                <ActionButton variant="secondary" type="button" className="btn-secondary" onClick={() => setShowEditModal(false)}>
                   Cancel
                 </ActionButton>
               </div>
             </form>
           </DialogSurface>
-        </DialogLayer>}
+        </> : null}</DialogLayer>}
 
-      {showResetModal && selectedUser && <DialogLayer className="modal-overlay" onClick={() => setShowResetModal(false)}>
+      {<DialogLayer open={Boolean(showResetModal && selectedUser)} className="modal-overlay" onClick={() => setShowResetModal(false)}>{Boolean(showResetModal && selectedUser) ? <>
           <DialogSurface className="modal-content" onClick={e => e.stopPropagation()}>
             <h2>Reset Password</h2>
             <p>Reset password for {selectedUser.name}</p>
@@ -853,8 +853,8 @@ function Users() {
                 <input type="password" value={resetPassword} onChange={e => setResetPassword(e.target.value)} placeholder="Minimum 6 characters" required minLength={6} />
               </FieldGroup>
               <div className="form-actions">
-                <ActionButton type="submit" className="btn-primary">Reset Password</ActionButton>
-                <ActionButton type="button" className="btn-secondary" onClick={() => {
+                <ActionButton variant="primary" type="submit" className="btn-primary">Reset Password</ActionButton>
+                <ActionButton variant="secondary" type="button" className="btn-secondary" onClick={() => {
               setShowResetModal(false);
               setResetPassword('');
             }}>
@@ -863,9 +863,9 @@ function Users() {
               </div>
             </form>
           </DialogSurface>
-        </DialogLayer>}
+        </> : null}</DialogLayer>}
 
-      {showBulkUploadModal && <DialogLayer className="modal-overlay" onClick={() => {
+      {<DialogLayer open={Boolean(showBulkUploadModal)} className="modal-overlay" onClick={() => {
       setShowBulkUploadModal(false);
       setBulkUploadData({
         college_name: '',
@@ -875,7 +875,7 @@ function Users() {
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
-    }}>
+    }}>{Boolean(showBulkUploadModal) ? <>
           <DialogSurface className="modal-content bulk-upload-modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Add Users in Bulk</h2>
@@ -888,7 +888,7 @@ function Users() {
             </div>
               <FieldGroup className="form-group">
                 <label>Download Template</label>
-                <ActionButton type="button" className="btn-secondary" onClick={handleDownloadTemplate}>
+                <ActionButton variant="secondary" type="button" className="btn-secondary" onClick={handleDownloadTemplate}>
                   Download Excel Template
                 </ActionButton>
                 <small>The template includes: Name, Email, Roll Number, Department, Section, Degree</small>
@@ -916,7 +916,7 @@ function Users() {
                   ...prev,
                   file: e.target.files[0]
                 }))} hidden tabIndex={-1} />
-                  <ActionButton type="button" className="file-input-button" onClick={() => fileInputRef.current?.click()}>
+                  <ActionButton variant="secondary" type="button" className="file-input-button" onClick={() => fileInputRef.current?.click()}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                       <polyline points="17 8 12 3 7 8"></polyline>
@@ -933,10 +933,10 @@ function Users() {
             }}>
                 <p>Importing students: {uploadJob.progress?.processed || 0} of {uploadJob.progress?.total || '…'} processed; {uploadJob.progress?.created || 0} created.</p>
                 <p>You can close this window and return to Users to check progress.</p>
-                {uploadJob.error && <p role="alert">{uploadJob.error} <ActionButton type="button" className="btn-secondary" onClick={uploadJob.retry}>Check progress</ActionButton></p>}
+                {uploadJob.error && <p role="alert">{uploadJob.error} <ActionButton variant="secondary" type="button" className="btn-secondary" onClick={uploadJob.retry}>Check progress</ActionButton></p>}
               </div>}
               {bulkUploadResult && <div className={`bulk-upload-result ${bulkUploadResult.success ? 'success' : 'error'}`}>
-                  <ActionButton type="button" className="bulk-upload-close" onClick={() => setBulkUploadResult(null)} title="Close">
+                  <ActionButton variant="secondary" type="button" className="bulk-upload-close" onClick={() => setBulkUploadResult(null)} title="Close">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <line x1="18" y1="6" x2="6" y2="18"></line>
                       <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -956,7 +956,7 @@ function Users() {
                 </div>}
 
               <div className="modal-actions">
-                <ActionButton type="button" className="btn-secondary" onClick={() => {
+                <ActionButton variant="secondary" type="button" className="btn-secondary" onClick={() => {
                 setShowBulkUploadModal(false);
                 setBulkUploadData({
                   college_name: '',
@@ -969,14 +969,14 @@ function Users() {
               }}>
                   Cancel
                 </ActionButton>
-                <ActionButton type="submit" className="btn-primary" disabled={bulkUploadLoading || !!uploadJob.jobId}>
+                <ActionButton variant="primary" type="submit" className="btn-primary" disabled={bulkUploadLoading || !!uploadJob.jobId}>
                   {uploadJob.jobId ? 'Import in progress…' : bulkUploadLoading ? 'Uploading...' : 'Upload Users'}
                 </ActionButton>
               </div>
             </div>
             </form>
           </DialogSurface>
-        </DialogLayer>}
+        </> : null}</DialogLayer>}
 
       <ConfirmModal isOpen={showDeleteModal} onClose={handleDeleteCancel} onConfirm={handleDeleteConfirm} title="Delete User" message={selectedUser && isOnlyCollegeAdmin(selectedUser) ? `At least one college admin is required for "${selectedUser.college_name}".\n\nCannot delete ${selectedUser.name} as this institution must have at least one college admin.` : selectedUser ? `Are you sure you want to delete ${selectedUser.name}?\n This action cannot be undone.` : 'Are you sure you want to delete this user?\n This action cannot be undone.'} confirmText="Delete" cancelText="Cancel" errorMessage={deleteError} disabled={selectedUser && isOnlyCollegeAdmin(selectedUser)} />
     </PageContent>;

@@ -226,7 +226,7 @@ function DocumentViewer({
         return <div className={styles.pdfViewer}>
             <div className={styles.pdfControls}>
               <div className={styles.controlsLeft}>
-                <ActionButton onClick={goToPrevPage} disabled={pageNumber <= 1} className={styles.pdfBtn}>
+                <ActionButton variant="secondary" onClick={goToPrevPage} disabled={pageNumber <= 1} className={styles.pdfBtn}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polyline points="15 18 9 12 15 6" />
                   </svg>
@@ -234,13 +234,13 @@ function DocumentViewer({
                 <span className={styles.pageInfo}>
                   Page {pageNumber} of {numPages || '...'}
                 </span>
-                <ActionButton onClick={goToNextPage} disabled={pageNumber >= (numPages || 1)} className={styles.pdfBtn}>
+                <ActionButton variant="secondary" onClick={goToNextPage} disabled={pageNumber >= (numPages || 1)} className={styles.pdfBtn}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
                 </ActionButton>
                 <div className={styles.zoomControls}>
-                  <ActionButton onClick={zoomOut} className={styles.pdfBtn}>
+                  <ActionButton variant="secondary" onClick={zoomOut} className={styles.pdfBtn}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <circle cx="11" cy="11" r="8" />
                       <line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -248,7 +248,7 @@ function DocumentViewer({
                     </svg>
                   </ActionButton>
                   <span className={styles.zoomLevel}>{Math.round(scale * 100)}%</span>
-                  <ActionButton onClick={zoomIn} className={styles.pdfBtn}>
+                  <ActionButton variant="secondary" onClick={zoomIn} className={styles.pdfBtn}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <circle cx="11" cy="11" r="8" />
                       <line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -275,7 +275,7 @@ function DocumentViewer({
                         <polyline points="20 6 9 17 4 12" />
                       </svg>
                       <span>Completed</span>
-                    </div> : <ActionButton className={styles.btnMarkCompleteHeader} onClick={handleMarkComplete} title="Mark as done">
+                    </div> : <ActionButton variant="secondary" className={styles.btnMarkCompleteHeader} onClick={handleMarkComplete} title="Mark as done">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <polyline points="20 6 9 17 4 12" />
                       </svg>
@@ -302,7 +302,7 @@ function DocumentViewer({
                       <polyline points="20 6 9 17 4 12" />
                     </svg>
                     <span>Completed</span>
-                  </div> : <ActionButton className={styles.btnMarkCompleteHeader} onClick={handleMarkComplete} title="Mark as done">
+                  </div> : <ActionButton variant="secondary" className={styles.btnMarkCompleteHeader} onClick={handleMarkComplete} title="Mark as done">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <polyline points="20 6 9 17 4 12" />
                     </svg>
@@ -321,7 +321,7 @@ function DocumentViewer({
                       <polyline points="20 6 9 17 4 12" />
                     </svg>
                     <span>Completed</span>
-                  </div> : <ActionButton className={styles.btnMarkCompleteHeader} onClick={handleMarkComplete} title="Mark as done">
+                  </div> : <ActionButton variant="secondary" className={styles.btnMarkCompleteHeader} onClick={handleMarkComplete} title="Mark as done">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <polyline points="20 6 9 17 4 12" />
                     </svg>
@@ -342,7 +342,7 @@ function DocumentViewer({
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                   <span>Completed</span>
-                </div> : <ActionButton className={styles.btnMarkCompleteHeader} onClick={handleMarkComplete} title="Mark as done">
+                </div> : <ActionButton variant="secondary" className={styles.btnMarkCompleteHeader} onClick={handleMarkComplete} title="Mark as done">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
@@ -368,7 +368,7 @@ function DocumentViewer({
     return <div className={`${styles.container} ${styles.viewerMode}`}>
         {}
         {documents.length > 1 && <div className={styles.tabs}>
-            {documents.map((doc, index) => <ActionButton key={index} className={`${styles.tab} ${activeDocIndex === index ? styles.active : ''}`} onClick={() => {
+            {documents.map((doc, index) => <ActionButton variant="secondary" key={index} className={`${styles.tab} ${activeDocIndex === index ? styles.active : ''}`} onClick={() => {
           setActiveDocIndex(index);
           setLoading(true);
           setError(false);
@@ -445,7 +445,7 @@ function TextFileViewer({
       </div>;
   }
   return <div className={styles.textViewer}>
-      <pre>{content}</pre>
+      <pre tabIndex={0}>{content}</pre>
     </div>;
 }
 export default DocumentViewer;

@@ -10,3 +10,7 @@
 @import './design/admin.css';
 
 @import './design/assessment-workspace.css';
+@import './design/motion.css';
+
+/* Final shared geometry/state policy, after legacy feature overrides. */
+@import './design/foundations.css';

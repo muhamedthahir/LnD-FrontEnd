@@ -93,12 +93,12 @@ function AssessmentConfigurations() {
         </div>
       </PageContent>;
   }
-  return <PageContent className={styles.configurationsPage} view="AssessmentConfigurations">
-      <Toolbar className="cz-context-bar"><div className={styles.headerLeft}><ActionButton className={styles.backBtn} onClick={() => navigate(`/admin/assessments/${id}/edit`)}>
+  return <PageContent className={styles.configurationsPage} view="AssessmentConfigurations" backAction={<ActionButton variant="secondary" className={styles.backBtn} onClick={() => navigate(`/admin/assessments/${id}/edit`)}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
               <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
-          </ActionButton><div><span className={styles.breadcrumb}>{assessment?.title}</span></div></div><Button variant="primary" onClick={() => navigate(`/admin/assessments/${id}/configurations/create`)}>
+          </ActionButton>}>
+      <Toolbar className="cz-context-bar"><div className={styles.headerLeft}><div><span className={styles.breadcrumb}>{assessment?.title}</span></div></div><Button variant="primary" onClick={() => navigate(`/admin/assessments/${id}/configurations/create`)}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
             <path d="M12 5v14M5 12h14" />
           </svg>
@@ -146,13 +146,13 @@ function AssessmentConfigurations() {
               </div>
 
               <div className={styles.configActions}>
-                <ActionButton className={styles.actionBtn} onClick={() => navigate(`/admin/assessments/${id}/configurations/create?edit=${config.id}`)} title="Edit">
+                <ActionButton variant="secondary" className={styles.actionBtn} onClick={() => navigate(`/admin/assessments/${id}/configurations/create?edit=${config.id}`)} title="Edit">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                   </svg>
                 </ActionButton>
-                <ActionButton className={styles.actionBtn} onClick={() => navigate(`/admin/assessments/administrators/${config.id}/users`)} title="Manage Users">
+                <ActionButton variant="secondary" className={styles.actionBtn} onClick={() => navigate(`/admin/assessments/administrators/${config.id}/users`)} title="Manage Users">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                     <circle cx="9" cy="7" r="4" />
@@ -160,7 +160,7 @@ function AssessmentConfigurations() {
                     <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                   </svg>
                 </ActionButton>
-                <ActionButton className={`${styles.actionBtn} ${styles.delete}`} onClick={() => handleDeleteConfig(config.id)} title="Delete">
+                <ActionButton variant="danger" className={`${styles.actionBtn} ${styles.delete}`} onClick={() => handleDeleteConfig(config.id)} title="Delete">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
                     <polyline points="3 6 5 6 21 6" />
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />

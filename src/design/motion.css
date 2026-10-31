@@ -1,0 +1,26 @@
+/* Short spatial transitions for overlays; assessment timing and typing stay immediate. */
+.cz-dialog-layer { opacity: 1; transition: opacity var(--duration-menu) var(--ease-out); }
+.cz-dialog-layer > .cz-dialog { transform: translateY(0) scale(1); transition: transform var(--duration-normal) var(--ease-out); transform-origin: center; }
+.cz-dialog-layer[data-state=closed] { opacity: 0; pointer-events: none; }
+.cz-dialog-layer[data-state=closed] > .cz-dialog { transform: translateY(.5rem) scale(.97); }
+.cz-navigation-layer .cz-navigation { transform: translateX(0); transition: transform var(--duration-slow) var(--ease-drawer); }
+.cz-navigation-layer { transition-duration: 400ms; }
+.cz-navigation-layer .cz-navigation { touch-action: pan-y; }
+.cz-navigation-layer[data-state=closed] .cz-navigation { transform: translateX(-100%); }
+@starting-style {
+  .cz-dialog-layer { opacity: 0; }
+  .cz-dialog-layer > .cz-dialog { transform: translateY(.5rem) scale(.97); }
+  .cz-navigation-layer .cz-navigation { transform: translateX(-100%); }
+}
+.cz-combobox-menu,.cz-account-popover { transform-origin: top; animation: cz-disclosure-in var(--duration-menu) var(--ease-out); }
+.cz-combobox-menu[data-side=top] { transform-origin: bottom; }
+.cz-combobox-menu[data-input=keyboard],.cz-account-popover[data-input=keyboard] { animation: none; }
+@keyframes cz-disclosure-in { from { opacity: 0; transform: scale(.98); } to { opacity: 1; transform: scale(1); } }
+@media (hover: hover) and (pointer: fine) {
+  .cz-button:active:not(:disabled):not(:focus-visible) { transform: scale(.98); }
+  .cz-button { transition: background var(--transition-fast),border-color var(--transition-fast),transform var(--transition-fast); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cz-dialog-layer,.cz-dialog-layer > .cz-dialog,.cz-navigation-layer .cz-navigation,.cz-button { transition: none; }
+  .cz-dialog-layer > .cz-dialog,.cz-button:active { transform: none !important; }
+}

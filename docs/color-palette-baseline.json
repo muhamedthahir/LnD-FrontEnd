@@ -1,6 +1,6 @@
 {
-  "date": "2026-10-12",
-  "source": "src/index.css",
+  "date": "2026-10-30",
+  "source": "src/design/tokens/colors.css",
   "themes": {
     "light": [
       {
@@ -131,9 +131,9 @@
       },
       {
         "token": "--text-muted",
-        "value": "#8590ab",
+        "value": "#5a6787",
         "colors": [
-          "#8590ab"
+          "#5a6787"
         ]
       },
       {
@@ -159,9 +159,9 @@
       },
       {
         "token": "--error",
-        "value": "#d93a4a",
+        "value": "#b42336",
         "colors": [
-          "#d93a4a"
+          "#b42336"
         ]
       },
       {
@@ -173,9 +173,9 @@
       },
       {
         "token": "--success",
-        "value": "#12996b",
+        "value": "#066b4d",
         "colors": [
-          "#12996b"
+          "#066b4d"
         ]
       },
       {
@@ -187,9 +187,9 @@
       },
       {
         "token": "--warning",
-        "value": "#cf7d0a",
+        "value": "#874e00",
         "colors": [
-          "#cf7d0a"
+          "#874e00"
         ]
       },
       {
@@ -499,9 +499,9 @@
       },
       {
         "token": "--text-muted",
-        "value": "#67739a",
+        "value": "#8895b8",
         "colors": [
-          "#67739a"
+          "#8895b8"
         ]
       },
       {
@@ -735,5 +735,6 @@
         ]
       }
     ]
-  }
+  },
+  "note": "Approved Phase 1: accessible semantic status/muted foregrounds; original signal colors retained as --signal-*."
 }

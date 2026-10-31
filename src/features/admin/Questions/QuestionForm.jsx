@@ -521,20 +521,20 @@ function QuestionForm() {
         <div className="loading-state">Loading question...</div>
       </PageContent>;
   }
-  return <PageContent className="question-form-page" view="QuestionForm">
-      <Toolbar className="cz-context-bar"><div><ActionButton type="button" className="btn-secondary back-btn" onClick={() => navigate(getBackPath())}>
+  return <PageContent className="question-form-page" view="QuestionForm" backAction={<ActionButton variant="secondary" type="button" className="btn-secondary back-btn" onClick={() => navigate(getBackPath())}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <polyline points="15 18 9 12 15 6" />
             </svg>
             {returnTo ? 'Back to Assessment' : 'Back to Questions'}
-          </ActionButton></div></Toolbar>
+          </ActionButton>}>
+
 
       {}
       {step === 1 && !isEditing && <Panel className="form-card type-selection-card">
           <h2>Select Question Type</h2>
           <p>Choose the type of question you want to create</p>
           <div className="type-cards">
-            {masterData.questionTypes.map(type => <ActionButton key={type.id} type="button" className="type-card" onClick={() => handleTypeSelect(type.id)}>
+            {masterData.questionTypes.map(type => <ActionButton variant="secondary" key={type.id} type="button" className="type-card" onClick={() => handleTypeSelect(type.id)}>
                 <div className="type-icon">
                   {type.name === 'MCQ' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <circle cx="12" cy="12" r="10" />
@@ -593,7 +593,7 @@ function QuestionForm() {
                       <p>Upload multiple MCQ questions at once using an Excel template</p>
                     </div>
                     <div className="bulk-upload-actions">
-                      <ActionButton type="button" className="btn-secondary" onClick={() => handleDownloadTemplate('mcq')}>
+                      <ActionButton variant="secondary" type="button" className="btn-secondary" onClick={() => handleDownloadTemplate('mcq')}>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                           <polyline points="7 10 12 15 17 10"></polyline>
@@ -601,7 +601,7 @@ function QuestionForm() {
                         </svg>
                         Download Template
                       </ActionButton>
-                      <ActionButton type="button" className="btn-secondary" onClick={() => openBulkUploadModal('mcq')}>
+                      <ActionButton variant="secondary" type="button" className="btn-secondary" onClick={() => openBulkUploadModal('mcq')}>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                           <polyline points="17 8 12 3 7 8"></polyline>
@@ -624,7 +624,7 @@ function QuestionForm() {
                       <p>Upload multiple programming questions at once using an Excel template</p>
                     </div>
                     <div className="bulk-upload-actions">
-                      <ActionButton type="button" className="btn-secondary" onClick={() => handleDownloadTemplate('programming')}>
+                      <ActionButton variant="secondary" type="button" className="btn-secondary" onClick={() => handleDownloadTemplate('programming')}>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                           <polyline points="7 10 12 15 17 10"></polyline>
@@ -632,7 +632,7 @@ function QuestionForm() {
                         </svg>
                         Download Template
                       </ActionButton>
-                      <ActionButton type="button" className="btn-secondary" onClick={() => openBulkUploadModal('programming')}>
+                      <ActionButton variant="secondary" type="button" className="btn-secondary" onClick={() => openBulkUploadModal('programming')}>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                           <polyline points="17 8 12 3 7 8"></polyline>
@@ -821,14 +821,14 @@ function QuestionForm() {
                                   <polyline points="16 18 22 12 16 6" />
                                   <polyline points="8 6 2 12 8 18" />
                                 </svg>
-                                {langName}
+                                <button type="button" className="cz-disclosure-title" aria-expanded={Boolean(isExpanded)} onClick={event => { event.stopPropagation(); toggleTemplateExpand(langId) }}>{langName}</button>
                               </span>
                               <span className="template-status">
                                 {template.template_code ? 'Template configured' : 'No template'}
                               </span>
                             </div>
                             <div className="template-actions">
-                              {DEFAULT_CODE_TEMPLATES[langKey] && <ActionButton type="button" className="btn-reset" onClick={e => {
+                              {DEFAULT_CODE_TEMPLATES[langKey] && <ActionButton variant="secondary" type="button" className="btn-reset" onClick={e => {
                       e.stopPropagation();
                       resetTemplateToDefault(langId);
                     }} title="Reset to default template">
@@ -866,7 +866,7 @@ function QuestionForm() {
               <Panel className="form-section">
                 <div className="section-header">
                   <h2>Answer Options</h2>
-                  <ActionButton type="button" className="btn-secondary btn-sm" onClick={addOption}>
+                  <ActionButton variant="secondary" type="button" className="btn-secondary btn-sm" onClick={addOption}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <line x1="12" y1="5" x2="12" y2="19" />
                       <line x1="5" y1="12" x2="19" y2="12" />
@@ -906,7 +906,7 @@ function QuestionForm() {
 
           {}
           <div className="form-actions-bar">
-            {step > 2 && <ActionButton type="button" className="btn-secondary" onClick={e => {
+            {step > 2 && <ActionButton variant="secondary" type="button" className="btn-secondary" onClick={e => {
           e.preventDefault();
           setStep(step - 1);
         }}>
@@ -916,11 +916,11 @@ function QuestionForm() {
                 Previous
               </ActionButton>}
             <div className="actions-right">
-              <ActionButton type="button" className="btn-secondary" onClick={() => navigate(getBackPath())}>
+              <ActionButton variant="secondary" type="button" className="btn-secondary" onClick={() => navigate(getBackPath())}>
                 Cancel
               </ActionButton>
 
-              {(isProgramming() || isMCQ()) && step === 2 ? <ActionButton type="button" className="btn-primary" onClick={e => {
+              {(isProgramming() || isMCQ()) && step === 2 ? <ActionButton variant="primary" type="button" className="btn-primary" onClick={e => {
             e.preventDefault();
             e.stopPropagation();
             setStep(3);
@@ -929,7 +929,7 @@ function QuestionForm() {
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
-                </ActionButton> : <ActionButton type="submit" className="btn-primary" disabled={saving}>
+                </ActionButton> : <ActionButton variant="primary" type="submit" className="btn-primary" disabled={saving}>
                   {saving ? 'Saving...' : isEditing ? 'Update Question' : 'Create Question'}
                 </ActionButton>}
             </div>
@@ -937,7 +937,7 @@ function QuestionForm() {
         </form>}
 
       {}
-      {showBulkUploadModal && <DialogLayer className="modal-overlay" onClick={closeBulkUploadModal}>
+      {<DialogLayer open={Boolean(showBulkUploadModal)} className="modal-overlay" onClick={closeBulkUploadModal}>{Boolean(showBulkUploadModal) ? <>
           <DialogSurface className="modal-content bulk-upload-modal" onClick={e => e.stopPropagation()}>
             <h2>{bulkUploadType === 'programming' ? 'Bulk Upload Programming Questions' : 'Bulk Upload MCQ Questions'}</h2>
 
@@ -968,7 +968,7 @@ function QuestionForm() {
                 <label>Upload Excel File *</label>
                 <div className="file-input-wrapper">
                   <input ref={fileInputRef} type="file" accept=".xlsx,.xls" onChange={e => { setBulkUploadFile(e.target.files[0] || null); setBulkUploadResult(null); }} hidden tabIndex={-1} />
-                  <ActionButton type="button" className="file-input-button" onClick={() => fileInputRef.current?.click()}>
+                  <ActionButton variant="secondary" type="button" className="file-input-button" onClick={() => fileInputRef.current?.click()}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                       <polyline points="17 8 12 3 7 8"></polyline>
@@ -981,7 +981,7 @@ function QuestionForm() {
               </FieldGroup>
 
               {bulkUploadResult && <div className={`bulk-upload-result ${bulkUploadResult.success ? 'success' : 'error'}`}>
-                  <ActionButton className="bulk-upload-close" onClick={() => setBulkUploadResult(null)} title="Close">
+                  <ActionButton variant="secondary" className="bulk-upload-close" onClick={() => setBulkUploadResult(null)} title="Close">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <line x1="18" y1="6" x2="6" y2="18"></line>
                       <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -1002,16 +1002,16 @@ function QuestionForm() {
                 </div>}
 
               <div className="modal-actions">
-                <ActionButton type="button" className="btn-secondary" onClick={closeBulkUploadModal}>
+                <ActionButton variant="secondary" type="button" className="btn-secondary" onClick={closeBulkUploadModal}>
                   {bulkUploadResult?.created > 0 ? 'Done' : 'Cancel'}
                 </ActionButton>
-                <ActionButton type="submit" className="btn-primary" disabled={bulkUploadLoading || !bulkUploadFile || bulkUploadResult?.success}>
+                <ActionButton variant="primary" type="submit" className="btn-primary" disabled={bulkUploadLoading || !bulkUploadFile || bulkUploadResult?.success}>
                   {bulkUploadLoading ? 'Uploading...' : 'Upload Questions'}
                 </ActionButton>
               </div>
             </form>
           </DialogSurface>
-        </DialogLayer>}
+        </> : null}</DialogLayer>}
     </PageContent>;
 }
 export default QuestionForm;

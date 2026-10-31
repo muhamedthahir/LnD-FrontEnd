@@ -316,7 +316,7 @@ function MailerTemplates() {
       <div className="users-table-card mailer-templates-table-card">
         <div className="table-container">
           <div className="mailer-filters-section">
-            <div className="mailer-filters"><div className="cz-filter-actions"><ActionButton className="btn-primary" onClick={() => {
+            <div className="mailer-filters"><div className="cz-filter-actions"><ActionButton variant="primary" className="btn-primary" onClick={() => {
         setShowForm(!showForm);
         resetForm();
       }}>
@@ -334,7 +334,7 @@ function MailerTemplates() {
                 <label htmlFor="mailer-status-trigger">Status</label>
                 <ThemedSelect id="mailer-status-trigger" name="mailer_status_filter" value={activeFilter} onChange={e => setActiveFilter(e.target.value)} size="compact" className="mailer-filter-select mailer-filter-themed" options={STATUS_FILTER_OPTIONS} />
               </FieldGroup>
-              {(search || typeFilter || activeFilter) && <ActionButton type="button" onClick={() => {
+              {(search || typeFilter || activeFilter) && <ActionButton variant="secondary" type="button" onClick={() => {
               setSearch('');
               setTypeFilter('');
               setActiveFilter('');
@@ -354,7 +354,7 @@ function MailerTemplates() {
                 </div>
                 <h3>No Templates Found</h3>
                 <p>Get started by creating your first email template.</p>
-              </div> : <Table className="mailer-templates-table">
+              </div> : <Table aria-label="Mailer Templates" stickyActions className="mailer-templates-table">
                 <thead>
                   <tr>
                     <th>Name</th>
@@ -391,24 +391,24 @@ function MailerTemplates() {
                       <td className="usage-cell">{template.usage_count || 0}</td>
                       <td className="actions-cell">
                         <div className="action-buttons">
-                          <ActionButton className="btn-icon" onClick={() => handleView(template)} title="View">
+                          <ActionButton variant="secondary" className="btn-icon" onClick={() => handleView(template)} title="View">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                               <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                               <circle cx="12" cy="12" r="3" />
                             </svg>
                           </ActionButton>
-                          <ActionButton className="btn-icon" onClick={() => handlePreview(template)} title="Preview">
+                          <ActionButton variant="secondary" className="btn-icon" onClick={() => handlePreview(template)} title="Preview">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                               <polygon points="5 3 19 12 5 21 5 3" />
                             </svg>
                           </ActionButton>
-                          <ActionButton className="btn-icon" onClick={() => handleEdit(template)} title="Edit">
+                          <ActionButton variant="secondary" className="btn-icon" onClick={() => handleEdit(template)} title="Edit">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                             </svg>
                           </ActionButton>
-                          <ActionButton className="btn-icon" onClick={() => handleToggleActive(template)} title={template.is_active ? 'Deactivate' : 'Activate'}>
+                          <ActionButton variant="secondary" className="btn-icon" onClick={() => handleToggleActive(template)} title={template.is_active ? 'Deactivate' : 'Activate'}>
                             {template.is_active ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M18.36 6.64a9 9 0 1 1-12.73 0" />
                                 <line x1="12" y1="2" x2="12" y2="12" />
@@ -417,7 +417,7 @@ function MailerTemplates() {
                                 <polyline points="12 6 12 12 16 14" />
                               </svg>}
                           </ActionButton>
-                          <ActionButton className="btn-icon delete" onClick={() => handleDelete(template)} title="Delete">
+                          <ActionButton variant="danger" className="btn-icon delete" onClick={() => handleDelete(template)} title="Delete">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                               <polyline points="3 6 5 6 21 6" />
                               <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
@@ -437,10 +437,10 @@ function MailerTemplates() {
       </div>
 
       {}
-      {showPreviewModal && previewTemplate && <DialogLayer className="modal-overlay" onClick={() => {
+      {<DialogLayer open={Boolean(showPreviewModal && previewTemplate)} className="modal-overlay" onClick={() => {
       setShowPreviewModal(false);
       setPreviewTemplate(null);
-    }}>
+    }}>{Boolean(showPreviewModal && previewTemplate) ? <>
           <DialogSurface className="modal-content preview-modal" onClick={e => e.stopPropagation()}>
             <h2>Preview Template</h2>
 
@@ -456,7 +456,7 @@ function MailerTemplates() {
                     </FieldGroup>)}
                 </div>
               </div>}
-            <ActionButton type="button" className="btn-primary" onClick={() => renderPreview()}>Render Preview</ActionButton>
+            <ActionButton variant="primary" type="button" className="btn-primary" onClick={() => renderPreview()}>Render Preview</ActionButton>
 
             {renderedPreview && <div className="rendered-preview">
                 <div className="preview-section">
@@ -472,13 +472,13 @@ function MailerTemplates() {
               </div>}
 
             <div className="form-actions mailer-preview-actions">
-              <ActionButton type="button" className="btn-secondary" onClick={() => {
+              <ActionButton variant="secondary" type="button" className="btn-secondary" onClick={() => {
             setShowPreviewModal(false);
             setPreviewTemplate(null);
           }}>Close</ActionButton>
             </div>
           </DialogSurface>
-        </DialogLayer>}
+        </> : null}</DialogLayer>}
       <ConfirmDialog />
     </PageContent>;
 }

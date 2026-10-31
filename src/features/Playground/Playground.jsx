@@ -1,3 +1,4 @@
+import ResizeHandle from '../../design/ResizeHandle';
 import ThemeSwitch from '../../design/ThemeSwitch';
 import { ActionButton, PageContent } from "../../design/Primitives";
 import { createViewStyles } from "../../design/viewStyles";
@@ -225,25 +226,6 @@ ${js}
       setPreviewWidthPx(Math.round(previewRef.current.getBoundingClientRect().width));
     }
   }, []);
-  const handleMouseMove = useCallback(e => {
-    if (!workspaceRef.current) return;
-    const rect = workspaceRef.current.getBoundingClientRect();
-    const newLeft = (e.clientX - rect.left) / rect.width * 100;
-    if (newLeft >= 15 && newLeft <= 85) {
-      setLeftWidth(newLeft);
-    }
-  }, []);
-  const stopDragging = useCallback(() => {
-    setIsDragging(false);
-    document.removeEventListener('mousemove', handleMouseMove);
-    document.removeEventListener('mouseup', stopDragging);
-  }, [handleMouseMove]);
-  const startDragging = useCallback(e => {
-    e.preventDefault();
-    setIsDragging(true);
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', stopDragging);
-  }, [handleMouseMove, stopDragging]);
   useEffect(() => {
     updatePreviewWidth();
   }, [leftWidth, sidebarOpen, updatePreviewWidth]);
@@ -363,40 +345,40 @@ ${js}
           {sidebarOpen ? <>
               <div className={styles.sidebarHeader}>
                 <span className={styles.sidebarTitle}>Playgrounds</span>
-                <ActionButton className={styles.iconBtn} title="Collapse sidebar" onClick={() => setSidebarOpen(false)}>
+                <ActionButton variant="secondary" className={styles.iconBtn} title="Collapse sidebar" onClick={() => setSidebarOpen(false)}>
                   «
                 </ActionButton>
               </div>
-              <ActionButton className={styles.newBtn} onClick={handleNew}>
+              <ActionButton variant="secondary" className={styles.newBtn} onClick={handleNew}>
                 + New Exercise
               </ActionButton>
-              <input className={styles.searchInput} type="text" placeholder="Search saved…" value={search} onChange={e => setSearch(e.target.value)} />
-              <div className={styles.projectList}>
-                {!accessToken ? <div className={styles.emptyNote}>Log in to save and view your playgrounds.</div> : projects.length === 0 ? <div className={styles.emptyNote}>No saved playgrounds yet.</div> : projects.map(p => <div key={p.id} className={`${styles.projectItem} ${p.id === projectId ? styles.projectItemActive : ''}`} onClick={() => openProject(p.id)}>
-                      <div className={styles.projectInfo}>
+              <input aria-label="Search saved playgrounds" className={styles.searchInput} type="text" placeholder="Search saved…" value={search} onChange={e => setSearch(e.target.value)} />
+              <div className={styles.projectList} tabIndex={0} role="region" aria-label="Saved playgrounds">
+                {!accessToken ? <div className={styles.emptyNote}>Log in to save and view your playgrounds.</div> : projects.length === 0 ? <div className={styles.emptyNote}>No saved playgrounds yet.</div> : projects.map(p => <div key={p.id} className={`${styles.projectItem} ${p.id === projectId ? styles.projectItemActive : ''}`} >
+                      <button type="button" className={styles.projectInfo} onClick={() => openProject(p.id)}>
                         <div className={styles.projectName}>{p.title}</div>
                         <div className={styles.projectDate}>{formatDate(p.updated_at)}</div>
-                      </div>
-                      <ActionButton className={styles.deleteBtn} title="Delete" onClick={e => handleDelete(p.id, e)}>
+                      </button>
+                      <ActionButton variant="danger" className={styles.deleteBtn} title="Delete" onClick={e => handleDelete(p.id, e)}>
                         ✕
                       </ActionButton>
                     </div>)}
               </div>
-            </> : <ActionButton className={styles.expandBtn} title="Expand sidebar" onClick={() => setSidebarOpen(true)}>
+            </> : <ActionButton variant="secondary" className={styles.expandBtn} title="Expand sidebar" onClick={() => setSidebarOpen(true)}>
               »
             </ActionButton>}
         </div>}
 
       {}
       <div className={styles.mainArea}>
-        <div className={styles.toolbar}>
+        <div className={styles.toolbar}><h1 className="cz-session-title">Playground</h1>
           {shareMode && <span className={styles.shareBadge}>Shared copy — edits won&apos;t affect the original</span>}
-          <input className={styles.titleInput} type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="Untitled" />
+          <input aria-label="Playground title" className={styles.titleInput} type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="Untitled" />
           <div className={styles.toolbarActions}><ThemeSwitch />
-            <ActionButton className={styles.saveBtn} onClick={handleSave} disabled={saving}>
+            <ActionButton variant="primary" className={styles.saveBtn} onClick={handleSave} disabled={saving}>
               {saving ? 'Saving…' : shareMode ? 'Save a copy' : 'Save'}
             </ActionButton>
-            <ActionButton className={styles.shareBtn} onClick={handleShare} disabled={saving}>
+            <ActionButton variant="secondary" className={styles.shareBtn} onClick={handleShare} disabled={saving}>
               Share
             </ActionButton>
           </div>
@@ -406,8 +388,8 @@ ${js}
           <div className={styles.editorPane} style={{
           width: `${leftWidth}%`
         }}>
-            <div className={styles.tabBar}>
-              {TABS.map(tab => <button key={tab.key} className={`${styles.tab} ${activeTab === tab.key ? styles.tabActive : ''}`} onClick={() => setActiveTab(tab.key)}>
+            <div className={styles.tabBar} role="group" aria-label="Editor language">
+              {TABS.map(tab => <button key={tab.key} className={`${styles.tab} ${activeTab === tab.key ? styles.tabActive : ''}`} aria-pressed={activeTab === tab.key} type="button" onClick={() => setActiveTab(tab.key)}>
                   {tab.label}
                 </button>)}
             </div>
@@ -426,12 +408,12 @@ ${js}
 
             <div className={`${styles.console} ${consoleOpen ? styles.consoleOpen : ''}`}>
               <div className={styles.consoleHeader}>
-                <ActionButton className={styles.consoleToggle} onClick={() => setConsoleOpen(o => !o)}>
+                <ActionButton variant="secondary" className={styles.consoleToggle} onClick={() => setConsoleOpen(o => !o)}>
                   <span className={`${styles.chevron} ${consoleOpen ? styles.chevronUp : ''}`}>▸</span>
                   Console
                   {logs.length > 0 && <span className={styles.logBadge}>{logs.length}</span>}
                 </ActionButton>
-                {consoleOpen && logs.length > 0 && <ActionButton className={styles.clearBtn} onClick={() => setLogs([])}>Clear</ActionButton>}
+                {consoleOpen && logs.length > 0 && <ActionButton variant="secondary" className={styles.clearBtn} onClick={() => setLogs([])}>Clear</ActionButton>}
               </div>
               {consoleOpen && <div className={styles.consoleBody}>
                   {logs.length === 0 ? <div className={styles.consoleEmpty}>Console output will appear here…</div> : logs.map(log => <div key={log.id} className={`${styles.logLine} ${styles[`log_${log.level}`] || ''}`}>
@@ -441,9 +423,9 @@ ${js}
             </div>
           </div>
 
-          <div className={`${styles.resizer} ${isDragging ? styles.resizerActive : ''}`} onMouseDown={startDragging}>
+          <ResizeHandle containerRef={workspaceRef} value={leftWidth} onChange={setLeftWidth} min={15} max={85} label="Resize editor and preview" className={`${styles.resizer} ${isDragging ? styles.resizerActive : ''}`} onDraggingChange={setIsDragging}>
             <div className={styles.resizerGrip} />
-          </div>
+          </ResizeHandle>
 
           <div className={styles.previewPane} style={{
           width: `${100 - leftWidth}%`

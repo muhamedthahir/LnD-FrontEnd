@@ -197,14 +197,14 @@ function CourseAssessment() {
   }
   const currentQuestion = assessmentQuestions[currentQuestionIndex];
   if (!started) {
-    return <PageContent className="course-assessment-page" view="CourseAssessment">
-        <div className="assessment-intro">
-          <ActionButton className="btn-back" onClick={handleBackToCourse}>
+    return <PageContent className="course-assessment-page" view="CourseAssessment" backAction={<ActionButton variant="secondary" className="btn-back" onClick={handleBackToCourse}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
             Back to Course
-          </ActionButton>
+          </ActionButton>} title={<>{segment?.name || segment?.title || 'Assessment'}</>}>
+        <div className="assessment-intro">
+
 
           <Panel className="intro-card">
             <div className="intro-icon">
@@ -216,7 +216,7 @@ function CourseAssessment() {
               </svg>
             </div>
 
-            <h1>{segment?.name || segment?.title || 'Assessment'}</h1>
+
             {segment?.description && <p className="intro-description">{segment.description}</p>}
 
             <div className="intro-info">
@@ -248,7 +248,7 @@ function CourseAssessment() {
               </ul>
             </div>
 
-            <ActionButton className="btn-start-assessment" onClick={handleStartAssessment}>
+            <ActionButton variant="primary" className="btn-start-assessment" onClick={handleStartAssessment}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <polygon points="5 3 19 12 5 21 5 3" />
               </svg>
@@ -259,14 +259,14 @@ function CourseAssessment() {
       </PageContent>;
   }
   if (submittedAssessment && assessmentResults) {
-    return <PageContent className="course-assessment-page" view="CourseAssessment">
-        <div className="assessment-results">
-          <ActionButton className="btn-back" onClick={handleBackToCourse}>
+    return <PageContent className="course-assessment-page" view="CourseAssessment" backAction={<ActionButton variant="secondary" className="btn-back" onClick={handleBackToCourse}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
             Back to Course
-          </ActionButton>
+          </ActionButton>} title={<>Assessment Complete</>}>
+        <div className="assessment-results">
+
 
           <Panel className="results-card">
             <div className={`results-score ${assessmentResults.score >= 70 ? 'pass' : 'fail'}`}>
@@ -276,7 +276,7 @@ function CourseAssessment() {
               </div>
             </div>
 
-            <h1>Assessment Complete</h1>
+
             <p className="results-summary">
               You answered {assessmentResults.correctAnswers} out of {assessmentResults.totalQuestions} questions correctly.
             </p>
@@ -284,7 +284,7 @@ function CourseAssessment() {
             <div className="results-breakdown">
               <h3>Question Summary</h3>
               <div className="question-summary-grid">
-                {assessmentResults.questionResults.map((result, index) => <div key={index} className={`summary-item ${result.isCorrect ? 'correct' : 'incorrect'}`} onClick={() => handleGoToQuestion(index)}>
+                {assessmentResults.questionResults.map((result, index) => <button type="button" key={index} className={`summary-item ${result.isCorrect ? 'correct' : 'incorrect'}`} onClick={() => handleGoToQuestion(index)}>
                     <span className="summary-number">{index + 1}</span>
                     {result.isCorrect ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <polyline points="20 6 9 17 4 12" />
@@ -292,15 +292,15 @@ function CourseAssessment() {
                         <line x1="18" y1="6" x2="6" y2="18" />
                         <line x1="6" y1="6" x2="18" y2="18" />
                       </svg>}
-                  </div>)}
+                  </button>)}
               </div>
             </div>
 
             <div className="results-actions">
-              <ActionButton className="btn-review" onClick={() => setCurrentQuestionIndex(0)}>
+              <ActionButton variant="secondary" className="btn-review" onClick={() => setCurrentQuestionIndex(0)}>
                 Review Answers
               </ActionButton>
-              <ActionButton className="btn-finish" onClick={handleBackToCourse}>
+              <ActionButton variant="secondary" className="btn-finish" onClick={handleBackToCourse}>
                 Continue Course
               </ActionButton>
             </div>
@@ -327,7 +327,7 @@ function CourseAssessment() {
           <span className="progress-text">
             {getAnsweredCount()} / {assessmentQuestions.length} answered
           </span>
-          <ActionButton className="btn-submit" onClick={handleSubmitAssessment} disabled={getAnsweredCount() < assessmentQuestions.length}>
+          <ActionButton variant="primary" className="btn-submit" onClick={handleSubmitAssessment} disabled={getAnsweredCount() < assessmentQuestions.length}>
             Submit Assessment
           </ActionButton>
         </div>
@@ -379,13 +379,13 @@ function CourseAssessment() {
               </div>
 
               <div className="question-nav">
-                <ActionButton className="nav-btn" onClick={handlePrevQuestion} disabled={currentQuestionIndex === 0}>
+                <ActionButton variant="secondary" className="nav-btn" onClick={handlePrevQuestion} disabled={currentQuestionIndex === 0}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polyline points="15 18 9 12 15 6" />
                   </svg>
                   Previous
                 </ActionButton>
-                <ActionButton className="nav-btn" onClick={handleNextQuestion} disabled={currentQuestionIndex === assessmentQuestions.length - 1}>
+                <ActionButton variant="secondary" className="nav-btn" onClick={handleNextQuestion} disabled={currentQuestionIndex === assessmentQuestions.length - 1}>
                   Next
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polyline points="9 18 15 12 9 6" />

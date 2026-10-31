@@ -125,10 +125,10 @@ function MailerTemplateForm({
       </FieldRow>
 
       <div className="form-actions mailer-form-actions">
-        <ActionButton type="submit" className="btn-primary" disabled={isSubmitting}>
+        <ActionButton variant="primary" type="submit" className="btn-primary" disabled={isSubmitting}>
           {submitLabel}
         </ActionButton>
-        <ActionButton type="button" className="btn-secondary" onClick={onCancel}>
+        <ActionButton variant="secondary" type="button" className="btn-secondary" onClick={onCancel}>
           Cancel
         </ActionButton>
       </div>

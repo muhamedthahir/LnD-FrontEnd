@@ -266,13 +266,13 @@ function CreateAdministration() {
       setLoading(false);
     }
   };
-  return <PageContent className="create-page" view="CreateAdministration">
-      <Toolbar className="cz-context-bar"><ActionButton className="btn-back" onClick={() => navigate('/admin/courses/administrations')}>
+  return <PageContent className="create-page" view="CreateAdministration" backAction={<ActionButton variant="secondary" className="btn-back" onClick={() => navigate('/admin/courses/administrations')}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <polyline points="15 18 9 12 15 6"></polyline>
           </svg>
           Back
-        </ActionButton><span className="cz-step-label">Step {formPage} of 2</span></Toolbar>
+        </ActionButton>}>
+      <Toolbar className="cz-context-bar"><span className="cz-step-label">Step {formPage} of 2</span></Toolbar>
 
       <div className="create-page-content">
         {formPage === 1 ? <form className="create-form">
@@ -365,10 +365,10 @@ function CreateAdministration() {
             </Panel>
 
             <div className="form-actions">
-              <ActionButton type="button" className="btn-secondary" onClick={() => navigate('/admin/courses/administrations')}>
+              <ActionButton variant="secondary" type="button" className="btn-secondary" onClick={() => navigate('/admin/courses/administrations')}>
                 Cancel
               </ActionButton>
-              <ActionButton type="button" className="btn-primary" onClick={handleContinue}>
+              <ActionButton variant="primary" type="button" className="btn-primary" onClick={handleContinue}>
                 Continue
               </ActionButton>
             </div>
@@ -446,7 +446,7 @@ function CreateAdministration() {
                       </div> : <div className="groups-list">
                         {filteredGroups.map(group => {
                   const isSelected = formData.selectedGroups.includes(group.id);
-                  return <div key={group.id} className={`group-item ${isSelected ? 'selected' : ''}`} onClick={() => isSelected ? handleRemoveGroup(group.id) : handleAddGroup(group.id)}>
+                  return <button type="button" aria-pressed={isSelected} key={group.id} className={`group-item ${isSelected ? 'selected' : ''}`} onClick={() => isSelected ? handleRemoveGroup(group.id) : handleAddGroup(group.id)}>
                               <div className="group-checkbox">
                                 {isSelected ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                     <polyline points="20 6 9 17 4 12"></polyline>
@@ -464,7 +464,7 @@ function CreateAdministration() {
                               <span className="group-member-count">
                                 {group.member_count || 0} members
                               </span>
-                            </div>;
+                            </button>;
                 })}
                       </div>}
                   </div>
@@ -476,7 +476,7 @@ function CreateAdministration() {
                   const group = availableGroups.find(g => g.id === groupId);
                   return group ? <span key={groupId} className="selected-tag">
                               {group.name}
-                              <ActionButton type="button" onClick={() => handleRemoveGroup(groupId)} className="remove-tag">
+                              <ActionButton variant="secondary" type="button" onClick={() => handleRemoveGroup(groupId)} className="remove-tag">
                                 ×
                               </ActionButton>
                             </span> : null;
@@ -488,9 +488,9 @@ function CreateAdministration() {
                     <label>User Email ID or Username</label>
                     <input type="text" value={userSearch} onChange={e => setUserSearch(e.target.value)} placeholder="Search by email or username..." className="search-input" />
                     {userSearch && filteredUsers.length > 0 && <div className="suggestions-dropdown">
-                        {filteredUsers.map(user => <div key={user.id} className="suggestion-item" onClick={() => handleAddUser(user)}>
+                        {filteredUsers.map(user => <button type="button" key={user.id} className="suggestion-item" onClick={() => handleAddUser(user)}>
                             {user.name} ({user.email})
-                          </div>)}
+                          </button>)}
                       </div>}
                   </FieldGroup>
 
@@ -499,7 +499,7 @@ function CreateAdministration() {
                       <div className="selected-tags">
                         {formData.individualUsers.map(user => <span key={user.id} className="selected-tag">
                             {user.name} ({user.email})
-                            <ActionButton type="button" onClick={() => handleRemoveUser(user.id)} className="remove-tag">
+                            <ActionButton variant="secondary" type="button" onClick={() => handleRemoveUser(user.id)} className="remove-tag">
                               ×
                             </ActionButton>
                           </span>)}
@@ -509,10 +509,10 @@ function CreateAdministration() {
             </Panel>
 
             <div className="form-actions">
-              <ActionButton type="button" className="btn-secondary" onClick={() => setFormPage(1)}>
+              <ActionButton variant="secondary" type="button" className="btn-secondary" onClick={() => setFormPage(1)}>
                 Back
               </ActionButton>
-              <ActionButton type="button" className="btn-primary" onClick={handleSendInvite} disabled={!canSaveOrPublish() || loading}>
+              <ActionButton variant="primary" type="button" className="btn-primary" onClick={handleSendInvite} disabled={!canSaveOrPublish() || loading}>
                 {loading ? 'Creating...' : 'Send Invite'}
               </ActionButton>
             </div>

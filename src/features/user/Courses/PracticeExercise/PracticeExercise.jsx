@@ -1,5 +1,6 @@
+import ResizeHandle from '../../../../design/ResizeHandle';
 import { PageContent, ActionButton, Toolbar } from "../../../../design/Primitives";
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useOutletContext } from 'react-router-dom';
 import { useApi } from '../../../../contexts/ApiContext';
 import { API_ENDPOINTS } from "../../../../constants/constants.js";
@@ -26,7 +27,6 @@ function PracticeExercise() {
   const [leftPanelWidth, setLeftPanelWidth] = useState(30);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const containerRef = useRef(null);
-  const isDragging = useRef(false);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [submittedAnswers, setSubmittedAnswers] = useState({});
   useEffect(() => {
@@ -138,25 +138,6 @@ function PracticeExercise() {
       setLoading(false);
     }
   };
-  const handleMouseDown = useCallback(e => {
-    e.preventDefault();
-    isDragging.current = true;
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-  }, []);
-  const handleMouseMove = useCallback(e => {
-    if (!isDragging.current || !containerRef.current) return;
-    const containerRect = containerRef.current.getBoundingClientRect();
-    const newWidth = (e.clientX - containerRect.left) / containerRect.width * 100;
-    if (newWidth >= 20 && newWidth <= 80) {
-      setLeftPanelWidth(newWidth);
-    }
-  }, []);
-  const handleMouseUp = useCallback(() => {
-    isDragging.current = false;
-    document.removeEventListener('mousemove', handleMouseMove);
-    document.removeEventListener('mouseup', handleMouseUp);
-  }, [handleMouseMove]);
   const getDifficultyClass = difficulty => {
     switch (difficulty?.toLowerCase()) {
       case 'easy':
@@ -224,15 +205,15 @@ function PracticeExercise() {
   const totalQuestions = getTotalQuestions();
   const hasProgrammingQuestions = programmingQuestions.length > 0;
   const hasMcqQuestions = mcqQuestions.length > 0;
-  return <PageContent className="practice-exercise-page" ref={containerRef} view="PracticeExercise">
-      {}
-      <Toolbar className="cz-context-bar"><div className="header-top-row"><ActionButton className="btn-back" onClick={handleBackToCourse}>
+  return <PageContent className="practice-exercise-page" ref={containerRef} view="PracticeExercise" backAction={<ActionButton variant="secondary" className="btn-back" onClick={handleBackToCourse}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
             Back to Course
-          </ActionButton><div className="practice-title"><strong>{practiceSegment?.name || 'Practice Exercise'}</strong></div>{}{totalQuestions > 0 && <div className="header-nav-row">
-            <ActionButton className="nav-btn" onClick={handlePrevQuestion} disabled={currentQuestionIndex === 0}>
+          </ActionButton>} title={<>{practiceSegment?.name || 'Practice Exercise'}</>}>
+      {}
+      <Toolbar className="cz-context-bar"><div className="header-top-row">{}{totalQuestions > 0 && <div className="header-nav-row">
+            <ActionButton variant="secondary" className="nav-btn" onClick={handlePrevQuestion} disabled={currentQuestionIndex === 0}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <polyline points="15 18 9 12 15 6" />
               </svg>
@@ -241,7 +222,7 @@ function PracticeExercise() {
             <span className="question-counter">
               Question {currentQuestionIndex + 1} of {totalQuestions}
             </span>
-            <ActionButton className="nav-btn" onClick={handleNextQuestion} disabled={currentQuestionIndex === totalQuestions - 1}>
+            <ActionButton variant="secondary" className="nav-btn" onClick={handleNextQuestion} disabled={currentQuestionIndex === totalQuestions - 1}>
               Next
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <polyline points="9 18 15 12 9 6" />
@@ -295,32 +276,32 @@ function PracticeExercise() {
 
                       {currentQuestion.sample_input && <div className="question-sample">
                           <h4>Sample Input</h4>
-                          <pre>{currentQuestion.sample_input}</pre>
+                          <pre tabIndex={0}>{currentQuestion.sample_input}</pre>
                         </div>}
 
                       {currentQuestion.sample_output && <div className="question-sample">
                           <h4>Sample Output</h4>
-                          <pre>{currentQuestion.sample_output}</pre>
+                          <pre tabIndex={0}>{currentQuestion.sample_output}</pre>
                         </div>}
                     </div>
                   </>}
               </div>
 
               {}
-              <ActionButton className="collapse-btn" onClick={() => setSidebarCollapsed(!sidebarCollapsed)} title={sidebarCollapsed ? 'Show question' : 'Hide question'}>
+              <ActionButton variant="secondary" className="collapse-btn" onClick={() => setSidebarCollapsed(!sidebarCollapsed)} title={sidebarCollapsed ? 'Show question' : 'Hide question'}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <polyline points={sidebarCollapsed ? "9 18 15 12 9 6" : "15 18 9 12 15 6"} />
                 </svg>
               </ActionButton>
 
               {}
-              {!sidebarCollapsed && <div className="vertical-resizer" onMouseDown={handleMouseDown}>
+              {!sidebarCollapsed && <ResizeHandle containerRef={containerRef} value={leftPanelWidth} onChange={setLeftPanelWidth} label="Resize problem panel" className="vertical-resizer">
                   <div className="resizer-handle">
                     <span></span>
                     <span></span>
                     <span></span>
                   </div>
-                </div>}
+                </ResizeHandle>}
 
               {}
               <div className="editor-panel" style={{
@@ -420,7 +401,7 @@ function PracticeExercise() {
             })}
                 </div>
 
-                {!submittedAnswers[currentQuestion.id] && selectedAnswers[currentQuestion.id] !== undefined && <ActionButton className="btn-submit-mcq" onClick={() => handleMcqSubmit(currentQuestion.id)}>
+                {!submittedAnswers[currentQuestion.id] && selectedAnswers[currentQuestion.id] !== undefined && <ActionButton variant="primary" className="btn-submit-mcq" onClick={() => handleMcqSubmit(currentQuestion.id)}>
                     Submit Answer
                   </ActionButton>}
 

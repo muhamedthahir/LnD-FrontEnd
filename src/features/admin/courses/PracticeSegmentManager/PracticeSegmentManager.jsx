@@ -323,13 +323,13 @@ function PracticeSegmentManager() {
         <div className="loading-state">Loading...</div>
       </PageContent>;
   }
-  return <PageContent className="practice-manager-page" view="PracticeSegmentManager">
-      <Toolbar className="cz-context-bar"><div><ActionButton className="back-btn" onClick={() => navigate(`/admin/courses/management/${courseId}/edit`)}>
+  return <PageContent className="practice-manager-page" view="PracticeSegmentManager" backAction={<ActionButton variant="secondary" className="back-btn" onClick={() => navigate(`/admin/courses/management/${courseId}/edit`)}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <polyline points="15 18 9 12 15 6" />
             </svg>
             Back to Course
-          </ActionButton></div><ActionButton className="btn-primary" onClick={() => {
+          </ActionButton>}>
+      <Toolbar className="cz-context-bar"><div></div><ActionButton variant="primary" className="btn-primary" onClick={() => {
         setEditingSegment(null);
         setSegmentFormData({
           name: '',
@@ -366,7 +366,7 @@ function PracticeSegmentManager() {
             </FieldGroup>
           </div>
           <div className="form-actions">
-            <ActionButton type="button" className="btn-secondary" onClick={() => {
+            <ActionButton variant="secondary" type="button" className="btn-secondary" onClick={() => {
           setShowSegmentForm(false);
           setEditingSegment(null);
           setSegmentFormData({
@@ -376,7 +376,7 @@ function PracticeSegmentManager() {
         }}>
               Cancel
             </ActionButton>
-            <ActionButton className="btn-primary" onClick={editingSegment ? handleUpdateSegment : handleCreateSegment} disabled={saving}>
+            <ActionButton variant="primary" className="btn-primary" onClick={editingSegment ? handleUpdateSegment : handleCreateSegment} disabled={saving}>
               {saving ? 'Saving...' : editingSegment ? 'Update' : 'Create'}
             </ActionButton>
           </div>
@@ -392,20 +392,20 @@ function PracticeSegmentManager() {
               <p>No practice segments yet</p>
             </div> : <div className="segments-list">
               {practiceSegments.map(segment => <div key={segment.id} className={`segment-item ${practiceSegment?.id === segment.id ? 'active' : ''}`} onClick={() => handleSegmentSelect(segment)}>
-                  <div className="segment-item-content">
+                  <div className="segment-item-content"><button type="button" className="cz-disclosure-title" aria-pressed={practiceSegment?.id === segment.id} onClick={event => { event.stopPropagation(); handleSegmentSelect(segment) }}>
                     <span className="segment-name">{segment.name}</span>
                     <span className="segment-meta">
                       {(Number(segment.programming_count) || 0) + (Number(segment.mcq_count) || 0)} questions
                     </span>
-                  </div>
+                  </button></div>
                   <div className="segment-item-actions" onClick={e => e.stopPropagation()}>
-                    <ActionButton className="icon-btn" onClick={() => handleEditSegmentClick(segment)} title="Edit">
+                    <ActionButton variant="secondary" className="icon-btn" onClick={() => handleEditSegmentClick(segment)} title="Edit">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                       </svg>
                     </ActionButton>
-                    <ActionButton className="icon-btn delete" onClick={() => setDeleteModal({
+                    <ActionButton variant="danger" className="icon-btn delete" onClick={() => setDeleteModal({
                 show: true,
                 type: 'segment',
                 item: segment
@@ -469,7 +469,7 @@ function PracticeSegmentManager() {
                             <span className="badge level">{q.level_name || 'No Level'}</span>
                             <span className="badge bank">{q.question_bank_name || 'No Bank'}</span>
                           </div>
-                          <ActionButton className="btn-remove" onClick={() => setDeleteModal({
+                          <ActionButton variant="secondary" className="btn-remove" onClick={() => setDeleteModal({
                   show: true,
                   type: 'programming',
                   item: q
@@ -493,7 +493,7 @@ function PracticeSegmentManager() {
                             <span className="badge level">{q.level_name || 'No Level'}</span>
                             <span className="badge bank">{q.question_bank_name || 'No Bank'}</span>
                           </div>
-                          <ActionButton className="btn-remove" onClick={() => setDeleteModal({
+                          <ActionButton variant="secondary" className="btn-remove" onClick={() => setDeleteModal({
                   show: true,
                   type: 'mcq',
                   item: q
@@ -532,7 +532,7 @@ function PracticeSegmentManager() {
                           <span className="badge level">{q.level_name || 'No Level'}</span>
                           <span className="badge bank">{q.question_bank_name || 'No Bank'}</span>
                         </div>
-                        <ActionButton className="btn-add" onClick={() => handleAddQuestion(q)} title="Add">
+                        <ActionButton variant="secondary" className="btn-add" onClick={() => handleAddQuestion(q)} title="Add">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <line x1="12" y1="5" x2="12" y2="19" />
                             <line x1="5" y1="12" x2="19" y2="12" />

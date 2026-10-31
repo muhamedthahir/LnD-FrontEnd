@@ -153,8 +153,8 @@ function UserCourses() {
     label: 'Expired'
   }];
   return <PageContent className="user-courses-page" view="UserCourses">
-      <div className="courses-tabs la-tabs" role="tablist" aria-label="Course status">
-        {tabs.map(tab => <button key={tab.id} type="button" role="tab" aria-selected={activeTab === tab.id} className={`tab-button ${activeTab === tab.id ? 'active' : ''}`} onClick={() => setActiveTab(tab.id)}>
+      <div className="courses-tabs la-tabs" role="group" aria-label="Course status">
+        {tabs.map(tab => <button key={tab.id} type="button" aria-pressed={activeTab === tab.id} className={`tab-button ${activeTab === tab.id ? 'active' : ''}`} onClick={() => setActiveTab(tab.id)}>
             {tab.label}
             <span className="tab-count">{tabCounts[tab.id] || 0}</span>
           </button>)}
@@ -175,7 +175,7 @@ function UserCourses() {
             <input type="text" placeholder="Search by course name..." value={search} onChange={e => setSearch(e.target.value)} className="filter-input" />
           </FieldGroup>
 
-          {(search || selectedCategory) && <ActionButton onClick={handleClearFilters} className="btn-clear-filters" title="Clear all filters" aria-label="Clear all filters">
+          {(search || selectedCategory) && <ActionButton variant="secondary" onClick={handleClearFilters} className="btn-clear-filters" title="Clear all filters" aria-label="Clear all filters">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>

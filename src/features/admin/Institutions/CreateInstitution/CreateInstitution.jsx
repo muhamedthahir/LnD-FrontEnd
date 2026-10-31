@@ -1,3 +1,4 @@
+import ValidationSummary, { focusFirstInvalidField } from '../../../../design/ValidationSummary';
 import { ActionButton, Panel, FieldGroup, FieldRow, PageContent, Toolbar } from "../../../../design/Primitives";
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -40,14 +41,13 @@ function CreateInstitution() {
     } = validateCreateInstitutionForm(formData);
     setErrors(newErrors);
     if (!ok) {
-      Object.values(newErrors).forEach(msg => toast.error(msg));
       return false;
     }
     return true;
   };
   const handleSubmit = async e => {
     e.preventDefault();
-    if (!validateForm()) return;
+    if (!validateForm()) { const form = e.currentTarget; requestAnimationFrame(() => focusFirstInvalidField(form)); return; }
     setLoading(true);
     try {
       const request = getCreateInstitutionRequest(apiBaseUrl, formData);
@@ -76,16 +76,17 @@ function CreateInstitution() {
       setLoading(false);
     }
   };
-  return <PageContent className="create-page" view="CreateInstitution">
-      <Toolbar className="cz-context-bar"><ActionButton className="btn-back" onClick={() => navigate(INSTITUTIONS_LIST_ROUTE)}>
+  return <PageContent className="create-page" view="CreateInstitution" backAction={<ActionButton variant="secondary" className="btn-back" onClick={() => navigate(INSTITUTIONS_LIST_ROUTE)}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <polyline points="15 18 9 12 15 6"></polyline>
           </svg>
           Back
-        </ActionButton></Toolbar>
+        </ActionButton>}>
+
 
       <div className="create-page-content">
         <form onSubmit={handleSubmit} className="create-form">
+          <ValidationSummary errors={errors} />
           <Panel className="form-section">
             <h2>Institution Details</h2>
 
@@ -149,10 +150,10 @@ function CreateInstitution() {
           </Panel>
 
           <div className="form-actions">
-            <ActionButton type="submit" className="btn-primary" disabled={loading}>
+            <ActionButton variant="primary" type="submit" className="btn-primary" disabled={loading}>
               {loading ? 'Creating...' : 'Create Institution'}
             </ActionButton>
-            <ActionButton type="button" className="btn-secondary" onClick={() => navigate(INSTITUTIONS_LIST_ROUTE)} disabled={loading}>
+            <ActionButton variant="secondary" type="button" className="btn-secondary" onClick={() => navigate(INSTITUTIONS_LIST_ROUTE)} disabled={loading}>
               Cancel
             </ActionButton>
           </div>

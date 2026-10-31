@@ -1,3 +1,4 @@
+import ValidationSummary, { focusFirstInvalidField } from '../../../../design/ValidationSummary';
 import { ActionButton, Panel, FieldGroup, PageContent, Toolbar } from "../../../../design/Primitives";
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -125,7 +126,7 @@ function CreateUser() {
   };
   const handleSubmit = async e => {
     e.preventDefault();
-    if (!validateForm()) return;
+    if (!validateForm()) { const form = e.currentTarget; requestAnimationFrame(() => focusFirstInvalidField(form)); return; }
     setLoading(true);
     try {
       const token = accessToken || localStorage.getItem('accessToken');
@@ -153,16 +154,17 @@ function CreateUser() {
       setLoading(false);
     }
   };
-  return <PageContent className="create-page" view="CreateUser">
-      <Toolbar className="cz-context-bar"><ActionButton className="btn-back" onClick={() => navigate('/admin/users')}>
+  return <PageContent className="create-page" view="CreateUser" backAction={<ActionButton variant="secondary" className="btn-back" onClick={() => navigate('/admin/users')}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <polyline points="15 18 9 12 15 6"></polyline>
           </svg>
           Back
-        </ActionButton></Toolbar>
+        </ActionButton>}>
+
 
       <div className="create-page-content">
         <form onSubmit={handleSubmit} className="create-form">
+          <ValidationSummary errors={errors} />
           <Panel className="form-section">
             <h2>User Details</h2>
 
@@ -235,10 +237,10 @@ function CreateUser() {
             </Panel>}
 
           <div className="form-actions">
-            <ActionButton type="submit" className="btn-primary" disabled={loading}>
+            <ActionButton variant="primary" type="submit" className="btn-primary" disabled={loading}>
               {loading ? 'Creating...' : 'Create User'}
             </ActionButton>
-            <ActionButton type="button" className="btn-secondary" onClick={() => navigate('/admin/users')} disabled={loading}>
+            <ActionButton variant="secondary" type="button" className="btn-secondary" onClick={() => navigate('/admin/users')} disabled={loading}>
               Cancel
             </ActionButton>
           </div>

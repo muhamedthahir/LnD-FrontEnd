@@ -84,15 +84,15 @@ function QuestionDetail() {
         <div className="empty-state">Question not found</div>
       </PageContent>;
   }
-  return <PageContent className="question-form-page" view="QuestionDetail">
-      <Toolbar className="cz-context-bar"><div><ActionButton type="button" className="btn-secondary back-btn" onClick={() => navigate('/admin/questions/list')}>
+  return <PageContent className="question-form-page" view="QuestionDetail" backAction={<ActionButton variant="secondary" type="button" className="btn-secondary back-btn" onClick={() => navigate('/admin/questions/list')}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <polyline points="15 18 9 12 15 6" />
             </svg>
             Back
-          </ActionButton><strong>{question.name}</strong><div className="page-meta"><span className="question-code">{question.code}</span><span className={`type-badge type-${question.question_type_name?.toLowerCase().replace(' ', '-')}`}>{question.question_type_name}</span>{question.level_name && <span className={`level-badge ${getLevelBadgeClass(question.level_name)}`}>
+          </ActionButton>}>
+      <Toolbar className="cz-context-bar"><div><strong>{question.name}</strong><div className="page-meta"><span className="question-code">{question.code}</span><span className={`type-badge type-${question.question_type_name?.toLowerCase().replace(' ', '-')}`}>{question.question_type_name}</span>{question.level_name && <span className={`level-badge ${getLevelBadgeClass(question.level_name)}`}>
                 {question.level_name}
-              </span>}<span className={`status-badge ${getStatusBadgeClass(question.status_name)}`}>{question.status_name}</span></div></div><ActionButton className="btn-primary" onClick={() => navigate(`/admin/questions/list/${id}/edit`)}>
+              </span>}<span className={`status-badge ${getStatusBadgeClass(question.status_name)}`}>{question.status_name}</span></div></div><ActionButton variant="primary" className="btn-primary" onClick={() => navigate(`/admin/questions/list/${id}/edit`)}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
@@ -213,11 +213,11 @@ function QuestionDetail() {
               <div className="io-sections">
                 {programmingQuestion.sample_input && <div className="io-section">
                     <h3>Sample Input</h3>
-                    <pre className="code-block">{programmingQuestion.sample_input}</pre>
+                    <pre tabIndex={0} className="code-block">{programmingQuestion.sample_input}</pre>
                   </div>}
                 {programmingQuestion.sample_output && <div className="io-section">
                     <h3>Sample Output</h3>
-                    <pre className="code-block">{programmingQuestion.sample_output}</pre>
+                    <pre tabIndex={0} className="code-block">{programmingQuestion.sample_output}</pre>
                   </div>}
               </div>
               {programmingQuestion.constraints && <div className="constraints-section">
@@ -230,7 +230,7 @@ function QuestionDetail() {
           <Panel className="detail-card">
             <div className="card-header">
               <h2>Test Cases ({testCases.length})</h2>
-              <ActionButton className="btn-primary btn-sm" onClick={() => navigate(`/admin/questions/list/${id}/testcases`)}>
+              <ActionButton variant="primary" className="btn-primary btn-sm" onClick={() => navigate(`/admin/questions/list/${id}/testcases`)}>
                 Manage Test Cases
               </ActionButton>
             </div>
@@ -255,11 +255,11 @@ function QuestionDetail() {
                     <div className="testcase-io">
                       <div className="testcase-input">
                         <span className="io-label">Input:</span>
-                        <pre>{tc.input}</pre>
+                        <pre tabIndex={0}>{tc.input}</pre>
                       </div>
                       <div className="testcase-output">
                         <span className="io-label">Expected:</span>
-                        <pre>{tc.expected_result}</pre>
+                        <pre tabIndex={0}>{tc.expected_result}</pre>
                       </div>
                     </div>
                   </div>)}

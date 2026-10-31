@@ -17,6 +17,7 @@ function Layout() {
     return saved === 'true'
   })
   const [isSidebarOpen, setIsSidebarOpen] = useState(false) // For small screens
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 600)
   const navigate = useNavigate()
   const { pathname } = useLocation()
 
@@ -25,20 +26,14 @@ function Layout() {
   }, [pathname])
 
   useEffect(() => {
-    if (!isSidebarOpen) return
-    const closeOnEscape = (event) => {
-      if (event.key === 'Escape') setIsSidebarOpen(false)
+    const updateViewport = () => {
+      const mobile = window.innerWidth <= 600
+      setIsMobile(mobile)
+      if (!mobile) setIsSidebarOpen(false)
     }
-    const closeOnResize = () => {
-      if (window.innerWidth > 600) setIsSidebarOpen(false)
-    }
-    document.addEventListener('keydown', closeOnEscape)
-    window.addEventListener('resize', closeOnResize)
-    return () => {
-      document.removeEventListener('keydown', closeOnEscape)
-      window.removeEventListener('resize', closeOnResize)
-    }
-  }, [isSidebarOpen])
+    window.addEventListener('resize', updateViewport)
+    return () => window.removeEventListener('resize', updateViewport)
+  }, [])
 
   useEffect(() => {
     localStorage.setItem('sidebarCollapsed', JSON.stringify(isSidebarCollapsed))
@@ -54,23 +49,6 @@ function Layout() {
     }
   }
   
-  // Close sidebar when clicking outside on small screens
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (window.innerWidth <= 600 && isSidebarOpen) {
-        const sidebar = document.querySelector('[class*="sidebar"]')
-        if (sidebar && !sidebar.contains(event.target) && !event.target.closest('[class*="sidebarToggleBtn"]')) {
-          setIsSidebarOpen(false)
-        }
-      }
-    }
-    
-    if (isSidebarOpen) {
-      document.addEventListener('mousedown', handleClickOutside)
-      return () => document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [isSidebarOpen])
-
   useEffect(() => {
     if (apiBaseUrl) {
       if (user && (accessToken || localStorage.getItem('accessToken'))) {
@@ -212,17 +190,11 @@ function Layout() {
   return (
     <div className="cz-shell">
       <a href="#workspace-content" className="cz-skip-link">Skip to content</a>
-      {isSidebarOpen && (
-        <div
-          className="cz-shell-backdrop"
-          onClick={() => setIsSidebarOpen(false)}
-          aria-hidden="true"
-        />
-      )}
       <Sidebar 
         user={user} 
         isCollapsed={isSidebarCollapsed} 
         isOpen={isSidebarOpen}
+        isMobile={isMobile}
         onClose={() => setIsSidebarOpen(false)}
       />
       <Header 
@@ -230,6 +202,8 @@ function Layout() {
         logout={logout} 
         onToggleSidebar={toggleSidebar}
         isSidebarCollapsed={isSidebarCollapsed}
+        isSidebarOpen={isSidebarOpen}
+        isMobile={isMobile}
       />
       <main className="cz-workspace" id="workspace-content">
         <Suspense fallback={<div className="cz-loading" role="status" aria-label="Loading page"><div className="spinner" /></div>}>

@@ -1,3 +1,4 @@
+import { DialogLayer, DialogSurface } from '../../../../design/Dialog';
 import { PageContent, ActionButton, Panel, FieldGroup, FieldRow, Toolbar } from "../../../../design/Primitives";
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -740,12 +741,12 @@ function AssessmentUserMapping() {
         </div>
       </PageContent>;
   }
-  return <PageContent className="user-mapping-page" view="AssessmentUserMapping">
-      <Toolbar className="cz-context-bar"><div className="header-left"><ActionButton className="back-btn" onClick={() => navigate(-1)}>
+  return <PageContent className="user-mapping-page" view="AssessmentUserMapping" backAction={<ActionButton variant="secondary" className="back-btn" onClick={() => navigate(-1)}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
               <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
-          </ActionButton><div><span className="breadcrumb">{configData?.display_name}</span></div></div></Toolbar>
+          </ActionButton>}>
+      <Toolbar className="cz-context-bar"><div className="header-left"><div><span className="breadcrumb">{configData?.display_name}</span></div></div></Toolbar>
 
       {}
       {showAddSection && <div className="add-users-section">
@@ -836,7 +837,7 @@ function AssessmentUserMapping() {
                     </div> : <div className="groups-list">
                       {filteredGroups.map(group => {
                 const isSelected = selectedGroups.includes(group.id);
-                return <div key={group.id} className={`group-item ${isSelected ? 'selected' : ''}`} onClick={() => isSelected ? handleRemoveGroup(group.id) : handleAddGroup(group.id)}>
+                return <button type="button" aria-pressed={isSelected} key={group.id} className={`group-item ${isSelected ? 'selected' : ''}`} onClick={() => isSelected ? handleRemoveGroup(group.id) : handleAddGroup(group.id)}>
                             <div className="group-checkbox">
                               {isSelected ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                   <polyline points="20 6 9 17 4 12"></polyline>
@@ -854,7 +855,7 @@ function AssessmentUserMapping() {
                             <span className="group-member-count">
                               {group.member_count || 0} members
                             </span>
-                          </div>;
+                          </button>;
               })}
                     </div>}
                 </div>
@@ -866,7 +867,7 @@ function AssessmentUserMapping() {
                 const group = availableGroups.find(g => g.id === groupId);
                 return group ? <span key={groupId} className="selected-tag">
                             {group.name}
-                            <ActionButton type="button" onClick={() => handleRemoveGroup(groupId)} className="remove-tag">
+                            <ActionButton variant="secondary" type="button" onClick={() => handleRemoveGroup(groupId)} className="remove-tag">
                               ×
                             </ActionButton>
                           </span> : null;
@@ -878,9 +879,9 @@ function AssessmentUserMapping() {
                   <label>User Email ID or Username</label>
                   <input type="text" value={userSearch} onChange={e => setUserSearch(e.target.value)} placeholder="Search by email or username..." className="search-input" />
                   {userSearch && filteredAvailableUsers.length > 0 && <div className="suggestions-dropdown">
-                      {filteredAvailableUsers.map(user => <div key={user.id} className="suggestion-item" onClick={() => handleAddUser(user)}>
+                      {filteredAvailableUsers.map(user => <button type="button" key={user.id} className="suggestion-item" onClick={() => handleAddUser(user)}>
                           {user.name} ({user.email})
-                        </div>)}
+                        </button>)}
                     </div>}
                 </FieldGroup>
 
@@ -889,7 +890,7 @@ function AssessmentUserMapping() {
                     <div className="selected-tags">
                       {selectedUsers.map(user => <span key={user.id} className="selected-tag">
                           {user.name} ({user.email})
-                          <ActionButton type="button" onClick={() => handleRemoveUser(user.id)} className="remove-tag">
+                          <ActionButton variant="secondary" type="button" onClick={() => handleRemoveUser(user.id)} className="remove-tag">
                             ×
                           </ActionButton>
                         </span>)}
@@ -965,7 +966,7 @@ function AssessmentUserMapping() {
             Add Users
           </Button>
         </div> : <div className="users-table">
-          <Table>
+          <Table aria-label="Assessment User Mapping" stickyActions>
             <thead>
               <tr>
                 <th>User</th>
@@ -1020,7 +1021,7 @@ function AssessmentUserMapping() {
                   </td>
                   <td>
                     <div className="progress-report-cell">
-                      {['IN_PROGRESS', 'COMPLETED', 'SUBMITTED', 'DISQUALIFIED'].includes(mapping.status) ? <ActionButton className="progress-icon-btn" onClick={() => navigate(`/admin/assessments/progress/${mapping.id}`)} title="View Detailed Progress">
+                      {['IN_PROGRESS', 'COMPLETED', 'SUBMITTED', 'DISQUALIFIED'].includes(mapping.status) ? <ActionButton variant="secondary" className="progress-icon-btn" onClick={() => navigate(`/admin/assessments/progress/${mapping.id}`)} title="View Detailed Progress">
                           {mapping.status === 'DISQUALIFIED' ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20" className="text-danger">
                               <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
                               <line x1="12" y1="9" x2="12" y2="13" />
@@ -1044,18 +1045,18 @@ function AssessmentUserMapping() {
                   <td>{formatDateTime(mapping.submitted_at)}</td>
                   <td>
                     <div className="action-buttons">
-                      {mapping.status === 'NOT_STARTED' && !mapping.invitation_sent && <ActionButton className="action-btn invite" onClick={() => handleSendInvitation(mapping.id)} title="Send Invitation">
+                      {mapping.status === 'NOT_STARTED' && !mapping.invitation_sent && <ActionButton variant="secondary" className="action-btn invite" onClick={() => handleSendInvitation(mapping.id)} title="Send Invitation">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
                             <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
                           </svg>
                         </ActionButton>}
-                      {['COMPLETED', 'SUBMITTED', 'DISQUALIFIED'].includes(mapping.status) && <ActionButton className="action-btn view" onClick={() => navigate(`/admin/assessments/results/${mapping.id}`)} title="View Results">
+                      {['COMPLETED', 'SUBMITTED', 'DISQUALIFIED'].includes(mapping.status) && <ActionButton variant="secondary" className="action-btn view" onClick={() => navigate(`/admin/assessments/results/${mapping.id}`)} title="View Results">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                             <circle cx="12" cy="12" r="3" />
                           </svg>
                         </ActionButton>}
-                      {mapping.status === 'IN_PROGRESS' && <ActionButton className="action-btn extend-time" onClick={() => openExtendModal(mapping)} title={getExtendTimeLabel()}>
+                      {mapping.status === 'IN_PROGRESS' && <ActionButton variant="secondary" className="action-btn extend-time" onClick={() => openExtendModal(mapping)} title={getExtendTimeLabel()}>
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
                             <circle cx="12" cy="12" r="10" />
                             <polyline points="12 6 12 12 16 14" />
@@ -1063,13 +1064,13 @@ function AssessmentUserMapping() {
                             <line x1="8" y1="12" x2="16" y2="12" />
                           </svg>
                         </ActionButton>}
-                      {['IN_PROGRESS', 'COMPLETED', 'SUBMITTED', 'DISQUALIFIED'].includes(mapping.status) && <ActionButton className="action-btn reattempt" onClick={() => openConfirmModal('reattempt', mapping)} title="Allow Reattempt">
+                      {['IN_PROGRESS', 'COMPLETED', 'SUBMITTED', 'DISQUALIFIED'].includes(mapping.status) && <ActionButton variant="secondary" className="action-btn reattempt" onClick={() => openConfirmModal('reattempt', mapping)} title="Allow Reattempt">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
                             <polyline points="23 4 23 10 17 10" />
                             <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
                           </svg>
                         </ActionButton>}
-                      {mapping.status === 'DISQUALIFIED' && <ActionButton className="action-btn refresh-violation" onClick={() => openConfirmModal('refresh', mapping)} title="Refresh Violation - Allow user to continue">
+                      {mapping.status === 'DISQUALIFIED' && <ActionButton variant="secondary" className="action-btn refresh-violation" onClick={() => openConfirmModal('refresh', mapping)} title="Refresh Violation - Allow user to continue">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
                             <path d="M21 2v6h-6" />
                             <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
@@ -1077,7 +1078,7 @@ function AssessmentUserMapping() {
                             <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
                           </svg>
                         </ActionButton>}
-                      <ActionButton className="action-btn delete" onClick={() => openConfirmModal('remove', mapping)} title="Remove User">
+                      <ActionButton variant="danger" className="action-btn delete" onClick={() => openConfirmModal('remove', mapping)} title="Remove User">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
                           <polyline points="3 6 5 6 21 6" />
                           <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
@@ -1097,8 +1098,8 @@ function AssessmentUserMapping() {
 
       <ConfirmModal isOpen={confirmModal.isOpen} onClose={closeConfirmModal} onConfirm={handleConfirmAction} title={confirmConfig.title} message={confirmConfig.message} confirmText={confirmConfig.confirmText} cancelText="Cancel" disabled={confirmLoading} />
 
-      {extendModal.isOpen && <div className="extend-time-overlay" onClick={closeExtendModal}>
-          <div className="extend-time-modal" onClick={e => e.stopPropagation()}>
+      {<DialogLayer open={Boolean(extendModal.isOpen)} className="extend-time-overlay" onClose={closeExtendModal} busy={extendLoading}>{Boolean(extendModal.isOpen) ? <>
+          <DialogSurface className="extend-time-modal">
             <h3>{getExtendTimeLabel()}</h3>
             <p className="extend-time-user">
               {extendModal.mapping?.user_name || extendModal.mapping?.user_email}
@@ -1119,8 +1120,8 @@ function AssessmentUserMapping() {
                 {extendLoading ? 'Saving...' : 'Extend Time'}
               </Button>
             </div>
-          </div>
-        </div>}
+          </DialogSurface>
+        </> : null}</DialogLayer>}
     </PageContent>;
 }
 export default AssessmentUserMapping;

@@ -266,8 +266,8 @@ function Assessments() {
   return <PageContent className="assessments-page" view="Assessments">
 
 
-      <div className="assessments-tabs la-tabs" role="tablist" aria-label="Assessment status">
-        {tabs.map(tab => <button key={tab.id} type="button" role="tab" aria-selected={activeTab === tab.id} className={`tab-button ${activeTab === tab.id ? 'active' : ''}`} onClick={() => setActiveTab(tab.id)}>
+      <div className="assessments-tabs la-tabs" role="group" aria-label="Assessment status">
+        {tabs.map(tab => <button key={tab.id} type="button" aria-pressed={activeTab === tab.id} className={`tab-button ${activeTab === tab.id ? 'active' : ''}`} onClick={() => setActiveTab(tab.id)}>
             {tab.label}
             <span className="tab-count">{tab.count}</span>
           </button>)}

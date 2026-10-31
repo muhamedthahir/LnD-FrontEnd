@@ -387,14 +387,14 @@ function Quiz() {
       </PageContent>;
   }
   if (isAssessment && !started) {
-    return <PageContent className="quiz-page" view="Quiz">
-        <div className="quiz-intro">
-          <ActionButton className="btn-back" onClick={handleBackToCourse}>
+    return <PageContent className="quiz-page" view="Quiz" backAction={<ActionButton variant="secondary" className="btn-back" onClick={handleBackToCourse}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
             Back to Course
-          </ActionButton>
+          </ActionButton>} title={<>{practiceSegment?.name || 'Quiz'}</>}>
+        <div className="quiz-intro">
+
 
           <Panel className="intro-card">
             <div className="intro-icon">
@@ -405,7 +405,7 @@ function Quiz() {
               </svg>
             </div>
 
-            <h1>{practiceSegment?.name || 'Quiz'}</h1>
+
             {practiceSegment?.description && <p className="intro-description">{practiceSegment.description}</p>}
 
             <div className="intro-stats">
@@ -439,7 +439,7 @@ function Quiz() {
               </ul>
             </div>
 
-            <ActionButton className="btn-start-quiz" onClick={handleStartQuiz} disabled={questions.length === 0}>
+            <ActionButton variant="primary" className="btn-start-quiz" onClick={handleStartQuiz} disabled={questions.length === 0}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <polygon points="5 3 19 12 5 21 5 3" />
               </svg>
@@ -450,14 +450,14 @@ function Quiz() {
       </PageContent>;
   }
   if (isAssessment && quizCompleted && quizResults) {
-    return <PageContent className="quiz-page" view="Quiz">
-        <div className="quiz-results">
-          <ActionButton className="btn-back" onClick={handleBackToCourse}>
+    return <PageContent className="quiz-page" view="Quiz" backAction={<ActionButton variant="secondary" className="btn-back" onClick={handleBackToCourse}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
             Back to Course
-          </ActionButton>
+          </ActionButton>} title={<>Quiz Completed!</>}>
+        <div className="quiz-results">
+
 
           <Panel className="results-card">
             <div className={`results-score-circle ${quizResults.score >= 70 ? 'pass' : 'fail'}`}>
@@ -474,7 +474,7 @@ function Quiz() {
               </div>
             </div>
 
-            <h1>Quiz Completed!</h1>
+
             <p className="results-summary">
               You answered <strong>{quizResults.totalCorrect}</strong> out of <strong>{quizResults.totalQuestions}</strong> questions correctly.
             </p>
@@ -508,7 +508,7 @@ function Quiz() {
             <div className="question-summary-section">
               <h3>Question Summary</h3>
               <div className="question-summary-grid">
-                {quizResults.questionResults.map((result, index) => <div key={index} className={`summary-item ${result.isAnswered ? result.isCorrect ? 'correct' : 'incorrect' : 'skipped'}`} onClick={() => {
+                {quizResults.questionResults.map((result, index) => <button type="button" key={index} className={`summary-item ${result.isAnswered ? result.isCorrect ? 'correct' : 'incorrect' : 'skipped'}`} onClick={() => {
                 setQuizCompleted(false);
                 setCurrentQuestionIndex(index);
               }} title={result.questionName}>
@@ -521,19 +521,19 @@ function Quiz() {
                         </svg> : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <circle cx="12" cy="12" r="3" />
                       </svg>}
-                  </div>)}
+                  </button>)}
               </div>
             </div>
 
             <div className="results-actions">
-              <ActionButton className="btn-review" onClick={handleReviewAnswers}>
+              <ActionButton variant="secondary" className="btn-review" onClick={handleReviewAnswers}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                   <circle cx="12" cy="12" r="3" />
                 </svg>
                 Review Answers
               </ActionButton>
-              <ActionButton className="btn-finish" onClick={handleBackToCourse}>
+              <ActionButton variant="secondary" className="btn-finish" onClick={handleBackToCourse}>
                 Continue Course
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <polyline points="9 18 15 12 9 6" />
@@ -548,9 +548,14 @@ function Quiz() {
   const isMultiSelect = currentQuestion?.is_multi_select;
   const currentSelected = selectedAnswers[currentQuestion?.id] || [];
   const isSubmitted = submittedAnswers[currentQuestion?.id];
-  return <PageContent className="quiz-page" view="Quiz">
+  return <PageContent className="quiz-page" view="Quiz" backAction={<ActionButton variant="secondary" className="btn-back-small" onClick={handleBackToCourse} title="Back to Course">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M19 12H5" />
+              <path d="M12 19l-7-7 7-7" />
+            </svg>
+          </ActionButton>} title={<>{practiceSegment?.name || 'Quiz'}</>}>
       {}
-      {showConfirmModal && <DialogLayer className="confirm-modal-overlay" onClose={() => setShowConfirmModal(false)}>
+      {<DialogLayer open={Boolean(showConfirmModal)} className="confirm-modal-overlay" onClose={() => setShowConfirmModal(false)}>{Boolean(showConfirmModal) ? <>
           <DialogSurface className="confirm-modal">
             <div className="confirm-modal-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -565,31 +570,23 @@ function Quiz() {
               Are you sure you want to complete the quiz?
             </p>
             <div className="confirm-modal-actions">
-              <ActionButton className="btn-cancel" onClick={() => setShowConfirmModal(false)}>
+              <ActionButton variant="secondary" className="btn-cancel" onClick={() => setShowConfirmModal(false)}>
                 Continue Quiz
               </ActionButton>
-              <ActionButton className="btn-confirm" onClick={completeQuiz}>
+              <ActionButton variant="primary" className="btn-confirm" onClick={completeQuiz}>
                 Complete Anyway
               </ActionButton>
             </div>
           </DialogSurface>
-        </DialogLayer>}
+        </> : null}</DialogLayer>}
 
       {}
       <div className="quiz-header">
-        <div className="header-left">
-          <ActionButton className="btn-back-small" onClick={handleBackToCourse} title="Back to Course">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M19 12H5" />
-              <path d="M12 19l-7-7 7-7" />
-            </svg>
-          </ActionButton>
-          <h2>{practiceSegment?.name || 'Quiz'}</h2>
-        </div>
+
 
         {}
         <div className="header-nav">
-          <ActionButton className="nav-btn prev" onClick={handlePrevQuestion} disabled={currentQuestionIndex === 0} title="Previous Question" aria-label="Previous Question">
+          <ActionButton variant="secondary" className="nav-btn prev" onClick={handlePrevQuestion} disabled={currentQuestionIndex === 0} title="Previous Question" aria-label="Previous Question">
             <svg viewBox="0 0 24 24" width="20" height="20">
               <path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -597,7 +594,7 @@ function Quiz() {
           <span className="nav-indicator">
             {currentQuestionIndex + 1} / {questions.length}
           </span>
-          <ActionButton className="nav-btn next" onClick={handleNextQuestion} disabled={currentQuestionIndex === questions.length - 1} title="Next Question" aria-label="Next Question">
+          <ActionButton variant="secondary" className="nav-btn next" onClick={handleNextQuestion} disabled={currentQuestionIndex === questions.length - 1} title="Next Question" aria-label="Next Question">
             <svg viewBox="0 0 24 24" width="20" height="20">
               <path d="M9 18l6-6-6-6" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -605,7 +602,7 @@ function Quiz() {
         </div>
 
         <div className="header-right">
-          <ActionButton className="btn-complete" onClick={handleCompleteQuizClick}>
+          <ActionButton variant="secondary" className="btn-complete" onClick={handleCompleteQuizClick}>
             <span className="btn-text">Complete Quiz</span>
             <span className="btn-text-mobile">Done</span>
           </ActionButton>
@@ -677,12 +674,12 @@ function Quiz() {
               {}
               <div className="question-actions">
                 {}
-                {!isSubmitted && currentSelected.length > 0 && <ActionButton className="btn-submit-answer" onClick={handleSubmitAnswer}>
+                {!isSubmitted && currentSelected.length > 0 && <ActionButton variant="primary" className="btn-submit-answer" onClick={handleSubmitAnswer}>
                     Submit Answer
                   </ActionButton>}
 
                 {}
-                {isSubmitted && <ActionButton className="btn-try-again" onClick={() => handleResetQuestion(currentQuestion.id)}>
+                {isSubmitted && <ActionButton variant="secondary" className="btn-try-again" onClick={() => handleResetQuestion(currentQuestion.id)}>
                     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
                       <path d="M3 3v5h5" />

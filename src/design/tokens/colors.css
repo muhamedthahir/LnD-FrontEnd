@@ -1,4 +1,4 @@
-/* Exact existing palette. Geometry is defined in system.css. */
+/* Semantic theme colors. Original brand signal colors remain available separately. */
 [data-theme="light"] {
   --bg-primary: #f2f5fb;
   --bg-secondary: #e8edf7;
@@ -26,18 +26,22 @@
   --text-primary: #0d1630;
   --text-secondary: #3f4c6b;
   --text-tertiary: #5a6787;
-  --text-muted: #8590ab;
+  --text-muted: #5a6787;
   --text-on-accent: #ffffff;
 
   --border-color: #dde3f0;
   --border-strong: #c6d0e4;
   --border-focus: var(--accent-primary);
+  --border-control: #7786a3;
 
-  --error: #d93a4a;
+  --signal-error: #d93a4a;
+  --error: #b42336;
   --error-glow: rgba(217, 58, 74, 0.14);
-  --success: #12996b;
+  --signal-success: #12996b;
+  --success: #066b4d;
   --success-glow: rgba(18, 153, 107, 0.14);
-  --warning: #cf7d0a;
+  --signal-warning: #cf7d0a;
+  --warning: #874e00;
   --warning-glow: rgba(207, 125, 10, 0.16);
   --info: #2a7bd8;
 
@@ -102,17 +106,21 @@
   --text-primary: #eef2fc;
   --text-secondary: #b3bfdc;
   --text-tertiary: #8895b8;
-  --text-muted: #67739a;
+  --text-muted: #8895b8;
   --text-on-accent: #06122e;
 
   --border-color: #1f2a45;
   --border-strong: #2c3a5c;
   --border-focus: var(--accent-primary);
+  --border-control: #6c7da3;
 
+  --signal-error: #ff7a86;
   --error: #ff7a86;
   --error-glow: rgba(255, 122, 134, 0.16);
+  --signal-success: #4fd1a1;
   --success: #4fd1a1;
   --success-glow: rgba(79, 209, 161, 0.16);
+  --signal-warning: #f0b24a;
   --warning: #f0b24a;
   --warning-glow: rgba(240, 178, 74, 0.16);
   --info: #6bb0ff;

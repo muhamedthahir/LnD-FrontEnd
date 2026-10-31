@@ -87,10 +87,10 @@ function AssessmentResult() {
       </PageContent>;
   }
   if (!reportData) {
-    return <PageContent className={styles.progressReportPage} view="AssessmentResult">
+    return <PageContent className={styles.progressReportPage} view="AssessmentResult" backAction={<ActionButton variant="secondary" onClick={() => navigate(-1)}>Go Back</ActionButton>}>
         <div className={styles.errorContainer}>
           <p>Failed to load assessment report</p>
-          <ActionButton onClick={() => navigate(-1)}>Go Back</ActionButton>
+
         </div>
       </PageContent>;
   }
@@ -128,14 +128,14 @@ function AssessmentResult() {
       toast.error('Failed to refresh violation');
     }
   };
-  return <PageContent className={styles.progressReportPage} view="AssessmentResult">
-      {}
-      <Toolbar className="cz-context-bar"><ActionButton className={styles.btnBack} onClick={() => navigate(-1)}>
+  return <PageContent className={styles.progressReportPage} view="AssessmentResult" backAction={<ActionButton variant="secondary" className={styles.btnBack} onClick={() => navigate(-1)}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <polyline points="15 18 9 12 15 6"></polyline>
           </svg>
           Back
-        </ActionButton>{mapping.status === 'DISQUALIFIED' && <ActionButton className={styles.btnRefreshViolation} onClick={handleRefreshViolation} title="Allow user to continue by refreshing violation count">
+        </ActionButton>}>
+      {}
+      <Toolbar className="cz-context-bar">{mapping.status === 'DISQUALIFIED' && <ActionButton variant="secondary" className={styles.btnRefreshViolation} onClick={handleRefreshViolation} title="Allow user to continue by refreshing violation count">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
               <path d="M21 2v6h-6" />
               <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
@@ -259,12 +259,12 @@ function AssessmentResult() {
         {segment_progress.length === 0 ? <div className={styles.emptyTopics}>
             <p>No segment progress recorded.</p>
           </div> : <div className={styles.topicsList}>
-            {segment_progress.map((segment, index) => <div key={segment.assessment_segment_id} className={styles.topicCard}>
-                <div className={`${styles.topicHeader} ${expandedSegments[segment.assessment_segment_id] ? styles.topicHeaderExpanded : ''}`} onClick={() => toggleSegment(segment.assessment_segment_id)}>
+            {segment_progress.map((segment, index) => <div key={(segment.assessment_segment_id ?? segment.id ?? index)} className={styles.topicCard}>
+                <div className={`${styles.topicHeader} ${expandedSegments[(segment.assessment_segment_id ?? segment.id ?? index)] ? styles.topicHeaderExpanded : ''}`} onClick={() => toggleSegment((segment.assessment_segment_id ?? segment.id ?? index))}>
                   <div className={styles.topicInfo}>
                     <span className={styles.topicNumber}>{index + 1}</span>
                     <div className={styles.topicDetails}>
-                      <h4>{segment.segment_name}</h4>
+                      <h4><button type="button" className="cz-disclosure-title" aria-expanded={Boolean(expandedSegments[(segment.assessment_segment_id ?? segment.id ?? index)])} onClick={event => { event.stopPropagation(); toggleSegment(segment.assessment_segment_id ?? segment.id ?? index) }}>{segment.segment_name}</button></h4>
                       <p className={styles.topicMeta}>
                         {segment.attempted_questions || 0} questions attempted
                       </p>
@@ -282,13 +282,13 @@ function AssessmentResult() {
                     <span className={`${styles.statusBadge} ${styles.statusBadgeSmall} ${getStatusClass(segment.status)}`}>
                       {segment.status || 'NOT STARTED'}
                     </span>
-                    <svg className={`${styles.expandIcon} ${expandedSegments[segment.assessment_segment_id] ? styles.expandIconRotated : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <svg className={`${styles.expandIcon} ${expandedSegments[(segment.assessment_segment_id ?? segment.id ?? index)] ? styles.expandIconRotated : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
                   </div>
                 </div>
 
-                {expandedSegments[segment.assessment_segment_id] && <div className={styles.topicContent}>
+                {expandedSegments[(segment.assessment_segment_id ?? segment.id ?? index)] && <div className={styles.topicContent}>
                     <div className={styles.topicStats}>
                       <div className={styles.miniStat}>
                         <label>Score</label>
@@ -325,7 +325,7 @@ function AssessmentResult() {
                                 {question.score > 0 ? '✓ Correct' : question.is_attempted ? 'Attempted' : 'Not Attempted'}
                               </span>
                               <span className={styles.questionAction}>
-                                {question.question_type === 'PROGRAMMING' && question.submitted_code ? <ActionButton className={styles.btnShowCode} onClick={e => {
+                                {question.question_type === 'PROGRAMMING' && question.submitted_code ? <ActionButton variant="secondary" className={styles.btnShowCode} onClick={e => {
                       e.stopPropagation();
                       setCodeModalData({
                         questionName: question.question_title,
@@ -397,7 +397,7 @@ function AssessmentResult() {
         <h2>Proctoring Logs</h2>
         <div className={styles.logsContainer}>
           {proctoring_logs && proctoring_logs.length > 0 ? <div className={styles.logsTableWrapper}>
-              <Table>
+              <Table aria-label="Assessment Result">
                 <thead>
                   <tr>
                     <th>Timestamp</th>
@@ -418,7 +418,7 @@ function AssessmentResult() {
                       <td>{log.segment_name || '-'}</td>
                       <td>{log.violation_cycle || 1}</td>
                       <td>
-                        {log.metadata ? <pre className={styles.logMetadata}>
+                        {log.metadata ? <pre tabIndex={0} className={styles.logMetadata}>
                             {JSON.stringify(log.metadata, null, 2)}
                           </pre> : '-'}
                       </td>
@@ -432,7 +432,7 @@ function AssessmentResult() {
       </div>
 
       {}
-      {codeModalData && <DialogLayer className={styles.codeModalOverlay} onClick={() => setCodeModalData(null)}>
+      {<DialogLayer open={Boolean(codeModalData)} className={styles.codeModalOverlay} onClick={() => setCodeModalData(null)}>{Boolean(codeModalData) ? <>
           <DialogSurface className={styles.codeModal} onClick={e => e.stopPropagation()}>
             <div className={styles.codeModalHeader}>
               <div className={styles.codeModalTitle}>
@@ -447,7 +447,7 @@ function AssessmentResult() {
                   </span>
                 </div>
               </div>
-              <ActionButton className={styles.codeModalClose} onClick={() => setCodeModalData(null)}>
+              <ActionButton variant="secondary" className={styles.codeModalClose} onClick={() => setCodeModalData(null)}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <line x1="18" y1="6" x2="6" y2="18"></line>
                   <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -455,12 +455,12 @@ function AssessmentResult() {
               </ActionButton>
             </div>
             <div className={styles.codeModalBody}>
-              <pre className={styles.codeBlock}>
+              <pre tabIndex={0} className={styles.codeBlock}>
                 <code>{codeModalData.code}</code>
               </pre>
             </div>
             <div className={styles.codeModalFooter}>
-              <ActionButton className={styles.btnCopyCode} onClick={() => {
+              <ActionButton variant="secondary" className={styles.btnCopyCode} onClick={() => {
             navigator.clipboard.writeText(codeModalData.code);
             toast.success('Code copied to clipboard!');
           }}>
@@ -470,12 +470,12 @@ function AssessmentResult() {
                 </svg>
                 Copy Code
               </ActionButton>
-              <ActionButton className={styles.btnCloseModal} onClick={() => setCodeModalData(null)}>
+              <ActionButton variant="secondary" className={styles.btnCloseModal} onClick={() => setCodeModalData(null)}>
                 Close
               </ActionButton>
             </div>
           </DialogSurface>
-        </DialogLayer>}
+        </> : null}</DialogLayer>}
       <ConfirmDialog />
     </PageContent>;
 }

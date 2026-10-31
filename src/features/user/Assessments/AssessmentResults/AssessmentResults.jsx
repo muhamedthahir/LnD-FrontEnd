@@ -85,26 +85,26 @@ function AssessmentResults() {
       </PageContent>;
   }
   if (!results) {
-    return <PageContent className="results-page" view="AssessmentResults">
+    return <PageContent className="results-page" view="AssessmentResults" backAction={<ActionButton variant="secondary" onClick={() => navigate('/user/assessments')}>Back to Assessments</ActionButton>} title="Assessment Results">
         <EmptyState>
           <h3>Results not available</h3>
-          <ActionButton onClick={() => navigate('/user/assessments')}>Back to Assessments</ActionButton>
+
         </EmptyState>
       </PageContent>;
   }
   const subtitle = results.assessment_title && results.assessment_title !== results.display_name ? results.assessment_title : null;
-  return <PageContent className="results-page" view="AssessmentResults">
-      <div className="results-container">
-        <ActionButton variant="quiet" className="as-back back-link" onClick={() => navigate('/user/assessments')}>
+  return <PageContent className="results-page" view="AssessmentResults" backAction={<ActionButton variant="quiet" className="as-back back-link" onClick={() => navigate('/user/assessments')}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
           Back to Assessments
-        </ActionButton>
+        </ActionButton>} title={<>{results.display_name || results.assessment_title}</>}>
+      <div className="results-container">
+
 
         <header className="as-hero">
           <span className="cz-eyebrow">Result</span>
-          <h1>{results.display_name || results.assessment_title}</h1>
+
           {subtitle && <p>{subtitle}</p>}
         </header>
 
@@ -264,7 +264,7 @@ function AssessmentResults() {
       </div>
 
       {}
-      {showFeedbackModal && <DialogLayer className="modal-overlay" onClose={() => setShowFeedbackModal(false)}>
+      {<DialogLayer open={Boolean(showFeedbackModal)} className="modal-overlay" onClose={() => setShowFeedbackModal(false)}>{Boolean(showFeedbackModal) ? <>
           <DialogSurface className="modal-content feedback-modal">
             <div className="modal-header">
               <h2>How was your experience?</h2>
@@ -274,7 +274,7 @@ function AssessmentResults() {
 
               <div className="rating-section">
                 <div className="rating-stars">
-                  {[1, 2, 3, 4, 5].map(star => <ActionButton key={star} aria-label={`Rate ${star} out of 5`} aria-pressed={feedback.rating === star} className={`star-btn ${feedback.rating >= star ? 'active' : ''}`} onClick={() => setFeedback({
+                  {[1, 2, 3, 4, 5].map(star => <ActionButton variant="secondary" key={star} aria-label={`Rate ${star} out of 5`} aria-pressed={feedback.rating === star} className={`star-btn ${feedback.rating >= star ? 'active' : ''}`} onClick={() => setFeedback({
                 ...feedback,
                 rating: star
               })}>
@@ -305,7 +305,7 @@ function AssessmentResults() {
               </Button>
             </div>
           </DialogSurface>
-        </DialogLayer>}
+        </> : null}</DialogLayer>}
     </PageContent>;
 }
 export default AssessmentResults;

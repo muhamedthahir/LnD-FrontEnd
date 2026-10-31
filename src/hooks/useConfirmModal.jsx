@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import ConfirmModal from '../components/ConfirmModal/ConfirmModal'
 
 /**
@@ -12,8 +12,17 @@ import ConfirmModal from '../components/ConfirmModal/ConfirmModal'
 export function useConfirmModal() {
   const resolverRef = useRef(null)
   const [config, setConfig] = useState(null)
+  const configRef = useRef(config)
+  configRef.current = config
+
+  useEffect(() => () => {
+    resolverRef.current?.(false)
+    resolverRef.current = null
+  }, [])
 
   const confirm = useCallback((options) => {
+    // A new request cancels the previous pending request instead of orphaning it.
+    resolverRef.current?.(false)
     return new Promise((resolve) => {
       resolverRef.current = resolve
       setConfig({
@@ -39,18 +48,20 @@ export function useConfirmModal() {
     resolve?.(true)
   }, [])
 
-  const ConfirmDialog = useCallback(() => (
+  const ConfirmDialog = useCallback(() => {
+    const current = configRef.current
+    return (
     <ConfirmModal
-      isOpen={!!config}
+      isOpen={!!current}
       onClose={handleClose}
       onConfirm={handleConfirm}
-      title={config?.title || ''}
-      message={config?.message ?? ''}
-      confirmText={config?.confirmText}
-      cancelText={config?.cancelText}
-      disabled={config?.disabled}
+      title={current?.title || ''}
+      message={current?.message ?? ''}
+      confirmText={current?.confirmText}
+      cancelText={current?.cancelText}
+      disabled={current?.disabled}
     />
-  ), [config, handleClose, handleConfirm])
+  )}, [handleClose, handleConfirm])
 
   return { confirm, ConfirmDialog }
 }

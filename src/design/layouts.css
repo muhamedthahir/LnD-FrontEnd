@@ -4,7 +4,7 @@
 .cz-page > :is(.users-table-card,.questions-table-card,.assessments-table-card,.groups-table-card,.table-card) { padding: 0; border: 0; background: transparent; }
 .cz-page .cz-toolbar { margin-bottom: .5rem; padding: 1rem 1.25rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; }
 .cz-toolbar .cz-field { margin-bottom: 0; }
-.cz-toolbar label { font-size: .6875rem; letter-spacing: .04em; font-weight: 600; }
+.cz-toolbar label { font-size: .875rem; letter-spacing: .04em; font-weight: 600; }
 .cz-page .form-actions,.cz-page .modal-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: .75rem; padding-top: 1.25rem; border-top: 1px solid var(--border-color); margin-top: 1rem; }
 .cz-page .form-card { max-width: 66rem; }
 .cz-page .form-section + .form-section { margin-top: 1rem; }

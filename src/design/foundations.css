@@ -1,0 +1,84 @@
+/* Capability-based foundation: preserve readable entry and comfortable touch targets. */
+@media (pointer: coarse) {
+  .cz-page input:not([type=checkbox]):not([type=radio]):not([type=range]),
+  .cz-page select,.cz-page textarea,.cz-dialog input,.cz-dialog select,.cz-dialog textarea,
+  .cz-auth input,.cz-auth select,.cz-auth textarea,.cz-combobox-search input,
+  .cz-pagination select { font-size: max(1rem,16px); }
+  .cz-button,.cz-table .cz-button,.cz-pagination button,.cz-combobox-trigger,
+  .cz-combobox-clear,.cz-combobox-option,.cz-account-trigger { min-height:2.75rem; min-width:2.75rem; }
+  label:has(> input[type=checkbox]),label:has(> input[type=radio]) { min-height:2.75rem; }
+}
+@media (prefers-contrast: more) {
+  .cz-button,input:not([type=checkbox]):not([type=radio]),select,textarea,.cz-panel,.cz-dialog { border-color:var(--text-secondary); }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .cz-topbar { background:var(--bg-card); backdrop-filter:none; }
+}
+
+/* Foundation owns shared utility typography; page content is migrated in Phase 3. */
+.cz-toolbar label,.cz-field label { font-size:.875rem; line-height:var(--line-label); }
+.cz-resize-handle { touch-action: none; user-select: none; flex-shrink: 0; }
+.cz-resize-handle:focus-visible { outline: 2px solid var(--accent-primary); outline-offset: -2px; }
+.cz-page-heading { min-width: 0; grid-column: 1 / -1; }
+.cz-page-heading h1 { color: var(--text-primary); overflow-wrap: anywhere; }
+.cz-session-title { font-size: 1rem; line-height: 1.4; letter-spacing: 0; }
+.cz-shell .cz-page[data-view=AssessmentTake] .cz-context-bar { top: var(--layout-header-height); z-index: 30; }
+.cz-shell .czv-AssessmentTake-questionNav { top: calc(var(--layout-header-height) + 5rem); }
+.cz-auth-title { margin-bottom: 1.5rem; }
+.czv-Playground-projectInfo { border: 0; background: transparent; text-align: left; padding: .25rem; color: inherit; min-width: 0; }
+.cz-disclosure-title { font: inherit; color: inherit; background: transparent; border: 0; padding: .25rem 0; text-align: left; }
+.cz-button[aria-disabled=true] { opacity: .6; cursor: wait; }
+button.group-item,button.suggestion-item,button.summary-item { width: 100%; text-align: left; font: inherit; color: inherit; background: var(--bg-card); border: 1px solid var(--border-color); }
+.cz-page[data-view=CurrentCourse] .sidebar-segments { border-inline-start: 2px solid var(--border-color); margin-inline-start: .65rem; padding-inline-start: .75rem; }
+.cz-page[data-view=CurrentCourse] .sidebar-segment[aria-current=step] { box-shadow: inset 3px 0 var(--accent-primary); background: var(--accent-subtle); }
+.cz-page[data-view=CurrentCourse] .section-dot.completed { background: var(--success); }
+.cz-page[data-view=CurrentCourse] .section-dot.in-progress { background: var(--accent-primary); }
+.cz-page[data-view=ConfigurationCreate] .step-item { border-inline-start: 2px solid var(--border-color); }
+.cz-page[data-view=ConfigurationCreate] .step-item.active { border-inline-start-color: var(--accent-primary); }
+.cz-page[data-view=ConfigurationCreate] .step-item.completed { border-inline-start-color: var(--success); }
+.cz-validation-summary { padding: 1rem; margin-bottom: 1.5rem; border: 1px solid var(--error); border-radius: var(--radius-sm); background: var(--error-glow); color: var(--error); }
+.cz-validation-summary ul { margin: .5rem 0 0; padding-left: 1.25rem; }
+.cz-appearance-setting { display: grid; gap: .375rem; padding: .75rem; font-size: .875rem; }
+@media (max-width: 600px) {
+  .cz-page[data-view=CoursesManagement] > .filters-section .filters-right { grid-template-columns: minmax(0,1fr) minmax(0,1fr); }
+  .cz-page[data-view=CoursesManagement] .filters-right > .cz-button { grid-column: 1 / -1; justify-self: start; }
+}
+@supports (padding: env(safe-area-inset-bottom)) {
+  .cz-topbar { padding-top: env(safe-area-inset-top); }
+  .cz-dialog-actions,.cz-nav-footer { padding-bottom: max(1rem,env(safe-area-inset-bottom)); }
+}
+.cz-table { font-size:.875rem; }
+.cz-table th { font-size:.75rem; line-height:1.5; letter-spacing:.02em; text-transform:none; }
+.cz-page .status-badge,.cz-page .role-badge { font-size:.75rem; line-height:1.5; }
+.cz-table :is(td,th),.cz-pagination,.czv-AssessmentTake-timer { font-variant-numeric:tabular-nums; }
+
+/* Compact headings and balanced student transfer lists. */
+.cz-page-heading + .cz-context-bar { margin-top: -.5rem; }
+.cz-page[data-view=CreateGroup] .student-selection-container { display:grid; grid-template-columns:minmax(0,1fr) 3rem minmax(0,1fr); gap:1rem; align-items:stretch; }
+.cz-page[data-view=CreateGroup] .student-list-panel { min-width:0; display:flex; flex-direction:column; gap:.75rem; padding:1rem; border:1px solid var(--border-color); border-radius:var(--radius-md); background:var(--bg-card); }
+.cz-page[data-view=CreateGroup] .student-list-header { display:flex; align-items:center; justify-content:space-between; gap:.5rem; flex-wrap:wrap; }
+.cz-page[data-view=CreateGroup] .select-all-checkbox { display:inline-flex; align-items:center; gap:.5rem; font-size:.875rem; }
+.cz-page[data-view=CreateGroup] .student-list { min-height:12rem; max-height:26rem; overflow:auto; flex:1; }
+.cz-page[data-view=CreateGroup] .student-item { display:flex; align-items:center; gap:.75rem; padding:.75rem .25rem; cursor:pointer; border-bottom:1px solid var(--border-color); }
+.cz-page[data-view=CreateGroup] .student-item > div { min-width:0; overflow-wrap:anywhere; }
+.cz-page[data-view=CreateGroup] .student-email { font-size:.875rem; color:var(--text-secondary); }
+.cz-page[data-view=CreateGroup] .transfer-buttons { display:flex; flex-direction:column; justify-content:center; gap:.75rem; }
+.cz-page[data-view=CreateGroup] .btn-transfer { padding:.5rem; font-size:1.25rem; }
+.cz-page[data-view=CreateGroup] .student-list-pagination .cz-pagination { flex-wrap:wrap; }
+@media(max-width:600px) {
+.cz-page[data-view=CreateGroup] .student-selection-container { grid-template-columns:minmax(0,1fr); }
+.cz-page[data-view=CreateGroup] .transfer-buttons { flex-direction:row; }
+.cz-page[data-view=CreateGroup] .btn-transfer { transform:rotate(90deg); min-width:2.75rem; }
+}
+
+.cz-page[data-view=CreateGroup] .form-section:has(.group-info) { padding:1rem; }
+.cz-page[data-view=CreateGroup] .form-section:has(.group-info) > h2 { margin-bottom:.5rem; }
+.cz-page[data-view=CreateGroup] .student-list-panel .select-all-checkbox { padding:.25rem; border:0; border-radius:0; background:transparent; min-height:2.75rem; }
+.cz-page[data-view=CreateGroup] .student-list .student-item { margin:0; }
+
+/* Page return navigation shares the title row at every viewport size. */
+.cz-page-heading { display:flex; align-items:center; justify-content:space-between; gap:.75rem; }
+.cz-page-heading h1 { flex:1 1 auto; min-width:0; }
+.cz-page-back { flex:0 0 auto; margin-inline-start:auto; max-width:55%; }
+.cz-page-back > .cz-button { margin:0; position:static; width:auto; max-width:100%; }
+.cz-page-back .user-detail-back-nav__inner { display:inline-flex; align-items:center; gap:.5rem; }

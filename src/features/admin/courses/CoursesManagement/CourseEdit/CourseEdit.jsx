@@ -423,12 +423,12 @@ function CourseEdit() {
   const canEditPublishedCourse = user?.role === 'primary_admin' || user?.role === 'campuszen_admin';
   const isEditable = !isPublished ? true : canEditPublishedCourse && editMode;
   const isViewOnly = isPublished && !editMode;
-  return <PageContent className="course-edit-page" view="CourseEdit">
-      <Toolbar className="cz-context-bar"><ActionButton className="back-button" onClick={() => navigate('/admin/courses/management')}>
+  return <PageContent className="course-edit-page" view="CourseEdit" backAction={<ActionButton variant="secondary" className="back-button" onClick={() => navigate('/admin/courses/management')}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
-        </ActionButton><div className="header-content"><strong>{course?.name || 'Course'}</strong><div className="header-actions">{isPublished && !editMode ? canEditPublishedCourse ? <Button variant="primary" onClick={() => setEditMode(true)} title="Edit course to make changes, then save to update">
+        </ActionButton>}>
+      <Toolbar className="cz-context-bar"><div className="header-content"><strong>{course?.name || 'Course'}</strong><div className="header-actions">{isPublished && !editMode ? canEditPublishedCourse ? <Button variant="primary" onClick={() => setEditMode(true)} title="Edit course to make changes, then save to update">
                   Edit Course
                 </Button> : <Button variant="primary" disabled title="Only primary admins can edit published courses">
                   Edit Course
@@ -509,12 +509,12 @@ function CourseEdit() {
                   {sections.map(section => <div key={section.id} className="section-item">
                       <div className="section-header" onClick={() => toggleSection(section.id)}>
                         <div className="section-info">
-                          <h4>{section.name}</h4>
+                          <h4><button type="button" className="cz-disclosure-title" aria-expanded={Boolean(expandedSections[section.id])} onClick={event => { event.stopPropagation(); toggleSection(section.id) }}>{section.name}</button></h4>
                           {section.description && <p>{section.description}</p>}
                         </div>
                         <div className="section-actions">
                           {isEditable && <>
-                              <ActionButton className="icon-btn" aria-label={`Edit section ${section.name}`} onClick={e => {
+                              <ActionButton variant="secondary" className="icon-btn" aria-label={`Edit section ${section.name}`} onClick={e => {
                       e.stopPropagation();
                       handleEditSection(section);
                     }}>
@@ -523,7 +523,7 @@ function CourseEdit() {
                                   <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                                 </svg>
                               </ActionButton>
-                              <ActionButton className="icon-btn" aria-label={`Delete section ${section.name}`} onClick={e => {
+                              <ActionButton variant="secondary" className="icon-btn" aria-label={`Delete section ${section.name}`} onClick={e => {
                       e.stopPropagation();
                       handleDeleteSection(section.id);
                     }}>
@@ -589,7 +589,7 @@ function CourseEdit() {
                                           <span className="lesson-type">{lesson.segment_type.replace('lesson_', '')}</span>
                                         </div>
                                         <div className="lesson-actions">
-                                          <ActionButton className="icon-btn view" onClick={async () => {
+                                          <ActionButton variant="secondary" className="icon-btn view" onClick={async () => {
                             try {
                               const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.SEGMENTS.GET(lesson.id)}`, {
                                 headers: {
@@ -615,7 +615,7 @@ function CourseEdit() {
                                             </svg>
                                           </ActionButton>
                                           {isEditable && <>
-                                              <ActionButton className="icon-btn" onClick={async () => {
+                                              <ActionButton variant="secondary" className="icon-btn" onClick={async () => {
                               try {
                                 const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.SEGMENTS.GET(lesson.id)}`, {
                                   headers: {
@@ -640,7 +640,7 @@ function CourseEdit() {
                                                   <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                                                 </svg>
                                               </ActionButton>
-                                              <ActionButton className="icon-btn delete" onClick={() => {
+                                              <ActionButton variant="danger" className="icon-btn delete" onClick={() => {
                               setLessonToDelete(lesson);
                               setSectionIdForDelete(section.id);
                               setShowDeleteConfirm(true);
@@ -703,7 +703,7 @@ function CourseEdit() {
                                           </div>
                                         </div>
                                         <div className="practice-segment-actions">
-                                          <ActionButton className="icon-btn" onClick={() => navigate(`/admin/courses/${id}/topics/${section.id}/practice?id=${segment.id}`)} title="Edit Practice Segment">
+                                          <ActionButton variant="secondary" className="icon-btn" onClick={() => navigate(`/admin/courses/${id}/topics/${section.id}/practice?id=${segment.id}`)} title="Edit Practice Segment">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                                               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
@@ -843,7 +843,7 @@ function CourseEdit() {
               <div className="thumbnail-upload">
                 {thumbnail ? <div className="thumbnail-preview">
                     <img src={thumbnail} alt="Course thumbnail" />
-                    {isEditable && <ActionButton type="button" className="btn-danger" onClick={() => setThumbnail(null)}>Remove</ActionButton>}
+                    {isEditable && <ActionButton variant="danger" type="button" className="btn-danger" onClick={() => setThumbnail(null)}>Remove</ActionButton>}
                   </div> : isEditable && <div className="thumbnail-placeholder">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
@@ -891,7 +891,7 @@ function CourseEdit() {
                   <div className="tags-list">
                     {tags.map(tag => <span key={tag} className="tag">
                         {tag}
-                        <ActionButton type="button" className="tag-remove" onClick={() => handleRemoveTag(tag)} aria-label={`Remove ${tag}`}>×</ActionButton>
+                        <ActionButton variant="secondary" type="button" className="tag-remove" onClick={() => handleRemoveTag(tag)} aria-label={`Remove ${tag}`}>×</ActionButton>
                       </span>)}
                   </div>
                 </> : <div className="tags-list">

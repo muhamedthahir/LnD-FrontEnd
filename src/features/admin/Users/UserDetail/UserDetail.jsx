@@ -267,41 +267,41 @@ function UserDetail() {
       </PageContent>;
   }
   if (!user) {
-    return <PageContent className="user-detail-page" view="UserDetail">
-        <div className="user-detail-error">
-          <p>User not found</p>
-          <ActionButton type="button" className="user-detail-back-nav" onClick={() => navigate('/admin/users')}>
+    return <PageContent className="user-detail-page" view="UserDetail" backAction={<ActionButton variant="secondary" type="button" className="user-detail-back-nav" onClick={() => navigate('/admin/users')}>
             <span className="user-detail-back-nav__inner">
               <svg className="user-detail-back-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
                 <path d="M19 12H5M12 19l-7-7 7-7" />
               </svg>
               <span className="user-detail-back-nav__label">Back</span>
             </span>
-          </ActionButton>
+          </ActionButton>}>
+        <div className="user-detail-error">
+          <p>User not found</p>
+
         </div>
       </PageContent>;
   }
-  return <PageContent className="user-detail-page" view="UserDetail">
-      <Toolbar className="cz-context-bar"><ActionButton type="button" className="user-detail-back-nav" onClick={() => navigate('/admin/users')}>
+  return <PageContent className="user-detail-page" view="UserDetail" backAction={<ActionButton variant="secondary" type="button" className="user-detail-back-nav" onClick={() => navigate('/admin/users')}>
           <span className="user-detail-back-nav__inner">
             <svg className="user-detail-back-nav__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
               <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
             <span className="user-detail-back-nav__label">Back</span>
           </span>
-        </ActionButton><div className="header-content"><div className="user-identity"><div className="user-avatar-large">{user.name?.charAt(0).toUpperCase() || 'U'}</div><div><strong>{user.name}</strong><span className={`role-badge role-${user.role}`}>{getRoleDisplay(user.role)}</span><span className={`status-badge status-${user.status || 'activated'}`}>{user.status === 'pending' ? 'Pending' : 'Activated'}</span></div></div><div className="header-actions"><ActionButton className="btn-action" onClick={() => setShowEditModal(true)}>
+        </ActionButton>}>
+      <Toolbar className="cz-context-bar"><div className="header-content"><div className="user-identity"><div className="user-avatar-large">{user.name?.charAt(0).toUpperCase() || 'U'}</div><div><strong>{user.name}</strong><span className={`role-badge role-${user.role}`}>{getRoleDisplay(user.role)}</span><span className={`status-badge status-${user.status || 'activated'}`}>{user.status === 'pending' ? 'Pending' : 'Activated'}</span></div></div><div className="header-actions"><ActionButton variant="secondary" className="btn-action" onClick={() => setShowEditModal(true)}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
               </svg>
               Edit
-            </ActionButton><ActionButton className="btn-action warning" onClick={() => setShowResetModal(true)}>
+            </ActionButton><ActionButton variant="secondary" className="btn-action warning" onClick={() => setShowResetModal(true)}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                 <path d="M7 11V7a5 5 0 0 1 10 0v4" />
               </svg>
               Reset Password
-            </ActionButton>{user.status === 'pending' && <ActionButton className="btn-action info" onClick={handleResendOTP} disabled={resendingOtp}>
+            </ActionButton>{user.status === 'pending' && <ActionButton variant="secondary" className="btn-action info" onClick={handleResendOTP} disabled={resendingOtp}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M21.5 2v6h-6M2.5 22v-6h6" />
                   <path d="M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
@@ -584,7 +584,7 @@ function UserDetail() {
       </section>
 
       {}
-      {showEditModal && <DialogLayer className="modal-overlay" onClick={() => setShowEditModal(false)} busy={saving}>
+      {<DialogLayer open={Boolean(showEditModal)} className="modal-overlay" onClick={() => setShowEditModal(false)} busy={saving}>{Boolean(showEditModal) ? <>
           <DialogSurface className="modal-content" onClick={e => e.stopPropagation()}>
             <h2>Edit User Details</h2>
             <form onSubmit={handleEditSubmit}>
@@ -653,19 +653,19 @@ function UserDetail() {
               </FieldGroup>
 
               <div className="form-actions">
-                <ActionButton type="submit" className="btn-primary" disabled={saving}>
+                <ActionButton variant="primary" type="submit" className="btn-primary" disabled={saving}>
                   {saving ? 'Updating...' : 'Update'}
                 </ActionButton>
-                <ActionButton type="button" className="btn-secondary" onClick={() => setShowEditModal(false)}>
+                <ActionButton variant="secondary" type="button" className="btn-secondary" onClick={() => setShowEditModal(false)}>
                   Cancel
                 </ActionButton>
               </div>
             </form>
           </DialogSurface>
-        </DialogLayer>}
+        </> : null}</DialogLayer>}
 
       {}
-      {showResetModal && <DialogLayer className="modal-overlay" onClick={() => setShowResetModal(false)} busy={resettingPassword}>
+      {<DialogLayer open={Boolean(showResetModal)} className="modal-overlay" onClick={() => setShowResetModal(false)} busy={resettingPassword}>{Boolean(showResetModal) ? <>
           <DialogSurface className="modal-content" onClick={e => e.stopPropagation()}>
             <h2>Reset Password</h2>
             <p>Reset password for {user.name}</p>
@@ -675,10 +675,10 @@ function UserDetail() {
                 <input type="password" value={resetPassword} onChange={e => setResetPassword(e.target.value)} placeholder="Minimum 6 characters" required minLength={6} />
               </FieldGroup>
               <div className="form-actions">
-                <ActionButton type="submit" className="btn-primary" disabled={resettingPassword}>
+                <ActionButton variant="primary" type="submit" className="btn-primary" disabled={resettingPassword}>
                   {resettingPassword ? 'Resetting...' : 'Reset Password'}
                 </ActionButton>
-                <ActionButton type="button" className="btn-secondary" onClick={() => {
+                <ActionButton variant="secondary" type="button" className="btn-secondary" onClick={() => {
               setShowResetModal(false);
               setResetPassword('');
             }}>
@@ -687,7 +687,7 @@ function UserDetail() {
               </div>
             </form>
           </DialogSurface>
-        </DialogLayer>}
+        </> : null}</DialogLayer>}
     </PageContent>;
 }
 export default UserDetail;

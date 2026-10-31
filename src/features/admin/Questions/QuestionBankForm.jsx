@@ -174,13 +174,13 @@ function QuestionBankForm() {
         <div className="loading-state">Loading question bank...</div>
       </PageContent>;
   }
-  return <PageContent className="question-form-page" view="QuestionBankForm">
-      <Toolbar className="cz-context-bar"><div><ActionButton type="button" className="btn-secondary back-btn" onClick={() => navigate('/admin/questions/banks')}>
+  return <PageContent className="question-form-page" view="QuestionBankForm" backAction={<ActionButton variant="secondary" type="button" className="btn-secondary back-btn" onClick={() => navigate('/admin/questions/banks')}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <polyline points="15 18 9 12 15 6" />
             </svg>
             Back
-          </ActionButton></div></Toolbar>
+          </ActionButton>}>
+
 
       <form onSubmit={handleSubmit} className="form-card">
         <Panel className="form-section">
@@ -235,10 +235,10 @@ function QuestionBankForm() {
         </Panel>
 
         <div className="form-actions">
-          <ActionButton type="button" className="btn-secondary" onClick={() => navigate('/admin/questions/banks')}>
+          <ActionButton variant="secondary" type="button" className="btn-secondary" onClick={() => navigate('/admin/questions/banks')}>
             Cancel
           </ActionButton>
-          <ActionButton type="submit" className="btn-primary" disabled={saving}>
+          <ActionButton variant="primary" type="submit" className="btn-primary" disabled={saving}>
             {saving ? 'Saving...' : isEditing ? 'Update Question Bank' : 'Create Question Bank'}
           </ActionButton>
         </div>

@@ -349,13 +349,13 @@ function Settings() {
           </td>)}
         <td>
           <div className="action-buttons">
-            <ActionButton className="btn-icon edit" onClick={() => handleEdit(item)} title="Edit">
+            <ActionButton variant="secondary" className="btn-icon edit" onClick={() => handleEdit(item)} title="Edit">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
               </svg>
             </ActionButton>
-            {!isCoreRole && <ActionButton className="btn-icon delete" onClick={() => handleDelete(item)} title="Delete">
+            {!isCoreRole && <ActionButton variant="danger" className="btn-icon delete" onClick={() => handleDelete(item)} title="Delete">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <polyline points="3 6 5 6 21 6" />
                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
@@ -374,7 +374,7 @@ function Settings() {
         {}
         <aside className="settings-sidebar">
           <nav className="settings-nav">
-            {Object.entries(MASTER_DATA_CONFIG).map(([key, value]) => <ActionButton key={key} className={`nav-item ${activeTab === key ? 'active' : ''}`} onClick={() => setActiveTab(key)}>
+            {Object.entries(MASTER_DATA_CONFIG).map(([key, value]) => <ActionButton variant="secondary" key={key} className={`nav-item ${activeTab === key ? 'active' : ''}`} onClick={() => setActiveTab(key)}>
                 {value.icon}
                 <span>{value.name}</span>
               </ActionButton>)}
@@ -385,7 +385,7 @@ function Settings() {
         <section className="settings-main">
           <div className="content-header">
             <h2>{config.name}</h2>
-            <ActionButton className="btn-primary" onClick={handleCreate}>
+            <ActionButton variant="primary" className="btn-primary" onClick={handleCreate}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <line x1="12" y1="5" x2="12" y2="19" />
                 <line x1="5" y1="12" x2="19" y2="12" />
@@ -402,10 +402,10 @@ function Settings() {
                 {config.icon}
                 <h3>No {config.name} Found</h3>
                 <p>Get started by creating your first {singularName.toLowerCase()}.</p>
-                <ActionButton className="btn-primary" onClick={handleCreate}>
+                <ActionButton variant="primary" className="btn-primary" onClick={handleCreate}>
                   Add {singularName}
                 </ActionButton>
-              </div> : <DataTable className="data-table">
+              </div> : <DataTable aria-label="Settings" className="data-table">
                 <thead>
                   {renderTableHeaders()}
                 </thead>
@@ -418,7 +418,7 @@ function Settings() {
       </div>
 
       {}
-      {showModal && <DialogLayer className="modal-overlay" onClick={() => setShowModal(false)} busy={actionLoading}>
+      {<DialogLayer open={Boolean(showModal)} className="modal-overlay" onClick={() => setShowModal(false)} busy={actionLoading}>{Boolean(showModal) ? <>
           <DialogSurface className="modal-content" onClick={e => e.stopPropagation()}>
             <h2>{isEditing ? 'Edit' : 'Add'} {singularName}</h2>
             <form onSubmit={handleSubmit}>
@@ -438,16 +438,16 @@ function Settings() {
                     </FieldGroup> : <input type={field.type} name={field.key} value={formData[field.key] ?? ''} onChange={handleChange} required={field.required} />}
                 </FieldGroup>)}
               <div className="form-actions">
-                <ActionButton type="submit" className="btn-primary" disabled={actionLoading}>
+                <ActionButton variant="primary" type="submit" className="btn-primary" disabled={actionLoading}>
                   {actionLoading ? 'Saving...' : isEditing ? 'Update' : 'Create'}
                 </ActionButton>
-                <ActionButton type="button" className="btn-secondary" onClick={() => setShowModal(false)}>
+                <ActionButton variant="secondary" type="button" className="btn-secondary" onClick={() => setShowModal(false)}>
                   Cancel
                 </ActionButton>
               </div>
             </form>
           </DialogSurface>
-        </DialogLayer>}
+        </> : null}</DialogLayer>}
 
       {}
       <ConfirmModal isOpen={showDeleteModal} onClose={() => {

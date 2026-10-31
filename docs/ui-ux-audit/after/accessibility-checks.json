@@ -1,0 +1,3088 @@
+[
+  {
+    "route": "/",
+    "role": "student",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/login",
+    "role": "anonymous",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/reset-password",
+    "role": "anonymous",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/codeeditor",
+    "role": "student",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [
+      {
+        "id": "scrollable-region-focusable",
+        "impact": "serious",
+        "description": "Ensure elements that have scrollable content are accessible by keyboard in Safari",
+        "nodes": [
+          {
+            "target": [
+              "pre:nth-child(6)"
+            ],
+            "summary": "Fix any of the following:\n Element should have focusable content\n Element should be focusable"
+          }
+        ]
+      }
+    ],
+    "incomplete": [
+      {
+        "id": "aria-prohibited-attr",
+        "impact": "serious",
+        "count": 1
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "route": "/playground",
+    "role": "student",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "count": 3
+      }
+    ]
+  },
+  {
+    "route": "/playground/share/1",
+    "role": "student",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "count": 3
+      }
+    ]
+  },
+  {
+    "route": "/dashboard",
+    "role": "student",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/personal-details",
+    "role": "student",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/courses",
+    "role": "student",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/courses/user-courses",
+    "role": "student",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/courses/1",
+    "role": "student",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/courses/1/current",
+    "role": "student",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/courses/1/practice/1",
+    "role": "student",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "aria-prohibited-attr",
+        "impact": "serious",
+        "count": 1
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "route": "/courses/1/quiz/1",
+    "role": "student",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/courses/1/assessment/1",
+    "role": "student",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/assessments",
+    "role": "student",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/user/assessments",
+    "role": "student",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/user/assessments/1/start",
+    "role": "student",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/user/assessments/1/take",
+    "role": "student",
+    "theme": "light",
+    "width": 1440,
+    "error": "SyntaxError: Unexpected end of JSON input"
+  },
+  {
+    "route": "/user/assessments/1/results",
+    "role": "student",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "route": "/admin/institutions",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/institutions/create",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/institutions/1",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/mailer-templates/1/edit",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/mailer-templates/1",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/mailer-templates",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/settings",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/users",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/users/create",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/users/1",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/management",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/create",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/1/edit",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/configurations",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/1/configurations",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/1/configurations/create",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/administrations",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/administrators/1/users",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/results/1",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/progress/1",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/groups",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/groups/create",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/groups/1/edit",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/courses/management",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/courses/management/1/edit",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/courses/1/topics/1/practice",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/courses/administrations",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/courses/administrations/create",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/courses/administrations/1",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/courses/administrations/1/users/1/progress",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/banks",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/banks/create",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/banks/1",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/banks/1/edit",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/list",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/list/create",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/list/1",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/list/1/edit",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/list/2/testcases",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/",
+    "role": "student",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/login",
+    "role": "anonymous",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/reset-password",
+    "role": "anonymous",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/codeeditor",
+    "role": "student",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "aria-prohibited-attr",
+        "impact": "serious",
+        "count": 1
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "route": "/playground",
+    "role": "student",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "count": 3
+      }
+    ]
+  },
+  {
+    "route": "/playground/share/1",
+    "role": "student",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "count": 4
+      }
+    ]
+  },
+  {
+    "route": "/dashboard",
+    "role": "student",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/personal-details",
+    "role": "student",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/courses",
+    "role": "student",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/courses/user-courses",
+    "role": "student",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/courses/1",
+    "role": "student",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/courses/1/current",
+    "role": "student",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/courses/1/practice/1",
+    "role": "student",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "aria-prohibited-attr",
+        "impact": "serious",
+        "count": 1
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "route": "/courses/1/quiz/1",
+    "role": "student",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/courses/1/assessment/1",
+    "role": "student",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/assessments",
+    "role": "student",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/user/assessments",
+    "role": "student",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/user/assessments/1/start",
+    "role": "student",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/user/assessments/1/take",
+    "role": "student",
+    "theme": "dark",
+    "width": 1440,
+    "error": "SyntaxError: Unexpected end of JSON input"
+  },
+  {
+    "route": "/user/assessments/1/results",
+    "role": "student",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "route": "/admin/institutions",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/institutions/create",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/institutions/1",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/mailer-templates/1/edit",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/mailer-templates/1",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/mailer-templates",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/settings",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/users",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/users/create",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/users/1",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/management",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/create",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/1/edit",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/configurations",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/1/configurations",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/1/configurations/create",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/administrations",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/administrators/1/users",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/results/1",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/progress/1",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/groups",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/groups/create",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/groups/1/edit",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/courses/management",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/courses/management/1/edit",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/courses/1/topics/1/practice",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/courses/administrations",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/courses/administrations/create",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/courses/administrations/1",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/courses/administrations/1/users/1/progress",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/banks",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/banks/create",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/banks/1",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/banks/1/edit",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/list",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/list/create",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/list/1",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/list/1/edit",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/list/2/testcases",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 1440,
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/user/assessments/1/take",
+    "theme": "light",
+    "width": 1440,
+    "state": "coding-submitted",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "count": 4
+      }
+    ]
+  },
+  {
+    "route": "/",
+    "role": "student",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/login",
+    "role": "anonymous",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".cz-button--primary"
+            ],
+            "summary": "Fix any of the following:\n Element has insufficient color contrast of 4.11 (foreground color: #ffffff, background color: #4c76eb, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ],
+    "incomplete": []
+  },
+  {
+    "route": "/reset-password",
+    "role": "anonymous",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/codeeditor",
+    "role": "student",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "aria-prohibited-attr",
+        "impact": "serious",
+        "count": 1,
+        "nodes": [
+          {
+            "target": [
+              ".czv-CodeEditor-customOutputArea"
+            ],
+            "reasons": [
+              "aria-label attribute is not well supported on \"pre\" elements with no valid role attribute."
+            ]
+          }
+        ]
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "count": 1,
+        "nodes": [
+          {
+            "target": [
+              ".ime-text-area"
+            ],
+            "reasons": [
+              "Element has no value; test color contrast with a value entered"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "route": "/playground",
+    "role": "student",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [
+      {
+        "id": "scrollable-region-focusable",
+        "impact": "serious",
+        "description": "Ensure elements that have scrollable content are accessible by keyboard in Safari",
+        "nodes": [
+          {
+            "target": [
+              ".czv-Playground-projectList"
+            ],
+            "summary": "Fix any of the following:\n Element should have focusable content\n Element should be focusable"
+          }
+        ]
+      }
+    ],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "count": 2,
+        "nodes": [
+          {
+            "target": [
+              "textarea"
+            ],
+            "reasons": [
+              "Element has no value; test color contrast with a value entered"
+            ]
+          },
+          {
+            "target": [
+              ".czv-Playground-chevron"
+            ],
+            "reasons": [
+              "Element content contains only non-text characters"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "route": "/playground/share/1",
+    "role": "student",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [
+      {
+        "id": "scrollable-region-focusable",
+        "impact": "serious",
+        "description": "Ensure elements that have scrollable content are accessible by keyboard in Safari",
+        "nodes": [
+          {
+            "target": [
+              ".czv-Playground-projectList"
+            ],
+            "summary": "Fix any of the following:\n Element should have focusable content\n Element should be focusable"
+          }
+        ]
+      }
+    ],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "count": 2,
+        "nodes": [
+          {
+            "target": [
+              "textarea"
+            ],
+            "reasons": [
+              "Element has no value; test color contrast with a value entered"
+            ]
+          },
+          {
+            "target": [
+              ".czv-Playground-chevron"
+            ],
+            "reasons": [
+              "Element content contains only non-text characters"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "route": "/dashboard",
+    "role": "student",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/personal-details",
+    "role": "student",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/courses",
+    "role": "student",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/courses/user-courses",
+    "role": "student",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/courses/1",
+    "role": "student",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/courses/1/current",
+    "role": "student",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/courses/1/practice/1",
+    "role": "student",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "aria-prohibited-attr",
+        "impact": "serious",
+        "count": 1,
+        "nodes": [
+          {
+            "target": [
+              "pre"
+            ],
+            "reasons": [
+              "aria-label attribute is not well supported on \"pre\" elements with no valid role attribute."
+            ]
+          }
+        ]
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "count": 1,
+        "nodes": [
+          {
+            "target": [
+              ".ime-text-area"
+            ],
+            "reasons": [
+              "Element has no value; test color contrast with a value entered"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "route": "/courses/1/quiz/1",
+    "role": "student",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/courses/1/assessment/1",
+    "role": "student",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/assessments",
+    "role": "student",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/user/assessments",
+    "role": "student",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/user/assessments/1/start",
+    "role": "student",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/user/assessments/1/take",
+    "role": "student",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "count": 2,
+        "nodes": [
+          {
+            "target": [
+              "#\\:r2\\:"
+            ],
+            "reasons": [
+              "Element's background color could not be determined because it partially overlaps other elements"
+            ]
+          },
+          {
+            "target": [
+              "p"
+            ],
+            "reasons": [
+              "Element's background color could not be determined because it partially overlaps other elements"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "route": "/user/assessments/1/results",
+    "role": "student",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "count": 1,
+        "nodes": [
+          {
+            "target": [
+              ".score-value"
+            ],
+            "reasons": [
+              "Element's background color could not be determined because element contains an image node"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "route": "/admin/institutions",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/institutions/create",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/institutions/1",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/mailer-templates/1/edit",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/mailer-templates/1",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/mailer-templates",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/settings",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/users",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/users/create",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/users/1",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/login",
+    "role": "anonymous",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/reset-password",
+    "role": "anonymous",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/codeeditor",
+    "role": "student",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "aria-prohibited-attr",
+        "impact": "serious",
+        "count": 1,
+        "nodes": [
+          {
+            "target": [
+              ".czv-CodeEditor-customOutputArea"
+            ],
+            "reasons": [
+              "aria-label attribute is not well supported on \"pre\" elements with no valid role attribute."
+            ]
+          }
+        ]
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "count": 1,
+        "nodes": [
+          {
+            "target": [
+              ".ime-text-area"
+            ],
+            "reasons": [
+              "Element has no value; test color contrast with a value entered"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "route": "/playground",
+    "role": "student",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "count": 2,
+        "nodes": [
+          {
+            "target": [
+              "textarea"
+            ],
+            "reasons": [
+              "Element has no value; test color contrast with a value entered"
+            ]
+          },
+          {
+            "target": [
+              ".czv-Playground-chevron"
+            ],
+            "reasons": [
+              "Element content contains only non-text characters"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "route": "/playground/share/1",
+    "role": "student",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "count": 2,
+        "nodes": [
+          {
+            "target": [
+              "textarea"
+            ],
+            "reasons": [
+              "Element has no value; test color contrast with a value entered"
+            ]
+          },
+          {
+            "target": [
+              ".czv-Playground-chevron"
+            ],
+            "reasons": [
+              "Element content contains only non-text characters"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "route": "/admin/assessments/management",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/create",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/1/edit",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/configurations",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/1/configurations",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/1/configurations/create",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/administrations",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/administrators/1/users",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/results/1",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/progress/1",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/groups",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/groups/create",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/groups/1/edit",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/courses/management",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/courses/management/1/edit",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/courses/1/topics/1/practice",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/courses/administrations",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/courses/administrations/create",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/courses/administrations/1",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/courses/administrations/1/users/1/progress",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/banks",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/banks/create",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/banks/1",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/banks/1/edit",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/list",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/list/create",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/list/1",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/list/1/edit",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/list/2/testcases",
+    "role": "primary_admin",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/",
+    "role": "student",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/login",
+    "role": "anonymous",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/reset-password",
+    "role": "anonymous",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/codeeditor",
+    "role": "student",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "count": 1,
+        "nodes": [
+          {
+            "target": [
+              ".ime-text-area"
+            ],
+            "reasons": [
+              "Element has no value; test color contrast with a value entered"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "route": "/playground",
+    "role": "student",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "count": 2,
+        "nodes": [
+          {
+            "target": [
+              "textarea"
+            ],
+            "reasons": [
+              "Element has no value; test color contrast with a value entered"
+            ]
+          },
+          {
+            "target": [
+              ".czv-Playground-chevron"
+            ],
+            "reasons": [
+              "Element content contains only non-text characters"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "route": "/playground/share/1",
+    "role": "student",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "count": 2,
+        "nodes": [
+          {
+            "target": [
+              "textarea"
+            ],
+            "reasons": [
+              "Element has no value; test color contrast with a value entered"
+            ]
+          },
+          {
+            "target": [
+              ".czv-Playground-chevron"
+            ],
+            "reasons": [
+              "Element content contains only non-text characters"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "route": "/dashboard",
+    "role": "student",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/personal-details",
+    "role": "student",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/courses",
+    "role": "student",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/courses/user-courses",
+    "role": "student",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/courses/1",
+    "role": "student",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/courses/1/current",
+    "role": "student",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/courses/1/practice/1",
+    "role": "student",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "count": 1,
+        "nodes": [
+          {
+            "target": [
+              ".ime-text-area"
+            ],
+            "reasons": [
+              "Element has no value; test color contrast with a value entered"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "route": "/courses/1/quiz/1",
+    "role": "student",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/courses/1/assessment/1",
+    "role": "student",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/assessments",
+    "role": "student",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/user/assessments",
+    "role": "student",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/user/assessments/1/start",
+    "role": "student",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/user/assessments/1/take",
+    "role": "student",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "count": 2,
+        "nodes": [
+          {
+            "target": [
+              "#\\:r2\\:"
+            ],
+            "reasons": [
+              "Element's background color could not be determined because it partially overlaps other elements"
+            ]
+          },
+          {
+            "target": [
+              "p"
+            ],
+            "reasons": [
+              "Element's background color could not be determined because it partially overlaps other elements"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "route": "/user/assessments/1/results",
+    "role": "student",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "count": 1,
+        "nodes": [
+          {
+            "target": [
+              ".score-value"
+            ],
+            "reasons": [
+              "Element's background color could not be determined because element contains an image node"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "route": "/admin/institutions",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/institutions/create",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/institutions/1",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/mailer-templates/1/edit",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/mailer-templates/1",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/mailer-templates",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/settings",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/users",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/users/create",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/users/1",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/management",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/create",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/1/edit",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/configurations",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/1/configurations",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/1/configurations/create",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/administrations",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/administrators/1/users",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/results/1",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/assessments/progress/1",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/groups",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/groups/create",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/groups/1/edit",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/courses/management",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/courses/management/1/edit",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/courses/1/topics/1/practice",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/courses/administrations",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/courses/administrations/create",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/courses/administrations/1",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/courses/administrations/1/users/1/progress",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/banks",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/banks/create",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/banks/1",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/banks/1/edit",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/list",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/list/create",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/list/1",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/list/1/edit",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/admin/questions/list/2/testcases",
+    "role": "primary_admin",
+    "theme": "dark",
+    "width": 390,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "route": "/codeeditor",
+    "role": "student",
+    "theme": "light",
+    "width": 1440,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "count": 1,
+        "nodes": [
+          {
+            "target": [
+              ".ime-text-area"
+            ],
+            "reasons": [
+              "Element has no value; test color contrast with a value entered"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "route": "/user/assessments/1/take",
+    "role": "student",
+    "theme": "light",
+    "width": 1440,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "count": 1,
+        "nodes": [
+          {
+            "target": [
+              "p"
+            ],
+            "reasons": [
+              "Element's background color could not be determined because it partially overlaps other elements"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "route": "/user/assessments/1/take",
+    "role": "student",
+    "theme": "dark",
+    "width": 1440,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "count": 1,
+        "nodes": [
+          {
+            "target": [
+              "p"
+            ],
+            "reasons": [
+              "Element's background color could not be determined because it partially overlaps other elements"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "route": "/codeeditor",
+    "role": "student",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "count": 1,
+        "nodes": [
+          {
+            "target": [
+              ".ime-text-area"
+            ],
+            "reasons": [
+              "Element has no value; test color contrast with a value entered"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "route": "/courses/1/practice/1",
+    "role": "student",
+    "theme": "light",
+    "width": 390,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "count": 1,
+        "nodes": [
+          {
+            "target": [
+              ".ime-text-area"
+            ],
+            "reasons": [
+              "Element has no value; test color contrast with a value entered"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "route": "/user/assessments/1/take",
+    "role": "student",
+    "theme": "light",
+    "width": 1440,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "count": 1,
+        "nodes": [
+          {
+            "target": [
+              "p"
+            ],
+            "reasons": [
+              "Element's background color could not be determined because it partially overlaps other elements"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "route": "/user/assessments/1/take",
+    "role": "student",
+    "theme": "dark",
+    "width": 1440,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              "footer > .cz-button--primary.cz-button[type=\"button\"]"
+            ],
+            "summary": "Fix any of the following:\n Element has insufficient color contrast of 4.13 (foreground color: #061028, background color: #5074c0, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ]
+      }
+    ],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "count": 1,
+        "nodes": [
+          {
+            "target": [
+              "p"
+            ],
+            "reasons": [
+              "Element's background color could not be determined because it partially overlaps other elements"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "route": "/user/assessments/1/take",
+    "role": "student",
+    "theme": "dark",
+    "width": 1440,
+    "state": "initial",
+    "date": "2026-10-31",
+    "version": "4.14.0",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "count": 1,
+        "nodes": [
+          {
+            "target": [
+              "p"
+            ],
+            "reasons": [
+              "Element's background color could not be determined because it partially overlaps other elements"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

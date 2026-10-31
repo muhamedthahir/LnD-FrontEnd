@@ -83,7 +83,7 @@ function ResetPassword() {
   return <PageContent className={styles.container} view="ResetPassword">
       <div className="cz-auth-theme"><ThemeSwitch /></div>
       <div className={styles.card}>
-        <h2>Reset Password</h2>
+        <h1>Reset password</h1>
         <p className={styles.subtitle}>Enter your new password to continue.</p>
         <form onSubmit={handleSubmit} className={styles.form}>
           <label>
@@ -98,7 +98,7 @@ function ResetPassword() {
             Confirm New Password
             <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} placeholder="Re-enter new password" autoComplete="new-password" />
           </label>
-          <ActionButton type="submit" disabled={isSubmitting}>
+          <ActionButton variant="secondary" type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Updating...' : 'Reset Password'}
           </ActionButton>
         </form>

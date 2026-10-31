@@ -159,7 +159,7 @@ function QuestionList() {
 
 
       <div className="table-card">
-        <div className="table-filters"><div className="cz-filter-actions"><ActionButton className="btn-primary" onClick={() => navigate('/admin/questions/list/create')}>
+        <div className="table-filters"><div className="cz-filter-actions"><ActionButton variant="primary" className="btn-primary" onClick={() => navigate('/admin/questions/list/create')}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <line x1="12" y1="5" x2="12" y2="19" />
             <line x1="5" y1="12" x2="19" y2="12" />
@@ -179,7 +179,7 @@ function QuestionList() {
           <FieldGroup className="filter-group filter-dropdown">
             <Dropdown label="Status" options={statuses} value={selectedStatus} onChange={setSelectedStatus} placeholder="All Statuses" />
           </FieldGroup>
-          {hasFilters && <ActionButton className="btn-clear-filters" onClick={clearFilters} title="Clear filters">
+          {hasFilters && <ActionButton variant="secondary" className="btn-clear-filters" onClick={clearFilters} title="Clear filters">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
@@ -197,7 +197,7 @@ function QuestionList() {
               </svg>
               <h3>No Questions Found</h3>
               <p>Create your first question to get started</p>
-            </div> : <Table>
+            </div> : <Table aria-label="Question List" stickyActions>
               <thead>
                 <tr>
                   <th>Code</th>
@@ -234,7 +234,7 @@ function QuestionList() {
                     <td>{question.question_bank_name || '-'}</td>
                     <td>{new Date(question.created_at).toLocaleDateString()}</td>
                     <td className="actions-cell">
-                      <ActionButton className="action-btn edit" onClick={e => {
+                      <ActionButton variant="secondary" className="action-btn edit" onClick={e => {
                   e.stopPropagation();
                   navigate(`/admin/questions/list/${question.id}/edit`);
                 }} title="Edit">
@@ -243,7 +243,7 @@ function QuestionList() {
                           <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                         </svg>
                       </ActionButton>
-                      <ActionButton className="btn-delete" type="button" onClick={e => {
+                      <ActionButton variant="danger" className="btn-delete" type="button" onClick={e => {
                   e.stopPropagation();
                   setQuestionToDelete(question);
                 }} title="Delete">

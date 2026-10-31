@@ -112,7 +112,7 @@ function AssessmentManagement() {
                     <option value="ARCHIVED">Archived</option>
                   </select>
                 </FieldGroup>
-                {hasActiveFilters && <ActionButton type="button" onClick={handleClearFilters} className="btn-clear-filters" title="Clear all filters">
+                {hasActiveFilters && <ActionButton variant="secondary" type="button" onClick={handleClearFilters} className="btn-clear-filters" title="Clear all filters">
                     <svg viewBox="64 64 896 896" focusable="false" width="1em" height="1em" fill="currentColor" aria-hidden="true">
                       <path d="M899.1 869.6l-53-305.6H864c14.4 0 26-11.6 26-26V346c0-14.4-11.6-26-26-26H618V138c0-14.4-11.6-26-26-26H432c-14.4 0-26 11.6-26 26v182H160c-14.4 0-26 11.6-26 26v192c0 14.4 11.6 26 26 26h17.9l-53 305.6a25.95 25.95 0 0025.6 30.4h723c1.5 0 3-.1 4.4-.4a25.88 25.88 0 0021.2-30zM204 390h272V182h72v208h272v104H204V390zm468 440V674c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v156H416V674c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v156H202.8l45.1-260H776l45.1 260H672z"></path>
                     </svg>
@@ -124,7 +124,7 @@ function AssessmentManagement() {
                 <h3>No Assessments Match Your Filters</h3>
                 <p>Try adjusting your filters or create a new assessment.</p>
               </div> : <div className="table-wrapper">
-                <Table variant="embedded">
+                <Table aria-label="Assessment Management" stickyActions variant="embedded">
                   <thead>
                     <tr>
                       <th>Assessment</th>
@@ -139,7 +139,7 @@ function AssessmentManagement() {
                   <tbody>
                     {assessments.map(assessment => <tr key={assessment.id}>
                         <td>
-                          <ActionButton type="button" className="assessment-name-link" onClick={() => navigate(`/admin/assessments/${assessment.id}/edit`)}>
+                          <ActionButton variant="secondary" type="button" className="assessment-name-link" onClick={() => navigate(`/admin/assessments/${assessment.id}/edit`)}>
                             {assessment.title}
                           </ActionButton>
                           <div className="assessment-meta">{assessment.unique_id}</div>
@@ -151,7 +151,7 @@ function AssessmentManagement() {
                         <td>{new Date(assessment.created_at).toLocaleDateString()}</td>
                         <td>
                           <div className="action-buttons">
-                            <ActionButton type="button" className="btn-edit" onClick={() => navigate(`/admin/assessments/${assessment.id}/edit`)} title="View/Edit Assessment">
+                            <ActionButton variant="secondary" type="button" className="btn-edit" onClick={() => navigate(`/admin/assessments/${assessment.id}/edit`)} title="View/Edit Assessment">
                               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                                 <circle cx="12" cy="12" r="3" />

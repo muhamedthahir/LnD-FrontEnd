@@ -336,14 +336,14 @@ function TestCaseManager() {
         <div className="loading-state">Loading question...</div>
       </PageContent>;
   }
-  return <PageContent className="testcase-manager-page" view="TestCaseManager">
-      <Toolbar className="cz-context-bar"><div><ActionButton className="back-btn" onClick={() => navigate(`/admin/questions/list/${id}`)}>
+  return <PageContent className="testcase-manager-page" view="TestCaseManager" backAction={<ActionButton variant="secondary" className="back-btn" onClick={() => navigate(`/admin/questions/list/${id}`)}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <polyline points="15 18 9 12 15 6" />
             </svg>
             Back to Question
-          </ActionButton><div className="page-meta"><span className="question-code">{question?.code}</span><span className="question-name">{question?.name}</span></div></div>{!showForm && <div className="header-actions">
-            <ActionButton className="btn-secondary" onClick={handleDownloadTemplate}>
+          </ActionButton>}>
+      <Toolbar className="cz-context-bar"><div><div className="page-meta"><span className="question-code">{question?.code}</span><span className="question-name">{question?.name}</span></div></div>{!showForm && <div className="header-actions">
+            <ActionButton variant="secondary" className="btn-secondary" onClick={handleDownloadTemplate}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                 <polyline points="7 10 12 15 17 10"></polyline>
@@ -351,7 +351,7 @@ function TestCaseManager() {
               </svg>
               Download Template
             </ActionButton>
-            <ActionButton className="btn-secondary" onClick={openBulkUploadModal}>
+            <ActionButton variant="secondary" className="btn-secondary" onClick={openBulkUploadModal}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                 <polyline points="17 8 12 3 7 8"></polyline>
@@ -359,7 +359,7 @@ function TestCaseManager() {
               </svg>
               Bulk Upload
             </ActionButton>
-            <ActionButton className="btn-primary" onClick={handleAddNew}>
+            <ActionButton variant="primary" className="btn-primary" onClick={handleAddNew}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <line x1="12" y1="5" x2="12" y2="19" />
                 <line x1="5" y1="12" x2="19" y2="12" />
@@ -421,10 +421,10 @@ function TestCaseManager() {
             </Panel>
 
             <div className="form-actions">
-              <ActionButton type="button" className="btn-secondary" onClick={handleCancel}>
+              <ActionButton variant="secondary" type="button" className="btn-secondary" onClick={handleCancel}>
                 Cancel
               </ActionButton>
-              <ActionButton type="submit" className="btn-primary" disabled={saving}>
+              <ActionButton variant="primary" type="submit" className="btn-primary" disabled={saving}>
                 {saving ? 'Saving...' : editingTestCase ? 'Update Test Case' : 'Create Test Case'}
               </ActionButton>
             </div>
@@ -445,7 +445,7 @@ function TestCaseManager() {
             </svg>
             <h3>No Test Cases Yet</h3>
             <p>Add test cases to validate code submissions</p>
-            <ActionButton className="btn-primary" onClick={handleAddNew}>
+            <ActionButton variant="primary" className="btn-primary" onClick={handleAddNew}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <line x1="12" y1="5" x2="12" y2="19" />
                 <line x1="5" y1="12" x2="19" y2="12" />
@@ -477,11 +477,11 @@ function TestCaseManager() {
                 <div className="testcase-io">
                   <div className="io-block">
                     <span className="io-label">Input</span>
-                    <pre className="io-content">{testCase.input || '(empty)'}</pre>
+                    <pre tabIndex={0} className="io-content">{testCase.input || '(empty)'}</pre>
                   </div>
                   <div className="io-block">
                     <span className="io-label">Expected Output</span>
-                    <pre className="io-content">{testCase.expected_result}</pre>
+                    <pre tabIndex={0} className="io-content">{testCase.expected_result}</pre>
                   </div>
                 </div>
 
@@ -492,12 +492,12 @@ function TestCaseManager() {
                 </div>
 
                 <div className="testcase-actions">
-                  <ActionButton className={`action-btn toggle ${testCase.is_active ? 'active' : ''}`} onClick={() => handleToggleActive(testCase)} title={testCase.is_active ? 'Deactivate' : 'Activate'}>
+                  <ActionButton variant="secondary" className={`action-btn toggle ${testCase.is_active ? 'active' : ''}`} onClick={() => handleToggleActive(testCase)} title={testCase.is_active ? 'Deactivate' : 'Activate'}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       {testCase.is_active ? <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /> : <circle cx="12" cy="12" r="10" />}
                     </svg>
                   </ActionButton>
-                  <ActionButton className={`action-btn visibility ${testCase.is_hidden ? 'hidden' : ''}`} onClick={() => handleToggleHidden(testCase)} title={testCase.is_hidden ? 'Make Visible' : 'Hide'}>
+                  <ActionButton variant="secondary" className={`action-btn visibility ${testCase.is_hidden ? 'hidden' : ''}`} onClick={() => handleToggleHidden(testCase)} title={testCase.is_hidden ? 'Make Visible' : 'Hide'}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       {testCase.is_hidden ? <>
                           <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
@@ -508,13 +508,13 @@ function TestCaseManager() {
                         </>}
                     </svg>
                   </ActionButton>
-                  <ActionButton className="action-btn edit" onClick={() => handleEdit(testCase)} title="Edit">
+                  <ActionButton variant="secondary" className="action-btn edit" onClick={() => handleEdit(testCase)} title="Edit">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                       <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                     </svg>
                   </ActionButton>
-                  <ActionButton className="action-btn delete" onClick={() => setDeleteModal({
+                  <ActionButton variant="danger" className="action-btn delete" onClick={() => setDeleteModal({
               show: true,
               testCase
             })} title="Delete">
@@ -531,7 +531,7 @@ function TestCaseManager() {
       </div>
 
       {}
-      {showBulkUploadModal && <DialogLayer className="modal-overlay" onClick={closeBulkUploadModal}>
+      {<DialogLayer open={Boolean(showBulkUploadModal)} className="modal-overlay" onClick={closeBulkUploadModal}>{Boolean(showBulkUploadModal) ? <>
           <DialogSurface className="modal-content bulk-upload-modal" onClick={e => e.stopPropagation()}>
             <h2>Bulk Upload Test Cases</h2>
 
@@ -551,7 +551,7 @@ function TestCaseManager() {
                 <label>Upload Excel File *</label>
                 <div className="file-input-wrapper">
                   <input ref={fileInputRef} type="file" accept=".xlsx,.xls" onChange={e => { setBulkUploadFile(e.target.files[0] || null); setBulkUploadResult(null); }} hidden tabIndex={-1} />
-                  <ActionButton type="button" className="file-input-button" onClick={() => fileInputRef.current?.click()}>
+                  <ActionButton variant="secondary" type="button" className="file-input-button" onClick={() => fileInputRef.current?.click()}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                       <polyline points="17 8 12 3 7 8"></polyline>
@@ -564,7 +564,7 @@ function TestCaseManager() {
               </FieldGroup>
 
               {bulkUploadResult && <div className={`bulk-upload-result ${bulkUploadResult.success ? 'success' : 'error'}`}>
-                  <ActionButton type="button" className="bulk-upload-close" onClick={() => setBulkUploadResult(null)} title="Close">
+                  <ActionButton variant="secondary" type="button" className="bulk-upload-close" onClick={() => setBulkUploadResult(null)} title="Close">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <line x1="18" y1="6" x2="6" y2="18"></line>
                       <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -585,16 +585,16 @@ function TestCaseManager() {
                 </div>}
 
               <div className="modal-actions">
-                <ActionButton type="button" className="btn-secondary" onClick={closeBulkUploadModal}>
+                <ActionButton variant="secondary" type="button" className="btn-secondary" onClick={closeBulkUploadModal}>
                   {bulkUploadResult?.created > 0 ? 'Done' : 'Cancel'}
                 </ActionButton>
-                <ActionButton type="submit" className="btn-primary" disabled={bulkUploadLoading || !bulkUploadFile || bulkUploadResult?.success}>
+                <ActionButton variant="primary" type="submit" className="btn-primary" disabled={bulkUploadLoading || !bulkUploadFile || bulkUploadResult?.success}>
                   {bulkUploadLoading ? 'Uploading...' : 'Upload Test Cases'}
                 </ActionButton>
               </div>
             </form>
           </DialogSurface>
-        </DialogLayer>}
+        </> : null}</DialogLayer>}
 
       {}
       <ConfirmModal isOpen={deleteModal.show} onClose={() => setDeleteModal({

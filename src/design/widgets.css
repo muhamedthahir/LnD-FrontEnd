@@ -36,5 +36,6 @@ progress::-webkit-progress-value { background: var(--accent-primary); }
 .cz-combobox-menu { position: fixed; z-index: 1600; padding: .375rem; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--bg-card); box-shadow: var(--shadow-md); overflow-y: auto; }
 .cz-combobox-option { display: block; width: 100%; padding: .625rem .75rem; text-align: left; border: 0; border-radius: 5px; background: transparent; font-size: .8125rem; color: var(--text-primary); }
 .cz-combobox-option:hover,.cz-combobox-option[aria-selected=true] { background: var(--accent-subtle); color: var(--accent-primary); }
+.cz-combobox-option[data-active=true] { background: var(--accent-subtle); color: var(--accent-primary); outline: 2px solid var(--accent-primary); outline-offset: -2px; }
 .cz-combobox-search { padding: .25rem; position: sticky; top: 0; background: var(--bg-card); }
 .cz-combobox-empty { padding: 1rem; text-align: center; color: var(--text-secondary); font-size: .8125rem; }

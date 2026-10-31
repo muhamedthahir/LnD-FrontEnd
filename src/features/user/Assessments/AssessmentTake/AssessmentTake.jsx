@@ -1,3 +1,6 @@
+import { Dialog } from '../../../../design/Dialog';
+import useMediaQuery from '../../../../hooks/useMediaQuery';
+import ResizeHandle from '../../../../design/ResizeHandle';
 import AssessmentDialogs from '../../../../design/AssessmentDialogs';
 import { PageContent, ActionButton, Toolbar } from "../../../../design/Primitives";
 import { createViewStyles } from "../../../../design/viewStyles";
@@ -101,8 +104,9 @@ function AssessmentTake() {
   }, [navigate]);
   const PROGRESS_SAVE_INTERVAL = 10;
   const [showQuestionNav, setShowQuestionNav] = useState(false);
+  const compactQuestionNav = useMediaQuery('(max-width: 1200px)');
   const [problemWidth, setProblemWidth] = useState(34);
-  const resizingProblemRef = useRef(false);
+  const problemContainerRef = useRef(null);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showSegmentEndModal, setShowSegmentEndModal] = useState(false);
   const [showSegmentSubmitModal, setShowSegmentSubmitModal] = useState(false);
@@ -642,6 +646,7 @@ function AssessmentTake() {
       console.log('jumping to question', index);
       await saveCurrentProgress();
       setCurrentQuestionIndex(index);
+      if (compactQuestionNav) setShowQuestionNav(false);
     }
   };
   const handleMoveToNextSegment = async () => {
@@ -823,18 +828,65 @@ function AssessmentTake() {
       </PageContent>;
   }
   if (!assessmentData) {
-    return <PageContent className={`${styles.assessmentTakePage} ${styles.error}`} view="AssessmentTake">
+    return <PageContent className={`${styles.assessmentTakePage} ${styles.error}`} view="AssessmentTake" backAction={<Button variant="secondary" onClick={() => navigate('/user/assessments')}>Back to Assessments</Button>} title="Assessment Take">
         <h3>Could not load assessment</h3>
-        <Button onClick={() => navigate('/user/assessments')}>Back to Assessments</Button>
+
       </PageContent>;
   }
   if (questions.length === 0) {
-    return <PageContent className={`${styles.assessmentTakePage} ${styles.error}`} view="AssessmentTake">
+    return <PageContent className={`${styles.assessmentTakePage} ${styles.error}`} view="AssessmentTake" backAction={<Button variant="secondary" onClick={() => navigate('/user/assessments')}>Back to Assessments</Button>} title="Assessment Take">
         <h3>No questions available for this segment</h3>
         <p>Please contact your administrator or try resuming again later.</p>
-        <Button onClick={() => navigate('/user/assessments')}>Back to Assessments</Button>
+
       </PageContent>;
   }
+  const questionNavigation = <>
+            {}
+            {assessmentData?.segments && assessmentData.segments.length > 1 && <div className={styles.segmentsSection}>
+                <h3>Segments</h3>
+                <div className={styles.segmentsList}>
+                  {assessmentData.segments.map((segment, index) => {
+              const isCurrentSegment = index === currentSegmentIndex;
+              const isPastSegment = index < currentSegmentIndex;
+              const isFutureSegment = index > currentSegmentIndex;
+              const allowSegmentSwitch = isConfigFlagEnabled(assessmentData.allow_segment_switch, true);
+              const canSwitch = allowSegmentSwitch && !isCurrentSegment;
+              const segmentTitle = isCurrentSegment ? segment.name : !allowSegmentSwitch ? isFutureSegment ? 'Complete current segment first' : 'Segment navigation is disabled' : `Go to ${segment.name}`;
+              return <ActionButton variant="secondary" key={segment.id} className={`${styles.segmentItem} ${isCurrentSegment ? styles.segmentItemCurrent : ''} ${isPastSegment ? styles.segmentItemCompleted : ''} ${isFutureSegment && !allowSegmentSwitch ? styles.segmentItemUpcoming : ''}`} onClick={() => canSwitch && handleSegmentSwitch(index)} disabled={!canSwitch} title={segmentTitle}>
+                        <span className={styles.segmentNumber}>{index + 1}</span>
+                        <span className={styles.segmentName}>{segment.name}</span>
+                        {isCurrentSegment && <span className={styles.segmentBadgeCurrent}>Current</span>}
+                        {isPastSegment && <svg className={styles.checkIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>}
+                      </ActionButton>;
+            })}
+                </div>
+              </div>}
+
+            <div className={styles.navHeader}>
+              {!compactQuestionNav && <h3>Questions</h3>}
+              <div className={styles.navStats}>
+                <span className={`${styles.stat} ${styles.statAnswered}`}>{getAnsweredCount()} answered</span>
+                <span className={styles.stat}>{questions.length - getAnsweredCount()} remaining</span>
+              </div>
+            </div>
+            <div className={styles.navGrid}>
+              {questions.map((q, index) => {
+            const status = getQuestionStatus(index);
+            return <ActionButton variant="secondary" key={q.id || index} className={`${styles.navItem} ${status === 'current' ? styles.navItemCurrent : ''} ${status === 'answered' ? styles.navItemAnswered : ''} ${status === 'visited' ? styles.navItemVisited : ''}`} aria-label={`Question ${index + 1}, ${status}`} aria-current={index === currentQuestionIndex ? 'step' : undefined} onClick={() => handleJumpToQuestion(index)}>
+                    {index + 1}
+                  </ActionButton>;
+          })}
+            </div>
+            <div className={styles.navLegend}>
+              <span className={styles.legendItem}><span className={`${styles.dot} ${styles.dotCurrent}`}></span> Current</span>
+              <span className={styles.legendItem}><span className={`${styles.dot} ${styles.dotAnswered}`}></span> Answered</span>
+              <span className={styles.legendItem}><span className={`${styles.dot} ${styles.dotVisited}`}></span> Visited</span>
+              <span className={styles.legendItem}><span className={styles.dot}></span> Not visited</span>
+            </div>
+
+          </>;
   return <PageContent className={`${styles.assessmentTakePage} ${isFullScreen ? styles.fullscreen : ''}`} view="AssessmentTake">
       {}
 
@@ -847,7 +899,7 @@ function AssessmentTake() {
             <line x1="12" y1="17" x2="12.01" y2="17" />
           </svg>
           <span>{proctoringWarning}</span>
-          {pendingFullscreenExit && assessmentData?.proctoring?.full_screen_mandatory && <ActionButton onClick={handleReturnToFullscreen} style={{
+          {pendingFullscreenExit && assessmentData?.proctoring?.full_screen_mandatory && <ActionButton variant="secondary" onClick={handleReturnToFullscreen} style={{
         background: 'var(--bg-card)',
         color: 'var(--error)',
         padding: '4px 12px',
@@ -857,26 +909,28 @@ function AssessmentTake() {
       }}>
               Return to Fullscreen
             </ActionButton>}
-          <ActionButton onClick={() => setProctoringWarning(null)}>×</ActionButton>
+          <ActionButton variant="secondary" onClick={() => setProctoringWarning(null)}>×</ActionButton>
         </div>}
 
       {}
-      <Toolbar className="cz-context-bar"><div className={styles.headerLeft}><strong>{assessmentData.display_name || assessmentData.administrator_name || assessmentData.assessment_title}</strong>{currentSegment && <span className={styles.segmentBadge}>{currentSegment.name}</span>}</div><div className={styles.headerCenter}><div className={styles.timer}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg><span className={timeRemaining < 300 ? styles.timerWarning : ''}>{formatTime(timeRemaining)}</span></div>{assessmentData.timing_mode !== 'OVERALL' && <div className={`${styles.timer} ${styles.segmentTimer}`}>
+      <Toolbar className="cz-context-bar"><div className={styles.headerLeft}><h1 className="cz-session-title">{assessmentData.display_name || assessmentData.administrator_name || assessmentData.assessment_title}</h1>{currentSegment && <span className={styles.segmentBadge}>{currentSegment.name}</span>}</div><div className={styles.headerCenter}><div className={styles.timer}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg><span className={timeRemaining < 300 ? styles.timerWarning : ''}>{formatTime(timeRemaining)}</span></div>{assessmentData.timing_mode !== 'OVERALL' && <div className={`${styles.timer} ${styles.segmentTimer}`}>
               <span className={styles.timerLabel}>Segment:</span>
               <span className={segmentTimeRemaining < 60 ? styles.timerWarning : ''}>
                 {formatTime(segmentTimeRemaining)}
               </span>
             </div>}</div><div className={styles.headerRight}><span className={styles.progressText}>
-            Question {currentQuestionIndex + 1} of {questions.length}</span><ActionButton className={styles.toggleNavBtn} onClick={() => setShowQuestionNav(!showQuestionNav)} aria-expanded={showQuestionNav} aria-label={showQuestionNav ? 'Hide questions' : 'Show questions'} title={showQuestionNav ? 'Hide navigation' : 'Show navigation'}><span>{showQuestionNav ? 'Hide questions' : 'Show questions'}</span>
+            Question {currentQuestionIndex + 1} of {questions.length}</span><ActionButton variant="secondary" className={styles.toggleNavBtn} onClick={() => setShowQuestionNav(!showQuestionNav)} aria-expanded={showQuestionNav} aria-controls="assessment-question-navigation" aria-label={showQuestionNav ? 'Hide questions' : 'Show questions'} title={showQuestionNav ? 'Hide navigation' : 'Show navigation'}><span>{showQuestionNav ? 'Hide questions' : 'Show questions'}</span>
 
-          </ActionButton></div></Toolbar>
+          </ActionButton><ActionButton variant="primary" className={styles.submitBtn} onClick={async () => { await saveCurrentProgress(); isLastSegment ? setShowSubmitModal(true) : setShowSegmentSubmitModal(true) }}>
+              {isLastSegment ? 'Submit Test' : 'Submit Segment'}
+            </ActionButton></div></Toolbar>
 
       <div className={`${styles.assessmentBody} ${!showQuestionNav ? styles.navigationHidden : ''}`}>
         {}
         <section className={`${styles.questionArea} ${isProgrammingQuestion ? styles.questionAreaProgramming : ''}`}>
           {currentQuestion ? <div className={`${styles.questionContainer} ${isProgrammingQuestion ? styles.questionContainerProgramming : ''}`}>
               <div className={styles.questionHeader}>
-                <span className={styles.questionNumber}>Question {currentQuestionIndex + 1}</span>
+                <span className={styles.questionNumber} aria-live="polite">Question {currentQuestionIndex + 1}</span>
                 <span className={styles.questionType}>
                   {currentQuestion.type === 'PROGRAMMING' || currentQuestion.question_type === 'PROGRAMMING' ? 'Coding' : 'MCQ'}
                 </span>
@@ -913,7 +967,7 @@ function AssessmentTake() {
               })}
                   </div>
                   {(!currentQuestion.options || currentQuestion.options.length === 0) && <p className={styles.noOptions}>No options available for this question.</p>}
-                </div> : currentQuestion.type === 'PROGRAMMING' || currentQuestion.question_type === 'PROGRAMMING' ? <div className={styles.programmingQuestion} style={{"--problem-width": `${problemWidth}%`}}>
+                </div> : currentQuestion.type === 'PROGRAMMING' || currentQuestion.question_type === 'PROGRAMMING' ? <div ref={problemContainerRef} className={styles.programmingQuestion} style={{"--problem-width": `${problemWidth}%`}}>
                   {}
                   <div className={styles.problemPanel}>
                     <div className={styles.problemContent}>
@@ -957,11 +1011,11 @@ function AssessmentTake() {
                               <div className={styles.exampleIo}>
                                 <div className={styles.ioBlock}>
                                   <span className={styles.ioLabel}>Input:</span>
-                                  <pre className={styles.ioContent}>{example.input}</pre>
+                                  <pre tabIndex={0} className={styles.ioContent}>{example.input}</pre>
                                 </div>
                                 <div className={styles.ioBlock}>
                                   <span className={styles.ioLabel}>Output:</span>
-                                  <pre className={styles.ioContent}>{example.output}</pre>
+                                  <pre tabIndex={0} className={styles.ioContent}>{example.output}</pre>
                                 </div>
                               </div>
                               {example.explanation && <div className={styles.exampleExplanation}>
@@ -986,11 +1040,11 @@ function AssessmentTake() {
                                   <div className={styles.testCaseIo}>
                                     <div className={styles.ioBlock}>
                                       <span className={styles.ioLabel}>Input:</span>
-                                      <pre className={styles.ioContent}>{testCase.input || testCase.input_data}</pre>
+                                      <pre tabIndex={0} className={styles.ioContent}>{testCase.input || testCase.input_data}</pre>
                                     </div>
                                     <div className={styles.ioBlock}>
                                       <span className={styles.ioLabel}>Expected Output:</span>
-                                      <pre className={styles.ioContent}>{testCase.expected_output || testCase.output}</pre>
+                                      <pre tabIndex={0} className={styles.ioContent}>{testCase.expected_output || testCase.output}</pre>
                                     </div>
                                   </div>
                                 </div>)}
@@ -1009,11 +1063,7 @@ function AssessmentTake() {
                   </div>
 
                   {}
-                  <div className={styles.problemResizer} role="separator" tabIndex={0} aria-label="Resize problem panel" aria-orientation="vertical" aria-valuemin={25} aria-valuemax={55} aria-valuenow={problemWidth}
-                    onPointerDown={e => { resizingProblemRef.current = true; e.currentTarget.setPointerCapture(e.pointerId); }}
-                    onPointerMove={e => { if (!resizingProblemRef.current) return; const rect = e.currentTarget.parentElement.getBoundingClientRect(); setProblemWidth(Math.max(25, Math.min(55, (e.clientX - rect.left) / rect.width * 100))); }}
-                    onPointerUp={e => { resizingProblemRef.current = false; e.currentTarget.releasePointerCapture(e.pointerId); }} onPointerCancel={() => { resizingProblemRef.current = false; }}
-                    onKeyDown={e => { if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); setProblemWidth(value => Math.max(25, Math.min(55, value + (e.key === 'ArrowRight' ? 2 : -2)))); } }} />
+                  <ResizeHandle containerRef={problemContainerRef} value={problemWidth} onChange={setProblemWidth} min={25} max={55} step={2} label="Resize problem panel" className={styles.problemResizer} />
                   <div className={styles.codeEditorWrapper}>
                     <CodeEditor key={`code-q-${currentQuestion.id}`} questionId={currentQuestion.id} disableCopyPaste={disableCopyPaste} initialCode={(() => {
                 const code = getQuestionAnswerValue(answers, currentQuestion.id);
@@ -1112,62 +1162,12 @@ function AssessmentTake() {
             <Button variant="secondary" onClick={handlePrevious} disabled={!canGoBack}>
               Previous
             </Button>
-            <Button variant="primary" onClick={handleNext}>
-              {isLastQuestion ? isLastSegment ? 'Submit Test' : 'Submit Segment' : 'Next'}
-            </Button>
+            {!isLastQuestion && <Button variant="primary" onClick={handleNext}>Next</Button>}
           </div>
         </section>
 
         {}
-        {showQuestionNav && <aside className={`${styles.questionNav} ${showQuestionNav ? styles.questionNavVisible : ''}`}>
-            {}
-            {assessmentData?.segments && assessmentData.segments.length > 1 && <div className={styles.segmentsSection}>
-                <h3>Segments</h3>
-                <div className={styles.segmentsList}>
-                  {assessmentData.segments.map((segment, index) => {
-              const isCurrentSegment = index === currentSegmentIndex;
-              const isPastSegment = index < currentSegmentIndex;
-              const isFutureSegment = index > currentSegmentIndex;
-              const allowSegmentSwitch = isConfigFlagEnabled(assessmentData.allow_segment_switch, true);
-              const canSwitch = allowSegmentSwitch && !isCurrentSegment;
-              const segmentTitle = isCurrentSegment ? segment.name : !allowSegmentSwitch ? isFutureSegment ? 'Complete current segment first' : 'Segment navigation is disabled' : `Go to ${segment.name}`;
-              return <ActionButton key={segment.id} className={`${styles.segmentItem} ${isCurrentSegment ? styles.segmentItemCurrent : ''} ${isPastSegment ? styles.segmentItemCompleted : ''} ${isFutureSegment && !allowSegmentSwitch ? styles.segmentItemUpcoming : ''}`} onClick={() => canSwitch && handleSegmentSwitch(index)} disabled={!canSwitch} title={segmentTitle}>
-                        <span className={styles.segmentNumber}>{index + 1}</span>
-                        <span className={styles.segmentName}>{segment.name}</span>
-                        {isCurrentSegment && <span className={styles.segmentBadgeCurrent}>Current</span>}
-                        {isPastSegment && <svg className={styles.checkIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
-                            <polyline points="20 6 9 17 4 12" />
-                          </svg>}
-                      </ActionButton>;
-            })}
-                </div>
-              </div>}
-
-            <div className={styles.navHeader}>
-              <h3>Questions</h3>
-              <div className={styles.navStats}>
-                <span className={`${styles.stat} ${styles.statAnswered}`}>{getAnsweredCount()} answered</span>
-                <span className={styles.stat}>{questions.length - getAnsweredCount()} remaining</span>
-              </div>
-            </div>
-            <div className={styles.navGrid}>
-              {questions.map((q, index) => {
-            const status = getQuestionStatus(index);
-            return <ActionButton key={q.id || index} className={`${styles.navItem} ${status === 'current' ? styles.navItemCurrent : ''} ${status === 'answered' ? styles.navItemAnswered : ''} ${status === 'visited' ? styles.navItemVisited : ''}`} aria-label={`Question ${index + 1}, ${status}`} aria-current={index === currentQuestionIndex ? 'step' : undefined} onClick={() => handleJumpToQuestion(index)}>
-                    {index + 1}
-                  </ActionButton>;
-          })}
-            </div>
-            <div className={styles.navLegend}>
-              <span className={styles.legendItem}><span className={`${styles.dot} ${styles.dotCurrent}`}></span> Current</span>
-              <span className={styles.legendItem}><span className={`${styles.dot} ${styles.dotAnswered}`}></span> Answered</span>
-              <span className={styles.legendItem}><span className={`${styles.dot} ${styles.dotVisited}`}></span> Visited</span>
-              <span className={styles.legendItem}><span className={styles.dot}></span> Not visited</span>
-            </div>
-            <ActionButton className={styles.submitBtn} onClick={() => isLastSegment ? setShowSubmitModal(true) : setShowSegmentSubmitModal(true)}>
-              {isLastSegment ? 'Submit Test' : 'Submit Segment'}
-            </ActionButton>
-          </aside>}
+        {compactQuestionNav ? <Dialog id="assessment-question-navigation" open={showQuestionNav} title="Questions" onClose={() => setShowQuestionNav(false)}>{showQuestionNav && questionNavigation}</Dialog> : showQuestionNav && <aside id="assessment-question-navigation" aria-label="Assessment questions" className={`${styles.questionNav} ${showQuestionNav ? styles.questionNavVisible : ''}`}>{questionNavigation}</aside>}
       </div>
 
       {}

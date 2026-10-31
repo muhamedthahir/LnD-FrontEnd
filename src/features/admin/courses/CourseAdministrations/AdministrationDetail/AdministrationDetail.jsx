@@ -689,14 +689,14 @@ function AdministrationDetail() {
         <div className="loading">Loading administration details...</div>
       </PageContent>;
   }
-  return <PageContent className="administration-detail-page" view="AdministrationDetail">
-      <div className="detail-header">
-        <ActionButton className="btn-back" onClick={() => navigate('/admin/courses/administrations')}>
+  return <PageContent className="administration-detail-page" view="AdministrationDetail" backAction={<ActionButton variant="secondary" className="btn-back" onClick={() => navigate('/admin/courses/administrations')}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <polyline points="15 18 9 12 15 6"></polyline>
           </svg>
           Back to Administrations
-        </ActionButton>
+        </ActionButton>}>
+      <div className="detail-header">
+
         <div className="header-actions">
           {!isEditing ? <>
               <Button variant="primary" onClick={() => setIsEditing(true)}>
@@ -730,8 +730,8 @@ function AdministrationDetail() {
       </div>
 
       {}
-      <nav className="administration-tabs" role="tablist">
-        <button type="button" role="tab" aria-selected={activeTab === 'details'} className={`tab-item ${activeTab === 'details' ? 'active' : ''}`} onClick={() => setActiveTab('details')}>
+      <nav className="administration-tabs" role="group">
+        <button type="button" aria-pressed={activeTab === 'details'} className={`tab-item ${activeTab === 'details' ? 'active' : ''}`} onClick={() => setActiveTab('details')}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
             <polyline points="14 2 14 8 20 8"></polyline>
@@ -742,7 +742,7 @@ function AdministrationDetail() {
           Administration Details
         </button>
         {administration?.status === 'published' && <>
-            <button type="button" role="tab" aria-selected={activeTab === 'enrolled'} className={`tab-item ${activeTab === 'enrolled' ? 'active' : ''}`} onClick={() => setActiveTab('enrolled')}>
+            <button type="button" aria-pressed={activeTab === 'enrolled'} className={`tab-item ${activeTab === 'enrolled' ? 'active' : ''}`} onClick={() => setActiveTab('enrolled')}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                 <circle cx="9" cy="7" r="4"></circle>
@@ -752,7 +752,7 @@ function AdministrationDetail() {
               Enrolled Users
               {enrolledUsers.length > 0 && <span className="tab-count">{enrolledUsers.length}</span>}
             </button>
-            <button type="button" role="tab" aria-selected={activeTab === 'add-users'} className={`tab-item ${activeTab === 'add-users' ? 'active' : ''}`} onClick={() => setActiveTab('add-users')}>
+            <button type="button" aria-pressed={activeTab === 'add-users'} className={`tab-item ${activeTab === 'add-users' ? 'active' : ''}`} onClick={() => setActiveTab('add-users')}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <line x1="12" y1="5" x2="12" y2="19"></line>
                 <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -911,7 +911,7 @@ function AdministrationDetail() {
                       </div> : <div className="groups-list">
                         {filteredGroups.map(group => {
                     const isSelected = formData.selectedGroups.includes(group.id);
-                    return <div key={group.id} className={`group-item ${isSelected ? 'selected' : ''}`} onClick={() => isSelected ? handleRemoveGroup(group.id) : handleAddGroup(group.id)}>
+                    return <button type="button" aria-pressed={isSelected} key={group.id} className={`group-item ${isSelected ? 'selected' : ''}`} onClick={() => isSelected ? handleRemoveGroup(group.id) : handleAddGroup(group.id)}>
                               <div className="group-checkbox">
                                 {isSelected ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                     <polyline points="20 6 9 17 4 12"></polyline>
@@ -929,7 +929,7 @@ function AdministrationDetail() {
                               <span className="group-member-count">
                                 {group.member_count || 0} members
                               </span>
-                            </div>;
+                            </button>;
                   })}
                       </div>}
                   </div>
@@ -941,7 +941,7 @@ function AdministrationDetail() {
                     const group = availableGroups.find(g => g.id === groupId);
                     return group ? <span key={groupId} className="selected-tag">
                               {group.name}
-                              <ActionButton type="button" onClick={() => handleRemoveGroup(groupId)} className="remove-tag">
+                              <ActionButton variant="secondary" type="button" onClick={() => handleRemoveGroup(groupId)} className="remove-tag">
                                 ×
                               </ActionButton>
                             </span> : null;
@@ -953,9 +953,9 @@ function AdministrationDetail() {
                     <label>User Email ID or Username</label>
                     <input type="text" value={userSearch} onChange={e => setUserSearch(e.target.value)} placeholder="Search by email or username..." className="search-input" />
                     {userSearch && filteredUsers.length > 0 && <div className="suggestions-dropdown">
-                        {filteredUsers.map(user => <div key={user.id} className="suggestion-item" onClick={() => handleAddUser(user)}>
+                        {filteredUsers.map(user => <button type="button" key={user.id} className="suggestion-item" onClick={() => handleAddUser(user)}>
                             {user.name} ({user.email})
-                          </div>)}
+                          </button>)}
                       </div>}
                   </FieldGroup>
 
@@ -964,7 +964,7 @@ function AdministrationDetail() {
                       <div className="selected-tags">
                         {formData.individualUsers.map(user => <span key={user.id} className="selected-tag">
                             {user.name} ({user.email})
-                            <ActionButton type="button" onClick={() => handleRemoveUser(user.id)} className="remove-tag">
+                            <ActionButton variant="secondary" type="button" onClick={() => handleRemoveUser(user.id)} className="remove-tag">
                               ×
                             </ActionButton>
                           </span>)}
@@ -1038,14 +1038,14 @@ function AdministrationDetail() {
                     </svg>
                     Error: {progressUpdateResult.error}
                   </p>}
-                <ActionButton className="dismiss-result" onClick={() => setProgressUpdateResult(null)}>×</ActionButton>
+                <ActionButton variant="secondary" className="dismiss-result" onClick={() => setProgressUpdateResult(null)}>×</ActionButton>
               </div>}
 
             {loadingEnrolledUsers ? <div className="loading-section">Loading enrolled users...</div> : enrolledUsers.length === 0 ? <div className="empty-enrolled">
                 <p>No users enrolled in this administration yet.</p>
               </div> : <>
               <div className="enrolled-table-wrapper">
-                <Table>
+                <Table aria-label="Administration Detail" stickyActions>
                   <thead>
                     <tr>
                       <th>User Name</th>
@@ -1085,7 +1085,7 @@ function AdministrationDetail() {
                         <td>{formatLastVisited(user.last_accessed_at)}</td>
                         <td>
                           <div className="action-buttons">
-                            <ActionButton className="btn-view-report" onClick={() => navigate(`/admin/courses/administrations/${id}/users/${user.user_id}/progress`)} title="View Progress Report">
+                            <ActionButton variant="secondary" className="btn-view-report" onClick={() => navigate(`/admin/courses/administrations/${id}/users/${user.user_id}/progress`)} title="View Progress Report">
                               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                                 <polyline points="14 2 14 8 20 8"></polyline>
@@ -1094,12 +1094,12 @@ function AdministrationDetail() {
                                 <polyline points="10 9 9 9 8 9"></polyline>
                               </svg>
                             </ActionButton>
-                            {getProgressStatus(user) === 'Expired' ? <ActionButton className="btn-reactivate" onClick={() => handleReactivate(user)} title="Reactivate Course" disabled={reactivatingUserId === user.user_id}>
+                            {getProgressStatus(user) === 'Expired' ? <ActionButton variant="secondary" className="btn-reactivate" onClick={() => handleReactivate(user)} title="Reactivate Course" disabled={reactivatingUserId === user.user_id}>
                                 {reactivatingUserId === user.user_id ? <span className="btn-reactivate-text">...</span> : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                     <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
                                     <path d="M3 3v5h5"></path>
                                   </svg>}
-                              </ActionButton> : <ActionButton className="btn-force-expire" onClick={() => handleForceExpireClick(user)} title="Force Expire Course">
+                              </ActionButton> : <ActionButton variant="danger" className="btn-force-expire" onClick={() => handleForceExpireClick(user)} title="Force Expire Course">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                   <circle cx="12" cy="12" r="10"></circle>
                                   <polyline points="12 6 12 12 16 14"></polyline>
@@ -1128,13 +1128,13 @@ function AdministrationDetail() {
                     </select>
                   </label>
                   <div className="page-buttons">
-                    <ActionButton type="button" className="pagination-btn" disabled={enrolledPage <= 1} onClick={() => setEnrolledPage(p => Math.max(1, p - 1))} aria-label="Previous page">
+                    <ActionButton variant="secondary" type="button" className="pagination-btn" disabled={enrolledPage <= 1} onClick={() => setEnrolledPage(p => Math.max(1, p - 1))} aria-label="Previous page">
                       Previous
                     </ActionButton>
                     <span className="page-numbers">
                       Page {enrolledPage} of {totalEnrolledPages}
                     </span>
-                    <ActionButton type="button" className="pagination-btn" disabled={enrolledPage >= totalEnrolledPages} onClick={() => setEnrolledPage(p => Math.min(totalEnrolledPages, p + 1))} aria-label="Next page">
+                    <ActionButton variant="secondary" type="button" className="pagination-btn" disabled={enrolledPage >= totalEnrolledPages} onClick={() => setEnrolledPage(p => Math.min(totalEnrolledPages, p + 1))} aria-label="Next page">
                       Next
                     </ActionButton>
                   </div>
@@ -1185,7 +1185,7 @@ function AdministrationDetail() {
                       </div> : <div className="groups-list">
                         {filteredAddUsersGroups.map(group => {
                   const isSelected = addGroupsToAdd.includes(group.id);
-                  return <div key={group.id} className={`group-item ${isSelected ? 'selected' : ''}`} onClick={() => isSelected ? handleRemoveGroupFromAdd(group.id) : handleAddGroupToPublished(group.id)}>
+                  return <button type="button" aria-pressed={isSelected} key={group.id} className={`group-item ${isSelected ? 'selected' : ''}`} onClick={() => isSelected ? handleRemoveGroupFromAdd(group.id) : handleAddGroupToPublished(group.id)}>
                               <div className="group-checkbox">
                                 {isSelected ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                     <polyline points="20 6 9 17 4 12"></polyline>
@@ -1203,7 +1203,7 @@ function AdministrationDetail() {
                               <span className="group-member-count">
                                 {group.member_count || 0} members
                               </span>
-                            </div>;
+                            </button>;
                 })}
                       </div>}
                   </div>
@@ -1214,7 +1214,7 @@ function AdministrationDetail() {
                   const group = addUsersAvailableGroups.find(g => g.id === groupId);
                   return group ? <span key={groupId} className="selected-tag">
                               {group.name}
-                              <ActionButton type="button" onClick={() => handleRemoveGroupFromAdd(groupId)} className="remove-tag">
+                              <ActionButton variant="secondary" type="button" onClick={() => handleRemoveGroupFromAdd(groupId)} className="remove-tag">
                                 ×
                               </ActionButton>
                             </span> : null;
@@ -1226,9 +1226,9 @@ function AdministrationDetail() {
                     <label>User Email ID or Username</label>
                     <input type="text" value={addUsersUserSearch} onChange={e => setAddUsersUserSearch(e.target.value)} placeholder="Search by email or username..." className="search-input" />
                     {addUsersUserSearch && filteredAddUsersUsers.length > 0 && <div className="suggestions-dropdown">
-                        {filteredAddUsersUsers.map(user => <div key={user.id} className="suggestion-item" onClick={() => handleAddUserToPublished(user)}>
+                        {filteredAddUsersUsers.map(user => <button type="button" key={user.id} className="suggestion-item" onClick={() => handleAddUserToPublished(user)}>
                             {user.name} ({user.email})
-                          </div>)}
+                          </button>)}
                       </div>}
                   </FieldGroup>
                   {addUsersToAdd.length > 0 && <div className="selected-items">
@@ -1236,7 +1236,7 @@ function AdministrationDetail() {
                       <div className="selected-tags">
                         {addUsersToAdd.map(user => <span key={user.id} className="selected-tag">
                             {user.name} ({user.email})
-                            <ActionButton type="button" onClick={() => handleRemoveUserFromAdd(user.id)} className="remove-tag">
+                            <ActionButton variant="secondary" type="button" onClick={() => handleRemoveUserFromAdd(user.id)} className="remove-tag">
                               ×
                             </ActionButton>
                           </span>)}
@@ -1254,11 +1254,11 @@ function AdministrationDetail() {
       </div>
 
       {}
-      {showDeleteConfirm && <DialogLayer className="modal-overlay" busy={deleting} onClose={() => setShowDeleteConfirm(false)}>
+      {<DialogLayer open={Boolean(showDeleteConfirm)} className="modal-overlay" busy={deleting} onClose={() => setShowDeleteConfirm(false)}>{Boolean(showDeleteConfirm) ? <>
           <DialogSurface className="modal-content delete-modal">
             <div className="modal-header">
               <h3>Delete Administration</h3>
-              <ActionButton className="modal-close" onClick={() => setShowDeleteConfirm(false)}>
+              <ActionButton variant="secondary" className="modal-close" onClick={() => setShowDeleteConfirm(false)}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <line x1="18" y1="6" x2="6" y2="18"></line>
                   <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -1280,19 +1280,19 @@ function AdministrationDetail() {
               </Button>
             </div>
           </DialogSurface>
-        </DialogLayer>}
+        </> : null}</DialogLayer>}
 
       {}
-      {showForceExpireConfirm && userToExpire && <DialogLayer className="modal-overlay" onClick={() => {
+      {<DialogLayer open={Boolean(showForceExpireConfirm && userToExpire)} className="modal-overlay" onClick={() => {
       if (!forceExpiring) {
         setShowForceExpireConfirm(false);
         setUserToExpire(null);
       }
-    }}>
+    }}>{Boolean(showForceExpireConfirm && userToExpire) ? <>
           <DialogSurface className="modal-content force-expire-modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h3>Force Expire Course</h3>
-              <ActionButton className="modal-close" onClick={() => {
+              <ActionButton variant="secondary" className="modal-close" onClick={() => {
             if (!forceExpiring) {
               setShowForceExpireConfirm(false);
               setUserToExpire(null);
@@ -1342,7 +1342,7 @@ function AdministrationDetail() {
               </Button>
             </div>
           </DialogSurface>
-        </DialogLayer>}
+        </> : null}</DialogLayer>}
     </PageContent>;
 }
 export default AdministrationDetail;

@@ -445,12 +445,12 @@ function CurrentCourse() {
       </PageContent>;
   }
   if (!course) {
-    return <PageContent className="current-course-page" view="CurrentCourse">
+    return <PageContent className="current-course-page" view="CurrentCourse" backAction={<ActionButton variant="secondary" onClick={() => navigate('/courses/user-courses')} className="btn-back">
+            Back to Courses
+          </ActionButton>} title="Current Course">
         <div className="empty-state">
           <h3>Course not found</h3>
-          <ActionButton onClick={() => navigate('/courses/user-courses')} className="btn-back">
-            Back to Courses
-          </ActionButton>
+
         </div>
       </PageContent>;
   }
@@ -465,15 +465,15 @@ function CurrentCourse() {
       });
     });
   });
-  return <PageContent className="current-course-page" view="CurrentCourse">
-      <div className="current-course-header">
-        <ActionButton onClick={() => navigate(`/courses/${id}`)} className="btn-back">
+  return <PageContent className="current-course-page" view="CurrentCourse" backAction={<ActionButton variant="secondary" onClick={() => navigate(`/courses/${id}`)} className="btn-back">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
           Back to Overview
-        </ActionButton>
-        <ActionButton className="sidebar-toggle" onClick={() => setSidebarCollapsed(!sidebarCollapsed)} aria-expanded={!sidebarCollapsed}>
+        </ActionButton>} title={<>{course.name || 'Course workspace'}</>}>
+      <div className="current-course-header">
+
+        <ActionButton variant="secondary" className="sidebar-toggle" onClick={() => setSidebarCollapsed(!sidebarCollapsed)} aria-expanded={!sidebarCollapsed}>
           {sidebarCollapsed ? 'Show course content' : 'Hide course content'}
         </ActionButton>
       </div>
@@ -502,7 +502,7 @@ function CurrentCourse() {
             const topicProgress = getTopicProgress(section.id);
             const sectionInProgress = isSectionInProgress(section.id);
             return <div key={section.id} className="sidebar-section">
-                  <ActionButton className="sidebar-section-header" onClick={() => toggleSection(section.id)}>
+                  <ActionButton variant="secondary" className="sidebar-section-header" aria-expanded={isExpanded} onClick={() => toggleSection(section.id)}>
                     <span className={`section-dot ${sectionCompleted ? 'completed' : sectionInProgress ? 'in-progress' : ''}`}></span>
                     <div className="section-info">
                       <span className="section-title" title={section.name || section.title || 'Untitled Section'}>
@@ -525,7 +525,7 @@ function CurrentCourse() {
                   const isInProgress = segmentProgress.status === 'in_progress';
                   const isSelected = selectedSegment?.id === segment.id;
                   const segmentType = (segment.segment_type || '').toLowerCase();
-                  return <ActionButton key={`lesson-${segment.id}`} className={`sidebar-segment ${isSelected ? 'active' : ''} ${isCompleted ? 'completed' : ''} ${isInProgress ? 'in-progress' : ''}`} onClick={() => handleSegmentClick(segment, false, section.id)}>
+                  return <ActionButton variant="secondary" key={`lesson-${segment.id}`} className={`sidebar-segment ${isSelected ? 'active' : ''} ${isCompleted ? 'completed' : ''} ${isInProgress ? 'in-progress' : ''}`} aria-current={selectedSegment?.id === segment.id ? 'step' : undefined} onClick={() => handleSegmentClick(segment, false, section.id)}>
                             <div className="segment-icon">
                               {isCompleted ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                   <polyline points="20 6 9 17 4 12" />
@@ -556,7 +556,7 @@ function CurrentCourse() {
                   const hasMcqQuestions = (segment.mcq_count || 0) > 0;
                   return <div key={`practice-${segment.id}`} className="practice-segment-group">
                             {}
-                            {hasProgrammingQuestions && <ActionButton className={`sidebar-segment practice-segment ${isCompleted ? 'completed' : ''} ${isInProgress ? 'in-progress' : ''}`} onClick={() => handleSegmentClick(segment, true, section.id, false)}>
+                            {hasProgrammingQuestions && <ActionButton variant="secondary" className={`sidebar-segment practice-segment ${isCompleted ? 'completed' : ''} ${isInProgress ? 'in-progress' : ''}`} onClick={() => handleSegmentClick(segment, true, section.id, false)}>
                                 <div className="segment-icon practice">
                                   {isCompleted ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                       <polyline points="20 6 9 17 4 12" />
@@ -573,7 +573,7 @@ function CurrentCourse() {
                               </ActionButton>}
 
                             {}
-                            {hasMcqQuestions && <ActionButton className={`sidebar-segment quiz-segment ${isCompleted ? 'completed' : ''} ${isInProgress ? 'in-progress' : ''}`} onClick={() => handleSegmentClick(segment, true, section.id, true)}>
+                            {hasMcqQuestions && <ActionButton variant="secondary" className={`sidebar-segment quiz-segment ${isCompleted ? 'completed' : ''} ${isInProgress ? 'in-progress' : ''}`} onClick={() => handleSegmentClick(segment, true, section.id, true)}>
                                 <div className="segment-icon quiz">
                                   {isCompleted ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                       <polyline points="20 6 9 17 4 12" />
@@ -591,7 +591,7 @@ function CurrentCourse() {
                               </ActionButton>}
 
                             {}
-                            {!hasProgrammingQuestions && !hasMcqQuestions && <ActionButton className={`sidebar-segment practice-segment ${isCompleted ? 'completed' : ''} ${isInProgress ? 'in-progress' : ''}`} onClick={() => handleSegmentClick(segment, true, section.id, false)}>
+                            {!hasProgrammingQuestions && !hasMcqQuestions && <ActionButton variant="secondary" className={`sidebar-segment practice-segment ${isCompleted ? 'completed' : ''} ${isInProgress ? 'in-progress' : ''}`} onClick={() => handleSegmentClick(segment, true, section.id, false)}>
                                 <div className="segment-icon practice">
                                   {isCompleted ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                       <polyline points="20 6 9 17 4 12" />
@@ -610,7 +610,7 @@ function CurrentCourse() {
                       {}
                       {assessments.map(segment => {
                   const isCompleted = isSegmentCompleted(segment.id);
-                  return <ActionButton key={`assessment-${segment.id}`} className={`sidebar-segment assessment-segment ${isCompleted ? 'completed' : ''}`} onClick={() => handleSegmentClick(segment)}>
+                  return <ActionButton variant="secondary" key={`assessment-${segment.id}`} className={`sidebar-segment assessment-segment ${isCompleted ? 'completed' : ''}`} onClick={() => handleSegmentClick(segment)}>
                             <div className="segment-icon assessment">
                               {isCompleted ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                   <polyline points="20 6 9 17 4 12" />
@@ -645,7 +645,7 @@ function CurrentCourse() {
                       <h3>Practice Exercise</h3>
                       <p>This is a practice exercise. Click the button below to start.</p>
                     </div>
-                    <ActionButton className="btn-start-exercise" onClick={() => handleStartExercise(selectedSegment)}>
+                    <ActionButton variant="primary" className="btn-start-exercise" onClick={() => handleStartExercise(selectedSegment)}>
                       Start Exercise
                     </ActionButton>
                   </div> : isAssessment(selectedSegment) ? <div className="assessment-view">
@@ -653,7 +653,7 @@ function CurrentCourse() {
                       <h3>Assessment</h3>
                       <p>This is an assessment. Click the button below to start.</p>
                     </div>
-                    <ActionButton className="btn-start-assessment" onClick={() => handleStartAssessment(selectedSegment)}>
+                    <ActionButton variant="primary" className="btn-start-assessment" onClick={() => handleStartAssessment(selectedSegment)}>
                       Start Assessment
                     </ActionButton>
                   </div> : <div className="lesson-content">
@@ -699,7 +699,7 @@ function CurrentCourse() {
                                     <iframe src={videoUrl} title={selectedSegment.name || 'Video'} frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
                                     {}
                                     {!isSegmentCompleted(selectedSegment.id) && <div className="embedded-video-complete">
-                                        <ActionButton className="btn-mark-complete" onClick={() => handleMarkComplete(selectedSegment.id)}>
+                                        <ActionButton variant="secondary" className="btn-mark-complete" onClick={() => handleMarkComplete(selectedSegment.id)}>
                                           Mark as Complete
                                         </ActionButton>
                                       </div>}
@@ -740,7 +740,7 @@ function CurrentCourse() {
                                 <div dangerouslySetInnerHTML={{
                           __html: htmlContent
                         }} />
-                                {!isSegmentCompleted(selectedSegment.id) && <ActionButton className="btn-mark-complete" onClick={() => handleMarkComplete(selectedSegment.id)}>
+                                {!isSegmentCompleted(selectedSegment.id) && <ActionButton variant="secondary" className="btn-mark-complete" onClick={() => handleMarkComplete(selectedSegment.id)}>
                                     Mark as Complete
                                   </ActionButton>}
                               </>;
@@ -748,7 +748,7 @@ function CurrentCourse() {
                   }
                   return <>
                               <div>{String(contentObj)}</div>
-                              {!isSegmentCompleted(selectedSegment.id) && <ActionButton className="btn-mark-complete" onClick={() => handleMarkComplete(selectedSegment.id)}>
+                              {!isSegmentCompleted(selectedSegment.id) && <ActionButton variant="secondary" className="btn-mark-complete" onClick={() => handleMarkComplete(selectedSegment.id)}>
                                   Mark as Complete
                                 </ActionButton>}
                             </>;

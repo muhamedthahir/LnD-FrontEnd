@@ -551,7 +551,7 @@ function CourseAdministrations() {
       {loading ? <div className="loading">Loading administrations...</div> : <div className="groups-table-card">
           <div className="table-container">
             <div className="filters-section">
-              <Toolbar className="filters"><div className="cz-filter-actions"><ActionButton className="btn-primary" onClick={handleCreateAdministration}>
+              <Toolbar className="filters"><div className="cz-filter-actions"><ActionButton variant="primary" className="btn-primary" onClick={handleCreateAdministration}>
           + Create Administration
         </ActionButton></div>
                 <FieldGroup className="filter-group">
@@ -575,7 +575,7 @@ function CourseAdministrations() {
                       </option>)}
                   </select>
                 </FieldGroup>
-                {(filters.courseName || filters.status !== 'all' || filters.college) && <ActionButton onClick={handleClearFilters} className="btn-clear-filters" title="Clear all filters">
+                {(filters.courseName || filters.status !== 'all' || filters.college) && <ActionButton variant="secondary" onClick={handleClearFilters} className="btn-clear-filters" title="Clear all filters">
                     <svg viewBox="64 64 896 896" focusable="false" width="1em" height="1em" fill="currentColor" aria-hidden="true">
                       <path d="M899.1 869.6l-53-305.6H864c14.4 0 26-11.6 26-26V346c0-14.4-11.6-26-26-26H618V138c0-14.4-11.6-26-26-26H432c-14.4 0-26 11.6-26 26v182H160c-14.4 0-26 11.6-26 26v192c0 14.4 11.6 26 26 26h17.9l-53 305.6a25.95 25.95 0 0025.6 30.4h723c1.5 0 3-.1 4.4-.4a25.88 25.88 0 0021.2-30zM204 390h272V182h72v208h272v104H204V390zm468 440V674c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v156H416V674c0-4.4-3.6-8-8-8h-48c-4.4 0-8 3.6-8 8v156H202.8l45.1-260H776l45.1 260H672z"></path>
                     </svg>
@@ -587,7 +587,7 @@ function CourseAdministrations() {
                 <h3>No Administrations Match Your Filters</h3>
                 <p>Try adjusting your filters or create a new administration.</p>
               </div> : <div className="table-wrapper">
-                <Table>
+                <Table aria-label="Course Administrations" stickyActions>
                   <thead>
                     <tr>
                       <th>ID</th>
@@ -625,13 +625,13 @@ function CourseAdministrations() {
                         <td>{admin.endDate ? new Date(admin.endDate).toLocaleDateString() : '-'}</td>
                 <td>
                                           <div className="action-buttons">
-                                            <ActionButton className="btn-edit" onClick={() => navigate(`/admin/courses/administrations/${admin.id}`)} title="View/Edit Administration">
+                                            <ActionButton variant="secondary" className="btn-edit" onClick={() => navigate(`/admin/courses/administrations/${admin.id}`)} title="View/Edit Administration">
                                               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                                                 <circle cx="12" cy="12" r="3"></circle>
                                               </svg>
                                             </ActionButton>
-                                            <ActionButton className="btn-delete" type="button" onClick={() => setAdministrationToDelete(admin)} title="Delete administration">
+                                            <ActionButton variant="danger" className="btn-delete" type="button" onClick={() => setAdministrationToDelete(admin)} title="Delete administration">
                                               Delete
                                             </ActionButton>
                                           </div>
@@ -647,16 +647,16 @@ function CourseAdministrations() {
         </div>}
 
       {}
-      {showCreateModal && <DialogLayer className="modal-overlay" onClick={handleCancel}>
+      {<DialogLayer open={Boolean(showCreateModal)} className="modal-overlay" onClick={handleCancel}>{Boolean(showCreateModal) ? <>
           <DialogSurface className="modal-content create-administration-modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              {formPage === 2 && <ActionButton className="modal-close-btn modal-close-left" onClick={() => setFormPage(1)} title="Back">
+              {formPage === 2 && <ActionButton variant="secondary" className="modal-close-btn modal-close-left" onClick={() => setFormPage(1)} title="Back">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="15 18 9 12 15 6"></polyline>
                   </svg>
                 </ActionButton>}
               <h2>{editingAdministration ? 'Edit Administration - Page 1 of 2' : formPage === 1 ? 'Create Administration - Page 1 of 2' : 'Create Administration - Page 2 of 2'}</h2>
-              <ActionButton className="modal-close-btn modal-close-right" onClick={handleCancel} title="Close">
+              <ActionButton variant="secondary" className="modal-close-btn modal-close-right" onClick={handleCancel} title="Close">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="18" y1="6" x2="6" y2="18"></line>
                   <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -825,9 +825,9 @@ function CourseAdministrations() {
                         <label>Select Groups</label>
                         <input type="text" value={groupSearch} onChange={e => setGroupSearch(e.target.value)} placeholder="Search groups..." className="search-input" />
                         {groupSearch && filteredGroups.length > 0 && <div className="suggestions-dropdown">
-                            {filteredGroups.map(group => <div key={group.id} className="suggestion-item" onClick={() => handleAddGroup(group.id)}>
+                            {filteredGroups.map(group => <button type="button" key={group.id} className="suggestion-item" onClick={() => handleAddGroup(group.id)}>
                                 {group.name}
-                              </div>)}
+                              </button>)}
                           </div>}
                       </FieldGroup>
 
@@ -838,7 +838,7 @@ function CourseAdministrations() {
                     const group = availableGroups.find(g => g.id === groupId);
                     return group ? <span key={groupId} className="selected-tag">
                                   {group.name}
-                                  <ActionButton type="button" onClick={() => handleRemoveGroup(groupId)} className="remove-tag">
+                                  <ActionButton variant="secondary" type="button" onClick={() => handleRemoveGroup(groupId)} className="remove-tag">
                                     ×
                                   </ActionButton>
                                 </span> : null;
@@ -850,9 +850,9 @@ function CourseAdministrations() {
                         <label>User Email ID or Username</label>
                         <input type="text" value={userSearch} onChange={e => setUserSearch(e.target.value)} placeholder="Search by email or username..." className="search-input" />
                         {userSearch && filteredUsers.length > 0 && <div className="suggestions-dropdown">
-                            {filteredUsers.map(user => <div key={user.id} className="suggestion-item" onClick={() => handleAddUser(user)}>
+                            {filteredUsers.map(user => <button type="button" key={user.id} className="suggestion-item" onClick={() => handleAddUser(user)}>
                                 {user.name} ({user.email})
-                              </div>)}
+                              </button>)}
                           </div>}
                       </FieldGroup>
 
@@ -861,7 +861,7 @@ function CourseAdministrations() {
                           <div className="selected-tags">
                             {formData.individualUsers.map(user => <span key={user.id} className="selected-tag">
                                 {user.name} ({user.email})
-                                <ActionButton type="button" onClick={() => handleRemoveUser(user.id)} className="remove-tag">
+                                <ActionButton variant="secondary" type="button" onClick={() => handleRemoveUser(user.id)} className="remove-tag">
                                   ×
                                 </ActionButton>
                               </span>)}
@@ -882,7 +882,7 @@ function CourseAdministrations() {
                 </div>
               </>}
           </DialogSurface>
-      </DialogLayer>}
+      </> : null}</DialogLayer>}
       <ConfirmModal isOpen={!!administrationToDelete} onClose={() => setAdministrationToDelete(null)} onConfirm={async () => {
         if (!administrationToDelete?.id) return;
         try {

@@ -128,13 +128,13 @@ function PersonalDetails() {
         <p>Loading...</p>
       </PageContent>;
   }
-  return <PageContent className={styles.personalDetails} view="PersonalDetails">
-      <Toolbar className="cz-context-bar"><ActionButton className={styles.backBtn} onClick={() => navigate(-1)}>
+  return <PageContent className={styles.personalDetails} view="PersonalDetails" backAction={<ActionButton variant="secondary" className={styles.backBtn} onClick={() => navigate(-1)}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
           Back
-        </ActionButton></Toolbar>
+        </ActionButton>}>
+
 
       {message.text && <div className={`${styles.messageBanner} ${styles[message.type]}`}>
           {message.type === 'success' ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -285,10 +285,10 @@ function PersonalDetails() {
 
         {}
         <div className={styles.formActions}>
-          <ActionButton type="button" className={styles.btnSecondary} onClick={() => navigate(-1)}>
+          <ActionButton variant="secondary" type="button" className={styles.btnSecondary} onClick={() => navigate(-1)}>
             Cancel
           </ActionButton>
-          <ActionButton type="submit" className={styles.btnPrimary} disabled={saving}>
+          <ActionButton variant="primary" type="submit" className={styles.btnPrimary} disabled={saving}>
             {saving ? <>
                 <span className={styles.btnSpinner}></span>
                 Saving...

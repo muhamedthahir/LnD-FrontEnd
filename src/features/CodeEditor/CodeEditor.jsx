@@ -1,3 +1,4 @@
+import ResizeHandle from '../../design/ResizeHandle';
 import { ActionButton, PageContent } from "../../design/Primitives";
 import { createViewStyles } from "../../design/viewStyles";
 const styles = createViewStyles("CodeEditor");
@@ -76,7 +77,6 @@ function CodeEditor({
   const containerRef = useRef(null);
   const editorRef = useRef(null);
   const monacoRef = useRef(null);
-  const isDragging = useRef(false);
   const previousQuestionIdRef = useRef(null);
   const languageDraftsRef = useRef({});
   const wsRef = useRef(null);
@@ -253,25 +253,6 @@ function CodeEditor({
       onCodeChange(nextCode, language);
     }
   };
-  const handleMouseDown = useCallback(e => {
-    e.preventDefault();
-    isDragging.current = true;
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-  }, []);
-  const handleMouseMove = useCallback(e => {
-    if (!isDragging.current || !containerRef.current) return;
-    const containerRect = containerRef.current.getBoundingClientRect();
-    const newHeight = (e.clientY - containerRect.top) / containerRect.height * 100;
-    if (newHeight >= 28 && newHeight <= 72) {
-      setEditorHeight(newHeight);
-    }
-  }, []);
-  const handleMouseUp = useCallback(() => {
-    isDragging.current = false;
-    document.removeEventListener('mousemove', handleMouseMove);
-    document.removeEventListener('mouseup', handleMouseUp);
-  }, [handleMouseMove]);
   const getWsUrl = () => {
     const url = new URL(apiBaseUrl);
     const protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -279,8 +260,6 @@ function CodeEditor({
   };
   useEffect(() => {
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
       if (wsRef.current) {
         wsRef.current.close();
         wsRef.current = null;
@@ -517,7 +496,7 @@ function CodeEditor({
     return allPassed;
   };
   const handleSaveAndRun = async () => {
-    if (isRunning || isSaving) return;
+    if (busy || !code.trim()) return;
     setIsSaving(true);
     try {
       await persistCode();
@@ -672,38 +651,38 @@ function CodeEditor({
       </div>
 
       {}
-      <div className={styles.horizontalResizer} role="separator" tabIndex={0} aria-label="Resize code editor" aria-orientation="horizontal" aria-valuemin={28} aria-valuemax={72} aria-valuenow={editorHeight} onKeyDown={event => { if (['ArrowUp', 'ArrowDown'].includes(event.key)) { event.preventDefault(); setEditorHeight(value => Math.max(28, Math.min(72, value + (event.key === 'ArrowUp' ? -4 : 4)))); } }} onMouseDown={handleMouseDown}>
+      <ResizeHandle containerRef={containerRef} value={editorHeight} onChange={setEditorHeight} min={28} max={72} orientation="horizontal" label="Resize code editor" className={styles.horizontalResizer}>
         <div className={styles.resizerHandleHorizontal}>
           <span></span>
           <span></span>
           <span></span>
         </div>
-      </div>
+      </ResizeHandle>
 
       {}
       <div className={styles.outputSection} style={{
       height: `${100 - editorHeight}%`
     }}>
         <div className={styles.outputHeader}>
-          <div className={styles.outputTabs}>
-            <button className={`${styles.tabBtn} ${activeTab === 'custom' ? styles.active : ''}`} onClick={() => setActiveTab('custom')}>
+          <div className={styles.outputTabs} role="group" aria-label="Execution views">
+            <button className={`${styles.tabBtn} ${activeTab === 'custom' ? styles.active : ''}`} type="button" aria-pressed={activeTab === 'custom'} onClick={() => setActiveTab('custom')}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14">
                 <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
               </svg>
               Test cases
               {userInput.trim() && <span className={styles.inputIndicator}></span>}
             </button>
-            {hasAnyTestCases && <button className={`${styles.tabBtn} ${activeTab === 'testcases' ? styles.active : ''}`} onClick={() => setActiveTab('testcases')}>
+            {hasAnyTestCases && <button className={`${styles.tabBtn} ${activeTab === 'testcases' ? styles.active : ''}`} type="button" aria-pressed={activeTab === 'testcases'} onClick={() => setActiveTab('testcases')}>
                 Sample results ({visibleTestCases.length})
               </button>}
-            <button className={`${styles.tabBtn} ${activeTab === 'history' ? styles.active : ''}`} onClick={() => setActiveTab('history')}>
+            <button className={`${styles.tabBtn} ${activeTab === 'history' ? styles.active : ''}`} type="button" aria-pressed={activeTab === 'history'} onClick={() => setActiveTab('history')}>
               {assessmentMode ? 'Submissions' : 'History'}
               {submissionHistory.length > 0 && ` (${submissionHistory.length})`}
             </button>
           </div>
           <div className={styles.codeActions}>
-            <ActionButton onClick={handleSaveAndRun} disabled={busy || !code.trim()}>{isSaving ? 'Saving…' : isRunning ? 'Running…' : 'Save & Run'}</ActionButton>
-            <ActionButton className={styles.btnSubmit} onClick={handleSubmit} disabled={busy || !canSubmitCode}>{isSubmitting ? 'Submitting…' : 'Submit Code'}</ActionButton>
+            <ActionButton variant="secondary" onClick={handleSaveAndRun} disabled={!code.trim()} aria-disabled={busy || undefined} aria-busy={isSaving || isRunning || undefined}>{isSaving ? 'Saving…' : isRunning ? 'Running…' : 'Save & Run'}</ActionButton>
+            <ActionButton variant="primary" className={styles.btnSubmit} onClick={handleSubmit} disabled={!canSubmitCode} aria-disabled={busy || undefined} aria-busy={isSubmitting || undefined}>{isSubmitting ? 'Submitting…' : 'Submit Code'}</ActionButton>
           </div>
 
         </div>
@@ -723,7 +702,7 @@ function CodeEditor({
                   </svg>
                   Input
                 </label>
-                <textarea aria-label="Custom testcase input" className={styles.customInputArea} value={selectedCustomCase === null && hasTestCases ? (visibleTestCases[selectedSample]?.input ?? visibleTestCases[selectedSample]?.input_data ?? '') : userInput} readOnly={selectedCustomCase === null && hasTestCases} onChange={e => { setUserInput(e.target.value); if (selectedCustomCase !== null) setCustomCases(cases => cases.map((value, index) => index === selectedCustomCase ? e.target.value : value)); }} placeholder="Enter your input here (one value per line for multiple inputs)..." spellCheck={false} disabled={isRunning} />
+                <textarea aria-label="Custom testcase input" className={styles.customInputArea} value={selectedCustomCase === null && hasTestCases ? (visibleTestCases[selectedSample]?.input ?? visibleTestCases[selectedSample]?.input_data ?? '') : userInput} readOnly={selectedCustomCase === null && hasTestCases} onChange={e => { setUserInput(e.target.value); if (selectedCustomCase !== null) setCustomCases(cases => cases.map((value, index) => index === selectedCustomCase ? e.target.value : value)); }} placeholder="Enter your input here (one value per line for multiple inputs)..." spellCheck={false} disabled={busy} />
               </div>
 
               {}
@@ -734,7 +713,7 @@ function CodeEditor({
                   </svg>
                   Output
                 </label>
-                <pre ref={outputRef} className={styles.customOutputArea} aria-label="Execution output" aria-live="polite">
+                <pre tabIndex={0} role="region" ref={outputRef} className={styles.customOutputArea} aria-label="Execution output" aria-live="polite">
                   {output || (selectedCustomCase === null && hasTestCases ? `Expected: ${visibleTestCases[selectedSample]?.expected_output ?? visibleTestCases[selectedSample]?.expected_result ?? visibleTestCases[selectedSample]?.output ?? ''}` : '// Save & Run to see output here')}
                 </pre>
               </div>
@@ -744,13 +723,13 @@ function CodeEditor({
             {useInteractiveMode && isInteractive && isRunning && <div className={styles.interactiveInputArea}>
                 <form onSubmit={handleInteractiveInputSubmit} className={styles.interactiveInputForm}>
                   <input type="text" value={interactiveInput} onChange={e => setInteractiveInput(e.target.value)} placeholder="Type input and press Enter..." className={styles.interactiveInput} autoFocus />
-                  <ActionButton type="submit" className={styles.btnSendInput}>
+                  <ActionButton variant="secondary" type="submit" className={styles.btnSendInput}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
                       <line x1="22" y1="2" x2="11" y2="13" />
                       <polygon points="22 2 15 22 11 13 2 9 22 2" />
                     </svg>
                   </ActionButton>
-                  <ActionButton type="button" className={styles.btnStop} onClick={handleStopExecution}>
+                  <ActionButton variant="secondary" type="button" className={styles.btnStop} onClick={handleStopExecution}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
                       <rect x="6" y="6" width="12" height="12" />
                     </svg>
@@ -800,15 +779,15 @@ function CodeEditor({
                         <div className={styles.testcaseIo}>
                           <div className={styles.ioSection}>
                             <label>Input:</label>
-                            <pre>{tc.input || '(no input)'}</pre>
+                            <pre tabIndex={0}>{tc.input || '(no input)'}</pre>
                           </div>
                           <div className={styles.ioSection}>
                             <label>Expected Output:</label>
-                            <pre>{tc.expected_result || tc.expected_output || '(no output)'}</pre>
+                            <pre tabIndex={0}>{tc.expected_result || tc.expected_output || '(no output)'}</pre>
                           </div>
                           {result && result.actualOutput !== null && <div className={styles.ioSection}>
                               <label>Your Output:</label>
-                              <pre className={result.status === 'passed' ? styles.correct : styles.incorrect}>
+                              <pre tabIndex={0} className={result.status === 'passed' ? styles.correct : styles.incorrect}>
                                 {result.actualOutput || '(no output)'}
                               </pre>
                             </div>}
@@ -889,7 +868,7 @@ function CodeEditor({
                             <span className={styles.detailValue}>{submission.score}%</span>
                           </div>}
                       </div>
-                      <ActionButton className={styles.btnUseCode} onClick={() => handleUseHistoryCode(submission)}>
+                      <ActionButton variant="secondary" className={styles.btnUseCode} disabled={busy} onClick={() => handleUseHistoryCode(submission)}>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
                           <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />

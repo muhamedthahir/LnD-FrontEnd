@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-31",
+  "source": "synthetic browser UI fixture",
+  "headings": {
+    "page": 20,
+    "section": 18,
+    "list": 16
+  },
+  "desktop": {
+    "width": 1440,
+    "twoColumns": true,
+    "arrowsBetween": true,
+    "pageOverflow": false
+  },
+  "mobile": {
+    "width": 390,
+    "stacked": true,
+    "pageOverflow": false
+  },
+  "transfer": {
+    "before": {
+      "available": 16,
+      "selected": 8
+    },
+    "afterAdd": {
+      "available": 15,
+      "selected": 9
+    },
+    "afterRemove": {
+      "available": 16,
+      "selected": 8
+    }
+  },
+  "accessibility": {
+    "violations": [],
+    "incomplete": "Contrast of clipped offscreen list text requires manual review; semantic foregrounds tested separately."
+  },
+  "groupValidation": "Submit forwards the form event to invalid-field focus handling."
+}

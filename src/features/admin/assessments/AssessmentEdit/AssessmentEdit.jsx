@@ -988,19 +988,19 @@ function AssessmentEdit() {
       </PageContent>;
   }
   if (!assessment) {
-    return <PageContent className={styles.assessmentEditPage} view="AssessmentEdit">
+    return <PageContent className={styles.assessmentEditPage} view="AssessmentEdit" backAction={<Button variant="secondary" onClick={() => navigate('/admin/assessments/management')}>Back to List</Button>}>
         <div className={styles.errorState}>
           <h3>Assessment not found</h3>
-          <Button onClick={() => navigate('/admin/assessments/management')}>Back to List</Button>
+
         </div>
       </PageContent>;
   }
-  return <PageContent className={styles.assessmentEditPage} view="AssessmentEdit">
-      <Toolbar className="cz-context-bar"><div className={styles.headerLeft}><ActionButton className={styles.backBtn} onClick={() => navigate('/admin/assessments/management')}>
+  return <PageContent className={styles.assessmentEditPage} view="AssessmentEdit" backAction={<ActionButton variant="secondary" className={styles.backBtn} onClick={() => navigate('/admin/assessments/management')}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
               <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
-          </ActionButton><div><span className={styles.assessmentId}>{assessment.unique_id}</span><strong>{assessment.title}</strong></div></div><div className={styles.headerActions}><span className={`${styles.statusBadge} ${styles[assessment.status.toLowerCase()]}`}>{assessment.status}</span><Button variant="outline" onClick={() => navigate(`/admin/assessments/${id}/configurations`)}>
+          </ActionButton>}>
+      <Toolbar className="cz-context-bar"><div className={styles.headerLeft}><div><span className={styles.assessmentId}>{assessment.unique_id}</span><strong>{assessment.title}</strong></div></div><div className={styles.headerActions}><span className={`${styles.statusBadge} ${styles[assessment.status.toLowerCase()]}`}>{assessment.status}</span><Button variant="outline" onClick={() => navigate(`/admin/assessments/${id}/configurations`)}>
             Configurations
           </Button><Button variant="outline" onClick={handleDuplicateAssessment}>
             Duplicate
@@ -1013,10 +1013,10 @@ function AssessmentEdit() {
           </Button></div></Toolbar>
 
       <div className={styles.tabs}>
-        <button className={`${styles.tab} ${activeTab === 'details' ? styles.active : ''}`} onClick={() => setActiveTab('details')}>
+        <button className={`${styles.tab} ${activeTab === 'details' ? styles.active : ''}`} aria-pressed={activeTab === 'details'} onClick={() => setActiveTab('details')}>
           Details
         </button>
-        <button className={`${styles.tab} ${activeTab === 'segments' ? styles.active : ''}`} onClick={() => setActiveTab('segments')}>
+        <button className={`${styles.tab} ${activeTab === 'segments' ? styles.active : ''}`} aria-pressed={activeTab === 'segments'} onClick={() => setActiveTab('segments')}>
           Segments ({segments.length})
         </button>
       </div>
@@ -1097,7 +1097,7 @@ function AssessmentEdit() {
                     <div className={styles.segmentOrder}>{index + 1}</div>
                     <div className={styles.segmentInfo}>
                       <div className={styles.segmentTitleRow}>
-                        <h4>{segment.name}</h4>
+                        <h4><button type="button" className="cz-disclosure-title" aria-expanded={expandedSegment === segment.id} onClick={event => { event.stopPropagation(); toggleSegmentExpand(segment.id) }}>{segment.name}</button></h4>
                         {}
                         <div className={styles.bulkMarksSection} onClick={e => e.stopPropagation()}>
                           <span className={styles.bulkMarksLabel}>Bulk:</span>
@@ -1138,23 +1138,23 @@ function AssessmentEdit() {
                       </div>
                     </div>
                     <div className={styles.segmentActions} onClick={e => e.stopPropagation()}>
-                      <ActionButton className={styles.actionBtn} onClick={() => handleReorderSegment(segment.id, 'up')} disabled={index === 0} title="Move Up">
+                      <ActionButton variant="secondary" className={styles.actionBtn} onClick={() => handleReorderSegment(segment.id, 'up')} disabled={index === 0} title="Move Up">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
                           <path d="M18 15l-6-6-6 6" />
                         </svg>
                       </ActionButton>
-                      <ActionButton className={styles.actionBtn} onClick={() => handleReorderSegment(segment.id, 'down')} disabled={index === segments.length - 1} title="Move Down">
+                      <ActionButton variant="secondary" className={styles.actionBtn} onClick={() => handleReorderSegment(segment.id, 'down')} disabled={index === segments.length - 1} title="Move Down">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
                           <path d="M6 9l6 6 6-6" />
                         </svg>
                       </ActionButton>
-                      <ActionButton className={styles.actionBtn} onClick={() => handleEditSegment(segment)} title="Edit">
+                      <ActionButton variant="secondary" className={styles.actionBtn} onClick={() => handleEditSegment(segment)} title="Edit">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
                           <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                           <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                         </svg>
                       </ActionButton>
-                      <ActionButton className={`${styles.actionBtn} ${styles.delete}`} onClick={() => handleDeleteSegment(segment.id)} title="Delete">
+                      <ActionButton variant="danger" className={`${styles.actionBtn} ${styles.delete}`} onClick={() => handleDeleteSegment(segment.id)} title="Delete">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
                           <polyline points="3 6 5 6 21 6" />
                           <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
@@ -1195,7 +1195,7 @@ function AssessmentEdit() {
 
                         {}
                         {(segment.programming_questions?.length || 0) + (segment.mcq_questions?.length || 0) > 0 ? <div className={styles.questionsTableWrapper}>
-                            <Table className={styles.segmentQuestionsTable}>
+                            <Table aria-label="Assessment Edit" stickyActions className={styles.segmentQuestionsTable}>
                               <thead>
                                 <tr>
                                   <th style={{
@@ -1244,13 +1244,13 @@ function AssessmentEdit() {
                                       </td>
                                       <td>
                                         <div className={styles.questionActions}>
-                                          <ActionButton className={styles.actionIconBtn} onClick={() => handleViewQuestion(q.programming_question_id, 'PROGRAMMING')} title="View Question">
+                                          <ActionButton variant="secondary" className={styles.actionIconBtn} onClick={() => handleViewQuestion(q.programming_question_id, 'PROGRAMMING')} title="View Question">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
                                               <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                                               <circle cx="12" cy="12" r="3" />
                                             </svg>
                                           </ActionButton>
-                                          <ActionButton className={`${styles.actionIconBtn} ${styles.deleteBtn}`} onClick={() => handleRemoveQuestion(segment.id, q.programming_question_id, 'PROGRAMMING')} title="Delete">
+                                          <ActionButton variant="danger" className={`${styles.actionIconBtn} ${styles.deleteBtn}`} onClick={() => handleRemoveQuestion(segment.id, q.programming_question_id, 'PROGRAMMING')} title="Delete">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
                                               <polyline points="3 6 5 6 21 6" />
                                               <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
@@ -1281,13 +1281,13 @@ function AssessmentEdit() {
                                       </td>
                                       <td>
                                         <div className={styles.questionActions}>
-                                          <ActionButton className={styles.actionIconBtn} onClick={() => handleViewQuestion(q.mcq_question_id, 'MCQ')} title="View Question">
+                                          <ActionButton variant="secondary" className={styles.actionIconBtn} onClick={() => handleViewQuestion(q.mcq_question_id, 'MCQ')} title="View Question">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
                                               <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                                               <circle cx="12" cy="12" r="3" />
                                             </svg>
                                           </ActionButton>
-                                          <ActionButton className={`${styles.actionIconBtn} ${styles.deleteBtn}`} onClick={() => handleRemoveQuestion(segment.id, q.mcq_question_id, 'MCQ')} title="Delete">
+                                          <ActionButton variant="danger" className={`${styles.actionIconBtn} ${styles.deleteBtn}`} onClick={() => handleRemoveQuestion(segment.id, q.mcq_question_id, 'MCQ')} title="Delete">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
                                               <polyline points="3 6 5 6 21 6" />
                                               <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
@@ -1328,11 +1328,11 @@ function AssessmentEdit() {
         </div>}
 
       {}
-      {showQuestionModal && <div className={styles.fullPageModal}>
+      {<DialogLayer open={Boolean(showQuestionModal)} className={styles.fullPageModal} onClose={() => setShowQuestionModal(false)}>{Boolean(showQuestionModal) ? <>
           <DialogSurface className={styles.fullPageModalContent}>
             <div className={styles.fullPageModalHeader}>
               <h2>Add Questions to Segment</h2>
-              <ActionButton className={styles.closeBtn} onClick={() => {
+              <ActionButton variant="secondary" className={styles.closeBtn} onClick={() => {
             setShowQuestionModal(false);
             setSelectedQuestions([]);
             setAvailableQuestions([]);
@@ -1422,7 +1422,7 @@ function AssessmentEdit() {
                   <p>No questions found. Try adjusting your filters.</p>
                 </div> : <>
                   <div className={styles.questionsTableContainer}>
-                    <Table className={styles.questionsTable}>
+                    <Table aria-label="Assessment Edit" className={styles.questionsTable}>
                       <thead>
                         <tr>
                           <th style={{
@@ -1491,14 +1491,14 @@ function AssessmentEdit() {
                 </>}
             </div>
           </DialogSurface>
-        </div>}
+        </> : null}</DialogLayer>}
 
       {}
-      {showSegmentModal && <DialogLayer className={styles.modalOverlay} onClick={() => setShowSegmentModal(false)}>
+      {<DialogLayer open={Boolean(showSegmentModal)} className={styles.modalOverlay} onClick={() => setShowSegmentModal(false)}>{Boolean(showSegmentModal) ? <>
           <DialogSurface className={styles.modalContent} onClick={e => e.stopPropagation()}>
             <div className={styles.modalHeader}>
               <h2>{editingSegment ? 'Edit Segment' : 'Add Segment'}</h2>
-              <ActionButton className={styles.closeBtn} onClick={() => setShowSegmentModal(false)}>×</ActionButton>
+              <ActionButton variant="secondary" className={styles.closeBtn} onClick={() => setShowSegmentModal(false)}>×</ActionButton>
             </div>
 
             <div className={styles.modalBody}>
@@ -1596,7 +1596,7 @@ function AssessmentEdit() {
               </Button>
             </div>
           </DialogSurface>
-        </DialogLayer>}
+        </> : null}</DialogLayer>}
 
       {}
       <ConfirmModal isOpen={showPublishConfirm} onClose={() => setShowPublishConfirm(false)} onConfirm={handlePublishAssessment} title="Publish Assessment" message="Are you sure you want to publish this assessment? Once published, it will be available to users." confirmText="Publish" cancelText="Cancel" disabled={publishing} />
