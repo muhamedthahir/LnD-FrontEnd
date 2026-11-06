@@ -1,3 +1,4 @@
+import safeHtml from '../../../utils/safeHtml'
 import { PageContent, ActionButton, Panel, Toolbar } from "../../../design/Primitives";
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -104,7 +105,7 @@ function QuestionDetail() {
       {question.description && <Panel className="detail-card">
           <h2>Problem Description</h2>
           <div className="description-content" dangerouslySetInnerHTML={{
-        __html: question.description
+        __html: safeHtml(question.description)
       }} />
         </Panel>}
 
@@ -151,7 +152,7 @@ function QuestionDetail() {
           {question.explanation && <div className="explanation-section">
               <h3>Explanation</h3>
               <div dangerouslySetInnerHTML={{
-          __html: question.explanation
+          __html: safeHtml(question.explanation)
         }} />
             </div>}
         </Panel>}
@@ -163,7 +164,7 @@ function QuestionDetail() {
             {options.map((option, index) => <div key={option.id || index} className={`option-display-item ${option.is_correct ? 'correct' : ''}`}>
                 <span className="option-letter">{String.fromCharCode(65 + index)}</span>
                 <div className="option-text" dangerouslySetInnerHTML={{
-            __html: option.text
+            __html: safeHtml(option.text)
           }} />
                 {option.is_correct && <span className="correct-indicator">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">

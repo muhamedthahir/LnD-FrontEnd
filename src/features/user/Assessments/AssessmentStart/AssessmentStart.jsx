@@ -1,3 +1,4 @@
+import safeHtml from '../../../../utils/safeHtml'
 import { PageContent, ActionButton, Panel, LoadingState, EmptyState } from "../../../../design/Primitives";
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -239,7 +240,7 @@ function AssessmentStart() {
           {assessmentData.instruction_page && <Panel className="as-section">
               <h2>Instructions</h2>
               <div className="as-instructions" dangerouslySetInnerHTML={{
-            __html: assessmentData.instruction_page
+            __html: safeHtml(assessmentData.instruction_page)
           }} />
             </Panel>}
 

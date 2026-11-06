@@ -30,7 +30,7 @@ function SecureLayout() {
     try {
       const keepCachedSession = () => {
         const cached = localStorage.getItem('user');
-        if (!cached || !readStoredRefreshToken()) return false;
+        if (!cached) return false;
         try {
           acceptUser(JSON.parse(cached));
           return true;

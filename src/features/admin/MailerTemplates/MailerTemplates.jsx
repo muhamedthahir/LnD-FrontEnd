@@ -1,3 +1,4 @@
+import safeHtml from '../../../utils/safeHtml'
 import { ActionButton, Panel, FieldGroup, PageContent, Toolbar } from "../../../design/Primitives";
 import { DialogLayer, DialogSurface } from "../../../design/Dialog";
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -466,7 +467,7 @@ function MailerTemplates() {
                 <div className="preview-section">
                   <h4>HTML Preview:</h4>
                   <div className="preview-frame" dangerouslySetInnerHTML={{
-              __html: renderedPreview.html
+              __html: safeHtml(renderedPreview.html)
             }} />
                 </div>
               </div>}

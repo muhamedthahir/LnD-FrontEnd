@@ -1,3 +1,4 @@
+import safeHtml from '../../../../utils/safeHtml'
 import { PageContent, ActionButton, Panel } from "../../../../design/Primitives";
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, useOutletContext } from 'react-router-dom';
@@ -345,7 +346,7 @@ function CourseAssessment() {
               <div className="question-body">
                 <div className="question-text">
                   <div dangerouslySetInnerHTML={{
-                __html: currentQuestion.question_text || currentQuestion.title || ''
+                __html: safeHtml(currentQuestion.question_text || currentQuestion.title || '')
               }} />
                 </div>
 
@@ -373,7 +374,7 @@ function CourseAssessment() {
                 {submittedAssessment && currentQuestion.explanation && <div className="question-explanation">
                     <h4>Explanation</h4>
                     <div dangerouslySetInnerHTML={{
-                __html: currentQuestion.explanation
+                __html: safeHtml(currentQuestion.explanation)
               }} />
                   </div>}
               </div>

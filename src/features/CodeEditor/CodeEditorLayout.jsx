@@ -1,3 +1,4 @@
+import safeHtml from '../../utils/safeHtml'
 import ResizeHandle from '../../design/ResizeHandle';
 import ThemeSwitch from '../../design/ThemeSwitch';
 import { PageContent, Toolbar } from "../../design/Primitives";
@@ -59,7 +60,7 @@ Output: [0,1]</code></pre>
         <Toolbar className="cz-context-bar"><ThemeSwitch /><h1 className={`${styles.questionTitle} cz-session-title`}>{questionData.title}</h1><span className={`${styles.difficultyBadge} ${getDifficultyClass(questionData.difficulty)}`}>{questionData.difficulty}</span></Toolbar>
         <div className={styles.questionContent}>
           <div className={styles.questionDescription} dangerouslySetInnerHTML={{
-          __html: questionData.description
+          __html: safeHtml(questionData.description)
         }} />
         </div>
       </div>

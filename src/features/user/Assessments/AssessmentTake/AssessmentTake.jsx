@@ -1,3 +1,4 @@
+import safeHtml from '../../../../utils/safeHtml'
 import { Dialog } from '../../../../design/Dialog';
 import useMediaQuery from '../../../../hooks/useMediaQuery';
 import ResizeHandle from '../../../../design/ResizeHandle';
@@ -938,7 +939,7 @@ function AssessmentTake() {
 
               {currentQuestion.type === 'MCQ' || currentQuestion.question_type === 'MCQ' ? <div className={styles.mcqQuestion}>
                   <div className={styles.questionText} dangerouslySetInnerHTML={{
-              __html: currentQuestion.question_text || currentQuestion.name || currentQuestion.description || 'Question not available'
+              __html: safeHtml(currentQuestion.question_text || currentQuestion.name || currentQuestion.description || 'Question not available')
             }} />
 
                   <div className={styles.optionsList}>
@@ -961,7 +962,7 @@ function AssessmentTake() {
                   }} />
                           <span className={styles.optionMarker}>{String.fromCharCode(65 + idx)}</span>
                           <span className={styles.optionText} dangerouslySetInnerHTML={{
-                    __html: optionText
+                    __html: safeHtml(optionText)
                   }} />
                         </label>;
               })}
@@ -975,7 +976,7 @@ function AssessmentTake() {
                       <div className={styles.problemDescription}>
                         <h4 className={styles.sectionTitle}>Description</h4>
                         <div className={styles.descriptionContent} dangerouslySetInnerHTML={{
-                    __html: currentQuestion.problem_statement || currentQuestion.description || currentQuestion.name || 'Question not available'
+                    __html: safeHtml(currentQuestion.problem_statement || currentQuestion.description || currentQuestion.name || 'Question not available')
                   }} />
                       </div>
 
@@ -984,13 +985,13 @@ function AssessmentTake() {
                           {currentQuestion.input_format && <div className={styles.formatBlock}>
                               <h4 className={styles.sectionTitle}>Input Format</h4>
                               <div className={styles.formatContent} dangerouslySetInnerHTML={{
-                      __html: currentQuestion.input_format
+                      __html: safeHtml(currentQuestion.input_format)
                     }} />
                             </div>}
                           {currentQuestion.output_format && <div className={styles.formatBlock}>
                               <h4 className={styles.sectionTitle}>Output Format</h4>
                               <div className={styles.formatContent} dangerouslySetInnerHTML={{
-                      __html: currentQuestion.output_format
+                      __html: safeHtml(currentQuestion.output_format)
                     }} />
                             </div>}
                         </div>}
@@ -999,7 +1000,7 @@ function AssessmentTake() {
                       {currentQuestion.constraints && <div className={styles.constraintsSection}>
                           <h4 className={styles.sectionTitle}>Constraints</h4>
                           <div className={styles.constraintsContent} dangerouslySetInnerHTML={{
-                    __html: currentQuestion.constraints
+                    __html: safeHtml(currentQuestion.constraints)
                   }} />
                         </div>}
 
@@ -1150,7 +1151,7 @@ function AssessmentTake() {
                   </div>
                 </div> : <div className={styles.unknownQuestion}>
                   <div className={styles.questionText} dangerouslySetInnerHTML={{
-              __html: currentQuestion.description || currentQuestion.name || 'Question content not available'
+              __html: safeHtml(currentQuestion.description || currentQuestion.name || 'Question content not available')
             }} />
                 </div>}
             </div> : <div className={styles.noQuestion}>

@@ -1,3 +1,4 @@
+import safeHtml from '../../../utils/safeHtml'
 import { PageContent, ActionButton, Panel } from "../../../design/Primitives";
 import { DialogLayer, DialogSurface } from "../../../design/Dialog";
 import { useState, useEffect, useCallback } from 'react';
@@ -617,10 +618,10 @@ function Quiz() {
               <div className="question-text">
                 <div className="question-number-badge">Question {currentQuestionIndex + 1}</div>
                 <h3 dangerouslySetInnerHTML={{
-              __html: currentQuestion.name
+              __html: safeHtml(currentQuestion.name)
             }} />
                 {currentQuestion.description && <div className="question-description" dangerouslySetInnerHTML={{
-              __html: currentQuestion.description
+              __html: safeHtml(currentQuestion.description)
             }} />}
               </div>
 
@@ -656,7 +657,7 @@ function Quiz() {
                       </div>
                       <span className="option-letter">{String.fromCharCode(65 + index)}</span>
                       <span className="option-text" dangerouslySetInnerHTML={{
-                  __html: option.text
+                  __html: safeHtml(option.text)
                 }} />
                       {isSubmitted && <div className="option-status">
                           {isCorrect && <svg className="status-icon correct" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -699,7 +700,7 @@ function Quiz() {
                     <h4>Explanation</h4>
                   </div>
                   <div className="explanation-content" dangerouslySetInnerHTML={{
-              __html: currentQuestion.explanation
+              __html: safeHtml(currentQuestion.explanation)
             }} />
                 </div>}
             </div>}

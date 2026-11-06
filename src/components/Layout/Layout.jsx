@@ -62,9 +62,10 @@ function Layout() {
     try {
       // Call logout endpoint if refresh token exists
       const rt = refreshToken || localStorage.getItem('refreshToken')
-      if (rt) {
+      if (apiBaseUrl) {
         await fetch(`${apiBaseUrl}${API_ENDPOINTS.AUTH.LOGOUT}`, {
           method: 'POST',
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json'
           },

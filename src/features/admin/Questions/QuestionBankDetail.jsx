@@ -1,3 +1,4 @@
+import safeHtml from '../../../utils/safeHtml'
 import { PageContent, ActionButton, Panel, Toolbar } from "../../../design/Primitives";
 import { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -188,7 +189,7 @@ function QuestionBankDetail() {
       {questionBank.description && <Panel className="detail-card">
           <h2>Description</h2>
           <div className="description-content" dangerouslySetInnerHTML={{
-        __html: questionBank.description
+        __html: safeHtml(questionBank.description)
       }} />
         </Panel>}
 

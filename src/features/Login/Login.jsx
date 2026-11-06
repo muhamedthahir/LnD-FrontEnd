@@ -103,6 +103,7 @@ function Login() {
     try {
       const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.AUTH.LOGIN}`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json'
         },
@@ -133,14 +134,11 @@ function Login() {
       if (!data.accessToken) {
         throw new Error('Login response missing access token');
       }
-      if (!data.refreshToken) {
-        throw new Error('Login response missing refresh token');
-      }
       localStorage.setItem('accessToken', data.accessToken);
-      localStorage.setItem('refreshToken', data.refreshToken);
+      localStorage.removeItem('refreshToken');
       localStorage.setItem('user', JSON.stringify(data.user));
       localStorage.setItem(AUTH_REMEMBER_ME_KEY, formData.rememberMe ? '1' : '0');
-      setTokens(data.accessToken, data.refreshToken);
+      setTokens(data.accessToken);
       broadcastAuthSync();
       loadAllData().catch(console.error);
       toast.success('Login successful!');

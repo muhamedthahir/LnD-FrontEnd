@@ -39,7 +39,7 @@ export const ApiProvider = ({ children }) => {
   }, [accessToken])
 
   useEffect(() => {
-    if (refreshToken) localStorage.setItem('refreshToken', refreshToken)
+    if (!refreshToken) localStorage.removeItem('refreshToken')
   }, [refreshToken])
 
   useEffect(() => {
@@ -107,10 +107,11 @@ export const ApiProvider = ({ children }) => {
 
     const run = async () => {
       const rt = readStoredRefreshToken()
-      if (!rt || !apiBaseUrl) return readStoredAccessToken()
+      if (!apiBaseUrl || (!rt && !localStorage.getItem('user'))) return readStoredAccessToken()
 
       const requestRefresh = () => fetch(`${apiBaseUrl}${API_ENDPOINTS.AUTH.REFRESH}`, {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ refreshToken: rt })
       })
@@ -137,6 +138,8 @@ export const ApiProvider = ({ children }) => {
 
         const data = await response.json()
         if (data.accessToken) {
+          setRefreshToken(null)
+          localStorage.removeItem('refreshToken')
           setAccessToken(data.accessToken)
           localStorage.setItem('accessToken', data.accessToken)
           if (data.user) localStorage.setItem('user', JSON.stringify(data.user))
@@ -158,7 +161,7 @@ export const ApiProvider = ({ children }) => {
   const ensureAccessToken = useCallback(async ({ force = false } = {}) => {
     const current = readStoredAccessToken()
     if (!force && isAccessTokenUsable(current)) return current
-    if (!readStoredRefreshToken()) return isAccessTokenUsable(current, 0) ? current : null
+    if (!readStoredRefreshToken() && !localStorage.getItem('user')) return isAccessTokenUsable(current, 0) ? current : null
     const refreshed = await refreshSession()
     if (isAccessTokenUsable(refreshed, 0)) return refreshed
     return isAccessTokenUsable(current, 0) ? current : null

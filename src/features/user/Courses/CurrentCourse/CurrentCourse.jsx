@@ -1,3 +1,4 @@
+import safeHtml from '../../../../utils/safeHtml'
 import { PageContent, ActionButton } from "../../../../design/Primitives";
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, useOutletContext } from 'react-router-dom';
@@ -665,7 +666,7 @@ function CurrentCourse() {
                       contentObj = JSON.parse(contentObj);
                     } catch {
                       return <div dangerouslySetInnerHTML={{
-                        __html: contentObj
+                        __html: safeHtml(contentObj)
                       }} />;
                     }
                   }
@@ -738,7 +739,7 @@ function CurrentCourse() {
                     if (htmlContent) {
                       return <>
                                 <div dangerouslySetInnerHTML={{
-                          __html: htmlContent
+                          __html: safeHtml(htmlContent)
                         }} />
                                 {!isSegmentCompleted(selectedSegment.id) && <ActionButton variant="secondary" className="btn-mark-complete" onClick={() => handleMarkComplete(selectedSegment.id)}>
                                     Mark as Complete

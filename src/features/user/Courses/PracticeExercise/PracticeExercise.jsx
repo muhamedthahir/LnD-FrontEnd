@@ -1,3 +1,4 @@
+import safeHtml from '../../../../utils/safeHtml'
 import ResizeHandle from '../../../../design/ResizeHandle';
 import { PageContent, ActionButton, Toolbar } from "../../../../design/Primitives";
 import { useState, useEffect, useRef } from 'react';
@@ -250,27 +251,27 @@ function PracticeExercise() {
                     </div>
                     <div className="question-content">
                       <div className="question-description" dangerouslySetInnerHTML={{
-                __html: currentQuestion.description || currentQuestion.problem_statement || ''
+                __html: safeHtml(currentQuestion.description || currentQuestion.problem_statement || '')
               }} />
 
                       {currentQuestion.constraints && <div className="question-constraints">
                           <h4>Constraints</h4>
                           <div dangerouslySetInnerHTML={{
-                  __html: currentQuestion.constraints
+                  __html: safeHtml(currentQuestion.constraints)
                 }} />
                         </div>}
 
                       {currentQuestion.input_format && <div className="question-format">
                           <h4>Input Format</h4>
                           <div dangerouslySetInnerHTML={{
-                  __html: currentQuestion.input_format
+                  __html: safeHtml(currentQuestion.input_format)
                 }} />
                         </div>}
 
                       {currentQuestion.output_format && <div className="question-format">
                           <h4>Output Format</h4>
                           <div dangerouslySetInnerHTML={{
-                  __html: currentQuestion.output_format
+                  __html: safeHtml(currentQuestion.output_format)
                 }} />
                         </div>}
 
@@ -377,7 +378,7 @@ function PracticeExercise() {
 
                 <div className="mcq-question-text">
                   <div dangerouslySetInnerHTML={{
-              __html: currentQuestion.question_text || currentQuestion.title || ''
+              __html: safeHtml(currentQuestion.question_text || currentQuestion.title || '')
             }} />
                 </div>
 
@@ -423,7 +424,7 @@ function PracticeExercise() {
                 {currentQuestion.explanation && submittedAnswers[currentQuestion.id] && <div className="mcq-explanation">
                     <h4>Explanation</h4>
                     <div dangerouslySetInnerHTML={{
-              __html: currentQuestion.explanation
+              __html: safeHtml(currentQuestion.explanation)
             }} />
                   </div>}
               </div>

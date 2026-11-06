@@ -305,6 +305,8 @@ function CodeEditor({
       wsRef.current = null;
     }
     try {
+      const accessToken = await ensureAccessTokenRef.current();
+      if (!accessToken) throw new Error('Sign in to run code');
       const wsUrl = getWsUrl();
       console.log('[CodeEditor] Connecting to WebSocket:', wsUrl);
       const ws = new WebSocket(wsUrl);
@@ -313,6 +315,7 @@ function CodeEditor({
         console.log('[CodeEditor] WebSocket connected');
         ws.send(JSON.stringify({
           type: 'execute',
+          accessToken,
           language: language,
           code: code
         }));
